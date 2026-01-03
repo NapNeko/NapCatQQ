@@ -3,17 +3,24 @@ import { Card, CardBody, CardHeader } from '@heroui/card';
 import { Chip } from '@heroui/chip';
 import { Spinner } from '@heroui/spinner';
 import { Tooltip } from '@heroui/tooltip';
-import { useLocalStorage } from '@uidotdev/usehooks';
+import { Select, SelectItem } from '@heroui/select';
+import { Switch } from '@heroui/switch';
+import { Pagination } from '@heroui/pagination';
+import { Tabs, Tab } from '@heroui/tabs';
+import { Input } from '@heroui/input';
+import { useLocalStorage, useDebounce } from '@uidotdev/usehooks';
 import { useRequest } from 'ahooks';
 import clsx from 'clsx';
 import { FaCircleInfo, FaQq } from 'react-icons/fa6';
-import { IoLogoChrome, IoLogoOctocat } from 'react-icons/io';
+import { IoLogoChrome, IoLogoOctocat, IoSearch } from 'react-icons/io5';
 import { RiMacFill } from 'react-icons/ri';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 
 import key from '@/const/key';
 import WebUIManager from '@/controllers/webui_manager';
 import useDialog from '@/hooks/use-dialog';
+import Modal from '@/components/modal';
+import { hasNewVersion, compareVersion } from '@/utils/version';
 
 
 export interface SystemInfoItemProps {
@@ -22,6 +29,8 @@ export interface SystemInfoItemProps {
   value?: React.ReactNode;
   endContent?: React.ReactNode;
   hasBackground?: boolean;
+  onClick?: () => void;
+  clickable?: boolean;
 }
 
 const SystemInfoItem: React.FC<SystemInfoItemProps> = ({
@@ -30,14 +39,20 @@ const SystemInfoItem: React.FC<SystemInfoItemProps> = ({
   icon,
   endContent,
   hasBackground = false,
+  onClick,
+  clickable = false,
 }) => {
   return (
-    <div className={clsx(
-      'flex text-sm gap-3 py-2 items-center transition-colors',
-      hasBackground
-        ? 'text-white/90'
-        : 'text-default-600 dark:text-gray-300'
-    )}>
+    <div
+      className={clsx(
+        'flex text-sm gap-3 py-2 items-center transition-colors',
+        hasBackground
+          ? 'text-white/90'
+          : 'text-default-600 dark:text-gray-300',
+        clickable && 'cursor-pointer hover:bg-default-100/50 dark:hover:bg-default-800/30 rounded-lg -mx-2 px-2'
+      )}
+      onClick={onClick}
+    >
       <div className="text-lg opacity-70">{icon}</div>
       <div className='w-24 font-medium'>{title}</div>
       <div className={clsx(
@@ -53,155 +68,6 @@ export interface NewVersionTipProps {
   currentVersion?: string;
 }
 
-// const NewVersionTip = (props: NewVersionTipProps) => {
-//   const { currentVersion } = props;
-//   const dialog = useDialog();
-//   const { data: releaseData, error } = useRequest(() =>
-//     request.get<GithubRelease[]>(
-//       'https://api.github.com/repos/NapNeko/NapCatQQ/releases'
-//     )
-//   );
-
-//   if (error) {
-//     return (
-//       <Tooltip content='检查新版本失败'>
-//         <Button
-//           isIconOnly
-//           radius='full'
-//           color='primary'
-//           variant='shadow'
-//           className='!w-5 !h-5 !min-w-0 text-small shadow-md'
-//           onPress={() => {
-//             dialog.alert({
-//               title: '检查新版本失败',
-//               content: error.message,
-//             });
-//           }}
-//         >
-//           <FaInfo />
-//         </Button>
-//       </Tooltip>
-//     );
-//   }
-
-//   const latestVersion = releaseData?.data?.[0]?.tag_name;
-
-//   if (!latestVersion || !currentVersion) {
-//     return null;
-//   }
-
-//   if (compareVersion(latestVersion, currentVersion) <= 0) {
-//     return null;
-//   }
-
-//   const middleVersions: GithubRelease[] = [];
-
-//   for (let i = 0; i < releaseData.data.length; i++) {
-//     const versionInfo = releaseData.data[i];
-//     if (compareVersion(versionInfo.tag_name, currentVersion) > 0) {
-//       middleVersions.push(versionInfo);
-//     } else {
-//       break;
-//     }
-//   }
-
-//   const AISummaryComponent = () => {
-//     const {
-//       data: aiSummaryData,
-//       loading: aiSummaryLoading,
-//       error: aiSummaryError,
-//       run: runAiSummary,
-//     } = useRequest(
-//       (version) =>
-//         request.get<ServerResponse<string | null>>(
-//           `https://release.nc.152710.xyz/?version=${version}`,
-//           {
-//             timeout: 30000,
-//           }
-//         ),
-//       {
-//         manual: true,
-//       }
-//     );
-
-//     useEffect(() => {
-//       runAiSummary(currentVersion);
-//     }, [currentVersion, runAiSummary]);
-
-//     if (aiSummaryLoading) {
-//       return (
-//         <div className='flex justify-center py-1'>
-//           <Spinner size='sm' />
-//         </div>
-//       );
-//     }
-//     if (aiSummaryError) {
-//       return <div className='text-center text-primary-500'>AI 摘要获取失败</div>;
-//     }
-//     return <span className='text-default-700'>{aiSummaryData?.data.data}</span>;
-//   };
-
-//   return (
-//     <Tooltip content='有新版本可用'>
-//       <Button
-//         isIconOnly
-//         radius='full'
-//         color='primary'
-//         variant='shadow'
-//         className='!w-5 !h-5 !min-w-0 text-small shadow-md'
-//         onPress={() => {
-//           dialog.confirm({
-//             title: '有新版本可用',
-//             content: (
-//               <div className='space-y-2'>
-//                 <div className='text-sm space-x-2'>
-//                   <span>当前版本</span>
-//                   <Chip color='primary' variant='flat'>
-//                     v{currentVersion}
-//                   </Chip>
-//                 </div>
-//                 <div className='text-sm space-x-2'>
-//                   <span>最新版本</span>
-//                   <Chip color='primary'>{latestVersion}</Chip>
-//                 </div>
-//                 <div className='p-2 rounded-md bg-content2 text-sm'>
-//                   <div className='text-primary-400 font-bold flex items-center gap-1 mb-1'>
-//                     <BsStars />
-//                     <span>AI总结</span>
-//                   </div>
-//                   <AISummaryComponent />
-//                 </div>
-//                 <div className='text-sm space-y-2 !mt-4'>
-//                   {middleVersions.map((versionInfo) => (
-//                     <div
-//                       key={versionInfo.tag_name}
-//                       className='p-4 bg-content1 rounded-md shadow-small'
-//                     >
-//                       <TailwindMarkdown content={versionInfo.body} />
-//                     </div>
-//                   ))}
-//                 </div>
-//               </div>
-//             ),
-//             scrollBehavior: 'inside',
-//             size: '3xl',
-//             confirmText: '前往下载',
-//             onConfirm () {
-//               window.open(
-//                 'https://github.com/NapNeko/NapCatQQ/releases',
-//                 '_blank',
-//                 'noopener'
-//               );
-//             },
-//           });
-//         }}
-//       >
-//         <FaInfo />
-//       </Button>
-//     </Tooltip>
-//   );
-// };
-
 // 更新状态类型
 type UpdateStatus = 'idle' | 'updating' | 'success' | 'error';
 
@@ -213,18 +79,29 @@ const UpdateDialogContent: React.FC<{
   errorMessage?: string;
 }> = ({ currentVersion, latestVersion, status, errorMessage }) => {
   return (
-    <div className='space-y-4'>
-      {/* 版本信息 */}
-      <div className='space-y-2'>
-        <div className='text-sm space-x-2'>
-          <span>当前版本</span>
-          <Chip color='primary' variant='flat'>
+    <div className='space-y-6'>
+      {/* 版本对比 */}
+      <div className="flex items-center justify-between px-6 py-8 bg-default-50 dark:bg-default-100/5 rounded-xl border border-default-100 dark:border-default-100/10">
+        <div className="flex flex-col items-center gap-2">
+          <span className="text-xs text-default-500 font-medium uppercase tracking-wider">当前版本</span>
+          <Chip size="lg" variant="flat" color="default" classNames={{ content: "font-mono font-bold text-lg" }}>
             v{currentVersion}
           </Chip>
         </div>
-        <div className='text-sm space-x-2'>
-          <span>最新版本</span>
-          <Chip color='primary'>v{latestVersion}</Chip>
+
+        <div className="flex flex-col items-center text-primary-500 px-4">
+          <div className="p-2 rounded-full bg-primary-50 dark:bg-primary-900/20">
+            <svg className="w-6 h-6 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-center gap-2">
+          <span className="text-xs text-primary-500 font-medium uppercase tracking-wider">最新版本</span>
+          <Chip size="lg" color="primary" variant="shadow" classNames={{ content: "font-mono font-bold text-lg" }}>
+            v{latestVersion}
+          </Chip>
         </div>
       </div>
 
@@ -300,7 +177,8 @@ const NewVersionTip = (props: NewVersionTipProps) => {
   });
   const [updateStatus, setUpdateStatus] = useState<UpdateStatus>('idle');
 
-  if (error || !latestVersion || !currentVersion || latestVersion === currentVersion) {
+  // 使用 SemVer 规范比较版本号
+  if (error || !latestVersion || !currentVersion || !hasNewVersion(currentVersion, latestVersion)) {
     return null;
   }
 
@@ -380,11 +258,381 @@ const NewVersionTip = (props: NewVersionTipProps) => {
   );
 };
 
+// 版本信息类型
+interface VersionInfo {
+  tag: string;
+  type: 'release' | 'prerelease' | 'action';
+  artifactId?: number;
+  artifactName?: string;
+  createdAt?: string;
+  expiresAt?: string;
+  size?: number;
+}
+
+// 版本选择对话框内容
+interface VersionSelectDialogProps {
+  currentVersion: string;
+  onClose: () => void;
+}
+
+const VersionSelectDialogContent: React.FC<VersionSelectDialogProps> = ({
+  currentVersion,
+  onClose,
+}) => {
+  const dialog = useDialog();
+  const [selectedVersion, setSelectedVersion] = useState<VersionInfo | null>(null);
+  const [forceUpdate, setForceUpdate] = useState(false);
+  const [updateStatus, setUpdateStatus] = useState<UpdateStatus>('idle');
+  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [activeTab, setActiveTab] = useState<'release' | 'action'>('release');
+  const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearch = useDebounce(searchQuery, 300);
+  const pageSize = 15;
+
+  // 获取所有可用版本（带分页、过滤和搜索）
+  const { data: releasesData, loading: releasesLoading, error: releasesError } = useRequest(
+    () => WebUIManager.getAllReleases({
+      page: currentPage,
+      pageSize,
+      includeActions: true,
+      type: activeTab,
+      search: debouncedSearch
+    }),
+    {
+      refreshDeps: [currentPage, activeTab, debouncedSearch],
+    }
+  );
+
+  // 版本列表已在后端过滤，直接使用
+  const filteredVersions = releasesData?.versions || [];
+
+  // 检查是否是降级（使用语义化版本比较）
+  const isDowngrade = useCallback((targetTag: string): boolean => {
+    if (!currentVersion || !targetTag) return false;
+    // Action 版本不算降级
+    if (targetTag.startsWith('action-')) return false;
+    return compareVersion(targetTag, currentVersion) < 0;
+  }, [currentVersion]);
+
+  const selectedVersionTag = selectedVersion?.tag || '';
+  const isSelectedDowngrade = isDowngrade(selectedVersionTag);
+
+  const handleUpdate = async () => {
+    if (!selectedVersion) return;
+
+    if (isSelectedDowngrade && !forceUpdate) {
+      dialog.confirm({
+        title: '确认降级',
+        content: (
+          <div className='space-y-2'>
+            <p className='text-warning-600'>
+              您正在尝试从 <strong>v{currentVersion}</strong> 降级到 <strong>{selectedVersionTag}</strong>
+            </p>
+            <p className='text-sm text-default-500'>
+              降级可能导致配置不兼容或功能丢失，请确认您了解相关风险。
+            </p>
+          </div>
+        ),
+        confirmText: '确认降级',
+        cancelText: '取消',
+        onConfirm: () => performUpdate(true),
+      });
+      return;
+    }
+
+    await performUpdate(forceUpdate);
+  };
+
+  const performUpdate = async (force: boolean) => {
+    if (!selectedVersion) return;
+    setUpdateStatus('updating');
+    setErrorMessage('');
+
+    try {
+      await WebUIManager.UpdateNapCatToVersion(selectedVersionTag, force);
+      setUpdateStatus('success');
+    } catch (err) {
+      console.error('Update failed:', err);
+      const errMsg = err instanceof Error ? err.message : '未知错误';
+      setErrorMessage(errMsg);
+      setUpdateStatus('error');
+    }
+  };
+
+  // 处理分页变化
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  if (updateStatus === 'success') {
+    return (
+      <div className='flex flex-col items-center justify-center gap-3 py-4'>
+        <div className='w-12 h-12 rounded-full bg-success-100 dark:bg-success-900/40 flex items-center justify-center'>
+          <svg className='w-6 h-6 text-success-600 dark:text-success-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+            <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M5 13l4 4L19 7' />
+          </svg>
+        </div>
+        <div className='text-center'>
+          <p className='text-sm font-medium text-success-600 dark:text-success-400'>
+            更新到 {selectedVersionTag} 完成
+          </p>
+          <p className='text-xs text-default-500 mt-1'>
+            请重启 NapCat 以应用新版本
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (updateStatus === 'error') {
+    return (
+      <div className='flex flex-col items-center justify-center gap-3 py-4'>
+        <div className='w-12 h-12 rounded-full bg-danger-100 dark:bg-danger-900/40 flex items-center justify-center'>
+          <svg className='w-6 h-6 text-danger-600 dark:text-danger-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+            <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M6 18L18 6M6 6l12 12' />
+          </svg>
+        </div>
+        <div className='text-center'>
+          <p className='text-sm font-medium text-danger-600 dark:text-danger-400'>
+            更新失败
+          </p>
+          <p className='text-xs text-default-500 mt-1'>
+            {errorMessage || '请稍后重试'}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (updateStatus === 'updating') {
+    return (
+      <div className='flex flex-col items-center justify-center gap-3 py-6'>
+        <Spinner size='lg' color='primary' />
+        <div className='text-center'>
+          <p className='text-sm font-medium text-primary-600 dark:text-primary-400'>
+            正在更新到 {selectedVersionTag}...
+          </p>
+          <p className='text-xs text-default-500 mt-1'>
+            请耐心等待，更新可能需要几分钟
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const pagination = releasesData?.pagination;
+
+  return (
+    <div className='space-y-4'>
+      {/* 当前版本 */}
+      <div className='flex items-center justify-between'>
+        <div className='flex items-center gap-2'>
+          <span className='text-sm text-default-600'>当前版本:</span>
+          <Chip color='primary' variant='flat' size='sm'>
+            v{currentVersion}
+          </Chip>
+        </div>
+        {releasesData?.mirror && (
+          <div className='text-xs text-default-400 flex items-center gap-1'>
+            <span className='w-2 h-2 rounded-full bg-success-500'></span>
+            镜像: {releasesData.mirror}
+          </div>
+        )}
+      </div>
+
+      {/* 版本类型切换 */}
+      <Tabs
+        selectedKey={activeTab}
+        onSelectionChange={(key) => {
+          setActiveTab(key as 'release' | 'action');
+          setCurrentPage(1);
+          setSelectedVersion(null);
+          setSearchQuery('');
+        }}
+        size='sm'
+        color='primary'
+        variant='underlined'
+        classNames={{
+          tabList: 'gap-4',
+        }}
+      >
+        <Tab key='release' title='正式版本' />
+        <Tab key='action' title='临时版本 (Action)' />
+      </Tabs>
+
+      {/* 搜索框 */}
+      <Input
+        placeholder='搜索版本号...'
+        size='sm'
+        value={searchQuery}
+        onValueChange={(value) => {
+          setSearchQuery(value);
+          setCurrentPage(1);
+          setSelectedVersion(null);
+        }}
+        startContent={<IoSearch className='text-default-400' />}
+        isClearable
+        onClear={() => setSearchQuery('')}
+        classNames={{
+          inputWrapper: 'h-9',
+        }}
+      />
+
+      {/* 版本选择 */}
+      <div className='space-y-2'>
+        <div className='flex items-center justify-between'>
+          <label className='text-sm font-medium text-default-700'>选择目标版本</label>
+          {releasesData?.pagination && (
+            <span className='text-xs text-default-400'>
+              共 {releasesData.pagination.total} 个版本
+            </span>
+          )}
+        </div>
+        {releasesLoading ? (
+          <div className='flex items-center gap-2 py-2'>
+            <Spinner size='sm' />
+            <span className='text-sm text-default-500'>加载版本列表...</span>
+          </div>
+        ) : releasesError ? (
+          <div className='text-sm text-danger-500'>
+            加载版本列表失败: {releasesError.message}
+          </div>
+        ) : filteredVersions.length === 0 ? (
+          <div className='text-sm text-default-500 py-4 text-center'>
+            {searchQuery ? `未找到匹配 "${searchQuery}" 的版本` : '暂无可用版本'}
+          </div>
+        ) : (
+          <Select
+            label='选择版本'
+            placeholder='请选择要更新的版本'
+            selectedKeys={selectedVersion ? [selectedVersionTag] : []}
+            onSelectionChange={(keys) => {
+              const selectedTag = Array.from(keys)[0] as string;
+              const version = filteredVersions.find(v => v.tag === selectedTag);
+              setSelectedVersion(version || null);
+            }}
+            classNames={{
+              trigger: 'h-10',
+            }}
+          >
+            {filteredVersions.map((version) => {
+              const isCurrent = version.tag.replace(/^v/, '') === currentVersion;
+              const downgrade = isDowngrade(version.tag);
+              return (
+                <SelectItem
+                  key={version.tag}
+                  textValue={version.tag}
+                >
+                  <div className='flex items-center gap-2'>
+                    <span>{version.tag}</span>
+                    {version.type === 'prerelease' && (
+                      <Chip size='sm' color='secondary' variant='flat'>预发布</Chip>
+                    )}
+                    {version.type === 'action' && (
+                      <Chip size='sm' color='default' variant='flat'>临时</Chip>
+                    )}
+                    {isCurrent && (
+                      <Chip size='sm' color='success' variant='flat'>当前</Chip>
+                    )}
+                    {downgrade && !isCurrent && version.type !== 'action' && (
+                      <Chip size='sm' color='warning' variant='flat'>降级</Chip>
+                    )}
+                  </div>
+                </SelectItem>
+              );
+            })}
+          </Select>
+        )}
+      </div>
+
+      {/* Action 版本提示 */}
+      {activeTab === 'action' && (
+        <div className='p-3 rounded-lg bg-default-50 dark:bg-default-100/10 border border-default-200/50'>
+          <p className='text-xs text-default-500'>
+            临时版本来自 GitHub Actions 构建，可能不稳定，适合测试新功能。
+            {selectedVersion?.expiresAt && (
+              <span className='block mt-1 text-warning-600'>
+                此版本将于 {new Date(selectedVersion.expiresAt).toLocaleDateString()} 过期
+              </span>
+            )}
+          </p>
+        </div>
+      )}
+
+      {/* 降级警告 */}
+      {selectedVersion && isSelectedDowngrade && (
+        <div className='p-3 rounded-lg bg-warning-50/50 dark:bg-warning-900/20 border border-warning-200/50 dark:border-warning-700/30'>
+          <div className='flex items-start gap-2'>
+            <svg className='w-5 h-5 text-warning-600 dark:text-warning-400 flex-shrink-0 mt-0.5' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z' />
+            </svg>
+            <div>
+              <p className='text-sm font-medium text-warning-700 dark:text-warning-400'>
+                版本降级警告
+              </p>
+              <p className='text-xs text-warning-600/80 dark:text-warning-500 mt-1'>
+                降级到旧版本可能导致配置不兼容或功能丢失
+              </p>
+            </div>
+          </div>
+          <div className='mt-3 flex items-center gap-2'>
+            <Switch
+              size='sm'
+              isSelected={forceUpdate}
+              onValueChange={setForceUpdate}
+            />
+            <span className='text-xs text-warning-700 dark:text-warning-400'>
+              我了解风险，确认降级
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* 分页 */}
+      {pagination && pagination.totalPages > 1 && (
+        <div className='flex justify-center'>
+          <Pagination
+            total={pagination.totalPages}
+            page={currentPage}
+            onChange={handlePageChange}
+            size='sm'
+            showControls
+          />
+        </div>
+      )}
+
+      {/* 操作按钮 */}
+      <div className='flex justify-end gap-2 pt-4 border-t border-default-100 dark:border-default-100/10'>
+        <button
+          className='px-4 py-2 text-sm rounded-lg bg-default-100 hover:bg-default-200 transition-colors'
+          onClick={onClose}
+        >
+          关闭
+        </button>
+        <button
+          className={clsx(
+            'px-4 py-2 text-sm rounded-lg transition-colors text-white shadow-sm',
+            selectedVersion && (!isSelectedDowngrade || forceUpdate)
+              ? 'bg-primary-500 hover:bg-primary-600 shadow-primary-500/20'
+              : 'bg-default-300 cursor-not-allowed'
+          )}
+          disabled={!selectedVersion || (isSelectedDowngrade && !forceUpdate)}
+          onClick={handleUpdate}
+        >
+          {isSelectedDowngrade ? '确认降级更新' : '更新到此版本'}
+        </button>
+      </div>
+    </div>
+  );
+};
+
 interface NapCatVersionProps {
   hasBackground?: boolean;
 }
 
 const NapCatVersion: React.FC<NapCatVersionProps> = ({ hasBackground = false }) => {
+  const [isVersionModalOpen, setIsVersionModalOpen] = useState(false);
   const {
     data: packageData,
     loading: packageLoading,
@@ -397,26 +645,55 @@ const NapCatVersion: React.FC<NapCatVersionProps> = ({ hasBackground = false }) 
 
   const currentVersion = packageData?.version;
 
+  // 点击版本号时显示版本选择对话框
+  const handleVersionClick = useCallback(() => {
+    if (!currentVersion) return;
+    setIsVersionModalOpen(true);
+  }, [currentVersion]);
+
   return (
-    <SystemInfoItem
-      title='NapCat 版本'
-      icon={<IoLogoOctocat className='text-xl' />}
-      hasBackground={hasBackground}
-      value={
-        packageError
-          ? (
-            `错误：${packageError.message}`
-          )
-          : packageLoading
+    <>
+      <SystemInfoItem
+        title='NapCat 版本'
+        icon={<IoLogoOctocat className='text-xl' />}
+        hasBackground={hasBackground}
+        value={
+          packageError
             ? (
-              <Spinner size='sm' />
+              `错误：${packageError.message}`
             )
-            : (
-              currentVersion
-            )
-      }
-      endContent={<NewVersionTip currentVersion={currentVersion} />}
-    />
+            : packageLoading
+              ? (
+                <Spinner size='sm' />
+              )
+              : (
+                <Tooltip content='点击管理版本'>
+                  <span
+                    className='cursor-pointer hover:text-primary-500 transition-colors underline decoration-dashed underline-offset-2'
+                    onClick={handleVersionClick}
+                  >
+                    {currentVersion}
+                  </span>
+                </Tooltip>
+              )
+        }
+        endContent={<NewVersionTip currentVersion={currentVersion} />}
+      />
+      {isVersionModalOpen && (
+        <Modal
+          title='版本管理'
+          size='lg'
+          hideFooter={true}
+          onClose={() => setIsVersionModalOpen(false)}
+          content={
+            <VersionSelectDialogContent
+              currentVersion={currentVersion || ''}
+              onClose={() => setIsVersionModalOpen(false)}
+            />
+          }
+        />
+      )}
+    </>
   );
 };
 

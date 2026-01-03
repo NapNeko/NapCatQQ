@@ -3,11 +3,11 @@ import http from 'node:http';
 
 export class RequestUtil {
   // 适用于获取服务器下发cookies时获取，仅GET
-  static async HttpsGetCookies (url: string): Promise<{ [key: string]: string }> {
+  static async HttpsGetCookies (url: string): Promise<{ [key: string]: string; }> {
     const client = url.startsWith('https') ? https : http;
     return new Promise((resolve, reject) => {
       const req = client.get(url, (res) => {
-        const cookies: { [key: string]: string } = {};
+        const cookies: { [key: string]: string; } = {};
 
         res.on('data', () => { }); // Necessary to consume the stream
         res.on('end', () => {
@@ -27,7 +27,7 @@ export class RequestUtil {
     });
   }
 
-  private static async handleRedirect (res: http.IncomingMessage, url: string, cookies: { [key: string]: string }): Promise<{ [key: string]: string }> {
+  private static async handleRedirect (res: http.IncomingMessage, url: string, cookies: { [key: string]: string; }): Promise<{ [key: string]: string; }> {
     if (res.statusCode === 301 || res.statusCode === 302) {
       if (res.headers.location) {
         const redirectUrl = new URL(res.headers.location, url);
@@ -39,7 +39,7 @@ export class RequestUtil {
     return cookies;
   }
 
-  private static extractCookies (setCookieHeaders: string[], cookies: { [key: string]: string }) {
+  private static extractCookies (setCookieHeaders: string[], cookies: { [key: string]: string; }) {
     setCookieHeaders.forEach((cookie) => {
       const parts = cookie.split(';')[0]?.split('=');
       if (parts) {
@@ -53,9 +53,10 @@ export class RequestUtil {
   }
 
   // 请求和回复都是JSON data传原始内容 自动编码json
-  static async HttpGetJson<T>(url: string, method: string = 'GET', data?: any, headers: {
-    [key: string]: string
-  } = {}, isJsonRet: boolean = true, isArgJson: boolean = true): Promise<T> {
+  // 支持 301/302 重定向（最多 5 次）
+  static async HttpGetJson<T> (url: string, method: string = 'GET', data?: any, headers: {
+    [key: string]: string;
+  } = {}, isJsonRet: boolean = true, isArgJson: boolean = true, maxRedirects: number = 5): Promise<T> {
     const option = new URL(url);
     const protocol = url.startsWith('https://') ? https : http;
     const options = {
@@ -71,6 +72,20 @@ export class RequestUtil {
     //     },
     return new Promise((resolve, reject) => {
       const req = protocol.request(options, (res: http.IncomingMessage) => {
+        // 处理重定向
+        if ((res.statusCode === 301 || res.statusCode === 302 || res.statusCode === 307 || res.statusCode === 308) && res.headers.location) {
+          if (maxRedirects <= 0) {
+            reject(new Error('Too many redirects'));
+            return;
+          }
+          const redirectUrl = new URL(res.headers.location, url).href;
+          // 递归跟随重定向
+          this.HttpGetJson<T>(redirectUrl, method, data, headers, isJsonRet, isArgJson, maxRedirects - 1)
+            .then(resolve)
+            .catch(reject);
+          return;
+        }
+
         let responseBody = '';
         res.on('data', (chunk: string | Buffer) => {
           responseBody += chunk.toString();
@@ -109,7 +124,7 @@ export class RequestUtil {
   }
 
   // 请求返回都是原始内容
-  static async HttpGetText (url: string, method: string = 'GET', data?: any, headers: { [key: string]: string } = {}) {
+  static async HttpGetText (url: string, method: string = 'GET', data?: any, headers: { [key: string]: string; } = {}) {
     return this.HttpGetJson<string>(url, method, data, headers, false, false);
   }
 }

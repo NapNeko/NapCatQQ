@@ -10,18 +10,19 @@ import {
 import React from 'react';
 
 export interface ModalProps {
-  content: React.ReactNode
-  title?: React.ReactNode
-  size?: React.ComponentProps<typeof NextUIModal>['size']
-  scrollBehavior?: React.ComponentProps<typeof NextUIModal>['scrollBehavior']
-  onClose?: () => void
-  onConfirm?: () => void
-  onCancel?: () => void
-  backdrop?: 'opaque' | 'blur' | 'transparent'
-  showCancel?: boolean
-  dismissible?: boolean
-  confirmText?: string
-  cancelText?: string
+  content: React.ReactNode;
+  title?: React.ReactNode;
+  size?: React.ComponentProps<typeof NextUIModal>['size'];
+  scrollBehavior?: React.ComponentProps<typeof NextUIModal>['scrollBehavior'];
+  onClose?: () => void;
+  onConfirm?: () => void;
+  onCancel?: () => void;
+  backdrop?: 'opaque' | 'blur' | 'transparent';
+  showCancel?: boolean;
+  dismissible?: boolean;
+  confirmText?: string;
+  cancelText?: string;
+  hideFooter?: boolean;
 }
 
 const Modal: React.FC<ModalProps> = React.memo((props) => {
@@ -33,6 +34,7 @@ const Modal: React.FC<ModalProps> = React.memo((props) => {
     dismissible,
     confirmText = '确定',
     cancelText = '取消',
+    hideFooter = false,
     onClose,
     onConfirm,
     onCancel,
@@ -62,29 +64,31 @@ const Modal: React.FC<ModalProps> = React.memo((props) => {
               <ModalHeader className='flex flex-col gap-1'>{title}</ModalHeader>
             )}
             <ModalBody className='break-all'>{content}</ModalBody>
-            <ModalFooter>
-              {showCancel && (
+            {!hideFooter && (
+              <ModalFooter>
+                {showCancel && (
+                  <Button
+                    color='primary'
+                    variant='light'
+                    onPress={() => {
+                      onCancel?.();
+                      nativeClose();
+                    }}
+                  >
+                    {cancelText}
+                  </Button>
+                )}
                 <Button
                   color='primary'
-                  variant='light'
                   onPress={() => {
-                    onCancel?.();
+                    onConfirm?.();
                     nativeClose();
                   }}
                 >
-                  {cancelText}
+                  {confirmText}
                 </Button>
-              )}
-              <Button
-                color='primary'
-                onPress={() => {
-                  onConfirm?.();
-                  nativeClose();
-                }}
-              >
-                {confirmText}
-              </Button>
-            </ModalFooter>
+              </ModalFooter>
+            )}
           </>
         )}
       </ModalContent>

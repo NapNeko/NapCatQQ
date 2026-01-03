@@ -8,14 +8,17 @@ import { webUiPathWrapper } from '../../index';
 import { NapCatPathWrapper } from '@/napcat-common/src/path';
 import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
 import { NapCatCoreWorkingEnv } from '@/napcat-webui-backend/src/types';
+import {
+  getGitHubRelease,
+  findAvailableDownloadUrl
+} from '@/napcat-common/src/mirror';
 
-interface Release {
-  tag_name: string;
-  assets: Array<{
-    name: string;
-    browser_download_url: string;
-  }>;
-  body?: string;
+// 更新请求体接口
+interface UpdateRequestBody {
+  /** 要更新到的版本 tag，如 "v4.9.9"，不传则更新到最新版本 */
+  targetVersion?: string;
+  /** 是否强制更新（即使是降级也更新） */
+  force?: boolean;
 }
 
 // 更新配置文件接口
@@ -69,74 +72,7 @@ function scanFilesRecursively (dirPath: string, basePath: string = dirPath): Arr
   return files;
 }
 
-// 镜像源列表（参考ffmpeg下载实现）
-const mirrorUrls = [
-  'https://j.1win.ggff.net/',
-  'https://git.yylx.win/',
-  'https://ghfile.geekertao.top/',
-  'https://gh-proxy.net/',
-  'https://ghm.078465.xyz/',
-  'https://gitproxy.127731.xyz/',
-  'https://jiashu.1win.eu.org/',
-  '', // 原始URL
-];
-
-/**
- * 测试URL是否可用
- */
-async function testUrl (url: string): Promise<boolean> {
-  return new Promise<boolean>((resolve) => {
-    const req = https.get(url, { timeout: 5000 }, (res) => {
-      const statusCode = res.statusCode || 0;
-      if (statusCode >= 200 && statusCode < 300) {
-        req.destroy();
-        resolve(true);
-      } else {
-        req.destroy();
-        resolve(false);
-      }
-    });
-
-    req.on('error', () => resolve(false));
-    req.on('timeout', () => {
-      req.destroy();
-      resolve(false);
-    });
-  });
-}
-
-/**
- * 构建镜像URL
- */
-function buildMirrorUrl (originalUrl: string, mirror: string): string {
-  if (!mirror) return originalUrl;
-  return mirror + originalUrl;
-}
-
-/**
- * 查找可用的下载URL
- */
-async function findAvailableUrl (originalUrl: string): Promise<string> {
-  console.log('Testing download URLs...');
-
-  // 先测试原始URL
-  if (await testUrl(originalUrl)) {
-    console.log('Using original URL:', originalUrl);
-    return originalUrl;
-  }
-
-  // 测试镜像源
-  for (const mirror of mirrorUrls) {
-    const mirrorUrl = buildMirrorUrl(originalUrl, mirror);
-    console.log('Testing mirror:', mirrorUrl);
-    if (await testUrl(mirrorUrl)) {
-      console.log('Using mirror URL:', mirrorUrl);
-      return mirrorUrl;
-    }
-  }
-
-  throw new Error('所有下载源都不可用');
-}
+// 注：镜像配置已迁移到 @/napcat-common/src/mirror 模块统一管理
 
 /**
  * 下载文件（带进度和重试）
@@ -184,15 +120,57 @@ async function downloadFile (url: string, dest: string): Promise<void> {
   });
 }
 
-export const UpdateNapCatHandler: RequestHandler = async (_req, res) => {
+export const UpdateNapCatHandler: RequestHandler = async (req, res) => {
   try {
-    // 获取最新release信息
-    const latestRelease = await getLatestRelease() as Release;
+    // 从请求体获取目标版本（可选）
+    const { targetVersion, force } = req.body as UpdateRequestBody;
+
+    // 确定要下载的文件名
     const ReleaseName = WebUiDataRuntime.getWorkingEnv() === NapCatCoreWorkingEnv.Framework ? 'NapCat.Framework.zip' : 'NapCat.Shell.zip';
-    const shellZipAsset = latestRelease.assets.find(asset => asset.name === ReleaseName);
+
+    // 确定目标版本 tag
+    // 如果指定了版本，使用指定版本；否则使用 'latest'
+    const targetTag = targetVersion || 'latest';
+    console.log(`[NapCat Update] Target version: ${targetTag}`);
+
+    // 使用 mirror 模块获取 release 信息（不依赖 API）
+    // 通过 assetNames 参数直接构建下载 URL，避免调用 GitHub API
+    const release = await getGitHubRelease('NapNeko', 'NapCatQQ', targetTag, {
+      assetNames: [ReleaseName, 'NapCat.Framework.zip', 'NapCat.Shell.zip'],
+      fetchChangelog: false, // 不需要 changelog，避免 API 调用
+    });
+
+    const shellZipAsset = release.assets.find(asset => asset.name === ReleaseName);
     if (!shellZipAsset) {
       throw new Error(`未找到${ReleaseName}文件`);
     }
+
+    // 检查是否需要强制更新（降级警告）
+    const currentVersion = WebUiDataRuntime.GetNapCatVersion();
+    console.log(`[NapCat Update] Current version: ${currentVersion}, Target version: ${release.tag_name}`);
+
+    if (!force && currentVersion) {
+      // 简单的版本比较（可选的降级保护）
+      const parseVersion = (v: string): [number, number, number] => {
+        const match = v.match(/^v?(\d+)\.(\d+)\.(\d+)/);
+        if (!match) return [0, 0, 0];
+        return [parseInt(match[1] || '0'), parseInt(match[2] || '0'), parseInt(match[3] || '0')];
+      };
+      const [currMajor, currMinor, currPatch] = parseVersion(currentVersion);
+      const [targetMajor, targetMinor, targetPatch] = parseVersion(release.tag_name);
+
+      const isDowngrade =
+        targetMajor < currMajor ||
+        (targetMajor === currMajor && targetMinor < currMinor) ||
+        (targetMajor === currMajor && targetMinor === currMinor && targetPatch < currPatch);
+
+      if (isDowngrade) {
+        console.log(`[NapCat Update] Downgrade from ${currentVersion} to ${release.tag_name}, force=${force}`);
+        // 不阻止降级，只是记录日志
+      }
+    }
+
+    console.log(`[NapCat Update] Updating to version: ${release.tag_name}`);
 
     // 创建临时目录
     const tempDir = path.join(webUiPathWrapper.binaryPath, './temp');
@@ -200,8 +178,15 @@ export const UpdateNapCatHandler: RequestHandler = async (_req, res) => {
       fs.mkdirSync(tempDir, { recursive: true });
     }
 
-    // 查找可用的下载URL
-    const downloadUrl = await findAvailableUrl(shellZipAsset.browser_download_url);
+    // 使用 mirror 模块查找可用的下载 URL
+    // 启用内容验证，确保返回的是有效文件而非错误页面
+    const downloadUrl = await findAvailableDownloadUrl(shellZipAsset.browser_download_url, {
+      validateContent: true,           // 验证 Content-Type 和状态码
+      minFileSize: 1024 * 1024,        // 最小 1MB，确保不是错误页面
+      timeout: 10000,                  // 10秒超时
+    });
+
+    console.log(`[NapCat Update] Using download URL: ${downloadUrl}`);
 
     // 下载zip
     const zipPath = path.join(tempDir, 'napcat-latest.zip');
@@ -264,10 +249,10 @@ export const UpdateNapCatHandler: RequestHandler = async (_req, res) => {
       // 如果有替换失败的文件，创建更新配置文件
       if (failedFiles.length > 0) {
         const updateConfig: UpdateConfig = {
-          version: latestRelease.tag_name,
+          version: release.tag_name,
           updateTime: new Date().toISOString(),
           files: failedFiles,
-          changelog: latestRelease.body || ''
+          changelog: release.body || ''
         };
 
         // 保存更新配置文件
@@ -283,7 +268,7 @@ export const UpdateNapCatHandler: RequestHandler = async (_req, res) => {
       sendSuccess(res, {
         status: 'completed',
         message,
-        newVersion: latestRelease.tag_name,
+        newVersion: release.tag_name,
         failedFilesCount: failedFiles.length
       });
 
@@ -298,28 +283,7 @@ export const UpdateNapCatHandler: RequestHandler = async (_req, res) => {
   }
 };
 
-async function getLatestRelease (): Promise<Release> {
-  return new Promise((resolve, reject) => {
-    https.get('https://api.github.com/repos/NapNeko/NapCatQQ/releases/latest', {
-      headers: { 'User-Agent': 'NapCat-WebUI' }
-    }, (res) => {
-      let data = '';
-      res.on('data', chunk => data += chunk);
-      res.on('end', () => {
-        try {
-          const release = JSON.parse(data) as Release;
-          console.log('Release info:', {
-            tag_name: release.tag_name,
-            assets: release.assets?.map(a => ({ name: a.name, url: a.browser_download_url }))
-          });
-          resolve(release);
-        } catch (e) {
-          reject(e);
-        }
-      });
-    }).on('error', reject);
-  });
-}
+// 注：getLatestRelease 已移除，现在使用 mirror 模块的 getGitHubRelease
 
 /**
  * 应用待处理的更新（在应用启动时调用）

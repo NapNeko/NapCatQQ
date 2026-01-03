@@ -126,6 +126,7 @@ jobs:
     outputs:
       status: ${{ steps.build.outcome }} # 构建结果：success/failure
       error: ${{ steps.build.outputs.error }} # 错误信息（如有）
+      version: ${{ steps.version.outputs.version }} # 构建版本号
     steps:
       # 【安全】先从 base 分支 checkout 构建脚本
       # 这样即使 PR 中修改了脚本，也不会被执行
@@ -143,16 +144,36 @@ jobs:
           repository: ${{ needs.check-build.outputs.pr_head_repo }}
           ref: ${{ needs.check-build.outputs.pr_sha }}
           path: workspace
+          fetch-depth: 0  # 需要完整历史来获取 tags
 
       - name: Setup Node.js 24
         uses: actions/setup-node@v4
         with:
           node-version: 24
 
+      # 获取最新 release tag 并生成版本号
+      - name: Generate Version
+        id: version
+        working-directory: workspace
+        run: |
+          # 获取最近的 release tag (格式: vX.X.X)
+          LATEST_TAG=$(git describe --tags --abbrev=0 --match "v[0-9]*.[0-9]*.[0-9]*" 2>/dev/null || echo "v0.0.0")
+          # 去掉 v 前缀
+          BASE_VERSION="${LATEST_TAG#v}"
+          SHORT_SHA="${{ needs.check-build.outputs.pr_sha }}"
+          SHORT_SHA="${SHORT_SHA::7}"
+          VERSION="${BASE_VERSION}-pr.${{ needs.check-build.outputs.pr_number }}.${{ github.run_number }}+${SHORT_SHA}"
+          echo "NAPCAT_VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "Latest tag: ${LATEST_TAG}"
+          echo "Build version: ${VERSION}"
+
       # 执行构建，使用 base 分支的脚本处理 workspace 中的代码
       - name: Build
         id: build
         working-directory: workspace
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NAPCAT_VERSION: ${{ env.NAPCAT_VERSION }}
         run: node --experimental-strip-types ../_scripts/.github/scripts/pr-build-run.ts framework
         continue-on-error: true # 允许失败，后续更新评论时处理
 
@@ -177,6 +198,8 @@ jobs:
     outputs:
       status: ${{ steps.build.outcome }} # 构建结果：success/failure
       error: ${{ steps.build.outputs.error }} # 错误信息（如有）
+      version: ${{ steps.version.outputs.version }} # 构建版本号
+      version: ${{ steps.version.outputs.version }} # 构建版本号
     steps:
       # 【安全】先从 base 分支 checkout 构建脚本
       - name: Checkout scripts from base
@@ -193,16 +216,37 @@ jobs:
           repository: ${{ needs.check-build.outputs.pr_head_repo }}
           ref: ${{ needs.check-build.outputs.pr_sha }}
           path: workspace
+          fetch-depth: 0  # 需要完整历史来获取 tags
 
       - name: Setup Node.js 24
         uses: actions/setup-node@v4
         with:
           node-version: 24
 
+      # 获取最新 release tag 并生成版本号
+      - name: Generate Version
+        id: version
+        working-directory: workspace
+        run: |
+          # 获取最近的 release tag (格式: vX.X.X)
+          LATEST_TAG=$(git describe --tags --abbrev=0 --match "v[0-9]*.[0-9]*.[0-9]*" 2>/dev/null || echo "v0.0.0")
+          # 去掉 v 前缀
+          BASE_VERSION="${LATEST_TAG#v}"
+          SHORT_SHA="${{ needs.check-build.outputs.pr_sha }}"
+          SHORT_SHA="${SHORT_SHA::7}"
+          VERSION="${BASE_VERSION}-pr.${{ needs.check-build.outputs.pr_number }}.${{ github.run_number }}+${SHORT_SHA}"
+          echo "NAPCAT_VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Latest tag: ${LATEST_TAG}"
+          echo "Build version: ${VERSION}"
+
       # 执行构建
       - name: Build
         id: build
         working-directory: workspace
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NAPCAT_VERSION: ${{ env.NAPCAT_VERSION }}
         run: node --experimental-strip-types ../_scripts/.github/scripts/pr-build-run.ts shell
         continue-on-error: true
 
@@ -244,6 +288,8 @@ jobs:
           PR_NUMBER: ${{ needs.check-build.outputs.pr_number }}
           PR_SHA: ${{ needs.check-build.outputs.pr_sha }}
           RUN_ID: ${{ github.run_id }}
+          # 构建版本号
+          NAPCAT_VERSION: ${{ needs.build-framework.outputs.version || needs.build-shell.outputs.version || '' }}
           # 获取构建状态，如果 job 被跳过则标记为 cancelled
           FRAMEWORK_STATUS: ${{ needs.build-framework.outputs.status || 'cancelled' }}
           FRAMEWORK_ERROR: ${{ needs.build-framework.outputs.error }}

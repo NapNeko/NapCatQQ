@@ -13,11 +13,27 @@ jobs:
     steps:
       - name: Clone Main Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 需要完整历史来获取 tags
       - name: Use Node.js 20.X
         uses: actions/setup-node@v4
         with:
           node-version: 20.x
+      - name: Generate Version
+        run: |
+          # 获取最近的 release tag (格式: vX.X.X)
+          LATEST_TAG=$(git describe --tags --abbrev=0 --match "v[0-9]*.[0-9]*.[0-9]*" 2>/dev/null || echo "v0.0.0")
+          # 去掉 v 前缀
+          BASE_VERSION="${LATEST_TAG#v}"
+          SHORT_SHA="${GITHUB_SHA::7}"
+          VERSION="${BASE_VERSION}-main.${{ github.run_number }}+${SHORT_SHA}"
+          echo "NAPCAT_VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "Latest tag: ${LATEST_TAG}"
+          echo "Build version: ${VERSION}"
       - name: Build NapCat.Framework
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NAPCAT_VERSION: ${{ env.NAPCAT_VERSION }}
         run: |
           npm i -g pnpm
           pnpm i
@@ -39,11 +55,27 @@ jobs:
     steps:
       - name: Clone Main Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 需要完整历史来获取 tags
       - name: Use Node.js 20.X
         uses: actions/setup-node@v4
         with:
           node-version: 20.x
+      - name: Generate Version
+        run: |
+          # 获取最近的 release tag (格式: vX.X.X)
+          LATEST_TAG=$(git describe --tags --abbrev=0 --match "v[0-9]*.[0-9]*.[0-9]*" 2>/dev/null || echo "v0.0.0")
+          # 去掉 v 前缀
+          BASE_VERSION="${LATEST_TAG#v}"
+          SHORT_SHA="${GITHUB_SHA::7}"
+          VERSION="${BASE_VERSION}-main.${{ github.run_number }}+${SHORT_SHA}"
+          echo "NAPCAT_VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "Latest tag: ${LATEST_TAG}"
+          echo "Build version: ${VERSION}"
       - name: Build NapCat.Shell
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NAPCAT_VERSION: ${{ env.NAPCAT_VERSION }}
         run: |
           npm i -g pnpm
           pnpm i
