@@ -42,6 +42,7 @@ export let WebUiConfig: WebUiConfigWrapper;
 export let webUiPathWrapper: NapCatPathWrapper;
 export let logSubscription: ISubscription;
 export let statusHelperSubscription: IStatusHelperSubscription;
+export let webUiLogger: ILogWrapper | null = null;
 const MAX_PORT_TRY = 100;
 
 export let webUiRuntimePort = 6099;
@@ -100,6 +101,7 @@ export async function InitWebUi (logger: ILogWrapper, pathWrapper: NapCatPathWra
   webUiPathWrapper = pathWrapper;
   logSubscription = Subscription;
   statusHelperSubscription = statusSubscription;
+  webUiLogger = logger;
   WebUiConfig = new WebUiConfigWrapper();
   let config = await WebUiConfig.GetWebUIConfig();
 
