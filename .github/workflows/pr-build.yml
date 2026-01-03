@@ -199,7 +199,6 @@ jobs:
       status: ${{ steps.build.outcome }} # 构建结果：success/failure
       error: ${{ steps.build.outputs.error }} # 错误信息（如有）
       version: ${{ steps.version.outputs.version }} # 构建版本号
-      version: ${{ steps.version.outputs.version }} # 构建版本号
     steps:
       # 【安全】先从 base 分支 checkout 构建脚本
       - name: Checkout scripts from base

@@ -319,7 +319,7 @@ export async function NCoreInitShell () {
   const pathWrapper = new NapCatPathWrapper();
   const logger = new LogWrapper(pathWrapper.logsPath);
   handleUncaughtExceptions(logger);
-  await applyPendingUpdates(pathWrapper);
+  await applyPendingUpdates(pathWrapper, logger);
 
   // 初始化 FFmpeg 服务
   await FFmpegService.init(pathWrapper.binaryPath, logger);
