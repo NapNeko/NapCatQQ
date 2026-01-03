@@ -5,6 +5,7 @@ import { sendSuccess } from '@/napcat-webui-backend/src/utils/response';
 import { WebUiConfig } from '@/napcat-webui-backend/index';
 import { getLatestTag, getAllTags, compareSemVer } from 'napcat-common/src/helper';
 import { getLatestActionArtifacts } from '@/napcat-common/src/mirror';
+import { NapCatCoreWorkingEnv } from '@/napcat-webui-backend/src/types';
 
 export const GetNapCatVersion: RequestHandler = (_, res) => {
   const data = WebUiDataRuntime.GetNapCatVersion();
@@ -32,6 +33,8 @@ export interface VersionInfo {
   createdAt?: string;
   expiresAt?: string;
   size?: number;
+  workflowRunId?: number;
+  headSha?: string;
 }
 
 /**
@@ -75,8 +78,13 @@ export const getAllReleasesHandler: RequestHandler = async (req, res) => {
     if (includeActions) {
       try {
         const artifacts = await getLatestActionArtifacts('NapNeko', 'NapCatQQ', 'build.yml', 'main');
+
+        // 根据当前工作环境自动过滤对应的 artifact 类型
+        const isFramework = WebUiDataRuntime.getWorkingEnv() === NapCatCoreWorkingEnv.Framework;
+        const targetArtifactName = isFramework ? 'NapCat.Framework' : 'NapCat.Shell';
+
         actionVersions = artifacts
-          .filter(a => a.name.includes('NapCat'))
+          .filter(a => a.name === targetArtifactName)
           .map(a => ({
             tag: `action-${a.id}`,
             type: 'action' as const,
@@ -85,6 +93,8 @@ export const getAllReleasesHandler: RequestHandler = async (req, res) => {
             createdAt: a.created_at,
             expiresAt: a.expires_at,
             size: a.size_in_bytes,
+            workflowRunId: a.workflow_run_id,
+            headSha: a.head_sha,
           }));
       } catch {
         // 忽略 action artifacts 获取失败
