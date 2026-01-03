@@ -41,8 +41,14 @@ permissions:
 # 并发控制
 # =============================================================================
 # 同一 PR 的多次构建会取消之前未完成的构建，避免资源浪费
+# 注意：只有在 should_build=true 时才会进入实际构建流程，
+#       issue_comment 事件如果不是 /build 命令，会在 check-build 阶段快速退出，
+#       不会取消正在进行的构建（因为 cancel-in-progress 只影响同 group 的后续任务）
 concurrency:
-  group: pr-build-${{ github.event.pull_request.number || github.event.issue.number || github.run_id }}
+  # 使用不同的 group 策略：
+  # - pull_request_target: 使用 PR 号
+  # - issue_comment: 只有确认是 /build 命令时才使用 PR 号，否则使用 run_id（不冲突）
+  group: pr-build-${{ github.event_name == 'pull_request_target' && github.event.pull_request.number || github.event_name == 'issue_comment' && github.event.issue.pull_request && contains(github.event.comment.body, '/build') && github.event.issue.number || github.run_id }}
   cancel-in-progress: true
 
 # =============================================================================
