@@ -4,7 +4,7 @@
 
 ## 核心规则
 
-1. **版本号**：第一行必须是 `# {VERSION}`，使用用户提供的版本号（如 v4.10.2），不要添加额外的 V 前缀
+1. **版本号**：第一行必须是 `# {VERSION}`，使用用户提供的版本号，如果版本号是小写 v 开头（如 v4.10.2），必须转换为大写 V（如 V4.10.2）
 2. **语言**：全部使用简体中文
 3. **格式**：严格按照下方模板输出，不要添加额外的 markdown 格式
 
@@ -24,26 +24,36 @@
 - **控制数量**：最终保持 5-15 条更新要点
 - **保留 commit hash**：每条末尾附上短 hash，格式 `(a1b2c3d)`
 
-## 输出模板
+## 输出模板 - 必须严格遵守以下格式
 
 ```
 # {VERSION}
 [使用文档](https://napneko.github.io/)
 
 ## Windows 一键包
-我们提供了轻量化一键部署方案，内置 QQ 和 NapCat，详见使用文档。
+我们为提供了的轻量化一键部署方案
+相对于普通需要安装QQ的方案,下面已内置QQ和Napcat 阅读使用文档参考
 
-可下载文件：
-- NapCat.Shell.Windows.Node.zip（无头模式）
+你可以下载 
 
-## 注意事项
-**推荐 QQ 版本：9.9.23+，最低支持 9.9.22**
-**默认 WebUI 密钥为随机密码，请在控制台查看**
+NapCat.Shell.Windows.OneKey.zip (无头)
 
-## 运行库
-如果 Windows x64 缺少 xxx.dll，请安装 [VC++ 运行库](https://aka.ms/vs/17/release/vc_redist.x64.exe)
+启动后可自动化部署一键包,教程参考使用文档安装部分
 
-## 更新内容
+## 警告
+**注意QQ版本推荐使用 40768+ 版本 最低可以使用40768版本**
+**默认WebUi密钥为随机密码 控制台查看**
+
+**[9.9.22-40990 X64 Win](https://dldir1v6.qq.com/qqfile/qq/QQNT/2c9d3f6c/QQ9.9.22.40990_x64.exe)**
+[LinuxX64 DEB 40990 ](https://dldir1.qq.com/qqfile/qq/QQNT/ec800879/linuxqq_3.2.20-40990_amd64.deb)
+[LinuxX64 RPM 40990 ](https://dldir1.qq.com/qqfile/qq/QQNT/ec800879/linuxqq_3.2.20-40990_x86_64.rpm)
+[LinuxArm64 DEB 40990 ](https://dldir1.qq.com/qqfile/qq/QQNT/ec800879/linuxqq_3.2.20-40990_arm64.deb)
+[LinuxArm64 RPM  40990 ](https://dldir1.qq.com/qqfile/qq/QQNT/ec800879/linuxqq_3.2.20-40990_aarch64.rpm)
+[MAC   DMG   40990 ](https://dldir1v6.qq.com/qqfile/qq/QQNT/c6cb0f5d/QQ_v6.9.82.40990.dmg)
+## 如果WinX64缺少运行库或者xxx.dll？
+[安装运行库](https://aka.ms/vs/17/release/vc_redist.x64.exe)
+
+## 更新
 
 ### 🐛 修复
 1. 修复 xxx 问题 (a1b2c3d)
@@ -61,6 +71,13 @@
 
 **完整更新日志**: [{PREV_VERSION}...{VERSION}](https://github.com/NapNeko/NapCatQQ/compare/{PREV_VERSION}...{VERSION})
 ```
+
+**格式要求 - 务必严格遵守：**
+- "Windows 一键包"部分的文本必须完全一致，不要修改任何措辞
+- "警告"部分必须包含所有 QQ 版本下载链接，保持原有格式
+- "如果WinX64缺少运行库或者xxx.dll？"这一行必须保持原样
+- QQ 版本号和下载链接保持不变（40990 版本）
+- 只有"## 更新"部分下面的内容需要根据实际 commit 生成
 
 ## 重要约束
 
