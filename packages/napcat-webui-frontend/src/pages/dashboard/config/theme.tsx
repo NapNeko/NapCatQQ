@@ -163,9 +163,15 @@ const ThemeConfigCard = () => {
   const [dataLoaded, setDataLoaded] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  // 使用 useRef 存储 style 标签引用
+  // 使用 useRef 存储 style 标签引用和状态
   const styleTagRef = useRef<HTMLStyleElement | null>(null);
   const originalDataRef = useRef<ThemeConfig | null>(null);
+  const hasUnsavedChangesRef = useRef<boolean>(false);
+
+  // 同步 hasUnsavedChanges 到 ref，供 cleanup 函数使用
+  useEffect(() => {
+    hasUnsavedChangesRef.current = hasUnsavedChanges;
+  }, [hasUnsavedChanges]);
 
   // 在组件挂载时创建 style 标签，并在卸载时清理
   // 同时在卸载时恢复字体到已保存的状态（避免"伪自动保存"问题）
@@ -174,8 +180,9 @@ const ThemeConfigCard = () => {
     document.head.appendChild(styleTag);
     styleTagRef.current = styleTag;
     return () => {
-      // 组件卸载时，恢复到已保存的字体设置
-      if (originalDataRef.current?.fontMode) {
+      // 组件卸载时，只有在有未保存更改时才恢复到已保存的字体设置
+      // 避免在刷新页面后字体被意外重置
+      if (hasUnsavedChangesRef.current && originalDataRef.current?.fontMode) {
         applyFont(originalDataRef.current.fontMode);
       }
       if (styleTagRef.current) {
