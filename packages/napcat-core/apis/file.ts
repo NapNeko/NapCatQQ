@@ -33,7 +33,7 @@ export class NTQQFileApi {
       'http://ss.xingzhige.com/music_card/rkey',
       'https://secret-service.bietiaop.com/rkeys',
     ],
-    this.context.logger
+      this.context.logger
     );
   }
 
@@ -138,7 +138,7 @@ export class NTQQFileApi {
     })).urlResult.domainUrl;
   }
 
-  async uploadFile (filePath: string, elementType: ElementType = ElementType.PIC, elementSubType: number = 0) {
+  async uploadFile (filePath: string, elementType: ElementType = ElementType.PIC, elementSubType: number = 0, uploadGroupFile = true) {
     const fileMd5 = await calculateFileMD5(filePath);
     const extOrEmpty = await fileTypeFromFile(filePath).then(e => e?.ext ?? '').catch(() => '');
     const ext = extOrEmpty ? `.${extOrEmpty}` : '';
@@ -146,24 +146,33 @@ export class NTQQFileApi {
     if (fileName.indexOf('.') === -1) {
       fileName += ext;
     }
-
-    const mediaPath = this.context.session.getMsgService().getRichMediaFilePathForGuild({
-      md5HexStr: fileMd5,
-      fileName,
-      elementType,
-      elementSubType,
-      thumbSize: 0,
-      needCreate: true,
-      downloadType: 1,
-      file_uuid: '',
-    });
-
-    await this.copyFile(filePath, mediaPath);
     const fileSize = await this.getFileSize(filePath);
+    if (uploadGroupFile) {
+      const mediaPath = this.context.session.getMsgService().getRichMediaFilePathForGuild({
+        md5HexStr: fileMd5,
+        fileName,
+        elementType,
+        elementSubType,
+        thumbSize: 0,
+        needCreate: true,
+        downloadType: 1,
+        file_uuid: '',
+      });
+
+      await this.copyFile(filePath, mediaPath);
+
+      return {
+        md5: fileMd5,
+        fileName,
+        path: mediaPath,
+        fileSize,
+        ext,
+      };
+    }
     return {
       md5: fileMd5,
       fileName,
-      path: mediaPath,
+      path: filePath,
       fileSize,
       ext,
     };

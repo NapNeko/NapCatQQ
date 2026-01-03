@@ -12,6 +12,7 @@ const SchemaData = Type.Object({
   name: Type.String(),
   folder: Type.Optional(Type.String()),
   folder_id: Type.Optional(Type.String()), // 临时扩展
+  upload_file: Type.Boolean({ default: true }),
 });
 
 type Payload = Static<typeof SchemaData>;
@@ -41,7 +42,7 @@ export default class GoCQHTTPUploadGroupFile extends OneBotAction<Payload, Uploa
       peer,
       deleteAfterSentFiles: [],
     };
-    const sendFileEle = await this.obContext.apis.FileApi.createValidSendFileElement(msgContext, downloadResult.path, payload.name, payload.folder ?? payload.folder_id);
+    const sendFileEle = await this.obContext.apis.FileApi.createValidSendFileElement(msgContext, downloadResult.path, payload.name, payload.folder ?? payload.folder_id, payload.upload_file);
     msgContext.deleteAfterSentFiles.push(downloadResult.path);
     const returnMsg = await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(peer, [sendFileEle], msgContext.deleteAfterSentFiles);
 

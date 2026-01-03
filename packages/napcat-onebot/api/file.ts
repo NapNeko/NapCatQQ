@@ -19,16 +19,18 @@ export class OneBotFileApi {
     this.core = core;
   }
 
-  async createValidSendFileElement (context: SendMessageContext, filePath: string, fileName: string = '', folderId: string = ''): Promise<SendFileElement> {
+  async createValidSendFileElement (context: SendMessageContext, filePath: string, fileName: string = '', folderId: string = '', uploadGroupFile: boolean = false): Promise<SendFileElement> {
     const {
       fileName: _fileName,
       path,
       fileSize,
-    } = await this.core.apis.FileApi.uploadFile(filePath, ElementType.FILE);
+    } = await this.core.apis.FileApi.uploadFile(filePath, ElementType.FILE, 0, uploadGroupFile);
     if (fileSize === 0) {
       throw new Error('文件异常，大小为0');
     }
-    context.deleteAfterSentFiles.push(path);
+    if (uploadGroupFile) {
+      context.deleteAfterSentFiles.push(path);
+    }
     return {
       elementType: ElementType.FILE,
       elementId: '',
