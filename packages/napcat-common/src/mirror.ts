@@ -850,6 +850,8 @@ export interface ActionArtifact {
   created_at: string;
   expires_at: string;
   archive_download_url: string;
+  workflow_run_id?: number;
+  head_sha?: string;
 }
 
 /**
@@ -860,13 +862,14 @@ export async function getLatestActionArtifacts (
   owner: string,
   repo: string,
   workflow: string = 'build.yml',
-  branch: string = 'main'
+  branch: string = 'main',
+  maxRuns: number = 10
 ): Promise<ActionArtifact[]> {
-  const endpoint = `https://api.github.com/repos/${owner}/${repo}/actions/workflows/${workflow}/runs?branch=${branch}&status=success&per_page=1`;
+  const endpoint = `https://api.github.com/repos/${owner}/${repo}/actions/workflows/${workflow}/runs?branch=${branch}&status=success&per_page=${maxRuns}`;
 
   try {
     const runsResponse = await RequestUtil.HttpGetJson<{
-      workflow_runs: Array<{ id: number; }>;
+      workflow_runs: Array<{ id: number; head_sha: string; created_at: string; }>;
     }>(endpoint, 'GET', undefined, {
       'User-Agent': 'NapCat',
       'Accept': 'application/vnd.github.v3+json',
@@ -877,21 +880,33 @@ export async function getLatestActionArtifacts (
       throw new Error('No successful workflow runs found');
     }
 
-    const firstRun = workflowRuns[0];
-    if (!firstRun) {
-      throw new Error('No workflow run found');
+    // 获取所有 runs 的 artifacts
+    const allArtifacts: ActionArtifact[] = [];
+
+    for (const run of workflowRuns) {
+      try {
+        const artifactsEndpoint = `https://api.github.com/repos/${owner}/${repo}/actions/runs/${run.id}/artifacts`;
+        const artifactsResponse = await RequestUtil.HttpGetJson<{
+          artifacts: ActionArtifact[];
+        }>(artifactsEndpoint, 'GET', undefined, {
+          'User-Agent': 'NapCat',
+          'Accept': 'application/vnd.github.v3+json',
+        });
+
+        if (artifactsResponse.artifacts) {
+          // 为每个 artifact 添加 run 信息
+          for (const artifact of artifactsResponse.artifacts) {
+            artifact.workflow_run_id = run.id;
+            artifact.head_sha = run.head_sha;
+            allArtifacts.push(artifact);
+          }
+        }
+      } catch {
+        // 单个 run 获取失败，继续下一个
+      }
     }
-    const runId = firstRun.id;
-    const artifactsEndpoint = `https://api.github.com/repos/${owner}/${repo}/actions/runs/${runId}/artifacts`;
 
-    const artifactsResponse = await RequestUtil.HttpGetJson<{
-      artifacts: ActionArtifact[];
-    }>(artifactsEndpoint, 'GET', undefined, {
-      'User-Agent': 'NapCat',
-      'Accept': 'application/vnd.github.v3+json',
-    });
-
-    return artifactsResponse.artifacts || [];
+    return allArtifacts;
   } catch {
     return [];
   }

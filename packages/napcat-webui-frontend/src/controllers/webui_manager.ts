@@ -83,6 +83,8 @@ export default class WebUIManager {
         createdAt?: string;
         expiresAt?: string;
         size?: number;
+        workflowRunId?: number;
+        headSha?: string;
       }>;
       pagination: {
         page: number;

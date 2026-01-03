@@ -267,6 +267,8 @@ interface VersionInfo {
   createdAt?: string;
   expiresAt?: string;
   size?: number;
+  workflowRunId?: number;
+  headSha?: string;
 }
 
 // 版本选择对话框内容
@@ -513,7 +515,7 @@ const VersionSelectDialogContent: React.FC<VersionSelectDialogProps> = ({
               setSelectedVersion(version || null);
             }}
             classNames={{
-              trigger: 'h-10',
+              trigger: 'h-auto min-h-10',
             }}
           >
             {filteredVersions.map((version) => {
@@ -524,19 +526,28 @@ const VersionSelectDialogContent: React.FC<VersionSelectDialogProps> = ({
                   key={version.tag}
                   textValue={version.tag}
                 >
-                  <div className='flex items-center gap-2'>
-                    <span>{version.tag}</span>
-                    {version.type === 'prerelease' && (
-                      <Chip size='sm' color='secondary' variant='flat'>预发布</Chip>
-                    )}
+                  <div className='flex flex-col gap-0.5'>
+                    <div className='flex items-center gap-2'>
+                      <span>{version.type === 'action' && version.artifactName ? version.artifactName : version.tag}</span>
+                      {version.type === 'prerelease' && (
+                        <Chip size='sm' color='secondary' variant='flat'>预发布</Chip>
+                      )}
+                      {version.type === 'action' && (
+                        <Chip size='sm' color='default' variant='flat'>临时</Chip>
+                      )}
+                      {isCurrent && (
+                        <Chip size='sm' color='success' variant='flat'>当前</Chip>
+                      )}
+                      {downgrade && !isCurrent && version.type !== 'action' && (
+                        <Chip size='sm' color='warning' variant='flat'>降级</Chip>
+                      )}
+                    </div>
                     {version.type === 'action' && (
-                      <Chip size='sm' color='default' variant='flat'>临时</Chip>
-                    )}
-                    {isCurrent && (
-                      <Chip size='sm' color='success' variant='flat'>当前</Chip>
-                    )}
-                    {downgrade && !isCurrent && version.type !== 'action' && (
-                      <Chip size='sm' color='warning' variant='flat'>降级</Chip>
+                      <div className='text-xs text-default-400'>
+                        {version.headSha && <span className='font-mono'>{version.headSha.slice(0, 7)}</span>}
+                        {version.createdAt && <span className='ml-2'>{new Date(version.createdAt).toLocaleString()}</span>}
+                        {version.size && <span className='ml-2'>{(version.size / 1024 / 1024).toFixed(1)} MB</span>}
+                      </div>
                     )}
                   </div>
                 </SelectItem>
