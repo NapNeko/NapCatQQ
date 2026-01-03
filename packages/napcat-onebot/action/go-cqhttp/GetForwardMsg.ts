@@ -100,7 +100,7 @@ export class GoCQHTTPGetForwardMsgAction extends OneBotAction<Payload, {
 
     // 3. 定义协议回退逻辑函数
     const protocolFallbackLogic = async (resId: string) => {
-      const ob = (await this.obContext.apis.MsgApi.parseMessageV2(createFakeForwardMsg(resId)))?.arrayMsg;
+      const ob = (await this.obContext.apis.MsgApi.parseMessageV2(createFakeForwardMsg(resId), true))?.arrayMsg;
       if (ob) {
         return {
           messages: (ob?.message?.[0] as OB11MessageForward)?.data?.content,
@@ -122,7 +122,7 @@ export class GoCQHTTPGetForwardMsgAction extends OneBotAction<Payload, {
 
     if (rootMsg) {
       // 5. 获取消息内容
-      const data = await this.core.apis.MsgApi.getMsgsByMsgId(rootMsg.Peer, [rootMsg.MsgId]);
+      const data = await this.core.apis.MsgApi.getMsgHistory(rootMsg.Peer, rootMsg.MsgId, 1);//getMsgsIncludeSelf
 
       if (data && data.result === 0 && data.msgList.length > 0) {
         const singleMsg = data.msgList[0];
