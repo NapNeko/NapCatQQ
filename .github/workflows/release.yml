@@ -4,13 +4,16 @@ on:
   workflow_dispatch:
   push:
     tags:
-      - '*'
+      - 'v[0-9]*.[0-9]*.[0-9]*'
+      - 'v[0-9]*.[0-9]*.[0-9]*-*'
+      - 'v[0-9]*.[0-9]*.[0-9]*+*'
+      - 'v[0-9]*.[0-9]*.[0-9]*-*+*'
 
 permissions: write-all
 
 env:
   OPENROUTER_API_URL: https://91vip.futureppo.top/v1/chat/completions
-  OPENROUTER_MODEL: "kimi-k2-0905-turbo"
+  OPENROUTER_MODEL: "Antigravity/gemini-3-flash-preview"
   RELEASE_NAME: "NapCat"
 
 jobs:
@@ -24,6 +27,8 @@ jobs:
         with:
           node-version: 20.x
       - name: Build NapCat.Framework
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npm i -g pnpm
           pnpm i
@@ -49,6 +54,8 @@ jobs:
         with:
           node-version: 20.x
       - name: Build NapCat.Shell
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npm i -g pnpm
           pnpm i
@@ -171,7 +178,7 @@ jobs:
 
       - name: Generate release note via OpenRouter
         env:
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENAI_KEY: ${{ secrets.OPENAI_KEY }}
           OPENROUTER_API_URL: ${{ env.OPENROUTER_API_URL }}
           OPENROUTER_MODEL: ${{ env.OPENROUTER_MODEL }}
           GITHUB_OWNER: "NapNeKo"   # 替换成你的 repo owner
@@ -233,7 +240,7 @@ jobs:
 
           # 调用 OpenRouter
           if RESPONSE=$(curl -s -X POST "$OPENROUTER_API_URL" \
-            -H "Authorization: Bearer $OPENROUTER_API_KEY" \
+            -H "Authorization: Bearer $OPENAI_KEY" \
             -H "Content-Type: application/json" \
             -d "$BODY"); then
             echo "=== raw response ==="

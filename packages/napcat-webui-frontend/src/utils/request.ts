@@ -3,7 +3,7 @@ import axios from 'axios';
 import key from '@/const/key';
 
 export const serverRequest = axios.create({
-  timeout: 5000,
+  timeout: 30000, // 30秒，获取版本列表可能较慢
 });
 
 export const request = axios.create({

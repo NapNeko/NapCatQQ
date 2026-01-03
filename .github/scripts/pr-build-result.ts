@@ -6,6 +6,7 @@
  * - PR_NUMBER: PR 编号
  * - PR_SHA: PR 提交 SHA
  * - RUN_ID: GitHub Actions Run ID
+ * - NAPCAT_VERSION: 构建版本号
  * - FRAMEWORK_STATUS: Framework 构建状态
  * - FRAMEWORK_ERROR: Framework 构建错误信息
  * - SHELL_STATUS: Shell 构建状态
@@ -30,6 +31,7 @@ async function main (): Promise<void> {
   const prNumber = parseInt(getEnv('PR_NUMBER', true), 10);
   const prSha = getEnv('PR_SHA') || 'unknown';
   const runId = getEnv('RUN_ID', true);
+  const version = getEnv('NAPCAT_VERSION') || '';
   const { owner, repo } = getRepository();
 
   const frameworkStatus = parseStatus(getEnv('FRAMEWORK_STATUS'));
@@ -39,6 +41,7 @@ async function main (): Promise<void> {
 
   console.log(`PR: #${prNumber}`);
   console.log(`SHA: ${prSha}`);
+  console.log(`Version: ${version}`);
   console.log(`Run: ${runId}`);
   console.log(`Framework: ${frameworkStatus}${frameworkError ? ` (${frameworkError})` : ''}`);
   console.log(`Shell: ${shellStatus}${shellError ? ` (${shellError})` : ''}\n`);
@@ -76,7 +79,7 @@ async function main (): Promise<void> {
     },
   ];
 
-  const comment = generateResultComment(targets, prSha, runId, repository);
+  const comment = generateResultComment(targets, prSha, runId, repository, version);
 
   await github.createOrUpdateComment(owner, repo, prNumber, comment, COMMENT_MARKER);
 }

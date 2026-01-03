@@ -24,6 +24,10 @@ function escapeCodeBlock (text: string): string {
   return text.replace(/```/g, '\\`\\`\\`');
 }
 
+function getTimeString (): string {
+  return new Date().toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+}
+
 // ============== 状态图标 ==============
 
 export function getStatusIcon (status: BuildStatus): string {
@@ -34,30 +38,66 @@ export function getStatusIcon (status: BuildStatus): string {
       return '⏳ 构建中...';
     case 'cancelled':
       return '⚪ 已取消';
-    default:
+    case 'failure':
       return '❌ 失败';
+    default:
+      return '❓ 未知';
+  }
+}
+
+function getStatusEmoji (status: BuildStatus): string {
+  switch (status) {
+    case 'success': return '✅';
+    case 'pending': return '⏳';
+    case 'cancelled': return '⚪';
+    case 'failure': return '❌';
+    default: return '❓';
   }
 }
 
 // ============== 构建中评论 ==============
 
 export function generateBuildingComment (prSha: string, targets: string[]): string {
-  const time = new Date().toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+  const time = getTimeString();
+  const shortSha = formatSha(prSha);
 
   const lines: string[] = [
     COMMENT_MARKER,
-    '## 🔨 构建状态',
     '',
-    '| 构建目标 | 状态 |',
-    '| :--- | :--- |',
-    ...targets.map(name => `| ${name} | ⏳ 构建中... |`),
+    '<div align="center">',
+    '',
+    '# 🔨 NapCat 构建中',
+    '',
+    '![Building](https://img.shields.io/badge/状态-构建中-yellow?style=for-the-badge&logo=github-actions&logoColor=white)',
+    '',
+    '</div>',
     '',
     '---',
     '',
-    `📝 **提交**: \`${formatSha(prSha)}\``,
-    `🕐 **开始时间**: ${time}`,
+    '## 📦 构建目标',
     '',
-    '> 构建进行中，请稍候...',
+    '| 包名 | 状态 | 说明 |',
+    '| :--- | :---: | :--- |',
+    ...targets.map(name => `| \`${name}\` | ⏳ | 正在构建... |`),
+    '',
+    '---',
+    '',
+    '## 📋 构建信息',
+    '',
+    `| 项目 | 值 |`,
+    `| :--- | :--- |`,
+    `| 📝 提交 | \`${shortSha}\` |`,
+    `| 🕐 开始时间 | ${time} |`,
+    '',
+    '---',
+    '',
+    '<div align="center">',
+    '',
+    '> ⏳ **构建进行中，请稍候...**',
+    '>',
+    '> 构建完成后将自动更新此评论',
+    '',
+    '</div>',
   ];
 
   return lines.join('\n');
@@ -69,60 +109,123 @@ export function generateResultComment (
   targets: BuildTarget[],
   prSha: string,
   runId: string,
-  repository: string
+  repository: string,
+  version?: string
 ): string {
-  // 链接到 run 详情页，页面底部有 Artifacts 下载区域
   const runUrl = `https://github.com/${repository}/actions/runs/${runId}`;
+  const shortSha = formatSha(prSha);
+  const time = getTimeString();
 
   const allSuccess = targets.every(t => t.status === 'success');
   const anyCancelled = targets.some(t => t.status === 'cancelled');
+  const anyFailure = targets.some(t => t.status === 'failure');
 
-  const headerIcon = allSuccess
-    ? '✅ 构建成功'
-    : anyCancelled
-      ? '⚪ 构建已取消'
-      : '❌ 构建失败';
+  // 状态徽章
+  let statusBadge: string;
+  let headerTitle: string;
+  if (allSuccess) {
+    statusBadge = '![Success](https://img.shields.io/badge/状态-构建成功-success?style=for-the-badge&logo=github-actions&logoColor=white)';
+    headerTitle = '# ✅ NapCat 构建成功';
+  } else if (anyCancelled && !anyFailure) {
+    statusBadge = '![Cancelled](https://img.shields.io/badge/状态-已取消-lightgrey?style=for-the-badge&logo=github-actions&logoColor=white)';
+    headerTitle = '# ⚪ NapCat 构建已取消';
+  } else {
+    statusBadge = '![Failed](https://img.shields.io/badge/状态-构建失败-critical?style=for-the-badge&logo=github-actions&logoColor=white)';
+    headerTitle = '# ❌ NapCat 构建失败';
+  }
 
   const downloadLink = (target: BuildTarget) => {
     if (target.status !== 'success') return '—';
     if (target.downloadUrl) {
-      return `[📦 下载](${target.downloadUrl})`;
+      return `[📥 下载](${target.downloadUrl})`;
     }
-    // 回退到 run 详情页
-    return `[📦 下载](${runUrl}#artifacts)`;
+    return `[📥 下载](${runUrl}#artifacts)`;
   };
 
   const lines: string[] = [
     COMMENT_MARKER,
-    `## ${headerIcon}`,
     '',
-    '| 构建目标 | 状态 | 下载 |',
-    '| :--- | :--- | :--- |',
-    ...targets.map(t => `| ${t.name} | ${getStatusIcon(t.status)} | ${downloadLink(t)} |`),
+    '<div align="center">',
+    '',
+    headerTitle,
+    '',
+    statusBadge,
+    '',
+    '</div>',
     '',
     '---',
     '',
-    `📝 **提交**: \`${formatSha(prSha)}\``,
-    `🔗 **构建日志**: [查看详情](${runUrl})`,
+    '## 📦 构建产物',
+    '',
+    '| 包名 | 状态 | 下载 |',
+    '| :--- | :---: | :---: |',
+    ...targets.map(t => `| \`${t.name}\` | ${getStatusEmoji(t.status)} ${t.status === 'success' ? '成功' : t.status === 'failure' ? '失败' : t.status === 'cancelled' ? '已取消' : '未知'} | ${downloadLink(t)} |`),
+    '',
+    '---',
+    '',
+    '## 📋 构建信息',
+    '',
+    `| 项目 | 值 |`,
+    `| :--- | :--- |`,
+    ...(version ? [`| 🏷️ 版本号 | \`${version}\` |`] : []),
+    `| 📝 提交 | \`${shortSha}\` |`,
+    `| 🔗 构建日志 | [查看详情](${runUrl}) |`,
+    `| 🕐 完成时间 | ${time} |`,
   ];
 
   // 添加错误详情
   const failedTargets = targets.filter(t => t.status === 'failure' && t.error);
   if (failedTargets.length > 0) {
-    lines.push('', '---', '', '## ⚠️ 错误详情');
+    lines.push('', '---', '', '## ⚠️ 错误详情', '');
     for (const target of failedTargets) {
-      lines.push('', `### ${target.name} 构建错误`, '```', escapeCodeBlock(target.error!), '```');
+      lines.push(
+        `<details>`,
+        `<summary>🔴 <b>${target.name}</b> 构建错误</summary>`,
+        '',
+        '```',
+        escapeCodeBlock(target.error!),
+        '```',
+        '',
+        '</details>',
+        ''
+      );
     }
   }
 
   // 添加底部提示
+  lines.push('---', '');
   if (allSuccess) {
-    lines.push('', '> 🎉 所有构建均已成功完成，可点击上方下载链接获取构建产物进行测试。');
-  } else if (anyCancelled) {
-    lines.push('', '> ⚪ 构建已被取消，可能是由于新的提交触发了新的构建。');
+    lines.push(
+      '<div align="center">',
+      '',
+      '> 🎉 **所有构建均已成功完成！**',
+      '>',
+      '> 点击上方下载链接获取构建产物进行测试',
+      '',
+      '</div>'
+    );
+  } else if (anyCancelled && !anyFailure) {
+    lines.push(
+      '<div align="center">',
+      '',
+      '> ⚪ **构建已被取消**',
+      '>',
+      '> 可能是由于新的提交触发了新的构建',
+      '',
+      '</div>'
+    );
   } else {
-    lines.push('', '> ⚠️ 部分构建失败，请查看上方错误详情或点击构建日志查看完整输出。');
+    lines.push(
+      '<div align="center">',
+      '',
+      '> ⚠️ **部分构建失败**',
+      '>',
+      '> 请查看上方错误详情或点击构建日志查看完整输出',
+      '',
+      '</div>'
+    );
   }
 
   return lines.join('\n');
 }
+

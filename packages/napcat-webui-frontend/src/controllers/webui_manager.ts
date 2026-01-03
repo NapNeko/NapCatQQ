@@ -54,11 +54,68 @@ export default class WebUIManager {
     return data.data;
   }
 
+  /**
+   * 版本信息接口
+   */
+  static readonly VersionTypes = {
+    RELEASE: 'release',
+    PRERELEASE: 'prerelease',
+    ACTION: 'action',
+  } as const;
+
+  /**
+   * 获取所有可用的版本列表（支持分页、过滤和搜索）
+   */
+  public static async getAllReleases (options: {
+    page?: number;
+    pageSize?: number;
+    includeActions?: boolean;
+    type?: 'release' | 'action' | 'all';
+    search?: string;
+  } = {}) {
+    const { page = 1, pageSize = 20, includeActions = true, type = 'all', search = '' } = options;
+    const { data } = await serverRequest.get<ServerResponse<{
+      versions: Array<{
+        tag: string;
+        type: 'release' | 'prerelease' | 'action';
+        artifactId?: number;
+        artifactName?: string;
+        createdAt?: string;
+        expiresAt?: string;
+        size?: number;
+      }>;
+      pagination: {
+        page: number;
+        pageSize: number;
+        total: number;
+        totalPages: number;
+      };
+      mirror?: string;
+    }>>('/base/getAllReleases', {
+      params: { page, pageSize, includeActions, type, search },
+    });
+    return data.data;
+  }
+
   public static async UpdateNapCat () {
     const { data } = await serverRequest.post<ServerResponse<any>>(
       '/UpdateNapCat/update',
       {},
-      { timeout: 60000 } // 1分钟超时
+      { timeout: 120000 } // 2分钟超时
+    );
+    return data;
+  }
+
+  /**
+   * 更新到指定版本
+   * @param targetVersion 目标版本 tag，如 "v4.9.9" 或 "action-123456"
+   * @param force 是否强制更新（允许降级）
+   */
+  public static async UpdateNapCatToVersion (targetVersion: string, force: boolean = false) {
+    const { data } = await serverRequest.post<ServerResponse<any>>(
+      '/UpdateNapCat/update',
+      { targetVersion, force },
+      { timeout: 120000 } // 2分钟超时
     );
     return data;
   }
