@@ -984,8 +984,20 @@ export class OneBotMsgApi {
     disableGetUrl: boolean = false,
     quick_reply: boolean = false
   ) {
-    if (msg.senderUin === '0' || msg.senderUin === '') return;
-    if (msg.peerUin === '0' || msg.peerUin === '') return;
+    if ((msg.senderUin === '0' || msg.senderUin === '')) {
+      if (msg.senderUid && msg.senderUid !== '' && msg.senderUid !== '0') {
+        msg.senderUin = await this.core.apis.UserApi.getUinByUidV2(msg.senderUid);
+      } else {
+        return undefined;
+      }
+    }
+    if (msg.peerUin === '0' || msg.peerUin === '') {
+      if (msg.peerUid && msg.peerUid !== '' && msg.peerUid !== '0') {
+        msg.peerUin = await this.core.apis.UserApi.getUinByUidV2(msg.peerUid);
+      } else {
+        return undefined;
+      }
+    }
 
     const resMsg = this.initializeMessage(msg);
 
