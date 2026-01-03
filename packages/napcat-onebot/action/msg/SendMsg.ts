@@ -317,11 +317,11 @@ export class SendMsgBase extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
 
           const MixElement = sendElements.filter(
             element =>
-              element.elementType !== ElementType.FILE && element.elementType !== ElementType.VIDEO && element.elementType !== ElementType.ARK
+              element.elementType !== ElementType.FILE && element.elementType !== ElementType.VIDEO && element.elementType !== ElementType.ARK && element.elementType !== ElementType.PTT
           );
           const SingleElement = sendElements.filter(
             element =>
-              element.elementType === ElementType.FILE || element.elementType === ElementType.VIDEO || element.elementType === ElementType.ARK
+              element.elementType === ElementType.FILE || element.elementType === ElementType.VIDEO || element.elementType === ElementType.ARK || element.elementType === ElementType.PTT
           ).map(e => [e]);
 
           const AllElement: SendMessageElement[][] = [MixElement, ...SingleElement].filter(e => e !== undefined && e.length !== 0);
