@@ -4,8 +4,7 @@ on:
   workflow_dispatch:
   push:
     tags:
-      - 'v[0-9]*.[0-9]*.[0-9]*'
-      - 'v[0-9]*.[0-9]*.[0-9]*-*'
+      - 'v*'
 
 permissions: write-all
 
@@ -15,7 +14,38 @@ env:
   RELEASE_NAME: "NapCat"
 
 jobs:
+  # 验证版本号格式
+  validate-version:
+    runs-on: ubuntu-latest
+    outputs:
+      valid: ${{ steps.check.outputs.valid }}
+      version: ${{ steps.check.outputs.version }}
+    steps:
+      - name: Validate semantic version
+        id: check
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          echo "Checking tag: $TAG"
+          
+          # 语义化版本正则表达式
+          # 支持: v1.0.0, v1.0.0-beta, v1.0.0-rc.1, v1.0.0-alpha.1+build.123
+          SEMVER_REGEX="^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*))*))?$"
+          
+          if [[ "$TAG" =~ $SEMVER_REGEX ]]; then
+            echo "✅ Valid semantic version: $TAG"
+            echo "valid=true" >> $GITHUB_OUTPUT
+            echo "version=$TAG" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Invalid version format: $TAG"
+            echo "Expected format: vX.Y.Z or vX.Y.Z-prerelease"
+            echo "Examples: v1.0.0, v1.2.3-beta, v2.0.0-rc.1"
+            echo "valid=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
   Build-Framework:
+    needs: validate-version
+    if: needs.validate-version.outputs.valid == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Clone Main Repository
@@ -43,6 +73,8 @@ jobs:
           path: framework-dist
 
   Build-Shell:
+    needs: validate-version
+    if: needs.validate-version.outputs.valid == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Clone Main Repository
@@ -179,7 +211,7 @@ jobs:
           OPENAI_KEY: ${{ secrets.OPENAI_KEY }}
           OPENROUTER_API_URL: ${{ env.OPENROUTER_API_URL }}
           OPENROUTER_MODEL: ${{ env.OPENROUTER_MODEL }}
-          GITHUB_OWNER: "NapNeKo"   # 替换成你的 repo owner
+          GITHUB_OWNER: "NapNeko"   # 替换成你的 repo owner
           GITHUB_REPO: "NapCatQQ"   # 替换成你的 repo 名
         run: |
           set -euo pipefail
@@ -204,34 +236,145 @@ jobs:
           done
 
           if [ -z "$PREV_TAG" ]; then
-            echo "❌ Could not find previous tag for $CURRENT_TAG, aborting."
-            exit 1
+            echo "⚠️ Could not find previous tag for $CURRENT_TAG, using first commit"
+            PREV_TAG=$(git rev-list --max-parents=0 HEAD | head -1)
           fi
 
           echo "Previous tag: $PREV_TAG"
 
           # 强制拉取上一个 tag 和当前 tag
-          git fetch origin "refs/tags/$PREV_TAG:refs/tags/$PREV_TAG" --force
-          git fetch origin "refs/tags/$CURRENT_TAG:refs/tags/$CURRENT_TAG" --force
+          git fetch origin "refs/tags/$PREV_TAG:refs/tags/$PREV_TAG" --force || true
+          git fetch origin "refs/tags/$CURRENT_TAG:refs/tags/$CURRENT_TAG" --force || true
 
-          # 获取 commit title + body + 作者，保留换行
-          COMMITS=$(git log --pretty=format:'%h %B (%an)' "$PREV_TAG".."$CURRENT_TAG" | sed 's/$/\\n/')
+          # 获取 commit，使用更清晰的格式
+          # 格式: <type>: <subject> (<hash>)
+          COMMITS=$(git log --pretty=format:'- %s (%h)' "$PREV_TAG".."$CURRENT_TAG" 2>/dev/null || git log --pretty=format:'- %s (%h)' -20)
 
           echo "Commit list from $PREV_TAG to $CURRENT_TAG:"
-          echo -e "$COMMITS"
+          echo "$COMMITS"
+
+          # 获取文件变化统计
+          echo "Getting file change statistics..."
+          FILE_STATS=$(git diff --stat "$PREV_TAG".."$CURRENT_TAG" 2>/dev/null || echo "")
+          
+          # 获取总体统计（最后一行）
+          SUMMARY_LINE=$(echo "$FILE_STATS" | tail -1)
+          echo "Summary: $SUMMARY_LINE"
+          
+          # 获取每个文件的变化（去掉最后一行汇总）
+          # 截断过长的输出（最多50个文件，每行最多80字符）
+          FILE_CHANGES=$(echo "$FILE_STATS" | head -n -1 | head -50 | cut -c1-80)
+          
+          # 如果文件变化太多，进一步精简：只保留主要目录的变化
+          FILE_COUNT=$(echo "$FILE_STATS" | head -n -1 | wc -l)
+          if [ "$FILE_COUNT" -gt 50 ]; then
+            echo "Too many files ($FILE_COUNT), grouping by directory..."
+            # 按目录分组统计
+            DIR_STATS=$(git diff --stat "$PREV_TAG".."$CURRENT_TAG" 2>/dev/null | head -n -1 | \
+              sed 's/|.*//g' | \
+              awk -F'/' '{if(NF>1) print $1"/"$2; else print $1}' | \
+              sort | uniq -c | sort -rn | head -20)
+            FILE_CHANGES="[按目录分组统计 - 共 $FILE_COUNT 个文件变更]
+          $DIR_STATS"
+          fi
+          
+          echo "File changes:"
+          echo "$FILE_CHANGES"
+
+          # 获取具体代码变化（关键文件的diff）
+          echo "Getting code diff for key files..."
+          
+          # 定义关键目录（优先展示这些目录的变化）
+          KEY_DIRS="packages/napcat-core packages/napcat-onebot packages/napcat-webui-backend"
+          
+          # 获取变更的关键文件列表（排除测试、配置等）
+          KEY_FILES=$(git diff --name-only "$PREV_TAG".."$CURRENT_TAG" 2>/dev/null | \
+            grep -E "^packages/napcat-(core|onebot|webui-backend|shell)/" | \
+            grep -E "\.(ts|js)$" | \
+            grep -v -E "(test|spec|\.d\.ts|config)" | \
+            head -15)
+          
+          CODE_DIFF=""
+          DIFF_CHAR_LIMIT=6000  # 总diff字符限制
+          CURRENT_CHARS=0
+          
+          for file in $KEY_FILES; do
+            if [ "$CURRENT_CHARS" -ge "$DIFF_CHAR_LIMIT" ]; then
+              CODE_DIFF="$CODE_DIFF
+          [... 更多文件变化已截断 ...]"
+              break
+            fi
+            
+            # 获取单个文件的diff，限制每个文件最多50行
+            FILE_DIFF=$(git diff "$PREV_TAG".."$CURRENT_TAG" -- "$file" 2>/dev/null | head -50)
+            FILE_DIFF_LEN=${#FILE_DIFF}
+            
+            # 如果单个文件diff超过1500字符，截断
+            if [ "$FILE_DIFF_LEN" -gt 1500 ]; then
+              FILE_DIFF=$(echo "$FILE_DIFF" | head -c 1500)
+              FILE_DIFF="$FILE_DIFF
+          [... 文件 $file 变化已截断 ...]"
+            fi
+            
+            if [ -n "$FILE_DIFF" ]; then
+              CODE_DIFF="$CODE_DIFF
+          
+          ### $file
+          \`\`\`diff
+          $FILE_DIFF
+          \`\`\`"
+              CURRENT_CHARS=$((CURRENT_CHARS + FILE_DIFF_LEN))
+            fi
+          done
+          
+          # 如果没有关键文件变化，获取前5个变更文件的diff
+          if [ -z "$CODE_DIFF" ]; then
+            echo "No key files changed, getting top changed files..."
+            TOP_FILES=$(git diff --name-only "$PREV_TAG".."$CURRENT_TAG" 2>/dev/null | \
+              grep -E "\.(ts|js)$" | head -5)
+            
+            for file in $TOP_FILES; do
+              FILE_DIFF=$(git diff "$PREV_TAG".."$CURRENT_TAG" -- "$file" 2>/dev/null | head -30)
+              if [ -n "$FILE_DIFF" ] && [ ${#FILE_DIFF} -lt 1000 ]; then
+                CODE_DIFF="$CODE_DIFF
+          
+          ### $file
+          \`\`\`diff
+          $FILE_DIFF
+          \`\`\`"
+              fi
+            done
+          fi
+          
+          echo "Code diff preview:"
+          echo "$CODE_DIFF" | head -50
 
           # 读取 prompt
           PROMPT_FILE=".github/prompt/release_note_prompt.txt"
           SYSTEM_PROMPT=$(<"$PROMPT_FILE")
 
-          # 构建用户内容
-          USER_CONTENT="当前真正的版本: $CURRENT_TAG\n提交列表:\n$COMMITS"
+          # 构建用户内容，传递更多上下文（包含文件变化和代码diff）
+          USER_CONTENT="当前版本: $CURRENT_TAG
+          上一版本: $PREV_TAG
+          
+          ## 提交列表
+          $COMMITS
+          
+          ## 文件变化统计
+          $SUMMARY_LINE
+          
+          ## 变更文件列表
+          $FILE_CHANGES
+          
+          ## 关键代码变化
+          $CODE_DIFF"
 
-          # 构建请求 JSON
+          # 构建请求 JSON，增加 max_tokens 以获取更完整的输出
           BODY=$(jq -n \
             --arg system "$SYSTEM_PROMPT" \
             --arg user "$USER_CONTENT" \
-            '{model: env.OPENROUTER_MODEL, messages:[{role:"system", content:$system},{role:"user", content:$user}], temperature:0.3, max_tokens:800}')
+            --arg model "$OPENROUTER_MODEL" \
+            '{model: $model, messages:[{role:"system", content:$system},{role:"user", content:$user}], temperature:0.2, max_tokens:1500}')
 
           echo "=== OpenRouter request body ==="
           echo "$BODY" | jq .
@@ -255,13 +398,18 @@ jobs:
 
             if [ -z "$RELEASE_BODY" ]; then
               echo "❌ OpenRouter failed to generate release note, using default.md"
-              cp .github/prompt/default.md CHANGELOG.md
+              # 替换默认模板中的版本占位符
+              sed "s/{VERSION}/$CURRENT_TAG/g" .github/prompt/default.md > CHANGELOG.md
             else
+              # 后处理：确保版本号正确，并添加比较链接
               echo -e "$RELEASE_BODY" > CHANGELOG.md
+              # 替换可能的占位符
+              sed -i "s/{VERSION}/$CURRENT_TAG/g" CHANGELOG.md
+              sed -i "s/{PREV_VERSION}/$PREV_TAG/g" CHANGELOG.md
             fi
           else
             echo "❌ Curl failed, using default.md"
-            cp .github/prompt/default.md CHANGELOG.md
+            sed "s/{VERSION}/$CURRENT_TAG/g" .github/prompt/default.md > CHANGELOG.md
           fi
           echo "=== generated release note ==="
           cat CHANGELOG.md
