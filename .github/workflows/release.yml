@@ -288,62 +288,72 @@ jobs:
           KEY_DIRS="packages/napcat-core packages/napcat-onebot packages/napcat-webui-backend"
           
           # 获取变更的关键文件列表（排除测试、配置等）
+          # 使用 || true 防止 grep 无匹配时返回非零退出码
           KEY_FILES=$(git diff --name-only "$PREV_TAG".."$CURRENT_TAG" 2>/dev/null | \
-            grep -E "^packages/napcat-(core|onebot|webui-backend|shell)/" | \
-            grep -E "\.(ts|js)$" | \
-            grep -v -E "(test|spec|\.d\.ts|config)" | \
-            head -15)
+            grep -E "^packages/napcat-(core|onebot|webui-backend|shell)/" || true | \
+            grep -E "\.(ts|js)$" || true | \
+            grep -v -E "(test|spec|\.d\.ts|config)" || true | \
+            head -15) || true
           
           CODE_DIFF=""
           DIFF_CHAR_LIMIT=6000  # 总diff字符限制
           CURRENT_CHARS=0
           
-          for file in $KEY_FILES; do
-            if [ "$CURRENT_CHARS" -ge "$DIFF_CHAR_LIMIT" ]; then
-              CODE_DIFF="$CODE_DIFF
+          if [ -n "$KEY_FILES" ]; then
+            for file in $KEY_FILES; do
+              if [ "$CURRENT_CHARS" -ge "$DIFF_CHAR_LIMIT" ]; then
+                CODE_DIFF="$CODE_DIFF
           [... 更多文件变化已截断 ...]"
-              break
-            fi
-            
-            # 获取单个文件的diff，限制每个文件最多50行
-            FILE_DIFF=$(git diff "$PREV_TAG".."$CURRENT_TAG" -- "$file" 2>/dev/null | head -50)
-            FILE_DIFF_LEN=${#FILE_DIFF}
-            
-            # 如果单个文件diff超过1500字符，截断
-            if [ "$FILE_DIFF_LEN" -gt 1500 ]; then
-              FILE_DIFF=$(echo "$FILE_DIFF" | head -c 1500)
-              FILE_DIFF="$FILE_DIFF
+                break
+              fi
+              
+              # 获取单个文件的diff，限制每个文件最多50行
+              FILE_DIFF=$(git diff "$PREV_TAG".."$CURRENT_TAG" -- "$file" 2>/dev/null | head -50) || true
+              FILE_DIFF_LEN=${#FILE_DIFF}
+              
+              # 如果单个文件diff超过1500字符，截断
+              if [ "$FILE_DIFF_LEN" -gt 1500 ]; then
+                FILE_DIFF=$(echo "$FILE_DIFF" | head -c 1500)
+                FILE_DIFF="$FILE_DIFF
           [... 文件 $file 变化已截断 ...]"
-            fi
-            
-            if [ -n "$FILE_DIFF" ]; then
-              CODE_DIFF="$CODE_DIFF
-          
-          ### $file
-          \`\`\`diff
-          $FILE_DIFF
-          \`\`\`"
-              CURRENT_CHARS=$((CURRENT_CHARS + FILE_DIFF_LEN))
-            fi
-          done
-          
-          # 如果没有关键文件变化，获取前5个变更文件的diff
-          if [ -z "$CODE_DIFF" ]; then
-            echo "No key files changed, getting top changed files..."
-            TOP_FILES=$(git diff --name-only "$PREV_TAG".."$CURRENT_TAG" 2>/dev/null | \
-              grep -E "\.(ts|js)$" | head -5)
-            
-            for file in $TOP_FILES; do
-              FILE_DIFF=$(git diff "$PREV_TAG".."$CURRENT_TAG" -- "$file" 2>/dev/null | head -30)
-              if [ -n "$FILE_DIFF" ] && [ ${#FILE_DIFF} -lt 1000 ]; then
+              fi
+              
+              if [ -n "$FILE_DIFF" ]; then
                 CODE_DIFF="$CODE_DIFF
           
           ### $file
           \`\`\`diff
           $FILE_DIFF
           \`\`\`"
+                CURRENT_CHARS=$((CURRENT_CHARS + FILE_DIFF_LEN))
               fi
             done
+          fi
+          
+          # 如果没有关键文件变化，获取前5个变更文件的diff
+          if [ -z "$CODE_DIFF" ]; then
+            echo "No key files changed, getting top changed files..."
+            TOP_FILES=$(git diff --name-only "$PREV_TAG".."$CURRENT_TAG" 2>/dev/null | \
+              grep -E "\.(ts|js|yml|md)$" | head -5) || true
+            
+            if [ -n "$TOP_FILES" ]; then
+              for file in $TOP_FILES; do
+                FILE_DIFF=$(git diff "$PREV_TAG".."$CURRENT_TAG" -- "$file" 2>/dev/null | head -30) || true
+                if [ -n "$FILE_DIFF" ] && [ ${#FILE_DIFF} -lt 1000 ]; then
+                  CODE_DIFF="$CODE_DIFF
+          
+          ### $file
+          \`\`\`diff
+          $FILE_DIFF
+          \`\`\`"
+                fi
+              done
+            fi
+          fi
+          
+          # 如果仍然没有代码变化，添加说明
+          if [ -z "$CODE_DIFF" ]; then
+            CODE_DIFF="[本次更新主要涉及配置文件和文档变更，无核心代码变化]"
           fi
           
           echo "Code diff preview:"
