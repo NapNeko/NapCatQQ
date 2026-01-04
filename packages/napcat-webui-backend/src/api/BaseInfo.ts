@@ -39,43 +39,47 @@ export interface VersionInfo {
 
 /**
  * 获取所有可用的版本（release + action artifacts）
- * 支持分页
+ * 支持分页，懒加载：根据 type 参数只获取需要的版本类型
  */
 export const getAllReleasesHandler: RequestHandler = async (req, res) => {
   try {
     const page = parseInt(req.query['page'] as string) || 1;
     const pageSize = parseInt(req.query['pageSize'] as string) || 20;
-    const includeActions = req.query['includeActions'] !== 'false';
     const typeFilter = req.query['type'] as string | undefined; // 'release' | 'action' | 'all'
     const searchQuery = (req.query['search'] as string || '').toLowerCase().trim();
 
-    let tags: string[] = [];
+    let versions: VersionInfo[] = [];
+    let actionVersions: VersionInfo[] = [];
     let usedMirror = '';
-    try {
-      const result = await getAllTags();
-      tags = result.tags;
-      usedMirror = result.mirror;
-    } catch {
-      // 如果获取 tags 失败，返回空列表而不是抛出错误
-      tags = [];
+
+    // 懒加载：只获取需要的版本类型
+    const needReleases = !typeFilter || typeFilter === 'all' || typeFilter === 'release';
+    const needActions = typeFilter === 'action' || typeFilter === 'all';
+
+    // 获取正式版本（仅当需要时）
+    if (needReleases) {
+      try {
+        const result = await getAllTags();
+        usedMirror = result.mirror;
+        
+        versions = result.tags.map(tag => {
+          const isPrerelease = /-(alpha|beta|rc|dev|pre|snapshot)/i.test(tag);
+          return {
+            tag,
+            type: isPrerelease ? 'prerelease' : 'release',
+          } as VersionInfo;
+        });
+
+        // 使用语义化版本排序（最新的在前）
+        versions.sort((a, b) => -compareSemVer(a.tag, b.tag));
+      } catch {
+        // 如果获取 tags 失败，返回空列表而不是抛出错误
+        versions = [];
+      }
     }
 
-    // 解析版本信息
-    const versions: VersionInfo[] = tags.map(tag => {
-      // 检查是否是预发布版本
-      const isPrerelease = /-(alpha|beta|rc|dev|pre|snapshot)/i.test(tag);
-      return {
-        tag,
-        type: isPrerelease ? 'prerelease' : 'release',
-      };
-    });
-
-    // 使用语义化版本排序（最新的在前）
-    versions.sort((a, b) => -compareSemVer(a.tag, b.tag));
-
-    // 获取 Action Artifacts（如果请求）
-    let actionVersions: VersionInfo[] = [];
-    if (includeActions) {
+    // 获取 Action Artifacts（仅当需要时）
+    if (needActions) {
       try {
         const artifacts = await getLatestActionArtifacts('NapNeko', 'NapCatQQ', 'build.yml', 'main');
 
@@ -97,21 +101,13 @@ export const getAllReleasesHandler: RequestHandler = async (req, res) => {
             headSha: a.head_sha,
           }));
       } catch {
-        // 忽略 action artifacts 获取失败
+        // 获取失败时返回空列表
+        actionVersions = [];
       }
     }
 
     // 合并版本列表（action 在最前面）
     let allVersions = [...actionVersions, ...versions];
-
-    // 按类型过滤
-    if (typeFilter && typeFilter !== 'all') {
-      if (typeFilter === 'release') {
-        allVersions = allVersions.filter(v => v.type === 'release' || v.type === 'prerelease');
-      } else if (typeFilter === 'action') {
-        allVersions = allVersions.filter(v => v.type === 'action');
-      }
-    }
 
     // 搜索过滤
     if (searchQuery) {

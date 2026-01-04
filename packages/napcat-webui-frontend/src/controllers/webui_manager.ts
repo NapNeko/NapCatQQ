@@ -65,15 +65,15 @@ export default class WebUIManager {
 
   /**
    * 获取所有可用的版本列表（支持分页、过滤和搜索）
+   * 懒加载：根据 type 参数只获取对应类型的版本
    */
   public static async getAllReleases (options: {
     page?: number;
     pageSize?: number;
-    includeActions?: boolean;
     type?: 'release' | 'action' | 'all';
     search?: string;
   } = {}) {
-    const { page = 1, pageSize = 20, includeActions = true, type = 'all', search = '' } = options;
+    const { page = 1, pageSize = 20, type = 'release', search = '' } = options;
     const { data } = await serverRequest.get<ServerResponse<{
       versions: Array<{
         tag: string;
@@ -94,7 +94,7 @@ export default class WebUIManager {
       };
       mirror?: string;
     }>>('/base/getAllReleases', {
-      params: { page, pageSize, includeActions, type, search },
+      params: { page, pageSize, type, search },
     });
     return data.data;
   }

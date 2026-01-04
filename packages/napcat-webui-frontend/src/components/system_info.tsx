@@ -293,11 +293,11 @@ const VersionSelectDialogContent: React.FC<VersionSelectDialogProps> = ({
   const pageSize = 15;
 
   // 获取所有可用版本（带分页、过滤和搜索）
+  // 懒加载：根据 activeTab 只获取对应类型的版本
   const { data: releasesData, loading: releasesLoading, error: releasesError } = useRequest(
     () => WebUIManager.getAllReleases({
       page: currentPage,
       pageSize,
-      includeActions: true,
       type: activeTab,
       search: debouncedSearch
     }),

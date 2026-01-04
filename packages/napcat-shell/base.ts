@@ -418,7 +418,6 @@ export async function NCoreInitShell () {
     wrapper,
     session,
     logger,
-    loginService,
     selfInfo,
     basicInfoWrapper,
     pathWrapper,
@@ -434,7 +433,6 @@ export class NapCatShell {
     wrapper: WrapperNodeApi,
     session: NodeIQQNTWrapperSession,
     logger: LogWrapper,
-    loginService: NodeIKernelLoginService,
     selfInfo: SelfInfo,
     basicInfoWrapper: QQBasicInfoWrapper,
     pathWrapper: NapCatPathWrapper,
@@ -446,7 +444,6 @@ export class NapCatShell {
       wrapper,
       session,
       logger,
-      loginService,
       basicInfoWrapper,
       pathWrapper,
     };
