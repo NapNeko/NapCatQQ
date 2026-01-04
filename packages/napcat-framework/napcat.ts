@@ -73,7 +73,7 @@ export async function NCoreInitFramework (
   // 过早进入会导致addKernelMsgListener等Listener添加失败
   // await sleep(2500);
   // 初始化 NapCatFramework
-  const loaderObject = new NapCatFramework(wrapper, session, logger, loginService, selfInfo, basicInfoWrapper, pathWrapper, nativePacketHandler);
+  const loaderObject = new NapCatFramework(wrapper, session, logger, selfInfo, basicInfoWrapper, pathWrapper, nativePacketHandler);
   await loaderObject.core.initCore();
 
   // 启动WebUi
@@ -94,7 +94,6 @@ export class NapCatFramework {
     wrapper: WrapperNodeApi,
     session: NodeIQQNTWrapperSession,
     logger: LogWrapper,
-    loginService: NodeIKernelLoginService,
     selfInfo: SelfInfo,
     basicInfoWrapper: QQBasicInfoWrapper,
     pathWrapper: NapCatPathWrapper,
@@ -106,7 +105,6 @@ export class NapCatFramework {
       wrapper,
       session,
       logger,
-      loginService,
       basicInfoWrapper,
       pathWrapper,
     };

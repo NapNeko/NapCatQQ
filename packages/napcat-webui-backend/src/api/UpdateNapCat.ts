@@ -134,23 +134,73 @@ export const UpdateNapCatHandler: RequestHandler = async (req, res) => {
     const targetTag = targetVersion || 'latest';
     webUiLogger?.log(`[NapCat Update] Target version: ${targetTag}`);
 
-    // 使用 mirror 模块获取 release 信息（不依赖 API）
-    // 通过 assetNames 参数直接构建下载 URL，避免调用 GitHub API
-    const release = await getGitHubRelease('NapNeko', 'NapCatQQ', targetTag, {
-      assetNames: [ReleaseName, 'NapCat.Framework.zip', 'NapCat.Shell.zip'],
-      fetchChangelog: false, // 不需要 changelog，避免 API 调用
-    });
+    // 检查是否是 action 临时版本
+    const isActionVersion = targetTag.startsWith('action-');
+    let downloadUrl: string;
+    let actualVersion: string;
 
-    const shellZipAsset = release.assets.find(asset => asset.name === ReleaseName);
-    if (!shellZipAsset) {
-      throw new Error(`未找到${ReleaseName}文件`);
+    if (isActionVersion) {
+      // 处理 action 临时版本
+      const runId = parseInt(targetTag.replace('action-', ''));
+      if (isNaN(runId)) {
+        throw new Error(`Invalid action version format: ${targetTag}`);
+      }
+
+      webUiLogger?.log(`[NapCat Update] Downloading action artifact from run: ${runId}`);
+
+      // 根据当前工作环境确定 artifact 名称
+      const artifactName = ReleaseName.replace('.zip', ''); // NapCat.Framework 或 NapCat.Shell
+      
+      // Action artifacts 通过 nightly.link 下载
+      // 格式：https://nightly.link/{owner}/{repo}/actions/runs/{run_id}/{artifact_name}.zip
+      const baseUrl = `https://nightly.link/NapNeko/NapCatQQ/actions/runs/${runId}/${artifactName}.zip`;
+      actualVersion = targetTag;
+
+      webUiLogger?.log(`[NapCat Update] Action artifact URL: ${baseUrl}`);
+      
+      // 使用 mirror 模块查找可用的 nightly.link 镜像
+      try {
+        downloadUrl = await findAvailableDownloadUrl(baseUrl, {
+          validateContent: true,
+          minFileSize: 1024 * 1024,
+          timeout: 10000,
+        });
+        webUiLogger?.log(`[NapCat Update] Using download URL: ${downloadUrl}`);
+      } catch (error) {
+        // 如果镜像都不可用，直接使用原始 URL
+        webUiLogger?.logWarn(`[NapCat Update] All nightly.link mirrors failed, using original URL`);
+        downloadUrl = baseUrl;
+      }
+    } else {
+      // 处理标准 release 版本
+      // 使用 mirror 模块获取 release 信息（不依赖 API）
+      // 通过 assetNames 参数直接构建下载 URL，避免调用 GitHub API
+      const release = await getGitHubRelease('NapNeko', 'NapCatQQ', targetTag, {
+        assetNames: [ReleaseName, 'NapCat.Framework.zip', 'NapCat.Shell.zip'],
+        fetchChangelog: false, // 不需要 changelog，避免 API 调用
+      });
+
+      const shellZipAsset = release.assets.find(asset => asset.name === ReleaseName);
+      if (!shellZipAsset) {
+        throw new Error(`未找到${ReleaseName}文件`);
+      }
+
+      actualVersion = release.tag_name;
+
+      // 使用 mirror 模块查找可用的下载 URL
+      // 启用内容验证，确保返回的是有效文件而非错误页面
+      downloadUrl = await findAvailableDownloadUrl(shellZipAsset.browser_download_url, {
+        validateContent: true,           // 验证 Content-Type 和状态码
+        minFileSize: 1024 * 1024,        // 最小 1MB，确保不是错误页面
+        timeout: 10000,                  // 10秒超时
+      });
     }
 
     // 检查是否需要强制更新（降级警告）
     const currentVersion = WebUiDataRuntime.GetNapCatVersion();
-    webUiLogger?.log(`[NapCat Update] Current version: ${currentVersion}, Target version: ${release.tag_name}`);
+    webUiLogger?.log(`[NapCat Update] Current version: ${currentVersion}, Target version: ${actualVersion}`);
 
-    if (!force && currentVersion) {
+    if (!force && currentVersion && !isActionVersion) {
       // 简单的版本比较（可选的降级保护）
       const parseVersion = (v: string): [number, number, number] => {
         const match = v.match(/^v?(\d+)\.(\d+)\.(\d+)/);
@@ -158,7 +208,7 @@ export const UpdateNapCatHandler: RequestHandler = async (req, res) => {
         return [parseInt(match[1] || '0'), parseInt(match[2] || '0'), parseInt(match[3] || '0')];
       };
       const [currMajor, currMinor, currPatch] = parseVersion(currentVersion);
-      const [targetMajor, targetMinor, targetPatch] = parseVersion(release.tag_name);
+      const [targetMajor, targetMinor, targetPatch] = parseVersion(actualVersion);
 
       const isDowngrade =
         targetMajor < currMajor ||
@@ -166,26 +216,18 @@ export const UpdateNapCatHandler: RequestHandler = async (req, res) => {
         (targetMajor === currMajor && targetMinor === currMinor && targetPatch < currPatch);
 
       if (isDowngrade) {
-        webUiLogger?.log(`[NapCat Update] Downgrade from ${currentVersion} to ${release.tag_name}, force=${force}`);
+        webUiLogger?.log(`[NapCat Update] Downgrade from ${currentVersion} to ${actualVersion}, force=${force}`);
         // 不阻止降级，只是记录日志
       }
     }
 
-    webUiLogger?.log(`[NapCat Update] Updating to version: ${release.tag_name}`);
+    webUiLogger?.log(`[NapCat Update] Updating to version: ${actualVersion}`);
 
     // 创建临时目录
     const tempDir = path.join(webUiPathWrapper.binaryPath, './temp');
     if (!fs.existsSync(tempDir)) {
       fs.mkdirSync(tempDir, { recursive: true });
     }
-
-    // 使用 mirror 模块查找可用的下载 URL
-    // 启用内容验证，确保返回的是有效文件而非错误页面
-    const downloadUrl = await findAvailableDownloadUrl(shellZipAsset.browser_download_url, {
-      validateContent: true,           // 验证 Content-Type 和状态码
-      minFileSize: 1024 * 1024,        // 最小 1MB，确保不是错误页面
-      timeout: 10000,                  // 10秒超时
-    });
 
     webUiLogger?.log(`[NapCat Update] Using download URL: ${downloadUrl}`);
 
@@ -250,10 +292,10 @@ export const UpdateNapCatHandler: RequestHandler = async (req, res) => {
       // 如果有替换失败的文件，创建更新配置文件
       if (failedFiles.length > 0) {
         const updateConfig: UpdateConfig = {
-          version: release.tag_name,
+          version: actualVersion,
           updateTime: new Date().toISOString(),
           files: failedFiles,
-          changelog: release.body || ''
+          changelog: ''
         };
 
         // 保存更新配置文件
@@ -269,7 +311,7 @@ export const UpdateNapCatHandler: RequestHandler = async (req, res) => {
       sendSuccess(res, {
         status: 'completed',
         message,
-        newVersion: release.tag_name,
+        newVersion: actualVersion,
         failedFilesCount: failedFiles.length
       });
 

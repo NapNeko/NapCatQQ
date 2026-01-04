@@ -17,7 +17,6 @@ import {
   WrapperSessionInitConfig,
 } from '@/napcat-core/wrapper';
 import { LogLevel, LogWrapper } from '@/napcat-core/helper/log';
-import { NodeIKernelLoginService } from '@/napcat-core/services';
 import { QQBasicInfoWrapper } from '@/napcat-core/helper/qq-basic-info';
 import { NapCatPathWrapper } from 'napcat-common/src/path';
 import path from 'node:path';
@@ -278,7 +277,6 @@ export interface InstanceContext {
   readonly wrapper: WrapperNodeApi;
   readonly session: NodeIQQNTWrapperSession;
   readonly logger: LogWrapper;
-  readonly loginService: NodeIKernelLoginService;
   readonly basicInfoWrapper: QQBasicInfoWrapper;
   readonly pathWrapper: NapCatPathWrapper;
   readonly packetHandler: NativePacketHandler;
