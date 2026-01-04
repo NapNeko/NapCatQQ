@@ -1,4 +1,5 @@
 import { Button } from '@heroui/button';
+
 import { Input } from '@heroui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@heroui/popover';
 import { Tooltip } from '@heroui/tooltip';
@@ -6,7 +7,7 @@ import { Tab, Tabs } from '@heroui/tabs';
 import { Chip } from '@heroui/chip';
 import { useLocalStorage } from '@uidotdev/usehooks';
 import clsx from 'clsx';
-import { useEffect, useState, useCallback } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useState, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { IoChevronDown, IoSend, IoSettingsSharp, IoCopy } from 'react-icons/io5';
 import { TbCode, TbMessageCode } from 'react-icons/tb';
@@ -30,14 +31,21 @@ export interface OneBotApiDebugProps {
   adapterName?: string;
 }
 
-const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
+export interface OneBotApiDebugRef {
+  setRequestBody: (value: string) => void;
+  sendWithBody: (value: string) => void;
+  focusRequestEditor: () => void;
+}
+
+const OneBotApiDebug = forwardRef<OneBotApiDebugRef, OneBotApiDebugProps>((props, ref) => {
   const { path, data, adapterName } = props;
   const currentURL = new URL(window.location.origin);
   currentURL.port = '3000';
   const defaultHttpUrl = currentURL.href;
+  const defaultToken = localStorage.getItem('token') || '';
   const [httpConfig, setHttpConfig] = useLocalStorage(key.httpDebugConfig, {
     url: defaultHttpUrl,
-    token: '',
+    token: defaultToken,
   });
 
   const [requestBody, setRequestBody] = useState('{}');
@@ -46,21 +54,23 @@ const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
   const [activeTab, setActiveTab] = useState<any>('request');
   const [responseExpanded, setResponseExpanded] = useState(true);
   const [responseStatus, setResponseStatus] = useState<{ code: number; text: string; } | null>(null);
-  const [responseHeight, setResponseHeight] = useLocalStorage('napcat_debug_response_height', 240); // 默认高度
+  // Height Resizing Logic
+  const [responseHeight, setResponseHeight] = useState(240);
+  const [storedHeight, setStoredHeight] = useLocalStorage('napcat_debug_response_height', 240);
 
   const parsedRequest = parse(data.request);
   const parsedResponse = parse(data.response);
   const [backgroundImage] = useLocalStorage<string>(key.backgroundImage, '');
   const hasBackground = !!backgroundImage;
 
-  const sendRequest = async () => {
+  const sendRequest = async (bodyOverride?: string) => {
     if (isFetching) return;
     setIsFetching(true);
     setResponseStatus(null);
     const r = toast.loading('正在发送请求...');
 
     try {
-      const parsedRequestBody = JSON.parse(requestBody);
+      const parsedRequestBody = JSON.parse(bodyOverride ?? requestBody);
 
       // 如果有 adapterName，走后端转发
       if (adapterName) {
@@ -127,93 +137,132 @@ const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
     }
   };
 
+  useImperativeHandle(ref, () => ({
+    setRequestBody: (value: string) => {
+      setActiveTab('request');
+      setRequestBody(value);
+    },
+    sendWithBody: (value: string) => {
+      setActiveTab('request');
+      setRequestBody(value);
+      // 直接用 override 发送，避免 setState 异步导致拿到旧值
+      void sendRequest(value);
+    },
+    focusRequestEditor: () => {
+      setActiveTab('request');
+    }
+  }));
+
   useEffect(() => {
     setRequestBody(generateDefaultJson(data.request));
     setResponseContent('');
     setResponseStatus(null);
   }, [path]);
 
-  // Height Resizing Logic
+  // Sync from storage on mount
+  useEffect(() => {
+    setResponseHeight(storedHeight);
+  }, []);
+
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     const startY = e.clientY;
     const startHeight = responseHeight;
+    let currentH = startHeight;
+    let frameId: number;
 
     const handleMouseMove = (mv: MouseEvent) => {
-      const delta = startY - mv.clientY;
-      // 向上拖动 -> 增加高度
-      setResponseHeight(Math.max(100, Math.min(window.innerHeight - 200, startHeight + delta)));
+      if (frameId) cancelAnimationFrame(frameId);
+      frameId = requestAnimationFrame(() => {
+        const delta = startY - mv.clientY;
+        currentH = Math.max(100, Math.min(window.innerHeight - 200, startHeight + delta));
+        setResponseHeight(currentH);
+      });
     };
 
     const handleMouseUp = () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
+      if (frameId) cancelAnimationFrame(frameId);
+      setStoredHeight(currentH);
     };
 
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
-  }, [responseHeight, setResponseHeight]);
+  }, [responseHeight, setStoredHeight]);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    // 阻止默认滚动行为可能需要谨慎，这里尽量只阻止 handle 上的
-    // e.preventDefault(); 
     const touch = e.touches[0];
     const startY = touch.clientY;
     const startHeight = responseHeight;
+    let currentH = startHeight;
+    let frameId: number;
 
     const handleTouchMove = (mv: TouchEvent) => {
-      const mvTouch = mv.touches[0];
-      const delta = startY - mvTouch.clientY;
-      setResponseHeight(Math.max(100, Math.min(window.innerHeight - 200, startHeight + delta)));
+      if (frameId) cancelAnimationFrame(frameId);
+      frameId = requestAnimationFrame(() => {
+        const mvTouch = mv.touches[0];
+        const delta = startY - mvTouch.clientY;
+        currentH = Math.max(100, Math.min(window.innerHeight - 200, startHeight + delta));
+        setResponseHeight(currentH);
+      });
     };
 
     const handleTouchEnd = () => {
       document.removeEventListener('touchmove', handleTouchMove);
       document.removeEventListener('touchend', handleTouchEnd);
+      if (frameId) cancelAnimationFrame(frameId);
+      setStoredHeight(currentH);
     };
 
     document.addEventListener('touchmove', handleTouchMove);
     document.addEventListener('touchend', handleTouchEnd);
-  }, [responseHeight, setResponseHeight]);
+  }, [responseHeight, setStoredHeight]);
 
 
   return (
-    <section className='h-full flex flex-col overflow-hidden bg-transparent'>
-      {/* URL Bar */}
-      <div className='flex flex-wrap md:flex-nowrap items-center gap-2 p-2 md:p-4 pb-2 flex-shrink-0'>
-        <div className={clsx(
-          'flex-grow flex items-center gap-2 px-3 md:px-4 h-10 rounded-xl transition-all w-full md:w-auto',
-          hasBackground ? 'bg-white/5' : 'bg-black/5 dark:bg-white/5'
-        )}>
-          <Chip size="sm" variant="shadow" color="primary" className="font-bold text-[10px] h-5 min-w-[40px]">POST</Chip>
-          <span className={clsx(
-            'text-xs font-mono truncate select-all flex-1 opacity-50',
-            hasBackground ? 'text-white' : 'text-default-600'
-          )}>{path}</span>
+
+    <div className='flex flex-col h-full w-full relative overflow-hidden'>
+      {/* 1. Top Toolbar: URL & Actions */}
+      <div className={clsx(
+        'flex items-center gap-4 px-4 py-2 border-b flex-shrink-0 z-10',
+        hasBackground ? 'border-white/10 bg-white/5' : 'border-black/5 dark:border-white/10 bg-white/40 dark:bg-black/20'
+      )}>
+        {/* Method & Path */}
+        {/* Method & Path */}
+        {/* Method & Path */}
+        <div className="flex items-center gap-3 flex-1 min-w-0 pl-1">
+          <div className={clsx(
+            'text-sm font-mono truncate select-all px-2 py-1 rounded-md transition-colors',
+            hasBackground ? 'text-white/90 bg-black/10' : 'text-foreground dark:text-white/90 bg-default-100/50'
+          )}>
+            {path}
+          </div>
         </div>
 
-        <div className='flex items-center gap-2 flex-shrink-0 ml-auto'>
-          <Popover placement='bottom-end' backdrop='blur'>
+        {/* Actions */}
+        <div className='flex items-center gap-2'>
+          <Popover placement='bottom-end' backdrop='transparent'>
             <PopoverTrigger>
-              <Button size='sm' variant='light' radius='full' isIconOnly className='h-10 w-10 opacity-40 hover:opacity-100'>
+              <Button size='sm' variant='light' radius='sm' isIconOnly className='opacity-60 hover:opacity-100'>
                 <IoSettingsSharp className="text-lg" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className='w-[260px] p-3 rounded-xl border border-white/10 shadow-2xl bg-white/80 dark:bg-black/80 backdrop-blur-xl'>
+            <PopoverContent className='w-[260px] p-3 rounded-md border border-white/10 shadow-2xl bg-white/80 dark:bg-black/80 backdrop-blur-xl'>
               <div className='flex flex-col gap-2'>
                 <p className='text-[10px] font-bold opacity-30 uppercase tracking-widest'>Debug Setup</p>
-                <Input label='Base URL' value={httpConfig.url} onChange={(e) => setHttpConfig({ ...httpConfig, url: e.target.value })} size='sm' variant='flat' />
-                <Input label='Token' value={httpConfig.token} onChange={(e) => setHttpConfig({ ...httpConfig, token: e.target.value })} size='sm' variant='flat' />
+                <Input label='Base URL' labelPlacement="outside" placeholder="http://..." value={httpConfig.url} onChange={(e) => setHttpConfig({ ...httpConfig, url: e.target.value })} size='sm' variant='bordered' />
+                <Input label='Token' labelPlacement="outside" placeholder="access_token" value={httpConfig.token} onChange={(e) => setHttpConfig({ ...httpConfig, token: e.target.value })} size='sm' variant='bordered' />
               </div>
             </PopoverContent>
           </Popover>
 
           <Button
-            onPress={sendRequest}
+            onPress={() => sendRequest()}
             color='primary'
-            radius='full'
+            radius='sm'
             size='sm'
-            className='h-10 px-6 font-bold shadow-md shadow-primary/20 hover:scale-[1.02] active:scale-[0.98]'
+            className='font-bold shadow-sm px-4'
             isLoading={isFetching}
             startContent={!isFetching && <IoSend className="text-xs" />}
           >
@@ -222,85 +271,79 @@ const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
         </div>
       </div>
 
-      <div className='flex-1 flex flex-col min-h-0 bg-transparent'>
-        <div className='px-4 flex flex-wrap items-center justify-between flex-shrink-0 min-h-[36px] gap-2 py-1'>
-          <Tabs
-            size="sm"
-            variant="underlined"
-            selectedKey={activeTab}
-            onSelectionChange={setActiveTab}
-            classNames={{
-              cursor: 'bg-primary h-0.5',
-              tab: 'px-0 mr-5 h-8',
-              tabList: 'p-0 border-none',
-              tabContent: 'text-[11px] font-bold opacity-30 group-data-[selected=true]:opacity-80 transition-opacity'
-            }}
-          >
-            <Tab key="request" title="请求参数" />
-            <Tab key="docs" title="接口定义" />
-          </Tabs>
-          <div className='flex items-center gap-1 ml-auto'>
-            <ChatInputModal>
-              {(onOpen) => (
-                <Tooltip content="构造消息 (CQ码)" closeDelay={0}>
-                  <Button
-                    isIconOnly
-                    size='sm'
-                    variant='light'
-                    radius='full'
-                    className='h-7 w-7 text-primary/80 bg-primary/10 hover:bg-primary/20'
-                    onPress={onOpen}
-                  >
-                    <TbMessageCode size={16} />
-                  </Button>
-                </Tooltip>
-              )}
-            </ChatInputModal>
-
-            <Tooltip content="生成示例参数" closeDelay={0}>
-              <Button
-                isIconOnly
-                size='sm'
-                variant='light'
-                radius='full'
-                className='h-7 w-7 text-default-400 hover:text-primary hover:bg-default-100/50'
-                onPress={() => setRequestBody(generateDefaultJson(data.request))}
-              >
-                <TbCode size={16} />
-              </Button>
-            </Tooltip>
-          </div>
-        </div>
-
-        <div className='flex-1 min-h-0 relative px-3 pb-2 mt-1'>
+      {/* 2. Main Workspace (Request) - Flexible Height */}
+      <div className='flex-1 min-h-0 flex flex-col relative'>
+        <div className='flex-1 flex flex-col overflow-hidden relative'>
+          {/* Request Toolbar */}
           <div className={clsx(
-            'h-full transition-all',
-            activeTab !== 'request' && 'rounded-xl overflow-y-auto no-scrollbar',
-            hasBackground ? 'bg-transparent' : (activeTab !== 'request' && 'bg-white/10 dark:bg-black/10')
+            'px-4 flex items-center justify-between h-10 flex-shrink-0 border-b',
+            hasBackground ? 'border-white/10' : 'border-default-100 dark:border-white/10'
           )}>
+            <Tabs
+              aria-label="Request Options"
+              size="sm"
+              variant="underlined"
+              selectedKey={activeTab}
+              onSelectionChange={setActiveTab}
+              classNames={{
+                tabList: 'p-0 gap-6 bg-transparent',
+                cursor: 'w-full bg-foreground dark:bg-white h-[2px]',
+                tab: 'px-0 h-full',
+                tabContent: 'text-xs font-medium text-default-500 dark:text-white/50 group-data-[selected=true]:text-foreground dark:group-data-[selected=true]:text-white'
+              }}
+            >
+              <Tab key="request" title="请求体" />
+              <Tab key="docs" title="接口文档" />
+            </Tabs>
+
+            <div className='flex items-center gap-1 opacity-70'>
+              <ChatInputModal>
+                {(onOpen) => (
+                  <Tooltip content="构造 CQ 码" closeDelay={0}>
+                    <Button isIconOnly size='sm' variant='light' radius='sm' className='w-8 h-8' onPress={onOpen}>
+                      <TbMessageCode size={16} />
+                    </Button>
+                  </Tooltip>
+                )}
+              </ChatInputModal>
+              <Tooltip content="生成示例" closeDelay={0}>
+                <Button isIconOnly size='sm' variant='light' radius='sm' className='w-8 h-8' onPress={() => setRequestBody(generateDefaultJson(data.request))}>
+                  <TbCode size={16} />
+                </Button>
+              </Tooltip>
+            </div>
+          </div>
+
+          {/* Content Area */}
+          <div className='flex-1 relative overflow-hidden'>
             {activeTab === 'request' ? (
-              <CodeEditor
-                value={requestBody}
-                onChange={(value) => setRequestBody(value ?? '')}
-                language='json'
-                options={{
-                  minimap: { enabled: false },
-                  fontSize: 12,
-                  scrollBeyondLastLine: false,
-                  wordWrap: 'on',
-                  padding: { top: 12 },
-                  lineNumbersMinChars: 3
-                }}
-              />
+              <div className="absolute inset-0">
+                <CodeEditor
+                  value={requestBody}
+                  onChange={(value) => setRequestBody(value ?? '')}
+                  language='json'
+                  options={{
+                    minimap: { enabled: false },
+                    fontSize: 13,
+                    fontFamily: 'JetBrains Mono, monospace',
+                    scrollBeyondLastLine: false,
+                    wordWrap: 'on',
+                    padding: { top: 16, bottom: 16 },
+                    lineNumbersMinChars: 3,
+                    chromeless: true,
+                    backgroundColor: 'transparent'
+                  }}
+                />
+              </div>
             ) : (
-              <div className='p-6 space-y-10'>
+              <div className='p-6 space-y-8 overflow-y-auto h-full scrollbar-hide'>
                 <section>
-                  <h3 className='text-[10px] font-bold opacity-20 uppercase tracking-[0.2em] mb-4'>Request - 请求数据结构</h3>
+                  <h3 className='text-[10px] font-bold text-default-700 dark:text-default-50 uppercase tracking-widest mb-4'>Request Params</h3>
                   <DisplayStruct schema={parsedRequest} />
                 </section>
-                <div className='h-px bg-white/5 w-full' />
+                <div className='h-px bg-white/10 w-full' />
                 <section>
-                  <h3 className='text-[10px] font-bold opacity-20 uppercase tracking-[0.2em] mb-4'>Response - 返回数据结构</h3>
+                  <h3 className='text-[10px] font-bold text-default-700 dark:text-default-50 uppercase tracking-widest mb-4'>Response Data</h3>
                   <DisplayStruct schema={parsedResponse} />
                 </section>
               </div>
@@ -309,73 +352,79 @@ const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
         </div>
       </div>
 
-      {/* Response Area */}
-      <div className='flex-shrink-0 px-3 pb-3'>
+      {/* 3. Response Panel (Bottom) */}
+      <div
+        className='flex-shrink-0 flex flex-col overflow-hidden relative'
+        style={{ height: responseExpanded ? undefined : 'auto' }}
+      >
+        {/* Resize Handle / Header */}
         <div
           className={clsx(
-            'rounded-xl transition-all overflow-hidden border border-white/5 flex flex-col',
-            hasBackground ? 'bg-white/5' : 'bg-white/5 dark:bg-black/5'
+            'flex items-center justify-between px-4 py-1.5 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors select-none group relative border-t',
+            hasBackground ? 'border-white/10' : 'border-default-100 dark:border-white/10'
           )}
+          onClick={() => setResponseExpanded(!responseExpanded)}
         >
-          {/* Header & Resize Handle */}
-          <div
-            className='flex items-center justify-between px-4 py-2 cursor-pointer hover:bg-white/5 transition-all select-none relative group'
-            onClick={() => setResponseExpanded(!responseExpanded)}
-          >
-            {/* Invisble Resize Area that becomes visible/active */}
-            {responseExpanded && (
-              <div
-                className="absolute -top-1 left-0 w-full h-3 cursor-ns-resize z-50 flex items-center justify-center opacity-0 hover:opacity-100 group-hover:opacity-100 transition-opacity"
-                onMouseDown={(e) => { e.stopPropagation(); handleMouseDown(e); }}
-                onTouchStart={(e) => { e.stopPropagation(); handleTouchStart(e); }}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="w-12 h-1 bg-white/20 rounded-full" />
-              </div>
-            )}
+          {/* Invisible Draggable Area */}
+          {responseExpanded && (
+            <div
+              className="absolute -top-1.5 left-0 w-full h-4 cursor-ns-resize z-20"
+              onMouseDown={(e) => { e.stopPropagation(); handleMouseDown(e); }}
+              onTouchStart={(e) => { e.stopPropagation(); handleTouchStart(e); }}
+              onClick={(e) => e.stopPropagation()}
+            />
+          )}
 
-            <div className='flex items-center gap-2'>
-              <IoChevronDown className={clsx('text-[10px] transition-transform duration-300 opacity-20', !responseExpanded && '-rotate-90')} />
-              <span className='text-[10px] font-semibold tracking-wide opacity-30 uppercase'>Response</span>
+          <div className='flex items-center gap-2'>
+            <div className={clsx('transition-transform duration-200', !responseExpanded && '-rotate-90')}>
+              <IoChevronDown size={14} className="opacity-50" />
             </div>
-            <div className='flex items-center gap-2'>
-              {responseStatus && (
-                <Chip size="sm" variant="flat" color={responseStatus.code >= 200 && responseStatus.code < 300 ? 'success' : 'danger'} className="h-4 text-[9px] font-mono px-1.5 opacity-50">
-                  {responseStatus.code}
-                </Chip>
-              )}
-              <Button size='sm' variant='light' isIconOnly radius='full' className='h-6 w-6 opacity-20 hover:opacity-80 transition-opacity' onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(responseContent); toast.success('已复制'); }}>
-                <IoCopy size={10} />
-              </Button>
-            </div>
+            <span className={clsx(
+              'text-[10px] font-bold tracking-widest uppercase',
+              hasBackground ? 'text-white' : 'text-foreground dark:text-white'
+            )}>Response</span>
+            {responseStatus && (
+              <Chip size="sm" variant="dot" color={responseStatus.code >= 200 && responseStatus.code < 300 ? 'success' : 'danger'} className="h-5 text-[10px] font-mono border-none bg-transparent pl-0">
+                {responseStatus.code} {responseStatus.text}
+              </Chip>
+            )}
           </div>
 
-          {/* Response Content - Code Editor */}
-          {responseExpanded && (
-            <div style={{ height: responseHeight }} className="relative bg-transparent">
-              <PageLoading loading={isFetching} />
+          <Button size='sm' variant='light' isIconOnly radius='sm' className='h-6 w-6 opacity-40 hover:opacity-100' onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(responseContent); toast.success('已复制'); }}>
+            <IoCopy size={12} />
+          </Button>
+        </div>
+
+        {/* Response Editor */}
+        {responseExpanded && (
+          <div style={{ height: responseHeight }} className="relative bg-transparent">
+            <PageLoading loading={isFetching} />
+            <div className="absolute inset-0">
               <CodeEditor
                 value={responseContent || '// Waiting for response...'}
                 language='json'
                 options={{
                   minimap: { enabled: false },
-                  fontSize: 11,
+                  fontSize: 12,
+                  fontFamily: 'JetBrains Mono, monospace',
                   lineNumbers: 'off',
                   scrollBeyondLastLine: false,
                   wordWrap: 'on',
                   readOnly: true,
                   folding: true,
-                  padding: { top: 8, bottom: 8 },
+                  padding: { top: 12, bottom: 12 },
                   renderLineHighlight: 'none',
-                  automaticLayout: true
+                  chromeless: true,
+                  backgroundColor: 'transparent'
                 }}
               />
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
-    </section>
+
+    </div>
   );
-};
+});
 
 export default OneBotApiDebug;

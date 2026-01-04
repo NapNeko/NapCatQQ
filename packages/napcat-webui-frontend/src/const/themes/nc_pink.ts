@@ -183,7 +183,7 @@ const theme: ThemeConfig = {
     '--heroui-primary-800': '339.33 86.54% 20.39%',
     '--heroui-primary-900': '340 84.91% 10.39%',
     '--heroui-primary-foreground': '0 0% 100%',
-    '--heroui-primary': '339.2 90.36% 51.18%',
+    '--heroui-primary': '339.2 90.36% 60%',
     '--heroui-secondary-50': '270 61.54% 94.9%',
     '--heroui-secondary-100': '270 59.26% 89.41%',
     '--heroui-secondary-200': '270 59.26% 78.82%',

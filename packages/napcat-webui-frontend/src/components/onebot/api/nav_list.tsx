@@ -143,21 +143,23 @@ const OneBotApiNavList: React.FC<OneBotApiNavListProps> = (props) => {
                               key={api.path}
                               onClick={() => onSelect(api.path)}
                               className={clsx(
-                                'flex flex-col gap-0.5 px-3 py-2 rounded-lg cursor-pointer transition-all border border-transparent select-none',
+                                'flex flex-col gap-0.5 px-3 py-2 rounded-lg cursor-pointer transition-all border select-none',
                                 isSelected
-                                  ? (hasBackground ? '' : 'bg-primary/20 border-primary/20 shadow-sm')
-                                  : 'hover:bg-white/5'
+                                  ? (hasBackground 
+                                      ? 'bg-white/10 border-white/20' 
+                                      : 'bg-primary/10 border-primary/20 shadow-sm')
+                                  : 'border-transparent hover:bg-white/10 dark:hover:bg-white/5'
                               )}
                             >
                               <span className={clsx(
                                 'text-[12px] font-medium transition-colors truncate',
-                                isSelected ? 'text-primary' : 'opacity-60'
+                                isSelected ? 'text-primary' : 'opacity-70'
                               )}>
                                 {api.description}
                               </span>
                               <span className={clsx(
                                 'text-[10px] font-mono truncate transition-all',
-                                isSelected ? 'text-primary/60' : 'opacity-20'
+                                isSelected ? 'text-primary/60' : 'opacity-30'
                               )}>
                                 {api.path}
                               </span>
