@@ -268,15 +268,17 @@ const ThemeConfigCard = () => {
 
   // 找到已保存的主题名称
   const savedThemeName = useMemo(() => {
-    if (!originalDataRef.current) return null;
-    return themes.find(t => isThemeColorsEqual(t.theme, originalDataRef.current!))?.name || '自定义';
-  }, [dataLoaded, hasUnsavedChanges]);
+    const savedData = originalDataRef.current || data;
+    if (!savedData) return null;
+    return themes.find(t => isThemeColorsEqual(t.theme, savedData))?.name || '自定义';
+  }, [data, dataLoaded, hasUnsavedChanges]);
 
   // 已保存的字体模式显示名称
   const savedFontModeDisplayName = useMemo(() => {
-    const mode = originalDataRef.current?.fontMode || 'aacute';
+    const savedData = originalDataRef.current || data;
+    const mode = savedData?.fontMode || 'aacute';
     return fontModeNames[mode] || mode;
-  }, [dataLoaded, hasUnsavedChanges]);
+  }, [data, dataLoaded, hasUnsavedChanges]);
 
   if (loading) return <PageLoading loading />;
 

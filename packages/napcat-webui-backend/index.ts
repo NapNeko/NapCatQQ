@@ -182,16 +182,56 @@ export async function InitWebUi (logger: ILogWrapper, pathWrapper: NapCatPathWra
 
   // 如果是自定义色彩，构建一个css文件
   app.use('/files/theme.css', async (_req, res) => {
-    const colors = await WebUiConfig.GetTheme();
+    const theme = await WebUiConfig.GetTheme();
+    const fontMode = theme.fontMode || 'system';
 
-    let css = ':root, .light, [data-theme="light"] {';
-    for (const key in colors.light) {
-      css += `${key}: ${colors.light[key]};`;
+    let css = '';
+
+    // 生成字体 @font-face
+    if (fontMode === 'aacute') {
+      css += `
+@font-face {
+  font-family: 'Aa偷吃可爱长大的';
+  src: url('/webui/fonts/AaCute.woff') format('woff');
+  font-display: swap;
+}
+`;
+    } else if (fontMode === 'custom') {
+      css += `
+@font-face {
+  font-family: 'CustomFont';
+  src: url('/webui/fonts/CustomFont.woff') format('woff');
+  font-display: swap;
+}
+`;
+    }
+
+    // 生成颜色主题和字体变量
+    css += ':root, .light, [data-theme="light"] {';
+    for (const key in theme.light) {
+      css += `${key}: ${theme.light[key]};`;
+    }
+    // 添加字体变量
+    if (fontMode === 'aacute') {
+      css += "--font-family-base: 'Aa偷吃可爱长大的', var(--font-family-fallbacks) !important;";
+    } else if (fontMode === 'custom') {
+      css += "--font-family-base: 'CustomFont', var(--font-family-fallbacks) !important;";
+    } else {
+      css += '--font-family-base: var(--font-family-fallbacks) !important;';
     }
     css += '}';
+
     css += '.dark, [data-theme="dark"] {';
-    for (const key in colors.dark) {
-      css += `${key}: ${colors.dark[key]};`;
+    for (const key in theme.dark) {
+      css += `${key}: ${theme.dark[key]};`;
+    }
+    // 添加字体变量
+    if (fontMode === 'aacute') {
+      css += "--font-family-base: 'Aa偷吃可爱长大的', var(--font-family-fallbacks) !important;";
+    } else if (fontMode === 'custom') {
+      css += "--font-family-base: 'CustomFont', var(--font-family-fallbacks) !important;";
+    } else {
+      css += '--font-family-base: var(--font-family-fallbacks) !important;';
     }
     css += '}';
 

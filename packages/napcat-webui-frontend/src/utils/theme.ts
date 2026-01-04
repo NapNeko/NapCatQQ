@@ -3,24 +3,27 @@ import { request } from './request';
 const style = document.createElement('style');
 document.head.appendChild(style);
 
-// 字体样式标签
-const fontStyle = document.createElement('style');
-fontStyle.id = 'dynamic-font-style';
-document.head.appendChild(fontStyle);
+// 用于主题配置页面实时预览字体的临时样式标签
+const fontPreviewStyle = document.createElement('style');
+fontPreviewStyle.id = 'font-preview-style';
+document.head.appendChild(fontPreviewStyle);
 
 export function loadTheme () {
   request('/files/theme.css?_t=' + Date.now())
     .then((res) => res.data)
     .then((css) => {
       style.innerHTML = css;
+      // 清除预览样式，使用 theme.css 中的正式配置
+      fontPreviewStyle.innerHTML = '';
+      document.documentElement.style.removeProperty('--font-family-base');
     })
     .catch(() => {
       console.error('Failed to load theme.css');
     });
 }
 
-// 动态加载字体 CSS
-const loadFontCSS = (mode: string) => {
+// 动态加载字体 CSS（用于预览）
+const loadFontCSSForPreview = (mode: string) => {
   let css = '';
 
   if (mode === 'aacute') {
@@ -39,7 +42,7 @@ const loadFontCSS = (mode: string) => {
 }`;
   }
 
-  fontStyle.innerHTML = css;
+  fontPreviewStyle.innerHTML = css;
 };
 
 export const colorKeys = [
@@ -168,11 +171,12 @@ export const generateTheme = (theme: ThemeConfig, validField?: string) => {
   return css;
 };
 
+// 用于主题配置页面实时预览字体
 export const applyFont = (mode: string) => {
   const root = document.documentElement;
 
-  // 先加载字体 CSS
-  loadFontCSS(mode);
+  // 加载字体 CSS 用于预览
+  loadFontCSSForPreview(mode);
 
   if (mode === 'aacute') {
     root.style.setProperty('--font-family-base', "'Aa偷吃可爱长大的', var(--font-family-fallbacks)", 'important');
@@ -184,36 +188,13 @@ export const applyFont = (mode: string) => {
   }
 };
 
-const FONT_MODE_CACHE_KEY = 'webui-font-mode-cache';
-
+// 字体配置已通过 theme.css 加载，此函数仅用于兼容性保留
 export const initFont = () => {
-  // 先从缓存读取，立即应用
-  const cached = localStorage.getItem(FONT_MODE_CACHE_KEY);
-  if (cached) {
-    applyFont(cached);
-  } else {
-    // 默认使用系统字体
-    applyFont('system');
-  }
-
-  // 后台拉取最新配置并更新缓存
-  request('/api/base/Theme')
-    .then((res) => {
-      const data = res.data as { data: ThemeConfig; };
-      const fontMode = data?.data?.fontMode || 'system';
-      // 更新缓存
-      localStorage.setItem(FONT_MODE_CACHE_KEY, fontMode);
-      // 如果与当前不同，则应用新字体
-      if (fontMode !== cached) {
-        applyFont(fontMode);
-      }
-    })
-    .catch((e) => {
-      console.error('Failed to fetch font config', e);
-    });
+  // 字体现在由 theme.css 统一管理，无需单独初始化
 };
 
-// 保存时更新缓存
-export const updateFontCache = (fontMode: string) => {
-  localStorage.setItem(FONT_MODE_CACHE_KEY, fontMode);
+// 保存主题后调用 loadTheme 会使用 theme.css 中的正式配置
+// 此函数保留用于兼容性
+export const updateFontCache = (_fontMode: string) => {
+  // 不再需要缓存，字体配置已在 theme.css 中
 };
