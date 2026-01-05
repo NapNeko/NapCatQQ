@@ -58,7 +58,7 @@
     "@uidotdev/usehooks": "^2.4.1",
     "@uiw/react-codemirror": "^4.25.4",
     "@xterm/addon-canvas": "^0.7.0",
-    "@xterm/addon-fit": "^0.10.0",
+    "@xterm/addon-fit": "^0.11.0",
     "@xterm/addon-web-links": "^0.11.0",
     "@xterm/xterm": "^5.5.0",
     "ahooks": "^3.8.4",
