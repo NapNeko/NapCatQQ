@@ -92,7 +92,7 @@
   },
   "devDependencies": {
     "@react-types/shared": "^3.26.0",
-    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+    "@trivago/prettier-plugin-sort-imports": "^6.0.1",
     "@types/crypto-js": "^4.2.2",
     "@types/event-source-polyfill": "^1.0.5",
     "@types/fabric": "^5.3.9",
