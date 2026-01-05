@@ -27,7 +27,7 @@
     "vitest": "^4.0.9"
   },
   "dependencies": {
-    "express": "^5.0.0",
+    "express": "^5.2.1",
     "silk-wasm": "^3.6.1",
     "ws": "^8.18.3"
   }
