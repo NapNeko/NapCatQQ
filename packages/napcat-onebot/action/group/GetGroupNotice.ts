@@ -20,6 +20,12 @@ interface GroupNotice {
       id: string
     }>
   };
+  settings: {
+    is_show_edit_card: number
+    remind_ts: number
+    tip_window_type: number
+    confirm_required: number
+  };
 }
 
 const SchemaData = Type.Object({
@@ -59,6 +65,7 @@ export class GetGroupNotice extends OneBotAction<Payload, GroupNotice[]> {
           image,
           images: image,
         },
+        settings: retApiNotice.settings,
       };
       retNotices.push(retNotice);
     }
