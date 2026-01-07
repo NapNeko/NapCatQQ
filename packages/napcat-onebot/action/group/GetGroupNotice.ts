@@ -20,7 +20,7 @@ interface GroupNotice {
       id: string
     }>
   };
-  settings: {
+  settings?: {
     is_show_edit_card: number
     remind_ts: number
     tip_window_type: number
