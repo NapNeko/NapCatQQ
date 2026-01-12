@@ -50,7 +50,7 @@
     "@heroui/system": "2.4.7",
     "@heroui/table": "^2.2.9",
     "@heroui/tabs": "2.2.8",
-    "@heroui/theme": "2.4.6",
+    "@heroui/theme": "2.4.25",
     "@heroui/tooltip": "2.2.8",
     "@monaco-editor/loader": "^1.4.0",
     "@react-aria/visually-hidden": "^3.8.19",
