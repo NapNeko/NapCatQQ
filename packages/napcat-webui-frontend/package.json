@@ -110,7 +110,7 @@
     "eslint-plugin-prettier": "5.2.3",
     "eslint-plugin-unused-imports": "^4.1.4",
     "fontmin": "^0.9.9",
-    "glob": "^10.3.10",
+    "glob": "^13.0.0",
     "postcss": "^8.5.1",
     "prettier": "^3.4.2",
     "sharp": "^0.34.5",
