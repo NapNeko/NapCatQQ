@@ -31,7 +31,7 @@ export interface OB11Message {
   font: number;
   post_type?: EventType;
   raw?: RawMessage;
-  emoji_likes_list: Array<{ emoji_id: string; emoji_type: string; likes_cnt: string; }>;// 仅get_msg生效
+  emoji_likes_list?: Array<{ emoji_id: string; emoji_type: string; likes_cnt: string; }>;// 仅get_msg生效
 }
 
 // 合并转发消息接口定义
