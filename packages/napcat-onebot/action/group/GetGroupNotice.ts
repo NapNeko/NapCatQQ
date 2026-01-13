@@ -7,19 +7,26 @@ interface GroupNotice {
   publish_time: number;
   notice_id: string;
   message: {
-    text: string
+    text: string;
     // 保持一段时间兼容性 防止以往版本出现问题 后续版本可考虑移除
     image: Array<{
-      height: string
-      width: string
-      id: string
+      height: string;
+      width: string;
+      id: string;
     }>,
     images: Array<{
-      height: string
-      width: string
-      id: string
-    }>
+      height: string;
+      width: string;
+      id: string;
+    }>;
   };
+  settings?: {
+    is_show_edit_card: number,
+    remind_ts: number,
+    tip_window_type: number,
+    confirm_required: number;
+  };
+  read_num?: number;
 }
 
 const SchemaData = Type.Object({
@@ -59,6 +66,8 @@ export class GetGroupNotice extends OneBotAction<Payload, GroupNotice[]> {
           image,
           images: image,
         },
+        settings: retApiNotice.settings,
+        read_num: retApiNotice.read_num
       };
       retNotices.push(retNotice);
     }
