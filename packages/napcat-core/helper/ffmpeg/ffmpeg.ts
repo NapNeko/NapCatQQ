@@ -64,7 +64,10 @@ export class FFmpegService {
     }
     return this.adapter;
   }
-
+  public static async convertToNTSilkTct (inputFile: string, outputFile: string): Promise<void> {
+    const adapter = await this.getAdapter();
+    await adapter.convertToNTSilkTct(inputFile, outputFile);
+  }
   /**
      * 设置 FFmpeg 路径并更新适配器
      * @deprecated 建议使用 init() 方法初始化
@@ -92,9 +95,25 @@ export class FFmpegService {
   /**
      * 转换音频文件
      */
-  public static async convertFile (inputFile: string, outputFile: string, format: string): Promise<void> {
+  public static async convertAudioFmt (inputFile: string, outputFile: string, format: string): Promise<void> {
     const adapter = await this.getAdapter();
     await adapter.convertFile(inputFile, outputFile, format);
+  }
+
+  /**
+   * 获取音频时长
+   */
+  public static async getDuration (filePath: string): Promise<number> {
+    const adapter = await this.getAdapter();
+    return adapter.getDuration(filePath);
+  }
+
+  /**
+   * 判断是否为 Silk 格式
+   */
+  public static async isSilk (filePath: string): Promise<boolean> {
+    const adapter = await this.getAdapter();
+    return adapter.isSilk(filePath);
   }
 
   /**

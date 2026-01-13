@@ -1,19 +1,8 @@
 import fsPromise from 'fs/promises';
 import path from 'node:path';
 import { randomUUID } from 'crypto';
-import { EncodeResult, getDuration, getWavFileInfo, isSilk, isWav } from 'silk-wasm';
 import { LogWrapper } from '@/napcat-core/helper/log';
-import { EncodeArgs } from 'napcat-common/src/audio-worker';
 import { FFmpegService } from '@/napcat-core/helper/ffmpeg/ffmpeg';
-import { runTask } from 'napcat-common/src/worker';
-import { fileURLToPath } from 'node:url';
-
-const ALLOW_SAMPLE_RATE = [8000, 12000, 16000, 24000, 32000, 44100, 48000];
-
-function getWorkerPath () {
-  // return new URL(/* @vite-ignore */ './audio-worker.mjs', import.meta.url).href;
-  return path.join(path.dirname(fileURLToPath(import.meta.url)), 'audio-worker.mjs');
-}
 
 async function guessDuration (pttPath: string, logger: LogWrapper) {
   const pttFileInfo = await fsPromise.stat(pttPath);
@@ -22,51 +11,23 @@ async function guessDuration (pttPath: string, logger: LogWrapper) {
   return duration;
 }
 
-async function handleWavFile (
-  file: Buffer,
-  filePath: string,
-  pcmPath: string
-): Promise<{ input: Buffer; sampleRate: number }> {
-  const { fmt } = getWavFileInfo(file);
-  if (!ALLOW_SAMPLE_RATE.includes(fmt.sampleRate)) {
-    const result = await FFmpegService.convert(filePath, pcmPath);
-    return { input: await fsPromise.readFile(pcmPath), sampleRate: result.sampleRate };
-  }
-  return { input: file, sampleRate: fmt.sampleRate };
-}
-
 export async function encodeSilk (filePath: string, TEMP_DIR: string, logger: LogWrapper) {
   try {
-    const file = await fsPromise.readFile(filePath);
     const pttPath = path.join(TEMP_DIR, randomUUID());
-    if (!isSilk(file)) {
+    if (!(await FFmpegService.isSilk(filePath))) {
       logger.log(`语音文件${filePath}需要转换成silk`);
-      const pcmPath = `${pttPath}.pcm`;
-      // const { input, sampleRate } = isWav(file) ? await handleWavFile(file, filePath, pcmPath): { input: await FFmpegService.convert(filePath, pcmPath) ? await fsPromise.readFile(pcmPath) : Buffer.alloc(0), sampleRate: 24000 };
-      let input: Buffer;
-      let sampleRate: number;
-      if (isWav(file)) {
-        const result = await handleWavFile(file, filePath, pcmPath);
-        input = result.input;
-        sampleRate = result.sampleRate;
-      } else {
-        const result = await FFmpegService.convert(filePath, pcmPath);
-        input = await fsPromise.readFile(pcmPath);
-        sampleRate = result.sampleRate;
-      }
-      const silk = await runTask<EncodeArgs, EncodeResult>(getWorkerPath(), { input, sampleRate });
-      fsPromise.unlink(pcmPath).catch((e) => logger.logError('删除临时文件失败', pcmPath, e));
-      await fsPromise.writeFile(pttPath, Buffer.from(silk.data));
-      logger.log(`语音文件${filePath}转换成功!`, pttPath, '时长:', silk.duration);
+      await FFmpegService.convertToNTSilkTct(filePath, pttPath);
+      const duration = await FFmpegService.getDuration(filePath);
+      logger.log(`语音文件${filePath}转换成功!`, pttPath, '时长:', duration);
       return {
         converted: true,
         path: pttPath,
-        duration: silk.duration / 1000,
+        duration: duration,
       };
     } else {
       let duration = 0;
       try {
-        duration = getDuration(file) / 1000;
+        duration = await FFmpegService.getDuration(filePath);
       } catch (e: unknown) {
         logger.log('获取语音文件时长失败, 使用文件大小推测时长', filePath, (e as Error).stack);
         duration = await guessDuration(filePath, logger);

@@ -70,4 +70,6 @@ export interface FFmpeg {
      */
   decodeAudioToPCM (filePath: string, pcmPath: string, sampleRate?: number): Promise<{ result: boolean, sampleRate: number; }>;
   decodeAudioToFmt (filePath: string, pcmPath: string, format: string): Promise<{ channels: number; sampleRate: number; format: string; }>;
+
+  convertToNTSilkTct (inputFile: string, outputFile: string): Promise<void>;
 }
