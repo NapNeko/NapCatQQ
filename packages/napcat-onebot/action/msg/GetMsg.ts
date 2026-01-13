@@ -35,7 +35,16 @@ class GetMsg extends OneBotAction<Payload, OB11Message> {
     // }
     if (!msg) throw Error('消息不存在');
     const retMsg = await this.obContext.apis.MsgApi.parseMessage(msg, config.messagePostFormat);
+
     if (!retMsg) throw Error('消息为空');
+    msg.emojiLikesList?.map(emoji => {
+      retMsg.emoji_likes_list.push({
+        emoji_id: emoji.emojiId,
+        emoji_type: emoji.emojiType,
+        likes_cnt: emoji.likesCnt,
+      });
+    });
+    // 烘焙emoji_likes_list 仅此处烘焙
     try {
       retMsg.message_id = MessageUnique.createUniqueMsgId(peer, msg.msgId)!;
       retMsg.message_seq = retMsg.message_id;
