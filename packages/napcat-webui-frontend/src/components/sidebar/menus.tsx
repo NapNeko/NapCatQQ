@@ -54,7 +54,7 @@ const renderItems = (items: MenuItem[], children = false) => {
             isActive
               ? 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary-400 shadow-none font-semibold translate-x-1'
               : 'hover:bg-default-100 hover:translate-x-1',
-            b64img && 'backdrop-blur-md text-white'
+            b64img && 'backdrop-blur-md text-white dark:text-white'
           )}
           color={isActive ? 'primary' : 'default'}
           endContent={

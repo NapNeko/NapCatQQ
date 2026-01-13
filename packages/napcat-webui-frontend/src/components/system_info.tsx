@@ -81,25 +81,25 @@ const UpdateDialogContent: React.FC<{
   return (
     <div className='space-y-6'>
       {/* 版本对比 */}
-      <div className="flex items-center justify-between px-6 py-8 bg-default-50 dark:bg-default-100/5 rounded-xl border border-default-100 dark:border-default-100/10">
-        <div className="flex flex-col items-center gap-2">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-8 bg-default-50 dark:bg-default-100/5 rounded-xl border border-default-100 dark:border-default-100/10">
+        <div className="flex flex-col items-center gap-2 min-w-0 w-full sm:w-auto">
           <span className="text-xs text-default-500 font-medium uppercase tracking-wider">当前版本</span>
-          <Chip size="lg" variant="flat" color="default" classNames={{ content: "font-mono font-bold text-lg" }}>
+          <Chip size="lg" variant="flat" color="default" classNames={{ content: "font-mono font-bold text-base sm:text-lg break-all whitespace-normal text-center h-auto py-1" }}>
             v{currentVersion}
           </Chip>
         </div>
 
-        <div className="flex flex-col items-center text-primary-500 px-4">
+        <div className="flex flex-col items-center text-primary-500 px-4 shrink-0">
           <div className="p-2 rounded-full bg-primary-50 dark:bg-primary-900/20">
-            <svg className="w-6 h-6 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-6 h-6 animate-pulse rotate-90 sm:rotate-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
           </div>
         </div>
 
-        <div className="flex flex-col items-center gap-2">
+        <div className="flex flex-col items-center gap-2 min-w-0 w-full sm:w-auto">
           <span className="text-xs text-primary-500 font-medium uppercase tracking-wider">最新版本</span>
-          <Chip size="lg" color="primary" variant="shadow" classNames={{ content: "font-mono font-bold text-lg" }}>
+          <Chip size="lg" color="primary" variant="shadow" classNames={{ content: "font-mono font-bold text-base sm:text-lg break-all whitespace-normal text-center h-auto py-1" }}>
             v{latestVersion}
           </Chip>
         </div>
