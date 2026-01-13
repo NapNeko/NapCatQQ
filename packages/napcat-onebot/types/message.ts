@@ -31,6 +31,7 @@ export interface OB11Message {
   font: number;
   post_type?: EventType;
   raw?: RawMessage;
+  emoji_likes_list: Array<{ emoji_id: string; emoji_type: string; likes_cnt: string; }>;// 仅get_msg生效
 }
 
 // 合并转发消息接口定义
@@ -46,7 +47,7 @@ export interface OB11Return<DataType> {
   message: string;
   echo?: unknown; // ws调用api才有此字段
   wording?: string;  // go-cqhttp字段，错误信息
-  stream?: 'stream-action' | 'normal-action' ; // 流式返回标记
+  stream?: 'stream-action' | 'normal-action'; // 流式返回标记
 }
 
 // 消息数据类型枚举
@@ -186,7 +187,7 @@ export interface OB11MessageNode {
     name?: string; // compatible with go-cqhttp
     content: OB11MessageMixType;
     source?: string;
-    news?: { text: string }[];
+    news?: { text: string; }[];
     summary?: string;
     prompt?: string;
     time?: string;
@@ -210,13 +211,13 @@ export interface OB11MessageIdMusic {
 // 自定义音乐消息接口定义
 export interface OB11MessageCustomMusic {
   type: OB11MessageDataType.music;
-  data: Omit<CustomMusicSignPostData, 'singer'> & { content?: string };
+  data: Omit<CustomMusicSignPostData, 'singer'> & { content?: string; };
 }
 
 // JSON消息接口定义
 export interface OB11MessageJson {
   type: OB11MessageDataType.json;
-  data: { config?: { token: string }, data: string | object };
+  data: { config?: { token: string; }, data: string | object; };
 }
 
 // 骰子消息接口定义
@@ -254,12 +255,12 @@ export interface OB11MessageForward {
 
 // 消息数据类型定义
 export type OB11MessageData =
-    OB11MessageText |
-    OB11MessageFace | OB11MessageMFace |
-    OB11MessageAt | OB11MessageReply |
-    OB11MessageImage | OB11MessageRecord | OB11MessageFile | OB11MessageVideo |
-    OB11MessageNode | OB11MessageIdMusic | OB11MessageCustomMusic | OB11MessageJson |
-    OB11MessageDice | OB11MessageRPS | OB11MessageMarkdown | OB11MessageForward | OB11MessageContext | OB11MessagePoke;
+  OB11MessageText |
+  OB11MessageFace | OB11MessageMFace |
+  OB11MessageAt | OB11MessageReply |
+  OB11MessageImage | OB11MessageRecord | OB11MessageFile | OB11MessageVideo |
+  OB11MessageNode | OB11MessageIdMusic | OB11MessageCustomMusic | OB11MessageJson |
+  OB11MessageDice | OB11MessageRPS | OB11MessageMarkdown | OB11MessageForward | OB11MessageContext | OB11MessagePoke;
 
 // 发送消息接口定义
 export interface OB11PostSendMsg {
@@ -270,7 +271,7 @@ export interface OB11PostSendMsg {
   messages?: OB11MessageMixType;
   auto_escape?: boolean | string;
   source?: string;
-  news?: { text: string }[];
+  news?: { text: string; }[];
   summary?: string;
   prompt?: string;
   time?: string;

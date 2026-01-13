@@ -181,7 +181,7 @@ export interface MessageElement {
   tofuRecordElement?: TofuRecordElement,
   taskTopMsgElement?: TaskTopMsgElement,
   recommendedMsgElement?: RecommendedMsgElement,
-  actionBarElement?: ActionBarElement
+  actionBarElement?: ActionBarElement;
 }
 
 /**
@@ -337,7 +337,7 @@ export interface InlineKeyboardElementRowButton {
  */
 export interface InlineKeyboardElement {
   rows: [{
-    buttons: InlineKeyboardElementRowButton[]
+    buttons: InlineKeyboardElementRowButton[];
   }],
   botAppid: string;
 }
@@ -441,14 +441,14 @@ export interface TipGroupElement {
       uid: string;
       card: string;
       name: string;
-      role: NTGroupMemberRole
+      role: NTGroupMemberRole;
     };
     member: {
-      uid: string
+      uid: string;
       card: string;
       name: string;
-      role: NTGroupMemberRole
-    }
+      role: NTGroupMemberRole;
+    };
   };
 }
 
@@ -498,6 +498,7 @@ export interface RawMessage {
   sendStatus?: SendStatusType;// 消息状态
   recallTime: string;// 撤回时间，"0" 是没有撤回
   records: RawMessage[];// 消息记录
+  emojiLikesList?: Array<{ emojiId: string; emojiType: string; likesCnt: string; isClicked: string; }>;
   elements: MessageElement[];// 消息元素
   sourceType: MsgSourceType;// 消息来源类型
   isOnlineMsg: boolean;// 是否为在线消息
@@ -508,9 +509,9 @@ export interface RawMessage {
  * 查询消息参数接口
  */
 export interface QueryMsgsParams {
-  chatInfo: Peer & { privilegeFlag?: number };
+  chatInfo: Peer & { privilegeFlag?: number; };
   // searchFields: number;
-  filterMsgType: Array<{ type: NTMsgType, subType: Array<number> }>;
+  filterMsgType: Array<{ type: NTMsgType, subType: Array<number>; }>;
   filterSendersUid: string[];
   filterMsgFromTime: string;
   filterMsgToTime: string;
@@ -554,7 +555,7 @@ export interface MsgReqType {
   queryOrder: boolean,
   includeSelf: boolean,
   includeDeleteMsg: boolean,
-  extraCnt: number
+  extraCnt: number;
 }
 
 /**
