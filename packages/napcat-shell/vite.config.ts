@@ -9,7 +9,6 @@ import react from '@vitejs/plugin-react-swc';
 
 // 依赖排除
 const external = [
-  'silk-wasm',
   'ws',
   'express',
 ];
@@ -56,7 +55,6 @@ const ShellBaseConfig = (source_map: boolean = false) =>
       lib: {
         entry: {
           napcat: path.resolve(__dirname, 'napcat.ts'),
-          'audio-worker': path.resolve(__dirname, '../napcat-common/src/audio-worker.ts'),
           'worker/conoutSocketWorker': path.resolve(__dirname, '../napcat-pty/worker/conoutSocketWorker.ts'),
         },
         formats: ['es'],

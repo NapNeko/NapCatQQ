@@ -4,7 +4,6 @@ import { Static, Type } from '@sinclair/typebox';
 import { NetworkAdapterConfig } from '@/napcat-onebot/config/config';
 import { StreamPacket, StreamStatus } from './StreamBasic';
 import fs from 'fs';
-import { decode } from 'silk-wasm';
 import { FFmpegService } from '@/napcat-core/helper/ffmpeg/ffmpeg';
 import { BaseDownloadStream, DownloadResult } from './BaseDownloadStream';
 
@@ -38,7 +37,6 @@ export class DownloadFileRecordStream extends BaseDownloadStream<Payload, Downlo
           throw new Error('转换失败 out_format 字段可能格式不正确');
         }
 
-        const pcmFile = `${downloadPath}.pcm`;
         const outputFile = `${downloadPath}.${payload.out_format}`;
 
         try {
@@ -46,13 +44,8 @@ export class DownloadFileRecordStream extends BaseDownloadStream<Payload, Downlo
           await fs.promises.access(outputFile);
           streamPath = outputFile;
         } catch {
-          // 尝试解码 silk 到 pcm 再用 ffmpeg 转换
-          if (FFmpegService.getAdapterName() === 'FFmpegAddon') {
-            await FFmpegService.convertFile(downloadPath, outputFile, payload.out_format);
-          } else {
-            await this.decodeFile(downloadPath, pcmFile);
-            await FFmpegService.convertFile(pcmFile, outputFile, payload.out_format);
-          }
+          // 尝试解码 amr 到 out format直接 ffmpeg 转换
+          await FFmpegService.convertAudioFmt(downloadPath, outputFile, payload.out_format);
           streamPath = outputFile;
         }
       }
@@ -80,17 +73,6 @@ export class DownloadFileRecordStream extends BaseDownloadStream<Payload, Downlo
       };
     } catch (error) {
       throw new Error(`Download failed: ${(error as Error).message}`);
-    }
-  }
-
-  private async decodeFile (inputFile: string, outputFile: string): Promise<void> {
-    try {
-      const inputData = await fs.promises.readFile(inputFile);
-      const decodedData = await decode(inputData, 24000);
-      await fs.promises.writeFile(outputFile, Buffer.from(decodedData.data));
-    } catch (error) {
-      console.error('Error decoding file:', error);
-      throw error;
     }
   }
 }

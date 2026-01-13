@@ -5,7 +5,7 @@
 
 import { platform, arch } from 'node:os';
 import path from 'node:path';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync, openSync, readSync, closeSync } from 'node:fs';
 import { writeFile } from 'node:fs/promises';
 import type { FFmpeg } from './ffmpeg-addon';
 import type { IFFmpegAdapter, VideoInfoResult } from './ffmpeg-adapter-interface';
@@ -88,6 +88,22 @@ export class FFmpegAddonAdapter implements IFFmpegAdapter {
   }
 
   /**
+   * 判断是否为 Silk 格式
+   */
+  async isSilk (filePath: string): Promise<boolean> {
+    try {
+      const fd = openSync(filePath, 'r');
+      const buffer = Buffer.alloc(10);
+      readSync(fd, buffer, 0, 10, 0);
+      closeSync(fd);
+      const header = buffer.toString();
+      return header.includes('#!SILK') || header.includes('\x02#!SILK');
+    } catch {
+      return false;
+    }
+  }
+
+  /**
      * 转换为 PCM
      */
   async convertToPCM (filePath: string, pcmPath: string): Promise<{ result: boolean, sampleRate: number; }> {
@@ -104,6 +120,11 @@ export class FFmpegAddonAdapter implements IFFmpegAdapter {
     const addon = this.ensureAddon();
     console.log('[FFmpegAddonAdapter] Converting file:', inputFile, 'to', outputFile, 'as', format);
     await addon.decodeAudioToFmt(inputFile, outputFile, format);
+  }
+
+  async convertToNTSilkTct (inputFile: string, outputFile: string): Promise<void> {
+    const addon = this.ensureAddon();
+    await addon.convertToNTSilkTct(inputFile, outputFile);
   }
 
   /**
