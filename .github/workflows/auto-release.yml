@@ -46,8 +46,8 @@ jobs:
         env:
             GH_TOKEN: ${{ secrets.NAPCAT_BUILD }}
             NAPCAT_VERSION: ${{ env.latest_tag }}
-            QQ_VERSION_X86_64: 'https://dldir1v6.qq.com/qqfile/qq/QQNT/8015ff90/linuxqq_3.2.21-42086_x86_64.AppImage' # 写死 QQ 版本
-            QQ_VERSION_ARM64: 'https://dldir1v6.qq.com/qqfile/qq/QQNT/8015ff90/linuxqq_3.2.21-42086_arm64.AppImage' # 写死 QQ 版本
+            QQ_VERSION_X86_64: 'https://dldir1v6.qq.com/qqfile/qq/QQNT/94704804/linuxqq_3.2.23-44343_x86_64.AppImage' # 写死 QQ 版本
+            QQ_VERSION_ARM64: 'https://dldir1v6.qq.com/qqfile/qq/QQNT/94704804/linuxqq_3.2.23-44343_arm64.AppImage' # 写死 QQ 版本
         run: |
             echo "Debug: Triggering Release NapCat AppImage with napcat_version=${NAPCAT_VERSION}, qq_version_x86_64=${QQ_VERSION_X86_64}, qq_version_arm64=${QQ_VERSION_ARM64}"
             curl -X POST \
@@ -72,8 +72,8 @@ jobs:
         env:
             GH_TOKEN: ${{ secrets.NAPCAT_BUILD }}
             NAPCAT_VERSION: ${{ env.latest_tag }}
-            QQ_VERSION_X86_64: 'https://dldir1v6.qq.com/qqfile/qq/QQNT/8015ff90/linuxqq_3.2.21-42086_x86_64.AppImage' # 写死 QQ 版本
-            QQ_VERSION_ARM64: 'https://dldir1v6.qq.com/qqfile/qq/QQNT/8015ff90/linuxqq_3.2.21-42086_arm64.AppImage' # 写死 QQ 版本
+            QQ_VERSION_X86_64: 'https://dldir1v6.qq.com/qqfile/qq/QQNT/94704804/linuxqq_3.2.23-44343_x86_64.AppImage' # 写死 QQ 版本
+            QQ_VERSION_ARM64: 'https://dldir1v6.qq.com/qqfile/qq/QQNT/94704804/linuxqq_3.2.23-44343_arm64.AppImage' # 写死 QQ 版本
         run: |
             echo "Debug: Triggering Release NapCat AppImage with napcat_version=${NAPCAT_VERSION}, qq_url_amd64=${QQ_VERSION_X86_64}, qq_url_arm64=${QQ_VERSION_ARM64}"
             curl -X POST \
