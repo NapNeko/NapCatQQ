@@ -35,10 +35,10 @@ class GetMsg extends OneBotAction<Payload, OB11Message> {
     // }
     if (!msg) throw Error('消息不存在');
     const retMsg = await this.obContext.apis.MsgApi.parseMessage(msg, config.messagePostFormat);
-
     if (!retMsg) throw Error('消息为空');
+    retMsg.emoji_likes_list = [];
     msg.emojiLikesList?.map(emoji => {
-      retMsg.emoji_likes_list.push({
+      retMsg.emoji_likes_list?.push({
         emoji_id: emoji.emojiId,
         emoji_type: emoji.emojiType,
         likes_cnt: emoji.likesCnt,
