@@ -258,7 +258,7 @@ export class FFmpegExecAdapter implements IFFmpegAdapter {
     }
   }
 
-  async convertToNTSilkTct (inputFile: string, outputFile: string): Promise<void> {
+  async convertToNTSilkTct (_inputFile: string, _outputFile: string): Promise<void> {
     throw new Error('convertToNTSilkTct is not implemented in FFmpegExecAdapter');
   }
 }

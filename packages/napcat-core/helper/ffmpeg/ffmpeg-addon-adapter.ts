@@ -5,7 +5,7 @@
 
 import { platform, arch } from 'node:os';
 import path from 'node:path';
-import { existsSync, readFileSync, openSync, readSync, closeSync } from 'node:fs';
+import { existsSync, openSync, readSync, closeSync } from 'node:fs';
 import { writeFile } from 'node:fs/promises';
 import type { FFmpeg } from './ffmpeg-addon';
 import type { IFFmpegAdapter, VideoInfoResult } from './ffmpeg-adapter-interface';
