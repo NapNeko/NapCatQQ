@@ -10,7 +10,7 @@ permissions: write-all
 
 env:
   OPENROUTER_API_URL: https://91vip.futureppo.top/v1/chat/completions
-  OPENROUTER_MODEL: "Antigravity/gemini-3-flash-preview"
+  OPENROUTER_MODEL: "copilot/ant/gemini-3-flash-preview"
   RELEASE_NAME: "NapCat"
 
 jobs:
