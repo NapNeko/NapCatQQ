@@ -3,7 +3,7 @@
  * 使用 execFile 调用 FFmpeg 命令行工具的适配器实现
  */
 
-import { readFileSync, existsSync, mkdirSync } from 'fs';
+import { readFileSync, existsSync, mkdirSync, openSync, readSync, closeSync } from 'fs';
 import { dirname, join } from 'path';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
@@ -155,6 +155,22 @@ export class FFmpegExecAdapter implements IFFmpegAdapter {
   }
 
   /**
+   * 判断是否为 Silk 格式
+   */
+  async isSilk (filePath: string): Promise<boolean> {
+    try {
+      const fd = openSync(filePath, 'r');
+      const buffer = Buffer.alloc(10);
+      readSync(fd, buffer, 0, 10, 0);
+      closeSync(fd);
+      const header = buffer.toString();
+      return header.includes('#!SILK') || header.includes('\x02#!SILK');
+    } catch {
+      return false;
+    }
+  }
+
+  /**
      * 转换为 PCM
      */
   async convertToPCM (filePath: string, pcmPath: string): Promise<{ result: boolean, sampleRate: number; }> {
@@ -240,5 +256,9 @@ export class FFmpegExecAdapter implements IFFmpegAdapter {
       console.error('Error extracting thumbnail:', error);
       throw new Error(`提取缩略图失败: ${(error as Error).message}`);
     }
+  }
+
+  async convertToNTSilkTct (inputFile: string, outputFile: string): Promise<void> {
+    throw new Error('convertToNTSilkTct is not implemented in FFmpegExecAdapter');
   }
 }

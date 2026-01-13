@@ -1075,7 +1075,8 @@ export class OneBotMsgApi {
     resMsg.sub_type = 'group';
     const ret = await this.core.apis.MsgApi.getTempChatInfo(ChatType.KCHATTYPETEMPC2CFROMGROUP, msg.senderUid);
     if (ret.result === 0) {
-      const member = await this.core.apis.GroupApi.getGroupMember(msg.peerUin, msg.senderUin);
+      // 避免uin:'' uid非空，uid一般不空
+      const member = await this.core.apis.GroupApi.getGroupMember(msg.peerUin, await this.core.apis.UserApi.getUinByUidV2(msg.senderUid));
       resMsg.group_id = parseInt(ret.tmpChatInfo!.groupCode);
       resMsg.sender.nickname = member?.nick ?? member?.cardName ?? '临时会话';
       resMsg.temp_source = 0;
