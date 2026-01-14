@@ -24,6 +24,7 @@ const WSDebug = lazy(() => import('@/pages/dashboard/debug/websocket'));
 const FileManagerPage = lazy(() => import('@/pages/dashboard/file_manager'));
 const LogsPage = lazy(() => import('@/pages/dashboard/logs'));
 const NetworkPage = lazy(() => import('@/pages/dashboard/network'));
+const ProtocolPage = lazy(() => import('@/pages/dashboard/protocol'));
 const TerminalPage = lazy(() => import('@/pages/dashboard/terminal'));
 
 function App () {
@@ -42,7 +43,7 @@ function App () {
   );
 }
 
-function AuthChecker ({ children }: { children: React.ReactNode }) {
+function AuthChecker ({ children }: { children: React.ReactNode; }) {
   const { isAuth } = useAuth();
   const navigate = useNavigate();
 
@@ -68,6 +69,7 @@ function AppRoutes () {
       <Route path='/' element={<IndexPage />}>
         <Route index element={<DashboardIndexPage />} />
         <Route path='network' element={<NetworkPage />} />
+        <Route path='protocol' element={<ProtocolPage />} />
         <Route path='config' element={<ConfigPage />} />
         <Route path='logs' element={<LogsPage />} />
         <Route path='debug' element={<DebugPage />}>

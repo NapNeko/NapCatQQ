@@ -1,0 +1,36 @@
+{
+  "name": "napcat-satori",
+  "version": "1.0.0",
+  "description": "Satori Protocol Adapter for NapCat",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "exports": {
+    ".": {
+      "import": "./index.ts"
+    },
+    "./*": {
+      "import": "./*"
+    }
+  },
+  "dependencies": {
+    "napcat-core": "workspace:*",
+    "napcat-common": "workspace:*",
+    "napcat-webui-backend": "workspace:*",
+    "express": "^4.21.2",
+    "ws": "^8.18.0",
+    "@sinclair/typebox": "^0.34.33",
+    "ajv": "^8.17.1",
+    "json5": "^2.2.3"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/ws": "^8.5.13",
+    "@types/node": "^22.10.5",
+    "typescript": "^5.7.2"
+  }
+}

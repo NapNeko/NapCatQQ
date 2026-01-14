@@ -1,4 +1,44 @@
 import type { OneBotConfig } from '@/napcat-webui-backend/src/onebot/config';
+
+export interface SatoriConfig {
+  network: {
+    websocketServers: SatoriWebSocketServerConfig[];
+    httpServers: SatoriHttpServerConfig[];
+    webhookClients: SatoriWebHookClientConfig[];
+  };
+  platform: string;
+  selfId: string;
+}
+
+export interface SatoriWebSocketServerConfig {
+  name: string;
+  enable: boolean;
+  host: string;
+  port: number;
+  token: string;
+  path: string;
+  debug: boolean;
+  heartInterval: number;
+}
+
+export interface SatoriHttpServerConfig {
+  name: string;
+  enable: boolean;
+  host: string;
+  port: number;
+  token: string;
+  path: string;
+  debug: boolean;
+}
+
+export interface SatoriWebHookClientConfig {
+  name: string;
+  enable: boolean;
+  url: string;
+  token: string;
+  debug: boolean;
+}
+
 export interface LoginListItem {
   uin: string;
   uid: string;
@@ -48,9 +88,11 @@ export interface LoginRuntimeType {
   onWebUiTokenChange: (token: string) => Promise<void>;
   WebUiConfigQuickFunction: () => Promise<void>;
   OneBotContext: any | null; // OneBot 上下文，用于调试功能
+  SatoriContext: any | null; // Satori 上下文
   NapCatHelper: {
     onQuickLoginRequested: (uin: string) => Promise<{ result: boolean; message: string; }>;
     onOB11ConfigChanged: (ob11: OneBotConfig) => Promise<void>;
+    onSatoriConfigChanged: (config: SatoriConfig) => Promise<void>;
     QQLoginList: string[];
     NewQQLoginList: LoginListItem[];
   };

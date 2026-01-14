@@ -1,34 +1,34 @@
 {
-    "name": "napcat-shell",
-    "version": "0.0.1",
-    "private": true,
-    "type": "module",
-    "main": "index.ts",
-    "scripts": {
-        "build": "vite build",
-        "build:dev": "vite build --mode development",
-        "typecheck": "tsc --noEmit --skipLibCheck -p tsconfig.json"
+  "name": "napcat-shell",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "index.ts",
+  "scripts": {
+    "build": "vite build",
+    "build:dev": "vite build --mode development",
+    "typecheck": "tsc --noEmit --skipLibCheck -p tsconfig.json"
+  },
+  "exports": {
+    ".": {
+      "import": "./index.ts"
     },
-    "exports": {
-        ".": {
-            "import": "./index.ts"
-        },
-        "./*": {
-            "import": "./*"
-        }
-    },
-    "dependencies": {
-        "napcat-core": "workspace:*",
-        "napcat-common": "workspace:*",
-        "napcat-onebot": "workspace:*",
-        "napcat-webui-backend": "workspace:*",
-        "napcat-qrcode": "workspace:*"
-    },
-    "devDependencies": {
-        "@types/node": "^22.0.1",
-        "napcat-vite": "workspace:*"
-    },
-    "engines": {
-        "node": ">=18.0.0"
+    "./*": {
+      "import": "./*"
     }
+  },
+  "dependencies": {
+    "napcat-core": "workspace:*",
+    "napcat-common": "workspace:*",
+    "napcat-protocol": "workspace:*",
+    "napcat-webui-backend": "workspace:*",
+    "napcat-qrcode": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.1",
+    "napcat-vite": "workspace:*"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
 }

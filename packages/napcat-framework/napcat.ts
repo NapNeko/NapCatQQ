@@ -1,6 +1,6 @@
 import { NapCatPathWrapper } from 'napcat-common/src/path';
 import { InitWebUi, WebUiConfig, webUiRuntimePort } from 'napcat-webui-backend/index';
-import { NapCatOneBot11Adapter } from 'napcat-onebot/index';
+import { ProtocolManager } from 'napcat-protocol';
 import { NativePacketHandler } from 'napcat-core/packet/handler/client';
 import { FFmpegService } from 'napcat-core/helper/ffmpeg/ffmpeg';
 import { logSubscription, LogWrapper } from 'napcat-core/helper/log';
@@ -39,22 +39,12 @@ export async function NCoreInitFramework (
   await applyPendingUpdates(pathWrapper, logger);
   const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
   const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVersion());
-  const nativePacketHandler = new NativePacketHandler({ logger }); // 初始化 NativePacketHandler 用于后续使用
-  // nativePacketHandler.onAll((packet) => {
-  //     console.log('[Packet]', packet.uin, packet.cmd, packet.hex_data);
-  // });
+  const nativePacketHandler = new NativePacketHandler({ logger });
   await nativePacketHandler.init(basicInfoWrapper.getFullQQVersion());
-  // 在 init 之后注册监听器
 
   // 初始化 FFmpeg 服务
   await FFmpegService.init(pathWrapper.binaryPath, logger);
-  // 直到登录成功后，执行下一步
-  // const selfInfo = {
-  //     uid: 'u_FUSS0_x06S_9Tf4na_WpUg',
-  //     uin: '3684714082',
-  //     nick: '',
-  //     online: true
-  // }
+
   const selfInfo = await new Promise<SelfInfo>((resolve) => {
     const loginListener = new NodeIKernelLoginListener();
     loginListener.onQRCodeLoginSucceed = async (loginResult) => {
@@ -64,14 +54,13 @@ export async function NCoreInitFramework (
       resolve({
         uid: loginResult.uid,
         uin: loginResult.uin,
-        nick: '', // 获取不到
+        nick: '',
         online: true,
       });
     };
     loginService.addKernelLoginListener(proxiedListenerOf(loginListener, logger));
   });
-  // 过早进入会导致addKernelMsgListener等Listener添加失败
-  // await sleep(2500);
+
   // 初始化 NapCatFramework
   const loaderObject = new NapCatFramework(wrapper, session, logger, selfInfo, basicInfoWrapper, pathWrapper, nativePacketHandler);
   await loaderObject.core.initCore();
@@ -79,16 +68,37 @@ export async function NCoreInitFramework (
   // 启动WebUi
   WebUiDataRuntime.setWorkingEnv(NapCatCoreWorkingEnv.Framework);
   InitWebUi(logger, pathWrapper, logSubscription, statusHelperSubscription).then().catch(e => logger.logError(e));
-  // 初始化LLNC的Onebot实现
-  const oneBotAdapter = new NapCatOneBot11Adapter(loaderObject.core, loaderObject.context, pathWrapper);
-  // 注册到 WebUiDataRuntime，供调试功能使用
-  WebUiDataRuntime.setOneBotContext(oneBotAdapter);
-  await oneBotAdapter.InitOneBot();
+
+  // 使用协议管理器初始化所有协议
+  const protocolManager = new ProtocolManager(loaderObject.core, loaderObject.context, pathWrapper);
+
+  // 初始化所有协议
+  await protocolManager.initAllProtocols();
+
+  // 获取适配器并注册到 WebUiDataRuntime
+  const onebotAdapter = protocolManager.getOneBotAdapter();
+  const satoriAdapter = protocolManager.getSatoriAdapter();
+
+  if (onebotAdapter) {
+    WebUiDataRuntime.setOneBotContext(onebotAdapter.getRawAdapter());
+  }
+
+  if (satoriAdapter) {
+    WebUiDataRuntime.setSatoriContext(satoriAdapter.getRawAdapter());
+    WebUiDataRuntime.setOnSatoriConfigChanged(async (newConfig) => {
+      const prev = satoriAdapter.getConfigLoader().configData;
+      await protocolManager.reloadProtocolConfig('satori', prev, newConfig);
+    });
+  }
+
+  // 保存协议管理器引用
+  loaderObject.protocolManager = protocolManager;
 }
 
 export class NapCatFramework {
   public core: NapCatCore;
-  context: InstanceContext;
+  public context: InstanceContext;
+  public protocolManager?: ProtocolManager;
 
   constructor (
     wrapper: WrapperNodeApi,

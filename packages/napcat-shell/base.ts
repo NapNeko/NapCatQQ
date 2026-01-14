@@ -22,7 +22,7 @@ import fs from 'fs';
 import os from 'os';
 import { LoginListItem, NodeIKernelLoginService } from 'napcat-core/services';
 import qrcode from 'napcat-qrcode/lib/main';
-import { NapCatOneBot11Adapter } from 'napcat-onebot/index';
+import { ProtocolManager } from 'napcat-protocol';
 import { InitWebUi } from 'napcat-webui-backend/index';
 import { WebUiDataRuntime } from 'napcat-webui-backend/src/helper/Data';
 import { napCatVersion } from 'napcat-common/src/version';
@@ -428,6 +428,7 @@ export async function NCoreInitShell () {
 export class NapCatShell {
   readonly core: NapCatCore;
   readonly context: InstanceContext;
+  public protocolManager?: ProtocolManager;
 
   constructor (
     wrapper: WrapperNodeApi,
@@ -452,11 +453,28 @@ export class NapCatShell {
 
   async InitNapCat () {
     await this.core.initCore();
-    const oneBotAdapter = new NapCatOneBot11Adapter(this.core, this.context, this.context.pathWrapper);
-    // 注册到 WebUiDataRuntime，供调试功能使用
-    WebUiDataRuntime.setOneBotContext(oneBotAdapter);
-    oneBotAdapter.InitOneBot()
-      .catch(e => this.context.logger.logError('初始化OneBot失败', e));
+
+    // 使用协议管理器初始化所有协议
+    this.protocolManager = new ProtocolManager(this.core, this.context, this.context.pathWrapper);
+
+    // 初始化所有协议
+    await this.protocolManager.initAllProtocols();
+
+    // 获取适配器并注册到 WebUiDataRuntime
+    const onebotAdapter = this.protocolManager.getOneBotAdapter();
+    const satoriAdapter = this.protocolManager.getSatoriAdapter();
+
+    if (onebotAdapter) {
+      WebUiDataRuntime.setOneBotContext(onebotAdapter.getRawAdapter());
+    }
+
+    if (satoriAdapter) {
+      WebUiDataRuntime.setSatoriContext(satoriAdapter.getRawAdapter());
+      WebUiDataRuntime.setOnSatoriConfigChanged(async (newConfig) => {
+        const prev = satoriAdapter.getConfigLoader().configData;
+        await this.protocolManager!.reloadProtocolConfig('satori', prev, newConfig);
+      });
+    }
   }
 }
 

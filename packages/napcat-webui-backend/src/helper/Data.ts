@@ -16,6 +16,7 @@ const LoginRuntime: LoginRuntimeType = {
   },
   QQVersion: 'unknown',
   OneBotContext: null,
+  SatoriContext: null,
   onQQLoginStatusChange: async (status: boolean) => {
     LoginRuntime.QQLoginStatus = status;
   },
@@ -24,6 +25,9 @@ const LoginRuntime: LoginRuntimeType = {
   },
   NapCatHelper: {
     onOB11ConfigChanged: async () => {
+
+    },
+    onSatoriConfigChanged: async () => {
 
     },
     onQuickLoginRequested: async () => {
@@ -163,4 +167,20 @@ export const WebUiDataRuntime = {
   getOneBotContext (): any | null {
     return LoginRuntime.OneBotContext;
   },
+
+  setSatoriContext (context: any): void {
+    LoginRuntime.SatoriContext = context;
+  },
+
+  getSatoriContext (): any | null {
+    return LoginRuntime.SatoriContext;
+  },
+
+  setOnSatoriConfigChanged (func: LoginRuntimeType['NapCatHelper']['onSatoriConfigChanged']): void {
+    LoginRuntime.NapCatHelper.onSatoriConfigChanged = func;
+  },
+
+  setSatoriConfig: function (config) {
+    return LoginRuntime.NapCatHelper.onSatoriConfigChanged(config);
+  } as LoginRuntimeType['NapCatHelper']['onSatoriConfigChanged'],
 };

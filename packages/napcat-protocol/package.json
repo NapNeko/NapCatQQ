@@ -1,0 +1,19 @@
+{
+  "name": "napcat-protocol",
+  "version": "1.0.0",
+  "description": "NapCat Protocol Manager - Unified protocol adapter management for OneBot and Satori",
+  "main": "index.ts",
+  "types": "index.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "napcat-core": "workspace:*",
+    "napcat-common": "workspace:*",
+    "napcat-onebot": "workspace:*",
+    "napcat-satori": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  }
+}

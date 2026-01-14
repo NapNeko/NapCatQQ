@@ -1,0 +1,69 @@
+import { SatoriAction } from '../SatoriAction';
+import { SatoriMessage, SatoriChannelType } from '@/napcat-satori/types';
+import { ChatType, SendMessageElement } from 'napcat-core';
+
+interface MessageCreatePayload {
+  channel_id: string;
+  content: string;
+}
+
+export class MessageCreateAction extends SatoriAction<MessageCreatePayload, SatoriMessage[]> {
+  actionName = 'message.create';
+
+  async handle (payload: MessageCreatePayload): Promise<SatoriMessage[]> {
+    const { channel_id, content } = payload;
+
+    // 解析 channel_id，格式: private:{user_id} 或 group:{group_id}
+    const parts = channel_id.split(':');
+    const type = parts[0];
+    const id = parts[1];
+
+    if (!type || !id) {
+      throw new Error(`无效的频道ID格式: ${channel_id}`);
+    }
+
+    let chatType: ChatType;
+    let peerUid: string;
+
+    if (type === 'private') {
+      chatType = ChatType.KCHATTYPEC2C;
+      peerUid = await this.core.apis.UserApi.getUidByUinV2(id);
+    } else if (type === 'group') {
+      chatType = ChatType.KCHATTYPEGROUP;
+      peerUid = id;
+    } else {
+      throw new Error(`不支持的频道类型: ${type}`);
+    }
+
+    // 解析 Satori 消息内容为 NapCat 消息元素
+    const elements = await this.satoriAdapter.apis.MsgApi.parseContent(content);
+
+    // 发送消息
+    const result = await this.core.apis.MsgApi.sendMsg(
+      { chatType, peerUid, guildId: '' },
+      elements as SendMessageElement[],
+      30000
+    );
+
+    if (!result) {
+      throw new Error('消息发送失败: 未知错误');
+    }
+
+    // 构造返回结果
+    const message: SatoriMessage = {
+      id: result.msgId,
+      content,
+      channel: {
+        id: channel_id,
+        type: type === 'private' ? SatoriChannelType.DIRECT : SatoriChannelType.TEXT,
+      },
+      user: {
+        id: this.selfInfo.uin,
+        name: this.selfInfo.nick,
+      },
+      created_at: Date.now(),
+    };
+
+    return [message];
+  }
+}

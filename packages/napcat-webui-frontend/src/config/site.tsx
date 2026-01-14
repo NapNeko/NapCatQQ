@@ -4,6 +4,7 @@ import {
   LuFolderOpen,
   LuInfo,
   LuLayoutDashboard,
+  LuPlug,
   LuSettings,
   LuSignal,
   LuTerminal,
@@ -33,6 +34,11 @@ export const siteConfig = {
       label: '网络配置',
       icon: <LuSignal className='w-5 h-5' />,
       href: '/network',
+    },
+    {
+      label: '协议配置',
+      icon: <LuPlug className='w-5 h-5' />,
+      href: '/protocol',
     },
     {
       label: '其他配置',
