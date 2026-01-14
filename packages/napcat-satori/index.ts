@@ -25,7 +25,7 @@ import {
   ISatoriNetworkAdapter,
 } from './network';
 import { SatoriLoginStatus } from './types';
-import { MessageUnique } from 'napcat-common/src/message-unique';
+// import { MessageUnique } from 'napcat-common/src/message-unique';
 import { proxiedListenerOf } from '@/napcat-core/helper/proxy-handler';
 import { WebUiDataRuntime } from 'napcat-webui-backend/src/helper/Data';
 
@@ -161,14 +161,12 @@ export class NapCatSatoriAdapter {
     msgListener.onRecvMsg = async (msgs) => {
       if (!this.networkManager.hasActiveAdapters()) return;
 
+
       for (const msg of msgs) {
         if (this.bootTime > parseInt(msg.msgTime)) {
           continue;
         }
-        msg.id = MessageUnique.createUniqueMsgId(
-          { chatType: msg.chatType, peerUid: msg.peerUid, guildId: '' },
-          msg.msgId
-        );
+        // this.context.logger.log(`[Satori] Debug: Processing message ${msg.msgId}`);
         await this.handleMessage(msg);
       }
     };
@@ -192,10 +190,6 @@ export class NapCatSatoriAdapter {
           );
           const updatemsg = updatemsgs.find((e) => e.msgId === msg.msgId);
           if (updatemsg?.sendStatus === SendStatusType.KSEND_STATUS_SUCCESS) {
-            updatemsg.id = MessageUnique.createUniqueMsgId(
-              { chatType: updatemsg.chatType, peerUid: updatemsg.peerUid, guildId: '' },
-              updatemsg.msgId
-            );
             await this.handleMessage(updatemsg);
           }
         }
@@ -298,7 +292,10 @@ export class NapCatSatoriAdapter {
     try {
       const event = await this.apis.EventApi.createMessageEvent(message);
       if (event) {
+        this.context.logger.logDebug(`[Satori] Emitting event ${event.type}`);
         await this.networkManager.emitEvent(event);
+      } else {
+        this.context.logger.logDebug(`[Satori] Event creation returned null for msg ${message.msgId}`);
       }
     } catch (error) {
       this.context.logger.logError('[Satori] 处理消息失败', error);

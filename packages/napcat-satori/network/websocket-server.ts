@@ -120,6 +120,7 @@ export class SatoriWebSocketServerAdapter extends ISatoriNetworkAdapter<SatoriWe
     return SatoriNetworkReloadType.Normal;
   }
 
+
   async onEvent<T extends SatoriEmitEventContent> (event: T): Promise<void> {
     if (!this.isEnable) return;
 
@@ -133,14 +134,25 @@ export class SatoriWebSocketServerAdapter extends ISatoriNetworkAdapter<SatoriWe
     };
 
     const message = JSON.stringify(signal);
+    let sentCount = 0;
+
+    this.logger.logDebug(`[Satori] onEvent triggered. Current clients: ${this.clients.size}`);
 
     for (const [ws, clientInfo] of this.clients) {
-      if (clientInfo.identified && ws.readyState === WebSocket.OPEN) {
-        ws.send(message);
-        clientInfo.sequence = this.eventSequence;
-        if (this.config.debug) {
-          this.logger.logDebug(`[Satori] 发送事件: ${event.type}`);
+      const ip = (ws as any)._socket?.remoteAddress || 'unknown';
+      if (ws.readyState === WebSocket.OPEN) {
+        if (clientInfo.identified) {
+          ws.send(message);
+          clientInfo.sequence = this.eventSequence;
+          sentCount++;
+          if (this.config.debug) {
+            this.logger.logDebug(`[Satori] 发送事件: ${event.type} to ${ip}`);
+          }
+        } else {
+          this.logger.logDebug(`[Satori] 客户端未认证，跳过发送. IP: ${ip}, Identified: ${clientInfo.identified}`);
         }
+      } else {
+        this.logger.logDebug(`[Satori] 客户端连接非 OPEN. State: ${ws.readyState}`);
       }
     }
   }
@@ -171,36 +183,50 @@ export class SatoriWebSocketServerAdapter extends ISatoriNetworkAdapter<SatoriWe
 
   private handleMessage (ws: WebSocket, data: string): void {
     try {
-      const signal: SatoriSignal = JSON.parse(data);
+      const signal = JSON.parse(data) as SatoriSignal | { op?: number; };
       const clientInfo = this.clients.get(ws);
       if (!clientInfo) return;
 
+      if (typeof signal?.op === 'undefined') {
+        this.logger.log(`[Satori] 收到无 OP 信令: ${data}`);
+        return;
+      }
+
+      if (signal.op !== SatoriOpcode.PING) {
+        this.logger.log(`[Satori] 收到信令 OP: ${signal.op}`);
+      }
+
       switch (signal.op) {
         case SatoriOpcode.IDENTIFY:
-          this.handleIdentify(ws, clientInfo, signal.body as SatoriIdentifyBody);
+          this.handleIdentify(ws, clientInfo, (signal as SatoriSignal).body as SatoriIdentifyBody);
           break;
         case SatoriOpcode.PING:
           this.sendPong(ws);
           break;
         default:
-          this.logger.logDebug(`[Satori] 收到未知信令: ${signal.op}`);
+          this.logger.logDebug(`[Satori] 收到未知信令: ${JSON.stringify(signal)}`);
       }
     } catch (error) {
       this.logger.logError(`[Satori] 消息解析失败: ${error}`);
     }
   }
 
-  private handleIdentify (ws: WebSocket, clientInfo: ClientInfo, body: SatoriIdentifyBody): void {
+  private handleIdentify (ws: WebSocket, clientInfo: ClientInfo, body: SatoriIdentifyBody | undefined): void {
+    this.logger.logDebug(`[Satori] 处理客户端认证. Token required: ${!!this.config.token}, Body present: ${!!body}`);
+
     // 验证 token
-    if (this.config.token && body.token !== this.config.token) {
+    const clientToken = body?.token;
+    if (this.config.token && clientToken !== this.config.token) {
+      this.logger.log(`[Satori] 客户端认证失败: Token不匹配. Expected: ${this.config.token}, Received: ${clientToken}`);
       ws.close(4001, 'Invalid token');
       return;
     }
 
     clientInfo.identified = true;
-    if (body.sequence) {
+    if (body?.sequence) {
       clientInfo.sequence = body.sequence;
     }
+    this.logger.log(`[Satori] 客户端认证通过. Sequence: ${clientInfo.sequence}`);
 
     // 发送 READY 信令
     const readyBody: SatoriReadyBody = {

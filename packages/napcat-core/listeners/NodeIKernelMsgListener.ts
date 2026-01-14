@@ -383,4 +383,7 @@ export class NodeIKernelMsgListener {
   onBroadcastHelperProgerssUpdate (..._args: unknown[]): any {
 
   }
+  onNtMsgSyncContactUnread (..._args: unknown[]): any {
+
+  }
 }
