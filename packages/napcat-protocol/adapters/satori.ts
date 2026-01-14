@@ -16,9 +16,9 @@ export class SatoriProtocolAdapter implements IProtocolAdapter {
   private adapter: NapCatSatoriAdapter;
 
   constructor (
-    private _core: NapCatCore,
-    private _context: InstanceContext,
-    private _pathWrapper: NapCatPathWrapper
+    _core: NapCatCore,
+    _context: InstanceContext,
+    _pathWrapper: NapCatPathWrapper
   ) {
     this.adapter = new NapCatSatoriAdapter(_core, _context, _pathWrapper);
   }

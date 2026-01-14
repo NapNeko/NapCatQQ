@@ -16,9 +16,9 @@ export class OneBotProtocolAdapter implements IProtocolAdapter {
   private adapter: NapCatOneBot11Adapter;
 
   constructor (
-    private _core: NapCatCore,
-    private _context: InstanceContext,
-    private _pathWrapper: NapCatPathWrapper
+    _core: NapCatCore,
+    _context: InstanceContext,
+    _pathWrapper: NapCatPathWrapper
   ) {
     this.adapter = new NapCatOneBot11Adapter(_core, _context, _pathWrapper);
   }
