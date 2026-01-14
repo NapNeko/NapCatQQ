@@ -1,10 +1,10 @@
 import { NapCatCore, RawMessage, ChatType } from 'napcat-core';
-import { NapCatSatoriAdapter } from '@/napcat-satori/index';
+import { NapCatSatoriAdapter } from '../index';
 import {
   SatoriEvent,
   SatoriChannelType,
   SatoriLoginStatus,
-} from '@/napcat-satori/types';
+} from '../types';
 
 export class SatoriEventApi {
   private satoriAdapter: NapCatSatoriAdapter;

@@ -1,5 +1,5 @@
 import { SatoriAction } from '../SatoriAction';
-import { SatoriGuildMember } from '@/napcat-satori/types';
+import { SatoriGuildMember } from '../../types';
 
 interface GuildMemberGetPayload {
   guild_id: string;
@@ -25,7 +25,7 @@ export class GuildMemberGetAction extends SatoriAction<GuildMemberGetPayload, Sa
         avatar: `https://q1.qlogo.cn/g?b=qq&nk=${memberInfo.uin}&s=640`,
       },
       nick: memberInfo.cardName || memberInfo.nick,
-      joined_at: memberInfo.joinTime ? memberInfo.joinTime * 1000 : undefined,
+      joined_at: memberInfo.joinTime ? Number(memberInfo.joinTime) * 1000 : undefined,
     };
   }
 }

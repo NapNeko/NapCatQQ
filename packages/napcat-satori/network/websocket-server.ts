@@ -1,9 +1,9 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import { createServer, Server, IncomingMessage } from 'http';
 import { NapCatCore } from 'napcat-core';
-import { NapCatSatoriAdapter } from '@/napcat-satori/index';
-import { SatoriActionMap } from '@/napcat-satori/action';
-import { SatoriWebSocketServerConfig } from '@/napcat-satori/config/config';
+import { NapCatSatoriAdapter } from '../index';
+import { SatoriActionMap } from '../action';
+import { SatoriWebSocketServerConfig } from '../config/config';
 import {
   ISatoriNetworkAdapter,
   SatoriEmitEventContent,
@@ -15,7 +15,7 @@ import {
   SatoriIdentifyBody,
   SatoriReadyBody,
   SatoriLoginStatus,
-} from '@/napcat-satori/types';
+} from '../types';
 
 interface ClientInfo {
   ws: WebSocket;

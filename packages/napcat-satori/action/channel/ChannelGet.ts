@@ -1,5 +1,5 @@
 import { SatoriAction } from '../SatoriAction';
-import { SatoriChannel, SatoriChannelType } from '@/napcat-satori/types';
+import { SatoriChannel, SatoriChannelType } from '../../types';
 
 interface ChannelGetPayload {
   channel_id: string;

@@ -1,5 +1,5 @@
 import { SatoriAction } from '../SatoriAction';
-import { SatoriMessage, SatoriChannelType } from '@/napcat-satori/types';
+import { SatoriMessage, SatoriChannelType } from '../../types';
 import { ChatType, SendMessageElement } from 'napcat-core';
 
 interface MessageCreatePayload {

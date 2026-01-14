@@ -1,5 +1,5 @@
 import { NapCatCore, MessageElement, ElementType, NTMsgAtType } from 'napcat-core';
-import { NapCatSatoriAdapter } from '@/napcat-satori/index';
+import { NapCatSatoriAdapter } from '../index';
 
 export class SatoriMsgApi {
   private core: NapCatCore;

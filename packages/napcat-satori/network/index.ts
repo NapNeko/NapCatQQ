@@ -1,5 +1,5 @@
-import { ISatoriNetworkAdapter, SatoriEmitEventContent, SatoriNetworkReloadType } from './adapter';
-import { SatoriNetworkAdapterConfig } from '@/napcat-satori/config/config';
+import { ISatoriNetworkAdapter, SatoriEmitEventContent } from './adapter';
+import { SatoriNetworkAdapterConfig } from '../config/config';
 
 export class SatoriNetworkManager {
   adapters: Map<string, ISatoriNetworkAdapter<SatoriNetworkAdapterConfig>> = new Map();
@@ -23,7 +23,7 @@ export class SatoriNetworkManager {
 
   async openAllAdapters (): Promise<void> {
     const openPromises = Array.from(this.adapters.values()).map((adapter) =>
-      adapter.open().catch((e) => {
+      Promise.resolve(adapter.open()).catch((e) => {
         adapter.logger.logError(`[Satori] 适配器 ${adapter.name} 启动失败: ${e}`);
       })
     );
@@ -32,7 +32,7 @@ export class SatoriNetworkManager {
 
   async closeAllAdapters (): Promise<void> {
     const closePromises = Array.from(this.adapters.values()).map((adapter) =>
-      adapter.close().catch((e) => {
+      Promise.resolve(adapter.close()).catch((e) => {
         adapter.logger.logError(`[Satori] 适配器 ${adapter.name} 关闭失败: ${e}`);
       })
     );

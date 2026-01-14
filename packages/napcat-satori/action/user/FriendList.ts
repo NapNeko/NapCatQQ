@@ -1,5 +1,5 @@
 import { SatoriAction } from '../SatoriAction';
-import { SatoriUser, SatoriPageResult } from '@/napcat-satori/types';
+import { SatoriUser, SatoriPageResult } from '../../types';
 
 interface FriendListPayload {
   next?: string;

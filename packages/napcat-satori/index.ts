@@ -12,10 +12,10 @@ import {
   GroupNotifyMsgStatus,
   GroupNotifyMsgType,
 } from 'napcat-core';
-import { SatoriConfigLoader, SatoriConfig, SatoriConfigSchema, SatoriNetworkAdapterConfig } from '@/napcat-satori/config';
+import { SatoriConfigLoader, SatoriConfig, SatoriConfigSchema, SatoriNetworkAdapterConfig } from './config';
 import { NapCatPathWrapper } from 'napcat-common/src/path';
-import { createSatoriApis, SatoriApiList } from '@/napcat-satori/api';
-import { createSatoriActionMap, SatoriActionMap } from '@/napcat-satori/action';
+import { createSatoriApis, SatoriApiList } from './api';
+import { createSatoriActionMap, SatoriActionMap } from './action';
 import {
   SatoriNetworkManager,
   SatoriWebSocketServerAdapter,
@@ -23,10 +23,11 @@ import {
   SatoriWebHookClientAdapter,
   SatoriNetworkReloadType,
   ISatoriNetworkAdapter,
-} from '@/napcat-satori/network';
-import { SatoriLoginStatus } from '@/napcat-satori/types';
+} from './network';
+import { SatoriLoginStatus } from './types';
 import { MessageUnique } from 'napcat-common/src/message-unique';
 import { proxiedListenerOf } from '@/napcat-core/helper/proxy-handler';
+import { WebUiDataRuntime } from 'napcat-webui-backend/src/helper/Data';
 
 export class NapCatSatoriAdapter {
   readonly core: NapCatCore;
@@ -101,6 +102,13 @@ export class NapCatSatoriAdapter {
     // 发送登录成功事件
     const loginEvent = this.apis.EventApi.createLoginUpdatedEvent(SatoriLoginStatus.ONLINE);
     await this.networkManager.emitEvent(loginEvent);
+
+    // 注册 Satori 配置热重载回调
+    WebUiDataRuntime.setOnSatoriConfigChanged(async (newConfig) => {
+      const prev = this.configLoader.configData;
+      this.configLoader.save(newConfig);
+      await this.reloadNetwork(prev, newConfig);
+    });
   }
 
   async reloadNetwork (prev: SatoriConfig, now: SatoriConfig): Promise<void> {

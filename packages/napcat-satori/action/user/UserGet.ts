@@ -1,5 +1,5 @@
 import { SatoriAction } from '../SatoriAction';
-import { SatoriUser } from '@/napcat-satori/types';
+import { SatoriUser } from '../../types';
 
 interface UserGetPayload {
   user_id: string;

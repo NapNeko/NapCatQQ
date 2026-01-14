@@ -1,5 +1,5 @@
 import { SatoriAction } from '../SatoriAction';
-import { SatoriMessage, SatoriChannelType } from '@/napcat-satori/types';
+import { SatoriMessage, SatoriChannelType } from '../../types';
 import { ChatType } from 'napcat-core';
 
 interface MessageGetPayload {
@@ -13,7 +13,13 @@ export class MessageGetAction extends SatoriAction<MessageGetPayload, SatoriMess
   async handle (payload: MessageGetPayload): Promise<SatoriMessage> {
     const { channel_id, message_id } = payload;
 
-    const [type, id] = channel_id.split(':');
+    const parts = channel_id.split(':');
+    const type = parts[0];
+    const id = parts[1];
+
+    if (!type || !id) {
+      throw new Error(`无效的频道ID: ${channel_id}`);
+    }
 
     let chatType: ChatType;
     let peerUid: string;
@@ -36,6 +42,10 @@ export class MessageGetAction extends SatoriAction<MessageGetPayload, SatoriMess
     }
 
     const msg = msgs.msgList[0];
+    if (!msg) {
+      throw new Error('消息不存在');
+    }
+
     const content = await this.satoriAdapter.apis.MsgApi.parseElements(msg.elements);
 
     const message: SatoriMessage = {

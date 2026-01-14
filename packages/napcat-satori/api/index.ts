@@ -1,5 +1,5 @@
 import { NapCatCore } from 'napcat-core';
-import { NapCatSatoriAdapter } from '@/napcat-satori/index';
+import { NapCatSatoriAdapter } from '../index';
 import { SatoriMsgApi } from './msg';
 import { SatoriEventApi } from './event';
 

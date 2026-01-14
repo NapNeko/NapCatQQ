@@ -1,9 +1,9 @@
-import { SatoriNetworkAdapterConfig } from '@/napcat-satori/config/config';
+import { SatoriNetworkAdapterConfig } from '../config/config';
 import { LogWrapper } from 'napcat-core/helper/log';
 import { NapCatCore } from 'napcat-core';
-import { NapCatSatoriAdapter } from '@/napcat-satori/index';
-import { SatoriActionMap } from '@/napcat-satori/action';
-import { SatoriEvent } from '@/napcat-satori/types';
+import { NapCatSatoriAdapter } from '../index';
+import { SatoriActionMap } from '../action';
+import { SatoriEvent } from '../types';
 
 export enum SatoriNetworkReloadType {
   Normal = 0,

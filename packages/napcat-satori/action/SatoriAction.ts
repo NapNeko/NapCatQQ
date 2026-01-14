@@ -1,5 +1,5 @@
 import { NapCatCore } from 'napcat-core';
-import { NapCatSatoriAdapter } from '@/napcat-satori/index';
+import { NapCatSatoriAdapter } from '../index';
 
 export abstract class SatoriAction<PayloadType, ReturnType> {
   abstract actionName: string;

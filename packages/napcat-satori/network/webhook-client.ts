@@ -1,7 +1,7 @@
 import { NapCatCore } from 'napcat-core';
-import { NapCatSatoriAdapter } from '@/napcat-satori/index';
-import { SatoriActionMap } from '@/napcat-satori/action';
-import { SatoriWebHookClientConfig } from '@/napcat-satori/config/config';
+import { NapCatSatoriAdapter } from '../index';
+import { SatoriActionMap } from '../action';
+import { SatoriWebHookClientConfig } from '../config/config';
 import {
   ISatoriNetworkAdapter,
   SatoriEmitEventContent,

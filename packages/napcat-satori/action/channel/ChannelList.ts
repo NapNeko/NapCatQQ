@@ -1,5 +1,5 @@
 import { SatoriAction } from '../SatoriAction';
-import { SatoriChannel, SatoriChannelType, SatoriPageResult } from '@/napcat-satori/types';
+import { SatoriChannel, SatoriChannelType, SatoriPageResult } from '../../types';
 
 interface ChannelListPayload {
   guild_id: string;

@@ -1,15 +1,15 @@
 import express, { Express, Request, Response, NextFunction } from 'express';
 import { createServer, Server } from 'http';
 import { NapCatCore } from 'napcat-core';
-import { NapCatSatoriAdapter } from '@/napcat-satori/index';
-import { SatoriActionMap } from '@/napcat-satori/action';
-import { SatoriHttpServerConfig } from '@/napcat-satori/config/config';
+import { NapCatSatoriAdapter } from '../index';
+import { SatoriActionMap } from '../action';
+import { SatoriHttpServerConfig } from '../config/config';
 import {
   ISatoriNetworkAdapter,
   SatoriEmitEventContent,
   SatoriNetworkReloadType,
 } from './adapter';
-import { SatoriApiResponse, SatoriLoginStatus } from '@/napcat-satori/types';
+import { SatoriApiResponse, SatoriLoginStatus } from '../types';
 
 export class SatoriHttpServerAdapter extends ISatoriNetworkAdapter<SatoriHttpServerConfig> {
   private app: Express | null = null;

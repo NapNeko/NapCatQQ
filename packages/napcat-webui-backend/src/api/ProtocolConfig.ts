@@ -104,6 +104,78 @@ export const SatoriSetConfigHandler: RequestHandler = async (req, res) => {
   }
 };
 
+// 获取指定协议配置
+export const GetProtocolConfigHandler: RequestHandler = (req, res) => {
+  const isLogin = WebUiDataRuntime.getQQLoginStatus();
+  if (!isLogin) {
+    return sendError(res, 'Not Login');
+  }
+
+  const { name } = req.params;
+  const uin = WebUiDataRuntime.getQQLoginUin();
+  // 映射 protocol name 到文件名
+  const protocolId = name === 'onebot11' ? 'onebot11' : name;
+
+  const configFilePath = resolve(webUiPathWrapper.configPath, `./${protocolId}_${uin}.json`);
+
+  try {
+    let configData: any = {};
+    // Satori 特殊处理默认值, 其他协议也可以在这里添加默认值
+    if (name === 'satori') {
+      configData = {
+        network: {
+          websocketServers: [],
+          httpServers: [],
+          webhookClients: [],
+        },
+        platform: 'qq',
+        selfId: uin,
+      };
+    }
+
+    if (existsSync(configFilePath)) {
+      const content = readFileSync(configFilePath, 'utf-8');
+      configData = json5.parse(content);
+    }
+    return sendSuccess(res, configData);
+  } catch (e) {
+    return sendError(res, 'Config Get Error: ' + e);
+  }
+};
+
+// 设置指定协议配置
+export const SetProtocolConfigHandler: RequestHandler = async (req, res) => {
+  const isLogin = WebUiDataRuntime.getQQLoginStatus();
+  if (!isLogin) {
+    return sendError(res, 'Not Login');
+  }
+
+  const { name } = req.params;
+  if (isEmpty(req.body.config)) {
+    return sendError(res, 'config is empty');
+  }
+
+  try {
+    const config = json5.parse(req.body.config);
+    if (name === 'satori') {
+      await WebUiDataRuntime.setSatoriConfig(config);
+    } else {
+      // 对于未特殊处理的协议，走通用的写文件逻辑
+      const uin = WebUiDataRuntime.getQQLoginUin();
+      // TODO: 这里目前 napcat-core 及其 helper 可能没有通用的 setConfig，
+      // 但 WebUiDataRuntime.setSatoriConfig 本质也是写文件。
+      // 暂时只支持 Satori 的通用调用 via this handler, 
+      // OneBot11 还是走原来的 /api/config
+      if (name !== 'satori') {
+        return sendError(res, 'Protocol not supported for generic set yet');
+      }
+    }
+    return sendSuccess(res, null);
+  } catch (e) {
+    return sendError(res, 'Error: ' + e);
+  }
+};
+
 // 获取所有协议配置
 export const GetAllProtocolConfigsHandler: RequestHandler = (_req, res) => {
   const isLogin = WebUiDataRuntime.getQQLoginStatus();

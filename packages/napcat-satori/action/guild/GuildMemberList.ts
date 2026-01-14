@@ -1,5 +1,5 @@
 import { SatoriAction } from '../SatoriAction';
-import { SatoriGuildMember, SatoriPageResult } from '@/napcat-satori/types';
+import { SatoriGuildMember, SatoriPageResult } from '../../types';
 import { GroupMember } from 'napcat-core';
 
 interface GuildMemberListPayload {
