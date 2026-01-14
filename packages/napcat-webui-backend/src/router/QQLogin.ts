@@ -10,6 +10,7 @@ import {
   getAutoLoginAccountHandler,
   setAutoLoginAccountHandler,
   QQRefreshQRcodeHandler,
+  QQRestartHandler,
 } from '@/napcat-webui-backend/src/api/QQLogin';
 
 const router = Router();
@@ -31,5 +32,7 @@ router.post('/GetQuickLoginQQ', getAutoLoginAccountHandler);
 router.post('/SetQuickLoginQQ', setAutoLoginAccountHandler);
 // router:刷新QQ登录二维码
 router.post('/RefreshQRcode', QQRefreshQRcodeHandler);
+// router:重启QQ
+router.post('/Restart', QQRestartHandler);
 
 export { router as QQLoginRouter };

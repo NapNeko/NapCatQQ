@@ -81,7 +81,7 @@ export const ActionName = {
   CanSendRecord: 'can_send_record',
   GetStatus: 'get_status',
   GetVersionInfo: 'get_version_info',
-  // Reboot : 'set_restart',
+  Reboot: 'set_restart',
   CleanCache: 'clean_cache',
   Exit: 'bot_exit',
   // go-cqhttp

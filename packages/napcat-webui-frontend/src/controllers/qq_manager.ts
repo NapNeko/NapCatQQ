@@ -1,3 +1,4 @@
+import { AxiosRequestConfig } from 'axios';
 import { serverRequest } from '@/utils/request';
 
 import { SelfInfo } from '@/types/user';
@@ -71,9 +72,11 @@ export default class QQManager {
     });
   }
 
-  public static async getQQLoginInfo () {
+  public static async getQQLoginInfo (config?: AxiosRequestConfig) {
     const data = await serverRequest.post<ServerResponse<SelfInfo>>(
-      '/QQLogin/GetQQLoginInfo'
+      '/QQLogin/GetQQLoginInfo',
+      {},
+      config
     );
     return data.data.data;
   }
@@ -89,5 +92,9 @@ export default class QQManager {
     await serverRequest.post<ServerResponse<null>>('/QQLogin/SetQuickLoginQQ', {
       uin,
     });
+  }
+
+  public static async reboot () {
+    await serverRequest.post<ServerResponse<null>>('/QQLogin/Restart');
   }
 }

@@ -1,9 +1,11 @@
 import { RequestHandler } from 'express';
+import { writeFileSync } from 'fs';
+import { join } from 'path';
 
 import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
+import { webUiPathWrapper, WebUiConfig } from '@/napcat-webui-backend/index';
 import { isEmpty } from '@/napcat-webui-backend/src/utils/check';
 import { sendError, sendSuccess } from '@/napcat-webui-backend/src/utils/response';
-import { WebUiConfig } from '@/napcat-webui-backend/index';
 
 // 获取QQ登录二维码
 export const QQGetQRcodeHandler: RequestHandler = async (_, res) => {
@@ -107,4 +109,13 @@ export const QQRefreshQRcodeHandler: RequestHandler = async (_, res) => {
   // 刷新二维码
   await WebUiDataRuntime.refreshQRCode();
   return sendSuccess(res, null);
+};
+
+// 退出以重启重新登录
+export const QQRestartHandler: RequestHandler = async (_, res) => {
+  sendSuccess(res, null);
+  setTimeout(() => {
+    writeFileSync(join(webUiPathWrapper.binaryPath, 'napcat.restart'), Date.now().toString());
+    process.exit(51);
+  }, 100);
 };
