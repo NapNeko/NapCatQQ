@@ -246,7 +246,7 @@ export class NapCatOneBot11Adapter {
     await this.handleConfigChange(prev.network.websocketClients, now.network.websocketClients, OB11WebSocketClientAdapter);
   }
 
-  private async handleConfigChange<CT extends NetworkAdapterConfig>(
+  private async handleConfigChange<CT extends NetworkAdapterConfig> (
     prevConfig: NetworkAdapterConfig[],
     nowConfig: NetworkAdapterConfig[],
     adapterClass: new (
@@ -305,6 +305,9 @@ export class NapCatOneBot11Adapter {
     };
 
     msgListener.onRecvMsg = async (msg) => {
+      if (!this.networkManager.hasActiveAdapters()) {
+        return;
+      }
       for (const m of msg) {
         if (this.bootTime > parseInt(m.msgTime)) {
           this.context.logger.logDebug(`消息时间${m.msgTime}早于启动时间${this.bootTime}，忽略上报`);
@@ -517,15 +520,14 @@ export class NapCatOneBot11Adapter {
   }
 
   private async emitMsg (message: RawMessage) {
-    const network = await this.networkManager.getAllConfig();
     this.context.logger.logDebug('收到新消息 RawMessage', message);
     await Promise.allSettled([
-      this.handleMsg(message, network),
+      this.handleMsg(message),
       message.chatType === ChatType.KCHATTYPEGROUP ? this.handleGroupEvent(message) : this.handlePrivateMsgEvent(message),
     ]);
   }
 
-  private async handleMsg (message: RawMessage, network: Array<NetworkAdapterConfig>) {
+  private async handleMsg (message: RawMessage) {
     // 过滤无效消息
     if (message.msgType === NTMsgType.KMSGTYPENULL) {
       return;
@@ -535,10 +537,36 @@ export class NapCatOneBot11Adapter {
       if (ob11Msg) {
         const isSelfMsg = this.isSelfMessage(ob11Msg);
         this.context.logger.logDebug('转化为 OB11Message', ob11Msg);
-        const msgMap = this.createMsgMap(network, ob11Msg, isSelfMsg, message);
-        this.handleDebugNetwork(network, msgMap, message);
-        this.handleNotReportSelfNetwork(network, msgMap, isSelfMsg);
-        this.networkManager.emitEventByNames(msgMap);
+        if (isSelfMsg || message.chatType !== ChatType.KCHATTYPEGROUP) {
+          const targetId = parseInt(message.peerUin);
+          ob11Msg.stringMsg.target_id = targetId;
+          ob11Msg.arrayMsg.target_id = targetId;
+        }
+
+        const msgMap = new Map<string, OB11Message>();
+
+        for (const adapter of this.networkManager.adapters.values()) {
+          if (!adapter.isActive) continue;
+          const config = adapter.config;
+          if (isSelfMsg) {
+            if (!('reportSelfMessage' in config) || !config.reportSelfMessage) {
+              continue;
+            }
+          }
+          const msgData = config.messagePostFormat === 'string' ? ob11Msg.stringMsg : ob11Msg.arrayMsg;
+          if (config.debug) {
+            const clone = structuredClone(msgData);
+            clone.raw = message;
+            msgMap.set(adapter.name, clone);
+          } else {
+            msgMap.set(adapter.name, msgData);
+          }
+        }
+        if (msgMap.size > 0) {
+          this.networkManager.emitEventByNames(msgMap);
+        } else if (this.networkManager.hasActiveAdapters()) {
+          this.context.logger.logDebug('没有可用的网络适配器发送消息，消息内容:', message);
+        }
       }
     } catch (e) {
       this.context.logger.logError('constructMessage error: ', e);
@@ -551,48 +579,6 @@ export class NapCatOneBot11Adapter {
   }): boolean {
     return ob11Msg.stringMsg.user_id.toString() === this.core.selfInfo.uin ||
       ob11Msg.arrayMsg.user_id.toString() === this.core.selfInfo.uin;
-  }
-
-  private createMsgMap (network: Array<NetworkAdapterConfig>, ob11Msg: {
-    stringMsg: OB11Message;
-    arrayMsg: OB11Message;
-  }, isSelfMsg: boolean, message: RawMessage): Map<string, OB11Message> {
-    const msgMap: Map<string, OB11Message> = new Map();
-    network.filter(e => e.enable).forEach(e => {
-      if (isSelfMsg || message.chatType !== ChatType.KCHATTYPEGROUP) {
-        ob11Msg.stringMsg.target_id = parseInt(message.peerUin);
-        ob11Msg.arrayMsg.target_id = parseInt(message.peerUin);
-      }
-      if ('messagePostFormat' in e && e.messagePostFormat === 'string') {
-        msgMap.set(e.name, structuredClone(ob11Msg.stringMsg));
-      } else {
-        msgMap.set(e.name, structuredClone(ob11Msg.arrayMsg));
-      }
-    });
-    return msgMap;
-  }
-
-  private handleDebugNetwork (network: Array<NetworkAdapterConfig>, msgMap: Map<string, OB11Message>, message: RawMessage) {
-    const debugNetwork = network.filter(e => e.enable && e.debug);
-    if (debugNetwork.length > 0) {
-      debugNetwork.forEach(adapter => {
-        const msg = msgMap.get(adapter.name);
-        if (msg) {
-          msg.raw = message;
-        }
-      });
-    } else if (msgMap.size === 0) {
-      this.context.logger.logDebug('没有可用的网络适配器发送消息，消息内容:', message);
-    }
-  }
-
-  private handleNotReportSelfNetwork (network: Array<NetworkAdapterConfig>, msgMap: Map<string, OB11Message>, isSelfMsg: boolean) {
-    if (isSelfMsg) {
-      const notReportSelfNetwork = network.filter(e => e.enable && (('reportSelfMessage' in e && !e.reportSelfMessage) || !('reportSelfMessage' in e)));
-      notReportSelfNetwork.forEach(adapter => {
-        msgMap.delete(adapter.name);
-      });
-    }
   }
 
   private async handleGroupEvent (message: RawMessage) {
