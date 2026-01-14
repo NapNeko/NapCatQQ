@@ -33,6 +33,10 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
   private readonly pluginPath: string;
   private loadedPlugins: Map<string, LoadedPlugin> = new Map();
   declare config: PluginConfig;
+  override get isActive (): boolean {
+    return this.isEnable && this.loadedPlugins.size > 0;
+  }
+
   constructor (
     name: string, core: NapCatCore, obContext: NapCatOneBot11Adapter, actions: ActionMap
   ) {
@@ -251,7 +255,7 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
     this.logger.log(`[Plugin Adapter] Unloaded plugin: ${pluginName}`);
   }
 
-  async onEvent<T extends OB11EmitEventContent>(event: T) {
+  async onEvent<T extends OB11EmitEventContent> (event: T) {
     if (!this.isEnable) {
       return;
     }
@@ -359,7 +363,7 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
 
       // 重新加载插件
       const isDirectory = fs.statSync(plugin.pluginPath).isDirectory() &&
-                plugin.pluginPath !== this.pluginPath;
+        plugin.pluginPath !== this.pluginPath;
 
       if (isDirectory) {
         const dirname = path.basename(plugin.pluginPath);
