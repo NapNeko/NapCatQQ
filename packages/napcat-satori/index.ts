@@ -249,13 +249,7 @@ export class NapCatSatoriAdapter {
         }
 
         try {
-          const requesterUin = await this.core.apis.UserApi.getUinByUidV2(req.friendUid);
-          const event = this.apis.EventApi.createFriendRequestEvent(
-            requesterUin,
-            req.friendNick || requesterUin,
-            req.extWords,
-            req.friendUid
-          );
+          const event = this.apis.EventApi.createFriendRequestEvent(req);
           await this.networkManager.emitEvent(event);
         } catch (error) {
           this.context.logger.logError('[Satori] 处理好友请求失败', error);
@@ -284,15 +278,7 @@ export class NapCatSatoriAdapter {
             [GroupNotifyMsgType.REQUEST_JOIN_NEED_ADMINI_STRATOR_PASS].includes(notify.type) &&
             notify.status === GroupNotifyMsgStatus.KUNHANDLE
           ) {
-            const requestUin = await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid);
-            const event = this.apis.EventApi.createGuildMemberRequestEvent(
-              notify.group.groupCode,
-              notify.group.groupName,
-              requestUin,
-              notify.user1.nickName || requestUin,
-              notify.postscript,
-              notify.seq
-            );
+            const event = this.apis.EventApi.createGuildMemberRequestEvent(notify);
             await this.networkManager.emitEvent(event);
           }
         } catch (error) {
@@ -322,3 +308,5 @@ export class NapCatSatoriAdapter {
 
 export * from './types';
 export * from './config';
+export * from './action';
+export * from './helper';

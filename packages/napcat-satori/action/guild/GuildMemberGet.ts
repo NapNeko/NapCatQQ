@@ -1,15 +1,20 @@
+import { Static, Type } from '@sinclair/typebox';
 import { SatoriAction } from '../SatoriAction';
+import { SatoriActionName } from '../router';
 import { SatoriGuildMember } from '../../types';
 
-interface GuildMemberGetPayload {
-  guild_id: string;
-  user_id: string;
-}
+const SchemaData = Type.Object({
+  guild_id: Type.String(),
+  user_id: Type.String(),
+});
 
-export class GuildMemberGetAction extends SatoriAction<GuildMemberGetPayload, SatoriGuildMember> {
-  actionName = 'guild.member.get';
+type Payload = Static<typeof SchemaData>;
 
-  async handle (payload: GuildMemberGetPayload): Promise<SatoriGuildMember> {
+export class GuildMemberGetAction extends SatoriAction<Payload, SatoriGuildMember> {
+  actionName = SatoriActionName.GuildMemberGet;
+  override payloadSchema = SchemaData;
+
+  protected async _handle (payload: Payload): Promise<SatoriGuildMember> {
     const { guild_id, user_id } = payload;
 
     const memberInfo = await this.core.apis.GroupApi.getGroupMember(guild_id, user_id);

@@ -1,21 +1,26 @@
+import { Static, Type } from '@sinclair/typebox';
 import { SatoriAction } from '../SatoriAction';
+import { SatoriActionName } from '../router';
 import { SatoriChannel, SatoriChannelType, SatoriPageResult } from '../../types';
 
-interface ChannelListPayload {
-  guild_id: string;
-  next?: string;
-}
+const SchemaData = Type.Object({
+  guild_id: Type.String(),
+  next: Type.Optional(Type.String()),
+});
 
-export class ChannelListAction extends SatoriAction<ChannelListPayload, SatoriPageResult<SatoriChannel>> {
-  actionName = 'channel.list';
+type Payload = Static<typeof SchemaData>;
 
-  async handle (payload: ChannelListPayload): Promise<SatoriPageResult<SatoriChannel>> {
+export class ChannelListAction extends SatoriAction<Payload, SatoriPageResult<SatoriChannel>> {
+  actionName = SatoriActionName.ChannelList;
+  override payloadSchema = SchemaData;
+
+  protected async _handle (payload: Payload): Promise<SatoriPageResult<SatoriChannel>> {
     const { guild_id } = payload;
 
     // 在 QQ 中，群组只有一个文本频道
     // 先从群列表缓存中查找
     const groups = await this.core.apis.GroupApi.getGroups();
-    let group = groups.find(e => e.groupCode === guild_id);
+    const group = groups.find((e) => e.groupCode === guild_id);
     let groupName: string;
 
     if (!group) {

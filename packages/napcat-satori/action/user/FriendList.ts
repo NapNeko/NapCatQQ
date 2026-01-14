@@ -1,14 +1,19 @@
+import { Static, Type } from '@sinclair/typebox';
 import { SatoriAction } from '../SatoriAction';
+import { SatoriActionName } from '../router';
 import { SatoriUser, SatoriPageResult } from '../../types';
 
-interface FriendListPayload {
-  next?: string;
-}
+const SchemaData = Type.Object({
+  next: Type.Optional(Type.String()),
+});
 
-export class FriendListAction extends SatoriAction<FriendListPayload, SatoriPageResult<SatoriUser>> {
-  actionName = 'friend.list';
+type Payload = Static<typeof SchemaData>;
 
-  async handle (_payload: FriendListPayload): Promise<SatoriPageResult<SatoriUser>> {
+export class FriendListAction extends SatoriAction<Payload, SatoriPageResult<SatoriUser>> {
+  actionName = SatoriActionName.FriendList;
+  override payloadSchema = SchemaData;
+
+  protected async _handle (_payload: Payload): Promise<SatoriPageResult<SatoriUser>> {
     const friends = await this.core.apis.FriendApi.getBuddy();
 
     const friendList: SatoriUser[] = friends.map((friend) => ({

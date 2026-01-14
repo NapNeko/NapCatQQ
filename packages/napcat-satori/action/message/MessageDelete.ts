@@ -1,15 +1,20 @@
+import { Static, Type } from '@sinclair/typebox';
 import { SatoriAction } from '../SatoriAction';
+import { SatoriActionName } from '../router';
 import { ChatType } from 'napcat-core';
 
-interface MessageDeletePayload {
-  channel_id: string;
-  message_id: string;
-}
+const SchemaData = Type.Object({
+  channel_id: Type.String(),
+  message_id: Type.String(),
+});
 
-export class MessageDeleteAction extends SatoriAction<MessageDeletePayload, void> {
-  actionName = 'message.delete';
+type Payload = Static<typeof SchemaData>;
 
-  async handle (payload: MessageDeletePayload): Promise<void> {
+export class MessageDeleteAction extends SatoriAction<Payload, void> {
+  actionName = SatoriActionName.MessageDelete;
+  override payloadSchema = SchemaData;
+
+  protected async _handle (payload: Payload): Promise<void> {
     const { channel_id, message_id } = payload;
 
     const parts = channel_id.split(':');

@@ -1,14 +1,19 @@
+import { Static, Type } from '@sinclair/typebox';
 import { SatoriAction } from '../SatoriAction';
+import { SatoriActionName } from '../router';
 import { SatoriUser } from '../../types';
 
-interface UserGetPayload {
-  user_id: string;
-}
+const SchemaData = Type.Object({
+  user_id: Type.String(),
+});
 
-export class UserGetAction extends SatoriAction<UserGetPayload, SatoriUser> {
-  actionName = 'user.get';
+type Payload = Static<typeof SchemaData>;
 
-  async handle (payload: UserGetPayload): Promise<SatoriUser> {
+export class UserGetAction extends SatoriAction<Payload, SatoriUser> {
+  actionName = SatoriActionName.UserGet;
+  override payloadSchema = SchemaData;
+
+  protected async _handle (payload: Payload): Promise<SatoriUser> {
     const { user_id } = payload;
 
     const uid = await this.core.apis.UserApi.getUidByUinV2(user_id);

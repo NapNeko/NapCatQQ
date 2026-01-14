@@ -1,15 +1,20 @@
+import { Static, Type } from '@sinclair/typebox';
 import { SatoriAction } from '../SatoriAction';
+import { SatoriActionName } from '../router';
 
-interface GuildMemberMutePayload {
-  guild_id: string;
-  user_id: string;
-  duration?: number; // 禁言时长（毫秒），0 表示解除禁言
-}
+const SchemaData = Type.Object({
+  guild_id: Type.String(),
+  user_id: Type.String(),
+  duration: Type.Optional(Type.Number({ default: 0 })), // 禁言时长（毫秒），0 表示解除禁言
+});
 
-export class GuildMemberMuteAction extends SatoriAction<GuildMemberMutePayload, void> {
-  actionName = 'guild.member.mute';
+type Payload = Static<typeof SchemaData>;
 
-  async handle (payload: GuildMemberMutePayload): Promise<void> {
+export class GuildMemberMuteAction extends SatoriAction<Payload, void> {
+  actionName = SatoriActionName.GuildMemberMute;
+  override payloadSchema = SchemaData;
+
+  protected async _handle (payload: Payload): Promise<void> {
     const { guild_id, user_id, duration } = payload;
 
     // 将毫秒转换为秒

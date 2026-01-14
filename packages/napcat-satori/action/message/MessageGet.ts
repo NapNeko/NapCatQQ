@@ -1,16 +1,21 @@
+import { Static, Type } from '@sinclair/typebox';
 import { SatoriAction } from '../SatoriAction';
+import { SatoriActionName } from '../router';
 import { SatoriMessage, SatoriChannelType } from '../../types';
 import { ChatType } from 'napcat-core';
 
-interface MessageGetPayload {
-  channel_id: string;
-  message_id: string;
-}
+const SchemaData = Type.Object({
+  channel_id: Type.String(),
+  message_id: Type.String(),
+});
 
-export class MessageGetAction extends SatoriAction<MessageGetPayload, SatoriMessage> {
-  actionName = 'message.get';
+type Payload = Static<typeof SchemaData>;
 
-  async handle (payload: MessageGetPayload): Promise<SatoriMessage> {
+export class MessageGetAction extends SatoriAction<Payload, SatoriMessage> {
+  actionName = SatoriActionName.MessageGet;
+  override payloadSchema = SchemaData;
+
+  protected async _handle (payload: Payload): Promise<SatoriMessage> {
     const { channel_id, message_id } = payload;
 
     const parts = channel_id.split(':');

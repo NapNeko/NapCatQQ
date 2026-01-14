@@ -1,14 +1,19 @@
+import { Static, Type } from '@sinclair/typebox';
 import { SatoriAction } from '../SatoriAction';
+import { SatoriActionName } from '../router';
 import { SatoriChannel, SatoriChannelType } from '../../types';
 
-interface ChannelGetPayload {
-  channel_id: string;
-}
+const SchemaData = Type.Object({
+  channel_id: Type.String(),
+});
 
-export class ChannelGetAction extends SatoriAction<ChannelGetPayload, SatoriChannel> {
-  actionName = 'channel.get';
+type Payload = Static<typeof SchemaData>;
 
-  async handle (payload: ChannelGetPayload): Promise<SatoriChannel> {
+export class ChannelGetAction extends SatoriAction<Payload, SatoriChannel> {
+  actionName = SatoriActionName.ChannelGet;
+  override payloadSchema = SchemaData;
+
+  protected async _handle (payload: Payload): Promise<SatoriChannel> {
     const { channel_id } = payload;
 
     const parts = channel_id.split(':');
@@ -31,7 +36,7 @@ export class ChannelGetAction extends SatoriAction<ChannelGetPayload, SatoriChan
     } else if (type === 'group') {
       // 先从群列表缓存中查找
       const groups = await this.core.apis.GroupApi.getGroups();
-      let group = groups.find(e => e.groupCode === id);
+      const group = groups.find((e) => e.groupCode === id);
 
       if (!group) {
         // 如果缓存中没有，尝试获取详细信息

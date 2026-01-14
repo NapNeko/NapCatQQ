@@ -1,16 +1,21 @@
+import { Static, Type } from '@sinclair/typebox';
 import { SatoriAction } from '../SatoriAction';
+import { SatoriActionName } from '../router';
 import { SatoriGuildMember, SatoriPageResult } from '../../types';
 import { GroupMember } from 'napcat-core';
 
-interface GuildMemberListPayload {
-  guild_id: string;
-  next?: string;
-}
+const SchemaData = Type.Object({
+  guild_id: Type.String(),
+  next: Type.Optional(Type.String()),
+});
 
-export class GuildMemberListAction extends SatoriAction<GuildMemberListPayload, SatoriPageResult<SatoriGuildMember>> {
-  actionName = 'guild.member.list';
+type Payload = Static<typeof SchemaData>;
 
-  async handle (payload: GuildMemberListPayload): Promise<SatoriPageResult<SatoriGuildMember>> {
+export class GuildMemberListAction extends SatoriAction<Payload, SatoriPageResult<SatoriGuildMember>> {
+  actionName = SatoriActionName.GuildMemberList;
+  override payloadSchema = SchemaData;
+
+  protected async _handle (payload: Payload): Promise<SatoriPageResult<SatoriGuildMember>> {
     const { guild_id } = payload;
 
     // 使用 getGroupMemberAll 获取所有群成员

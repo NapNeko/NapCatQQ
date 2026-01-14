@@ -1,75 +1,32 @@
 import { NapCatCore, MessageElement, ElementType, NTMsgAtType } from 'napcat-core';
 import { NapCatSatoriAdapter } from '../index';
+import SatoriElement from '@satorijs/element';
 
+/**
+ * Satori 消息处理 API
+ * 使用 @satorijs/element 处理消息格式转换
+ */
 export class SatoriMsgApi {
   private core: NapCatCore;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private _adapter: NapCatSatoriAdapter;
 
-  constructor (_satoriAdapter: NapCatSatoriAdapter, core: NapCatCore) {
+  constructor (satoriAdapter: NapCatSatoriAdapter, core: NapCatCore) {
+    this._adapter = satoriAdapter;
     this.core = core;
   }
 
   /**
    * 解析 Satori 消息内容为 NapCat 消息元素
+   * 使用 @satorijs/element 解析
    */
   async parseContent (content: string): Promise<MessageElement[]> {
     const elements: MessageElement[] = [];
+    const parsed = SatoriElement.parse(content);
 
-    // 简单的 XML 解析
-    const tagRegex = /<(\w+)([^>]*)(?:\/>|>([\s\S]*?)<\/\1>)/g;
-    let lastIndex = 0;
-    let match: RegExpExecArray | null;
-
-    while ((match = tagRegex.exec(content)) !== null) {
-      // 处理标签前的文本
-      if (match.index > lastIndex) {
-        const text = content.slice(lastIndex, match.index);
-        if (text.trim()) {
-          elements.push(this.createTextElement(text));
-        }
-      }
-
-      const [, tagName, attrs = '', innerContent] = match;
-      const parsedAttrs = this.parseAttributes(attrs);
-
-      switch (tagName) {
-        case 'at':
-          elements.push(await this.createAtElement(parsedAttrs));
-          break;
-        case 'img':
-        case 'image':
-          elements.push(await this.createImageElement(parsedAttrs));
-          break;
-        case 'audio':
-          elements.push(await this.createAudioElement(parsedAttrs));
-          break;
-        case 'video':
-          elements.push(await this.createVideoElement(parsedAttrs));
-          break;
-        case 'file':
-          elements.push(await this.createFileElement(parsedAttrs));
-          break;
-        case 'face':
-          elements.push(this.createFaceElement(parsedAttrs));
-          break;
-        case 'quote':
-          elements.push(await this.createQuoteElement(parsedAttrs));
-          break;
-        default:
-          // 未知标签，作为文本处理
-          if (innerContent) {
-            elements.push(this.createTextElement(innerContent));
-          }
-      }
-
-      lastIndex = match.index + match[0].length;
-    }
-
-    // 处理剩余文本
-    if (lastIndex < content.length) {
-      const text = content.slice(lastIndex);
-      if (text.trim()) {
-        elements.push(this.createTextElement(text));
-      }
+    for (const elem of parsed) {
+      const parsedElements = await this.parseSatoriElement(elem);
+      elements.push(...parsedElements);
     }
 
     // 如果没有解析到任何元素，将整个内容作为文本
@@ -81,73 +38,231 @@ export class SatoriMsgApi {
   }
 
   /**
-   * 解析 NapCat 消息元素为 Satori 消息内容
+   * 解析 satorijs 元素为消息元素
    */
-  async parseElements (elements: MessageElement[]): Promise<string> {
-    const parts: string[] = [];
+  private async parseSatoriElement (elem: SatoriElement): Promise<MessageElement[]> {
+    const elements: MessageElement[] = [];
 
-    for (const element of elements) {
-      switch (element.elementType) {
-        case ElementType.TEXT:
-          if (element.textElement) {
-            parts.push(this.escapeXml(element.textElement.content));
-          }
-          break;
-        case ElementType.PIC:
-          if (element.picElement) {
-            const src = element.picElement.sourcePath || '';
-            parts.push(`<img src="${this.escapeXml(src)}"/>`);
-          }
-          break;
-        case ElementType.PTT:
-          if (element.pttElement) {
-            const src = element.pttElement.filePath || '';
-            parts.push(`<audio src="${this.escapeXml(src)}"/>`);
-          }
-          break;
-        case ElementType.VIDEO:
-          if (element.videoElement) {
-            const src = element.videoElement.filePath || '';
-            parts.push(`<video src="${this.escapeXml(src)}"/>`);
-          }
-          break;
-        case ElementType.FILE:
-          if (element.fileElement) {
-            const src = element.fileElement.filePath || '';
-            parts.push(`<file src="${this.escapeXml(src)}"/>`);
-          }
-          break;
-        case ElementType.FACE:
-          if (element.faceElement) {
-            parts.push(`<face id="${element.faceElement.faceIndex}"/>`);
-          }
-          break;
-        case ElementType.REPLY:
-          if (element.replyElement) {
-            parts.push(`<quote id="${element.replyElement.sourceMsgIdInRecords}"/>`);
-          }
-          break;
-        default:
-          // 其他类型暂不处理
-          break;
+    switch (elem.type) {
+      case 'text':
+        if (elem.attrs['content']) {
+          elements.push(this.createTextElement(elem.attrs['content']));
+        }
+        break;
+
+      case 'at': {
+        const attrs = elem.attrs;
+        elements.push(await this.createAtElement({
+          id: attrs['id'] || '',
+          type: attrs['type'] || '',
+          name: attrs['name'] || '',
+        }));
+        break;
       }
+
+      case 'img':
+      case 'image': {
+        const attrs = elem.attrs;
+        elements.push(await this.createImageElement({
+          src: attrs['src'] || '',
+          width: attrs['width'] || '',
+          height: attrs['height'] || '',
+        }));
+        break;
+      }
+
+      case 'audio': {
+        const attrs = elem.attrs;
+        elements.push(await this.createAudioElement({
+          src: attrs['src'] || '',
+          duration: attrs['duration'] || '',
+        }));
+        break;
+      }
+
+      case 'video': {
+        const attrs = elem.attrs;
+        elements.push(await this.createVideoElement({
+          src: attrs['src'] || '',
+        }));
+        break;
+      }
+
+      case 'file': {
+        const attrs = elem.attrs;
+        elements.push(await this.createFileElement({
+          src: attrs['src'] || '',
+          title: attrs['title'] || '',
+        }));
+        break;
+      }
+
+      case 'face': {
+        const attrs = elem.attrs;
+        elements.push(this.createFaceElement({
+          id: attrs['id'] || '0',
+        }));
+        break;
+      }
+
+      case 'quote': {
+        const attrs = elem.attrs;
+        elements.push(await this.createQuoteElement({
+          id: attrs['id'] || '',
+        }));
+        break;
+      }
+
+      case 'a': {
+        const href = elem.attrs['href'];
+        if (href) {
+          const linkText = elem.children.map((c) => c.toString()).join('');
+          elements.push(this.createTextElement(`${linkText} (${href})`));
+        }
+        break;
+      }
+
+      case 'button': {
+        const text = elem.attrs['text'];
+        if (text) {
+          elements.push(this.createTextElement(`[${text}]`));
+        }
+        break;
+      }
+
+      case 'br':
+        elements.push(this.createTextElement('\n'));
+        break;
+
+      case 'p':
+        for (const child of elem.children) {
+          elements.push(...await this.parseSatoriElement(child));
+        }
+        elements.push(this.createTextElement('\n'));
+        break;
+
+      default:
+        // 递归处理子元素
+        if (elem.children) {
+          for (const child of elem.children) {
+            elements.push(...await this.parseSatoriElement(child));
+          }
+        }
     }
 
-    return parts.join('');
+    return elements;
   }
 
-  private parseAttributes (attrString: string): Record<string, string> {
-    const attrs: Record<string, string> = {};
-    const attrRegex = /(\w+)=["']([^"']*)["']/g;
-    let match: RegExpExecArray | null;
-    while ((match = attrRegex.exec(attrString)) !== null) {
-      const key = match[1];
-      const value = match[2];
-      if (key !== undefined && value !== undefined) {
-        attrs[key] = value;
+  /**
+   * 解析 NapCat 消息元素为 Satori XML 消息内容
+   */
+  async parseElements (elements: MessageElement[]): Promise<string> {
+    const satoriElements: SatoriElement[] = [];
+
+    for (const element of elements) {
+      const node = await this.elementToSatoriElement(element);
+      if (node) {
+        satoriElements.push(node);
       }
     }
-    return attrs;
+
+    return satoriElements.map((e) => e.toString()).join('');
+  }
+
+  /**
+   * 将单个消息元素转换为 SatoriElement
+   */
+  private async elementToSatoriElement (element: MessageElement): Promise<SatoriElement | null> {
+    switch (element.elementType) {
+      case ElementType.TEXT:
+        if (element.textElement) {
+          if (element.textElement.atType === NTMsgAtType.ATTYPEALL) {
+            return SatoriElement('at', { type: 'all' });
+          } else if (element.textElement.atType === NTMsgAtType.ATTYPEONE && element.textElement.atUid) {
+            const uin = await this.core.apis.UserApi.getUinByUidV2(element.textElement.atUid);
+            return SatoriElement('at', { id: uin, name: element.textElement.content?.replace('@', '') });
+          }
+          return SatoriElement.text(element.textElement.content);
+        }
+        break;
+
+      case ElementType.PIC:
+        if (element.picElement) {
+          const src = await this.getMediaUrl(element.picElement.sourcePath || '', 'image');
+          return SatoriElement('img', {
+            src,
+            width: element.picElement.picWidth,
+            height: element.picElement.picHeight,
+          });
+        }
+        break;
+
+      case ElementType.PTT:
+        if (element.pttElement) {
+          const src = await this.getMediaUrl(element.pttElement.filePath || '', 'audio');
+          return SatoriElement('audio', {
+            src,
+            duration: element.pttElement.duration,
+          });
+        }
+        break;
+
+      case ElementType.VIDEO:
+        if (element.videoElement) {
+          const src = await this.getMediaUrl(element.videoElement.filePath || '', 'video');
+          return SatoriElement('video', { src });
+        }
+        break;
+
+      case ElementType.FILE:
+        if (element.fileElement) {
+          const src = element.fileElement.filePath || '';
+          return SatoriElement('file', {
+            src,
+            title: element.fileElement.fileName,
+          });
+        }
+        break;
+
+      case ElementType.FACE:
+        if (element.faceElement) {
+          return SatoriElement('face', { id: element.faceElement.faceIndex });
+        }
+        break;
+
+      case ElementType.REPLY:
+        if (element.replyElement) {
+          const msgId = element.replyElement.sourceMsgIdInRecords || element.replyElement.replayMsgId || '';
+          return SatoriElement('quote', { id: msgId });
+        }
+        break;
+
+      case ElementType.MFACE:
+        if (element.marketFaceElement) {
+          return SatoriElement('face', { id: element.marketFaceElement.emojiId || '0' });
+        }
+        break;
+
+      default:
+        break;
+    }
+
+    return null;
+  }
+
+  /**
+   * 获取媒体资源 URL
+   */
+  private async getMediaUrl (path: string, _type: 'image' | 'audio' | 'video'): Promise<string> {
+    if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
+      return path;
+    }
+
+    if (path.startsWith('/') || /^[a-zA-Z]:/.test(path)) {
+      return `file://${path.replace(/\\/g, '/')}`;
+    }
+
+    return path;
   }
 
   private createTextElement (content: string): MessageElement {
@@ -155,7 +270,7 @@ export class SatoriMsgApi {
       elementType: ElementType.TEXT,
       elementId: '',
       textElement: {
-        content: this.unescapeXml(content),
+        content,
         atType: NTMsgAtType.ATTYPEUNKNOWN,
         atUid: '',
         atTinyId: '',
@@ -164,9 +279,8 @@ export class SatoriMsgApi {
     };
   }
 
-  private async createAtElement (attrs: Record<string, string>): Promise<MessageElement> {
-    const id = attrs['id'] || '';
-    const type = attrs['type'];
+  private async createAtElement (attrs: { id: string; type?: string; name?: string; }): Promise<MessageElement> {
+    const { id, type } = attrs;
 
     if (type === 'all') {
       return {
@@ -198,34 +312,33 @@ export class SatoriMsgApi {
     };
   }
 
-  private async createImageElement (attrs: Record<string, string>): Promise<MessageElement> {
-    const src = attrs['src'] || '';
-    // 这里需要根据 src 类型处理（URL、base64、本地路径等）
+  private async createImageElement (attrs: { src: string; width?: string; height?: string; }): Promise<MessageElement> {
+    const src = attrs.src;
     return {
       elementType: ElementType.PIC,
       elementId: '',
       picElement: {
         sourcePath: src,
-        picWidth: parseInt(attrs['width'] || '0', 10),
-        picHeight: parseInt(attrs['height'] || '0', 10),
+        picWidth: parseInt(attrs.width || '0', 10),
+        picHeight: parseInt(attrs.height || '0', 10),
       },
     } as MessageElement;
   }
 
-  private async createAudioElement (attrs: Record<string, string>): Promise<MessageElement> {
-    const src = attrs['src'] || '';
+  private async createAudioElement (attrs: { src: string; duration?: string; }): Promise<MessageElement> {
+    const src = attrs.src;
     return {
       elementType: ElementType.PTT,
       elementId: '',
       pttElement: {
         filePath: src,
-        duration: parseInt(attrs['duration'] || '0', 10),
+        duration: parseInt(attrs.duration || '0', 10),
       },
     } as MessageElement;
   }
 
-  private async createVideoElement (attrs: Record<string, string>): Promise<MessageElement> {
-    const src = attrs['src'] || '';
+  private async createVideoElement (attrs: { src: string; }): Promise<MessageElement> {
+    const src = attrs.src;
     return {
       elementType: ElementType.VIDEO,
       elementId: '',
@@ -238,32 +351,32 @@ export class SatoriMsgApi {
     } as MessageElement;
   }
 
-  private async createFileElement (attrs: Record<string, string>): Promise<MessageElement> {
-    const src = attrs['src'] || '';
+  private async createFileElement (attrs: { src: string; title?: string; }): Promise<MessageElement> {
+    const src = attrs.src;
     return {
       elementType: ElementType.FILE,
       elementId: '',
       fileElement: {
         filePath: src,
-        fileName: attrs['title'] || '',
+        fileName: attrs.title || '',
         fileSize: '',
       },
     } as MessageElement;
   }
 
-  private createFaceElement (attrs: Record<string, string>): MessageElement {
+  private createFaceElement (attrs: { id: string; }): MessageElement {
     return {
       elementType: ElementType.FACE,
       elementId: '',
       faceElement: {
-        faceIndex: parseInt(attrs['id'] || '0', 10),
+        faceIndex: parseInt(attrs.id || '0', 10),
         faceType: 1,
       },
     } as MessageElement;
   }
 
-  private async createQuoteElement (attrs: Record<string, string>): Promise<MessageElement> {
-    const id = attrs['id'] || '';
+  private async createQuoteElement (attrs: { id: string; }): Promise<MessageElement> {
+    const id = attrs.id;
     return {
       elementType: ElementType.REPLY,
       elementId: '',
@@ -275,23 +388,5 @@ export class SatoriMsgApi {
         senderUinStr: '',
       },
     } as MessageElement;
-  }
-
-  private escapeXml (str: string): string {
-    return str
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&apos;');
-  }
-
-  private unescapeXml (str: string): string {
-    return str
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&quot;/g, '"')
-      .replace(/&apos;/g, "'");
   }
 }

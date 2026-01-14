@@ -1,16 +1,21 @@
+import { Static, Type } from '@sinclair/typebox';
 import { SatoriAction } from '../SatoriAction';
+import { SatoriActionName } from '../router';
 import { SatoriMessage, SatoriChannelType } from '../../types';
 import { ChatType, SendMessageElement } from 'napcat-core';
 
-interface MessageCreatePayload {
-  channel_id: string;
-  content: string;
-}
+const SchemaData = Type.Object({
+  channel_id: Type.String(),
+  content: Type.String(),
+});
 
-export class MessageCreateAction extends SatoriAction<MessageCreatePayload, SatoriMessage[]> {
-  actionName = 'message.create';
+type Payload = Static<typeof SchemaData>;
 
-  async handle (payload: MessageCreatePayload): Promise<SatoriMessage[]> {
+export class MessageCreateAction extends SatoriAction<Payload, SatoriMessage[]> {
+  actionName = SatoriActionName.MessageCreate;
+  override payloadSchema = SchemaData;
+
+  protected async _handle (payload: Payload): Promise<SatoriMessage[]> {
     const { channel_id, content } = payload;
 
     // 解析 channel_id，格式: private:{user_id} 或 group:{group_id}

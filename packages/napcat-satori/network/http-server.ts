@@ -2,14 +2,14 @@ import express, { Express, Request, Response, NextFunction } from 'express';
 import { createServer, Server } from 'http';
 import { NapCatCore } from 'napcat-core';
 import { NapCatSatoriAdapter } from '../index';
-import { SatoriActionMap } from '../action';
+import { SatoriActionMap, SatoriResponseHelper } from '../action';
 import { SatoriHttpServerConfig } from '../config/config';
 import {
   ISatoriNetworkAdapter,
   SatoriEmitEventContent,
   SatoriNetworkReloadType,
 } from './adapter';
-import { SatoriApiResponse, SatoriLoginStatus } from '../types';
+import { SatoriLoginStatus } from '../types';
 
 export class SatoriHttpServerAdapter extends ISatoriNetworkAdapter<SatoriHttpServerConfig> {
   private app: Express | null = null;
@@ -30,7 +30,7 @@ export class SatoriHttpServerAdapter extends ISatoriNetworkAdapter<SatoriHttpSer
 
     try {
       this.app = express();
-      this.app.use(express.json());
+      this.app.use(express.json({ limit: '50mb' }));
 
       // Token 验证中间件
       this.app.use(this.config.path || '/v1', (req: Request, res: Response, next: NextFunction): void => {
@@ -38,7 +38,7 @@ export class SatoriHttpServerAdapter extends ISatoriNetworkAdapter<SatoriHttpSer
           const authHeader = req.headers.authorization;
           const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : authHeader;
           if (token !== this.config.token) {
-            res.status(401).json({ error: { code: 401, message: 'Unauthorized' } });
+            res.status(401).json(SatoriResponseHelper.error(401, 'Unauthorized'));
             return;
           }
         }
@@ -110,7 +110,24 @@ export class SatoriHttpServerAdapter extends ISatoriNetworkAdapter<SatoriHttpSer
     const basePath = this.config.path || '/v1';
     const router = express.Router();
 
-    // 获取登录信息
+    // 通用 action 处理器
+    const handleAction = async (actionName: string, req: Request, res: Response): Promise<void> => {
+      const action = this.actions.get(actionName);
+      if (!action) {
+        res.status(404).json(SatoriResponseHelper.error(404, `未知的 action: ${actionName}`));
+        return;
+      }
+
+      try {
+        const result = await action.handle(req.body || {});
+        res.json(SatoriResponseHelper.success(result));
+      } catch (error) {
+        this.logger.logError(`[Satori] Action ${actionName} 执行失败:`, error);
+        res.status(500).json(SatoriResponseHelper.error(500, `${error}`));
+      }
+    };
+
+    // 登录信息（特殊处理，可以使用缓存）
     router.post('/login.get', async (_req: Request, res: Response) => {
       try {
         const result = {
@@ -123,234 +140,37 @@ export class SatoriHttpServerAdapter extends ISatoriNetworkAdapter<SatoriHttpSer
           platform: this.satoriContext.configLoader.configData.platform,
           status: SatoriLoginStatus.ONLINE,
         };
-        this.sendSuccess(res, result);
+        res.json(SatoriResponseHelper.success(result));
       } catch (error) {
-        this.sendError(res, 500, `获取登录信息失败: ${error}`);
+        res.status(500).json(SatoriResponseHelper.error(500, `获取登录信息失败: ${error}`));
       }
     });
 
-    // 发送消息
-    router.post('/message.create', async (req: Request, res: Response): Promise<void> => {
-      try {
-        const { channel_id, content } = req.body;
-        if (!channel_id || !content) {
-          this.sendError(res, 400, '缺少必要参数');
-          return;
-        }
-        const result = await this.actions.get('message.create')?.handle({ channel_id, content });
-        this.sendSuccess(res, result);
-      } catch (error) {
-        this.sendError(res, 500, `发送消息失败: ${error}`);
-      }
-    });
+    // 动态注册所有 action 路由
+    for (const [actionName] of this.actions) {
+      const routePath = `/${actionName.replace(/\./g, '/')}`;
+      router.post(routePath, (req, res) => handleAction(actionName, req, res));
 
-    // 获取消息
-    router.post('/message.get', async (req: Request, res: Response): Promise<void> => {
-      try {
-        const { channel_id, message_id } = req.body;
-        if (!channel_id || !message_id) {
-          this.sendError(res, 400, '缺少必要参数');
-          return;
-        }
-        const result = await this.actions.get('message.get')?.handle({ channel_id, message_id });
-        this.sendSuccess(res, result);
-      } catch (error) {
-        this.sendError(res, 500, `获取消息失败: ${error}`);
-      }
-    });
+      // 同时支持点号格式的路由
+      router.post(`/${actionName}`, (req, res) => handleAction(actionName, req, res));
+    }
 
-    // 删除消息
-    router.post('/message.delete', async (req: Request, res: Response): Promise<void> => {
-      try {
-        const { channel_id, message_id } = req.body;
-        if (!channel_id || !message_id) {
-          this.sendError(res, 400, '缺少必要参数');
-          return;
-        }
-        await this.actions.get('message.delete')?.handle({ channel_id, message_id });
-        this.sendSuccess(res, {});
-      } catch (error) {
-        this.sendError(res, 500, `删除消息失败: ${error}`);
+    // 通用 action 入口
+    router.post('/:action(*)', async (req: Request, res: Response) => {
+      const actionParam = req.params['action'];
+      if (!actionParam) {
+        res.status(400).json(SatoriResponseHelper.error(400, '缺少 action 参数'));
+        return;
       }
-    });
-
-    // 获取频道信息
-    router.post('/channel.get', async (req: Request, res: Response): Promise<void> => {
-      try {
-        const { channel_id } = req.body;
-        if (!channel_id) {
-          this.sendError(res, 400, '缺少必要参数');
-          return;
-        }
-        const result = await this.actions.get('channel.get')?.handle({ channel_id });
-        this.sendSuccess(res, result);
-      } catch (error) {
-        this.sendError(res, 500, `获取频道信息失败: ${error}`);
-      }
-    });
-
-    // 获取频道列表
-    router.post('/channel.list', async (req: Request, res: Response): Promise<void> => {
-      try {
-        const { guild_id, next } = req.body;
-        if (!guild_id) {
-          this.sendError(res, 400, '缺少必要参数');
-          return;
-        }
-        const result = await this.actions.get('channel.list')?.handle({ guild_id, next });
-        this.sendSuccess(res, result);
-      } catch (error) {
-        this.sendError(res, 500, `获取频道列表失败: ${error}`);
-      }
-    });
-
-    // 获取群组信息
-    router.post('/guild.get', async (req: Request, res: Response): Promise<void> => {
-      try {
-        const { guild_id } = req.body;
-        if (!guild_id) {
-          this.sendError(res, 400, '缺少必要参数');
-          return;
-        }
-        const result = await this.actions.get('guild.get')?.handle({ guild_id });
-        this.sendSuccess(res, result);
-      } catch (error) {
-        this.sendError(res, 500, `获取群组信息失败: ${error}`);
-      }
-    });
-
-    // 获取群组列表
-    router.post('/guild.list', async (req: Request, res: Response) => {
-      try {
-        const { next } = req.body;
-        const result = await this.actions.get('guild.list')?.handle({ next });
-        this.sendSuccess(res, result);
-      } catch (error) {
-        this.sendError(res, 500, `获取群组列表失败: ${error}`);
-      }
-    });
-
-    // 获取群成员信息
-    router.post('/guild.member.get', async (req: Request, res: Response): Promise<void> => {
-      try {
-        const { guild_id, user_id } = req.body;
-        if (!guild_id || !user_id) {
-          this.sendError(res, 400, '缺少必要参数');
-          return;
-        }
-        const result = await this.actions.get('guild.member.get')?.handle({ guild_id, user_id });
-        this.sendSuccess(res, result);
-      } catch (error) {
-        this.sendError(res, 500, `获取群成员信息失败: ${error}`);
-      }
-    });
-
-    // 获取群成员列表
-    router.post('/guild.member.list', async (req: Request, res: Response): Promise<void> => {
-      try {
-        const { guild_id, next } = req.body;
-        if (!guild_id) {
-          this.sendError(res, 400, '缺少必要参数');
-          return;
-        }
-        const result = await this.actions.get('guild.member.list')?.handle({ guild_id, next });
-        this.sendSuccess(res, result);
-      } catch (error) {
-        this.sendError(res, 500, `获取群成员列表失败: ${error}`);
-      }
-    });
-
-    // 获取用户信息
-    router.post('/user.get', async (req: Request, res: Response): Promise<void> => {
-      try {
-        const { user_id } = req.body;
-        if (!user_id) {
-          this.sendError(res, 400, '缺少必要参数');
-          return;
-        }
-        const result = await this.actions.get('user.get')?.handle({ user_id });
-        this.sendSuccess(res, result);
-      } catch (error) {
-        this.sendError(res, 500, `获取用户信息失败: ${error}`);
-      }
-    });
-
-    // 获取好友列表
-    router.post('/friend.list', async (req: Request, res: Response) => {
-      try {
-        const { next } = req.body;
-        const result = await this.actions.get('friend.list')?.handle({ next });
-        this.sendSuccess(res, result);
-      } catch (error) {
-        this.sendError(res, 500, `获取好友列表失败: ${error}`);
-      }
-    });
-
-    // 处理好友请求
-    router.post('/friend.approve', async (req: Request, res: Response): Promise<void> => {
-      try {
-        const { message_id, approve, comment } = req.body;
-        if (message_id === undefined || approve === undefined) {
-          this.sendError(res, 400, '缺少必要参数');
-          return;
-        }
-        await this.actions.get('friend.approve')?.handle({ message_id, approve, comment });
-        this.sendSuccess(res, {});
-      } catch (error) {
-        this.sendError(res, 500, `处理好友请求失败: ${error}`);
-      }
-    });
-
-    // 踢出群成员
-    router.post('/guild.member.kick', async (req: Request, res: Response): Promise<void> => {
-      try {
-        const { guild_id, user_id, permanent } = req.body;
-        if (!guild_id || !user_id) {
-          this.sendError(res, 400, '缺少必要参数');
-          return;
-        }
-        await this.actions.get('guild.member.kick')?.handle({ guild_id, user_id, permanent });
-        this.sendSuccess(res, {});
-      } catch (error) {
-        this.sendError(res, 500, `踢出群成员失败: ${error}`);
-      }
-    });
-
-    // 禁言群成员
-    router.post('/guild.member.mute', async (req: Request, res: Response): Promise<void> => {
-      try {
-        const { guild_id, user_id, duration } = req.body;
-        if (!guild_id || !user_id) {
-          this.sendError(res, 400, '缺少必要参数');
-          return;
-        }
-        await this.actions.get('guild.member.mute')?.handle({ guild_id, user_id, duration });
-        this.sendSuccess(res, {});
-      } catch (error) {
-        this.sendError(res, 500, `禁言群成员失败: ${error}`);
-      }
-    });
-
-    // 上传文件
-    router.post('/upload.create', async (req: Request, res: Response) => {
-      try {
-        const result = await this.actions.get('upload.create')?.handle(req.body);
-        this.sendSuccess(res, result);
-      } catch (error) {
-        this.sendError(res, 500, `上传文件失败: ${error}`);
-      }
+      const actionName = actionParam.replace(/\//g, '.');
+      await handleAction(actionName, req, res);
     });
 
     this.app.use(basePath, router);
-  }
 
-  private sendSuccess<T> (res: Response, data: T): void {
-    const response: SatoriApiResponse<T> = { data };
-    res.json(response);
-  }
-
-  private sendError (res: Response, code: number, message: string): void {
-    const response: SatoriApiResponse = { error: { code, message } };
-    res.status(code >= 400 && code < 600 ? code : 500).json(response);
+    // Debug 日志
+    if (this.config.debug) {
+      this.logger.logDebug(`[Satori] 已注册 ${this.actions.size} 个 action 路由`);
+    }
   }
 }

@@ -1,19 +1,24 @@
+import { Static, Type } from '@sinclair/typebox';
 import { SatoriAction } from '../SatoriAction';
+import { SatoriActionName } from '../router';
 import { SatoriGuild } from '../../types';
 
-interface GuildGetPayload {
-  guild_id: string;
-}
+const SchemaData = Type.Object({
+  guild_id: Type.String(),
+});
 
-export class GuildGetAction extends SatoriAction<GuildGetPayload, SatoriGuild> {
-  actionName = 'guild.get';
+type Payload = Static<typeof SchemaData>;
 
-  async handle (payload: GuildGetPayload): Promise<SatoriGuild> {
+export class GuildGetAction extends SatoriAction<Payload, SatoriGuild> {
+  actionName = SatoriActionName.GuildGet;
+  override payloadSchema = SchemaData;
+
+  protected async _handle (payload: Payload): Promise<SatoriGuild> {
     const { guild_id } = payload;
 
     // 先从群列表缓存中查找
     const groups = await this.core.apis.GroupApi.getGroups();
-    let group = groups.find(e => e.groupCode === guild_id);
+    const group = groups.find((e) => e.groupCode === guild_id);
 
     if (!group) {
       // 如果缓存中没有，尝试获取详细信息

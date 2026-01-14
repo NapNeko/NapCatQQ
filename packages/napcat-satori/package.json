@@ -25,7 +25,10 @@
     "ws": "^8.18.0",
     "@sinclair/typebox": "^0.34.33",
     "ajv": "^8.17.1",
-    "json5": "^2.2.3"
+    "json5": "^2.2.3",
+    "@satorijs/core": "^4.3.1",
+    "@satorijs/element": "^3.1.3",
+    "@satorijs/protocol": "^1.4.1"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",

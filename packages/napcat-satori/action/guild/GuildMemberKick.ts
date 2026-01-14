@@ -1,15 +1,20 @@
+import { Static, Type } from '@sinclair/typebox';
 import { SatoriAction } from '../SatoriAction';
+import { SatoriActionName } from '../router';
 
-interface GuildMemberKickPayload {
-  guild_id: string;
-  user_id: string;
-  permanent?: boolean;
-}
+const SchemaData = Type.Object({
+  guild_id: Type.String(),
+  user_id: Type.String(),
+  permanent: Type.Optional(Type.Boolean({ default: false })),
+});
 
-export class GuildMemberKickAction extends SatoriAction<GuildMemberKickPayload, void> {
-  actionName = 'guild.member.kick';
+type Payload = Static<typeof SchemaData>;
 
-  async handle (payload: GuildMemberKickPayload): Promise<void> {
+export class GuildMemberKickAction extends SatoriAction<Payload, void> {
+  actionName = SatoriActionName.GuildMemberKick;
+  override payloadSchema = SchemaData;
+
+  protected async _handle (payload: Payload): Promise<void> {
     const { guild_id, user_id, permanent } = payload;
 
     await this.core.apis.GroupApi.kickMember(

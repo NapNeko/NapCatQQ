@@ -1,17 +1,20 @@
+import { Static, Type } from '@sinclair/typebox';
 import { SatoriAction } from '../SatoriAction';
+import { SatoriActionName } from '../router';
 
-interface UploadCreatePayload {
-  [key: string]: unknown;
-}
+const SchemaData = Type.Record(Type.String(), Type.Unknown());
+
+type Payload = Static<typeof SchemaData>;
 
 interface UploadResult {
   [key: string]: string;
 }
 
-export class UploadCreateAction extends SatoriAction<UploadCreatePayload, UploadResult> {
-  actionName = 'upload.create';
+export class UploadCreateAction extends SatoriAction<Payload, UploadResult> {
+  actionName = SatoriActionName.UploadCreate;
+  override payloadSchema = SchemaData;
 
-  async handle (payload: UploadCreatePayload): Promise<UploadResult> {
+  protected async _handle (payload: Payload): Promise<UploadResult> {
     const result: UploadResult = {};
 
     // 处理上传的文件

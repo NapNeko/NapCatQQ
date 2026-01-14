@@ -10,13 +10,16 @@ import { ChannelGetAction } from './channel/ChannelGet';
 import { ChannelListAction } from './channel/ChannelList';
 import { GuildGetAction } from './guild/GuildGet';
 import { GuildListAction } from './guild/GuildList';
+import { GuildApproveAction } from './guild/GuildApprove';
 import { GuildMemberGetAction } from './guild/GuildMemberGet';
 import { GuildMemberListAction } from './guild/GuildMemberList';
 import { GuildMemberKickAction } from './guild/GuildMemberKick';
 import { GuildMemberMuteAction } from './guild/GuildMemberMute';
+import { GuildMemberApproveAction } from './guild/GuildMemberApprove';
 import { UserGetAction } from './user/UserGet';
 import { FriendListAction } from './user/FriendList';
 import { FriendApproveAction } from './user/FriendApprove';
+import { LoginGetAction } from './login/LoginGet';
 import { UploadCreateAction } from './upload/UploadCreate';
 
 export type SatoriActionMap = Map<string, SatoriAction<unknown, unknown>>;
@@ -38,14 +41,18 @@ export function createSatoriActionMap (
     // 群组相关
     new GuildGetAction(satoriAdapter, core),
     new GuildListAction(satoriAdapter, core),
+    new GuildApproveAction(satoriAdapter, core),
     new GuildMemberGetAction(satoriAdapter, core),
     new GuildMemberListAction(satoriAdapter, core),
     new GuildMemberKickAction(satoriAdapter, core),
     new GuildMemberMuteAction(satoriAdapter, core),
+    new GuildMemberApproveAction(satoriAdapter, core),
     // 用户相关
     new UserGetAction(satoriAdapter, core),
     new FriendListAction(satoriAdapter, core),
     new FriendApproveAction(satoriAdapter, core),
+    // 登录相关
+    new LoginGetAction(satoriAdapter, core),
     // 上传相关
     new UploadCreateAction(satoriAdapter, core),
   ];
@@ -57,4 +64,5 @@ export function createSatoriActionMap (
   return actionMap;
 }
 
-export { SatoriAction } from './SatoriAction';
+export { SatoriAction, SatoriCheckResult, SatoriResponse, SatoriResponseHelper } from './SatoriAction';
+export { SatoriActionName, SatoriActionNameType } from './router';
