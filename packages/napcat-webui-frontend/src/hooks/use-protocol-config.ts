@@ -41,6 +41,7 @@ const useProtocolConfig = () => {
 
     await ProtocolManager.setSatoriConfig(newConfig);
     setSatoriConfig(newConfig);
+    await refreshSatoriConfig();
     return newConfig;
   };
 
@@ -61,6 +62,7 @@ const useProtocolConfig = () => {
 
     await ProtocolManager.setSatoriConfig(newConfig);
     setSatoriConfig(newConfig);
+    await refreshSatoriConfig();
     return newConfig;
   };
 
@@ -81,6 +83,7 @@ const useProtocolConfig = () => {
 
     await ProtocolManager.setSatoriConfig(newConfig);
     setSatoriConfig(newConfig);
+    await refreshSatoriConfig();
     return newConfig;
   };
 
@@ -101,6 +104,7 @@ const useProtocolConfig = () => {
 
     await ProtocolManager.setSatoriConfig(newConfig);
     setSatoriConfig(newConfig);
+    await refreshSatoriConfig();
     return newConfig;
   };
 
@@ -121,6 +125,7 @@ const useProtocolConfig = () => {
 
     await ProtocolManager.setSatoriConfig(newConfig);
     setSatoriConfig(newConfig);
+    await refreshSatoriConfig();
     return newConfig;
   };
 
@@ -135,6 +140,12 @@ const useProtocolConfig = () => {
     deleteSatoriNetworkConfig,
     enableSatoriNetworkConfig,
     enableSatoriDebugConfig,
+    toggleProtocol: async (name: string, enabled: boolean) => {
+      await ProtocolManager.toggleProtocol(name, enabled);
+      await refreshProtocols();
+      // If we enable/disable a protocol, maybe we should also refresh satori config if it was satori?
+      // Since toggleProtocol refreshes status, it's fine.
+    },
   };
 };
 

@@ -1,5 +1,8 @@
 import { InstanceContext, NapCatCore } from 'napcat-core';
 import { NapCatPathWrapper } from 'napcat-common/src/path';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import json5 from 'json5';
 import { IProtocolAdapter, IProtocolAdapterFactory, ProtocolInfo } from './types';
 import { OneBotProtocolAdapterFactory, OneBotProtocolAdapter } from './adapters/onebot';
 import { SatoriProtocolAdapterFactory, SatoriProtocolAdapter } from './adapters/satori';
@@ -34,9 +37,41 @@ export class ProtocolManager {
   }
 
   /**
+   * 加载协议状态
+   */
+  private loadProtocolStatus (): Record<string, boolean> {
+    return (this.core.configLoader.configData.protocols || { onebot11: true }) as Record<string, boolean>;
+  }
+
+  /**
+   * 保存协议状态
+   */
+  private saveProtocolStatus (status: Record<string, boolean>): void {
+    const config = this.core.configLoader.configData;
+    config.protocols = status;
+    this.core.configLoader.save(config);
+  }
+
+  /**
+   * 设置协议启用状态
+   */
+  async setProtocolEnabled (protocolId: string, enabled: boolean): Promise<void> {
+    const status = this.loadProtocolStatus();
+    status[protocolId] = enabled;
+    this.saveProtocolStatus(status);
+
+    if (enabled) {
+      await this.initProtocol(protocolId);
+    } else {
+      await this.destroyProtocol(protocolId);
+    }
+  }
+
+  /**
    * 获取所有已注册的协议信息
    */
   getRegisteredProtocols (): ProtocolInfo[] {
+    const status = this.loadProtocolStatus();
     const protocols: ProtocolInfo[] = [];
     for (const [id, factory] of this.factories) {
       protocols.push({
@@ -44,10 +79,32 @@ export class ProtocolManager {
         name: factory.protocolName,
         version: factory.protocolVersion,
         description: factory.protocolDescription,
-        enabled: this.adapters.has(id),
+        enabled: status[id] ?? false, // 使用持久化的状态
       });
     }
     return protocols;
+  }
+
+  /**
+   * 初始化所有协议
+   */
+  async initAllProtocols (): Promise<void> {
+    if (this.initialized) {
+      this.context.logger.logWarn('[Protocol] 协议管理器已初始化');
+      return;
+    }
+
+    this.context.logger.log('[Protocol] 开始初始化所有协议...');
+    const status = this.loadProtocolStatus();
+
+    for (const [protocolId] of this.factories) {
+      if (status[protocolId]) {
+        await this.initProtocol(protocolId);
+      }
+    }
+
+    this.initialized = true;
+    this.context.logger.log('[Protocol] 所有协议初始化完成');
   }
 
   /**
@@ -61,7 +118,7 @@ export class ProtocolManager {
     }
 
     if (this.adapters.has(protocolId)) {
-      this.context.logger.logWarn(`[Protocol] 协议 ${protocolId} 已初始化`);
+      // Already initialized
       return this.adapters.get(protocolId)!;
     }
 
@@ -75,25 +132,6 @@ export class ProtocolManager {
       this.context.logger.logError(`[Protocol] 协议 ${protocolId} 初始化失败:`, error);
       return null;
     }
-  }
-
-  /**
-   * 初始化所有协议
-   */
-  async initAllProtocols (): Promise<void> {
-    if (this.initialized) {
-      this.context.logger.logWarn('[Protocol] 协议管理器已初始化');
-      return;
-    }
-
-    this.context.logger.log('[Protocol] 开始初始化所有协议...');
-
-    for (const [protocolId] of this.factories) {
-      await this.initProtocol(protocolId);
-    }
-
-    this.initialized = true;
-    this.context.logger.log('[Protocol] 所有协议初始化完成');
   }
 
   /**
@@ -148,6 +186,44 @@ export class ProtocolManager {
    */
   getSatoriAdapter (): SatoriProtocolAdapter | null {
     return this.getAdapter<SatoriProtocolAdapter>('satori');
+  }
+
+  /**
+   * 获取协议配置
+   */
+  async getProtocolConfig (protocolId: string, uin: string): Promise<any> {
+    const configPath = resolve(this.pathWrapper.configPath, `./${protocolId}_${uin}.json`);
+    if (!existsSync(configPath)) {
+      return {};
+    }
+
+    try {
+      const content = readFileSync(configPath, 'utf-8');
+      return json5.parse(content);
+    } catch (error) {
+      this.context.logger.logError(`[Protocol] 读取协议 ${protocolId} 配置失败:`, error);
+      return {};
+    }
+  }
+
+  /**
+   * 设置协议配置
+   */
+  async setProtocolConfig (protocolId: string, uin: string, config: any): Promise<void> {
+    const configPath = resolve(this.pathWrapper.configPath, `./${protocolId}_${uin}.json`);
+    const prevConfig = await this.getProtocolConfig(protocolId, uin);
+
+    try {
+      writeFileSync(configPath, json5.stringify(config, null, 2), 'utf-8');
+
+      // 热重载配置
+      if (this.adapters.has(protocolId)) {
+        await this.reloadProtocolConfig(protocolId, prevConfig, config);
+      }
+    } catch (error) {
+      this.context.logger.logError(`[Protocol] 保存协议 ${protocolId} 配置失败:`, error);
+      throw error;
+    }
   }
 
   /**

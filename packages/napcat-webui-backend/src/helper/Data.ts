@@ -38,8 +38,8 @@ const LoginRuntime: LoginRuntimeType = {
   },
   NapCatVersion: napCatVersion,
   WebUiConfigQuickFunction: async () => {
-
   },
+  ProtocolManager: null,
 };
 export const WebUiDataRuntime = {
   setWorkingEnv (env: NapCatCoreWorkingEnv): void {
@@ -183,4 +183,12 @@ export const WebUiDataRuntime = {
   setSatoriConfig: function (config) {
     return LoginRuntime.NapCatHelper.onSatoriConfigChanged(config);
   } as LoginRuntimeType['NapCatHelper']['onSatoriConfigChanged'],
+
+  setProtocolManager (pm: any): void {
+    LoginRuntime.ProtocolManager = pm;
+  },
+
+  getProtocolManager (): any | null {
+    return LoginRuntime.ProtocolManager;
+  },
 };

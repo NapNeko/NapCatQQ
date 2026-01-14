@@ -11,13 +11,13 @@ import { Switch } from '@heroui/switch';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
-import useProtocolConfig from '@/hooks/use-protocol-config';
-
 interface Props {
   data?: SatoriWebSocketServerConfig | SatoriHttpServerConfig | SatoriWebHookClientConfig;
   field: SatoriNetworkConfigKey;
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
+  onCreate: (field: SatoriNetworkConfigKey, data: any) => Promise<any>;
+  onUpdate: (field: SatoriNetworkConfigKey, data: any) => Promise<any>;
 }
 
 const defaultWSServer: SatoriWebSocketServerConfig = {
@@ -54,8 +54,9 @@ export default function SatoriNetworkFormModal ({
   field,
   isOpen,
   onOpenChange,
+  onCreate,
+  onUpdate,
 }: Props) {
-  const { createSatoriNetworkConfig, updateSatoriNetworkConfig } = useProtocolConfig();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<any>(null);
 
@@ -91,9 +92,9 @@ export default function SatoriNetworkFormModal ({
     setLoading(true);
     try {
       if (isEdit) {
-        await updateSatoriNetworkConfig(field, formData);
+        await onUpdate(field, formData);
       } else {
-        await createSatoriNetworkConfig(field, formData);
+        await onCreate(field, formData);
       }
       toast.success(isEdit ? '更新成功' : '创建成功');
       onOpenChange(false);

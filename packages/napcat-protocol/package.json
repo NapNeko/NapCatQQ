@@ -11,7 +11,8 @@
     "napcat-core": "workspace:*",
     "napcat-common": "workspace:*",
     "napcat-onebot": "workspace:*",
-    "napcat-satori": "workspace:*"
+    "napcat-satori": "workspace:*",
+    "json5": "^2.2.3"
   },
   "devDependencies": {
     "typescript": "^5.7.2"

@@ -21,35 +21,18 @@ export const GetProtocolStatusHandler: RequestHandler = (_req, res) => {
     return sendError(res, 'Not Login');
   }
 
-  const uin = WebUiDataRuntime.getQQLoginUin();
-  const protocols = getSupportedProtocols();
+  const pm = WebUiDataRuntime.getProtocolManager();
   const status: Record<string, boolean> = {};
 
-  for (const protocol of protocols) {
-    const configPath = resolve(
-      webUiPathWrapper.configPath,
-      `./${protocol.id}_${uin}.json`
-    );
-
-    if (existsSync(configPath)) {
-      try {
-        const content = readFileSync(configPath, 'utf-8');
-        const config = json5.parse(content);
-        // 检查是否有任何网络配置启用
-        const network = config.network || {};
-        const hasEnabled = Object.values(network).some((arr: any) =>
-          Array.isArray(arr) && arr.some((item: any) => item.enable)
-        );
-        status[protocol.id] = hasEnabled;
-      } catch {
-        status[protocol.id] = false;
-      }
-    } else {
-      status[protocol.id] = protocol.id === 'onebot11'; // OneBot11 默认启用
+  if (pm) {
+    const protocols = pm.getRegisteredProtocols();
+    for (const p of protocols) {
+      status[p.id] = p.enabled;
     }
+    return sendSuccess(res, status);
   }
 
-  return sendSuccess(res, status);
+  return sendError(res, 'ProtocolManager not ready');
 };
 
 // 获取 Satori 配置
@@ -105,7 +88,7 @@ export const SatoriSetConfigHandler: RequestHandler = async (req, res) => {
 };
 
 // 获取指定协议配置
-export const GetProtocolConfigHandler: RequestHandler = (req, res) => {
+export const GetProtocolConfigHandler: RequestHandler = async (req, res) => {
   const isLogin = WebUiDataRuntime.getQQLoginStatus();
   if (!isLogin) {
     return sendError(res, 'Not Login');
@@ -113,34 +96,19 @@ export const GetProtocolConfigHandler: RequestHandler = (req, res) => {
 
   const { name } = req.params;
   const uin = WebUiDataRuntime.getQQLoginUin();
-  // 映射 protocol name 到文件名
-  const protocolId = name === 'onebot11' ? 'onebot11' : name;
+  const protocolId = name === 'onebot11' ? 'onebot11' : name; // Normalize if needed
 
-  const configFilePath = resolve(webUiPathWrapper.configPath, `./${protocolId}_${uin}.json`);
-
-  try {
-    let configData: any = {};
-    // Satori 特殊处理默认值, 其他协议也可以在这里添加默认值
-    if (name === 'satori') {
-      configData = {
-        network: {
-          websocketServers: [],
-          httpServers: [],
-          webhookClients: [],
-        },
-        platform: 'qq',
-        selfId: uin,
-      };
+  const pm = WebUiDataRuntime.getProtocolManager();
+  if (pm) {
+    try {
+      const config = await pm.getProtocolConfig(protocolId, uin);
+      return sendSuccess(res, config);
+    } catch (e) {
+      return sendError(res, 'ProtocolManager Get Error: ' + e);
     }
-
-    if (existsSync(configFilePath)) {
-      const content = readFileSync(configFilePath, 'utf-8');
-      configData = json5.parse(content);
-    }
-    return sendSuccess(res, configData);
-  } catch (e) {
-    return sendError(res, 'Config Get Error: ' + e);
   }
+
+  return sendError(res, 'ProtocolManager not ready');
 };
 
 // 设置指定协议配置
@@ -151,26 +119,50 @@ export const SetProtocolConfigHandler: RequestHandler = async (req, res) => {
   }
 
   const { name } = req.params;
+  const uin = WebUiDataRuntime.getQQLoginUin();
+  const protocolId = name === 'onebot11' ? 'onebot11' : name;
+
   if (isEmpty(req.body.config)) {
     return sendError(res, 'config is empty');
   }
 
   try {
     const config = json5.parse(req.body.config);
-    if (name === 'satori') {
-      await WebUiDataRuntime.setSatoriConfig(config);
-    } else {
-      // 对于未特殊处理的协议，走通用的写文件逻辑
-      const uin = WebUiDataRuntime.getQQLoginUin();
-      // TODO: 这里目前 napcat-core 及其 helper 可能没有通用的 setConfig，
-      // 但 WebUiDataRuntime.setSatoriConfig 本质也是写文件。
-      // 暂时只支持 Satori 的通用调用 via this handler, 
-      // OneBot11 还是走原来的 /api/config
-      if (name !== 'satori') {
-        return sendError(res, 'Protocol not supported for generic set yet');
-      }
+    const pm = WebUiDataRuntime.getProtocolManager();
+
+    if (pm) {
+      await pm.setProtocolConfig(protocolId, uin, config);
+      return sendSuccess(res, null);
     }
-    return sendSuccess(res, null);
+
+    return sendError(res, 'ProtocolManager not active');
+  } catch (e) {
+    return sendError(res, 'Error: ' + e);
+  }
+};
+
+// 切换指定协议启用状态
+export const ToggleProtocolHandler: RequestHandler = async (req, res) => {
+  const isLogin = WebUiDataRuntime.getQQLoginStatus();
+  if (!isLogin) {
+    return sendError(res, 'Not Login');
+  }
+
+  const { name } = req.params;
+  const protocolId = name === 'onebot11' ? 'onebot11' : name;
+  const { enabled } = req.body;
+
+  if (typeof enabled !== 'boolean') {
+    return sendError(res, 'enabled param must be boolean');
+  }
+
+  try {
+    const pm = WebUiDataRuntime.getProtocolManager();
+    if (pm) {
+      await pm.setProtocolEnabled(protocolId, enabled);
+      return sendSuccess(res, null);
+    }
+    return sendError(res, 'ProtocolManager not ready');
   } catch (e) {
     return sendError(res, 'Error: ' + e);
   }

@@ -456,6 +456,7 @@ export class NapCatShell {
 
     // 使用协议管理器初始化所有协议
     this.protocolManager = new ProtocolManager(this.core, this.context, this.context.pathWrapper);
+    WebUiDataRuntime.setProtocolManager(this.protocolManager);
 
     // 初始化所有协议
     await this.protocolManager.initAllProtocols();

@@ -97,6 +97,7 @@ export interface LoginRuntimeType {
     NewQQLoginList: LoginListItem[];
   };
   NapCatVersion: string;
+  ProtocolManager: any | null;
 }
 
 export default {};

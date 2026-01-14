@@ -11,6 +11,7 @@ export const NapcatConfigSchema = Type.Object({
   packetBackend: Type.String({ default: 'auto' }),
   packetServer: Type.String({ default: '' }),
   o3HookMode: Type.Number({ default: 0 }),
+  protocols: Type.Optional(Type.Record(Type.String(), Type.Boolean())),
 });
 
 export type NapcatConfig = Static<typeof NapcatConfigSchema>;

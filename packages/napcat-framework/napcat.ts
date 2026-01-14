@@ -71,6 +71,7 @@ export async function NCoreInitFramework (
 
   // 使用协议管理器初始化所有协议
   const protocolManager = new ProtocolManager(loaderObject.core, loaderObject.context, pathWrapper);
+  WebUiDataRuntime.setProtocolManager(protocolManager);
 
   // 初始化所有协议
   await protocolManager.initAllProtocols();

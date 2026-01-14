@@ -232,6 +232,9 @@ importers:
 
   packages/napcat-protocol:
     dependencies:
+      json5:
+        specifier: ^2.2.3
+        version: 2.2.3
       napcat-common:
         specifier: workspace:*
         version: link:../napcat-common

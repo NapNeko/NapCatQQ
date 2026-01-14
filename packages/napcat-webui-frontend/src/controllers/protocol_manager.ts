@@ -40,6 +40,15 @@ const ProtocolManager = {
       throw new Error(res.data.message);
     }
   },
+  async toggleProtocol (name: string, enabled: boolean): Promise<void> {
+    const res = await serverRequest.post<ServerResponse<null>>(
+      `/ProtocolConfig/${name}/toggle`,
+      { enabled }
+    );
+    if (res.data.code !== 0) {
+      throw new Error(res.data.message);
+    }
+  },
 };
 
 export default ProtocolManager;

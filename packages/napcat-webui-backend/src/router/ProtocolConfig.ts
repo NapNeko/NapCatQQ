@@ -7,6 +7,7 @@ import {
   GetAllProtocolConfigsHandler,
   GetProtocolConfigHandler,
   SetProtocolConfigHandler,
+  ToggleProtocolHandler,
 } from '@/napcat-webui-backend/src/api/ProtocolConfig';
 
 const router = Router();
@@ -27,5 +28,6 @@ router.post('/satori', SatoriSetConfigHandler);
 // 通用协议配置路由
 router.get('/:name/config', GetProtocolConfigHandler);
 router.post('/:name/config', SetProtocolConfigHandler);
+router.post('/:name/toggle', ToggleProtocolHandler);
 
 export { router as ProtocolConfigRouter };
