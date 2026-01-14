@@ -49,23 +49,23 @@ export class OB11NetworkManager {
     }));
   }
 
-  registerAdapter<CT extends NetworkAdapterConfig>(adapter: IOB11NetworkAdapter<CT>) {
+  registerAdapter<CT extends NetworkAdapterConfig> (adapter: IOB11NetworkAdapter<CT>) {
     this.adapters.set(adapter.name, adapter);
   }
 
-  async registerAdapterAndOpen<CT extends NetworkAdapterConfig>(adapter: IOB11NetworkAdapter<CT>) {
+  async registerAdapterAndOpen<CT extends NetworkAdapterConfig> (adapter: IOB11NetworkAdapter<CT>) {
     this.registerAdapter(adapter);
     await adapter.open();
   }
 
-  async closeSomeAdapters<CT extends NetworkAdapterConfig>(adaptersToClose: IOB11NetworkAdapter<CT>[]) {
+  async closeSomeAdapters<CT extends NetworkAdapterConfig> (adaptersToClose: IOB11NetworkAdapter<CT>[]) {
     for (const adapter of adaptersToClose) {
       this.adapters.delete(adapter.name);
       await adapter.close();
     }
   }
 
-  async closeSomeAdaterWhenOpen<CT extends NetworkAdapterConfig>(adaptersToClose: IOB11NetworkAdapter<CT>[]) {
+  async closeSomeAdaterWhenOpen<CT extends NetworkAdapterConfig> (adaptersToClose: IOB11NetworkAdapter<CT>[]) {
     for (const adapter of adaptersToClose) {
       this.adapters.delete(adapter.name);
       if (adapter.isEnable) {
@@ -88,15 +88,19 @@ export class OB11NetworkManager {
     this.adapters.clear();
   }
 
-  async readloadAdapter<T>(name: string, config: T) {
+  async readloadAdapter<T> (name: string, config: T) {
     const adapter = this.adapters.get(name);
     if (adapter) {
       await adapter.reload(config);
     }
   }
 
-  async readloadSomeAdapters<T>(configMap: Map<string, T>) {
+  async readloadSomeAdapters<T> (configMap: Map<string, T>) {
     await Promise.all(Array.from(configMap.entries()).map(([name, config]) => this.readloadAdapter(name, config)));
+  }
+
+  hasActiveAdapters (): boolean {
+    return Array.from(this.adapters.values()).some(adapter => adapter.isActive);
   }
 
   async getAllConfig () {

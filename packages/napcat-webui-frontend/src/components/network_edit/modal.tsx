@@ -2,6 +2,7 @@ import { Modal, ModalContent, ModalHeader } from '@heroui/modal';
 import toast from 'react-hot-toast';
 
 import useConfig from '@/hooks/use-config';
+import useDialog from '@/hooks/use-dialog';
 
 import HTTPClientForm from './http_client';
 import HTTPServerForm from './http_server';
@@ -31,23 +32,57 @@ const NetworkFormModal = <T extends keyof OneBotConfig['network']> (
 ) => {
   const { isOpen, onOpenChange, field, data } = props;
   const { createNetworkConfig, updateNetworkConfig } = useConfig();
+  const dialog = useDialog();
   const isCreate = !data;
 
   const onSubmit = async (data: OneBotConfig['network'][typeof field][0]) => {
-    try {
-      if (isCreate) {
-        await createNetworkConfig(field, data);
-      } else {
-        await updateNetworkConfig(field, data);
+    const saveData = async (dataToSave: OneBotConfig['network'][typeof field][0]) => {
+      try {
+        if (isCreate) {
+          await createNetworkConfig(field, dataToSave);
+        } else {
+          await updateNetworkConfig(field, dataToSave);
+        }
+        toast.success('保存配置成功');
+      } catch (error) {
+        const msg = (error as Error).message;
+
+        toast.error(`保存配置失败: ${msg}`);
+
+        throw error;
       }
-      toast.success('保存配置成功');
-    } catch (error) {
-      const msg = (error as Error).message;
+    };
 
-      toast.error(`保存配置失败: ${msg}`);
-
-      throw error;
+    if (['httpServers', 'httpSseServers', 'websocketServers'].includes(field)) {
+      const serverData = data as any;
+      if (!serverData.token) {
+        await new Promise<void>((resolve, reject) => {
+          dialog.confirm({
+            title: '安全警告',
+            content: (
+              <div>
+                <p>检测到未配置Token，这可能导致安全风险。确认要继续吗？</p>
+                <p className='text-sm text-gray-500 mt-2'>(未配置Token时，Host将被强制限制为 127.0.0.1)</p>
+              </div>
+            ),
+            onConfirm: async () => {
+              serverData.host = '127.0.0.1';
+              try {
+                await saveData(serverData);
+                resolve();
+              } catch (e) {
+                reject(e);
+              }
+            },
+            onCancel: () => {
+              reject(new Error('Cancelled'));
+            },
+          });
+        });
+        return;
+      }
     }
+    await saveData(data);
   };
 
   const renderFormComponent = (onClose: () => void) => {
