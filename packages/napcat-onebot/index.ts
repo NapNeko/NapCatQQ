@@ -246,7 +246,7 @@ export class NapCatOneBot11Adapter {
     await this.handleConfigChange(prev.network.websocketClients, now.network.websocketClients, OB11WebSocketClientAdapter);
   }
 
-  private async handleConfigChange<CT extends NetworkAdapterConfig>(
+  private async handleConfigChange<CT extends NetworkAdapterConfig> (
     prevConfig: NetworkAdapterConfig[],
     nowConfig: NetworkAdapterConfig[],
     adapterClass: new (
@@ -384,6 +384,7 @@ export class NapCatOneBot11Adapter {
       }
     };
     msgListener.onKickedOffLine = async (kick) => {
+      WebUiDataRuntime.setQQLoginStatus(false);
       const event = new BotOfflineEvent(this.core, kick.tipsTitle, kick.tipsDesc);
       this.networkManager
         .emitEvent(event)

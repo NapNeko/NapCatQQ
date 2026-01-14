@@ -1,6 +1,7 @@
 import { TypedEventEmitter } from './typeEvent';
 
 export interface AppEvents {
-  'event:emoji_like': { groupId: string; senderUin: string; emojiId: string, msgSeq: string, isAdd: boolean, count: number };
+  'event:emoji_like': { groupId: string; senderUin: string; emojiId: string, msgSeq: string, isAdd: boolean, count: number; };
+  KickedOffLine: string;
 }
 export const appEvent = new TypedEventEmitter<AppEvents>();

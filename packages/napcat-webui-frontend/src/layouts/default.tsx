@@ -15,6 +15,7 @@ import errorFallbackRender from '@/components/error_fallback';
 import SideBar from '@/components/sidebar';
 
 import useAuth from '@/hooks/auth';
+import useDialog from '@/hooks/use-dialog';
 
 import type { MenuItem } from '@/config/site';
 import { siteConfig } from '@/config/site';
@@ -48,7 +49,43 @@ const Layout: React.FC<{ children: React.ReactNode; }> = ({ children }) => {
   const [openSideBar, setOpenSideBar] = useLocalStorage(key.sideBarOpen, true);
   const [b64img] = useLocalStorage(key.backgroundImage, '');
   const navigate = useNavigate();
-  const { isAuth } = useAuth();
+  const { isAuth, revokeAuth } = useAuth();
+  const dialog = useDialog();
+  const isOnlineRef = useRef(true);
+
+  // 定期检查 QQ 在线状态，掉线时弹窗提示
+  useEffect(() => {
+    if (!isAuth) return;
+    const checkOnlineStatus = async () => {
+      const currentPath = location.pathname;
+      if (currentPath === '/qq_login' || currentPath === '/web_login') return;
+      try {
+        const info = await QQManager.getQQLoginInfo();
+        if (info?.online === false && isOnlineRef.current === true) {
+          isOnlineRef.current = false;
+          dialog.confirm({
+            title: '账号已离线',
+            content: '您的 QQ 账号已下线，请重新登录。',
+            confirmText: '重新登陆',
+            cancelText: '退出账户',
+            onConfirm: () => navigate('/qq_login'),
+            onCancel: () => {
+              revokeAuth();
+              navigate('/web_login');
+            },
+          });
+        } else if (info?.online === true) {
+          isOnlineRef.current = true;
+        }
+      } catch (_e) {
+        // 忽略请求错误
+      }
+    };
+    const timer = setInterval(checkOnlineStatus, 5000);
+    checkOnlineStatus();
+    return () => clearInterval(timer);
+  }, [isAuth, location.pathname]);
+
   const checkIsQQLogin = async () => {
     try {
       const result = await QQManager.checkQQLoginStatus();

@@ -128,10 +128,13 @@ async function handleLogin (
 
   const loginListener = new NodeIKernelLoginListener();
   loginListener.onUserLoggedIn = (userid: string) => {
-    logger.logError(`当前账号(${userid})已登录,无法重复登录`);
+    const tips = `当前账号(${userid})已登录,无法重复登录`;
+    logger.logError(tips);
+    WebUiDataRuntime.setQQLoginError(tips);
   };
   loginListener.onQRCodeLoginSucceed = async (loginResult) => {
     context.isLogined = true;
+    WebUiDataRuntime.setQQLoginStatus(true);
     inner_resolve({
       uid: loginResult.uid,
       uin: loginResult.uin,
@@ -170,13 +173,16 @@ async function handleLogin (
       logger.logError('[Core] [Login] Login Error,ErrType: ', errType, ' ErrCode:', errCode);
       if (errType === 1 && errCode === 3) {
         // 二维码过期刷新
+        WebUiDataRuntime.setQQLoginError('二维码已过期，请刷新');
       }
       loginService.getQRCodePicture();
     }
   };
 
   loginListener.onLoginFailed = (...args) => {
-    logger.logError('[Core] [Login] Login Error , ErrInfo: ', JSON.stringify(args));
+    const errInfo = JSON.stringify(args);
+    logger.logError('[Core] [Login] Login Error , ErrInfo: ', errInfo);
+    WebUiDataRuntime.setQQLoginError(`登录失败: ${errInfo}`);
   };
 
   loginService.addKernelLoginListener(proxiedListenerOf(loginListener, logger));
@@ -184,17 +190,29 @@ async function handleLogin (
   return await selfInfo;
 }
 async function handleLoginInner (context: { isLogined: boolean; }, logger: LogWrapper, loginService: NodeIKernelLoginService, quickLoginUin: string | undefined, historyLoginList: LoginListItem[]) {
+  // 注册刷新二维码回调
+  WebUiDataRuntime.setRefreshQRCodeCallback(async () => {
+    loginService.getQRCodePicture();
+  });
+
   WebUiDataRuntime.setQuickLoginCall(async (uin: string) => {
     return await new Promise((resolve) => {
       if (uin) {
         logger.log('正在快速登录 ', uin);
         loginService.quickLoginWithUin(uin).then(res => {
           if (res.loginErrorInfo.errMsg) {
+            WebUiDataRuntime.setQQLoginError(res.loginErrorInfo.errMsg);
+            loginService.getQRCodePicture();
             resolve({ result: false, message: res.loginErrorInfo.errMsg });
+          } else {
+            WebUiDataRuntime.setQQLoginStatus(true);
+            WebUiDataRuntime.setQQLoginError('');
+            resolve({ result: true, message: '' });
           }
-          resolve({ result: true, message: '' });
         }).catch((e) => {
           logger.logError(e);
+          WebUiDataRuntime.setQQLoginError('快速登录发生错误');
+          loginService.getQRCodePicture();
           resolve({ result: false, message: '快速登录发生错误' });
         });
       } else {
@@ -209,6 +227,7 @@ async function handleLoginInner (context: { isLogined: boolean; }, logger: LogWr
         .then(result => {
           if (result.loginErrorInfo.errMsg) {
             logger.logError('快速登录错误：', result.loginErrorInfo.errMsg);
+            WebUiDataRuntime.setQQLoginError(result.loginErrorInfo.errMsg);
             if (!context.isLogined) loginService.getQRCodePicture();
           }
         })
@@ -452,6 +471,10 @@ export class NapCatShell {
 
   async InitNapCat () {
     await this.core.initCore();
+    // 监听下线通知并同步到 WebUI
+    this.core.event.on('KickedOffLine', (tips: string) => {
+      WebUiDataRuntime.setQQLoginError(tips);
+    });
     const oneBotAdapter = new NapCatOneBot11Adapter(this.core, this.context, this.context.pathWrapper);
     // 注册到 WebUiDataRuntime，供调试功能使用
     WebUiDataRuntime.setOneBotContext(oneBotAdapter);
@@ -459,4 +482,3 @@ export class NapCatShell {
       .catch(e => this.context.logger.logError('初始化OneBot失败', e));
   }
 }
-

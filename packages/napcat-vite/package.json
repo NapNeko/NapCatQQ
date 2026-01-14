@@ -1,24 +1,24 @@
 {
-    "name": "napcat-vite",
-    "version": "0.0.1",
-    "private": true,
-    "type": "module",
-    "main": "index.ts",
-    "scripts": {
-        "build": "vite build"
+  "name": "napcat-vite",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "index.ts",
+  "scripts": {
+    "_build": "vite build"
+  },
+  "exports": {
+    ".": {
+      "import": "./index.ts"
     },
-    "exports": {
-        ".": {
-            "import": "./index.ts"
-        },
-        "./*": {
-            "import": "./*"
-        }
-    },
-    "devDependencies": {
-        "@types/node": "^22.0.1"
-    },
-    "engines": {
-        "node": ">=18.0.0"
+    "./*": {
+      "import": "./*"
     }
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
 }

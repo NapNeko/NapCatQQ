@@ -20,8 +20,8 @@ export default class QQManager {
   public static async checkQQLoginStatus () {
     const data = await serverRequest.post<
       ServerResponse<{
-        isLogin: string
-        qrcodeurl: string
+        isLogin: string;
+        qrcodeurl: string;
       }>
     >('/QQLogin/CheckLoginStatus');
 
@@ -30,16 +30,20 @@ export default class QQManager {
 
   public static async checkQQLoginStatusWithQrcode () {
     const data = await serverRequest.post<
-      ServerResponse<{ qrcodeurl: string; isLogin: string }>
+      ServerResponse<{ qrcodeurl: string; isLogin: string; loginError?: string; }>
     >('/QQLogin/CheckLoginStatus');
 
     return data.data.data;
   }
 
+  public static async refreshQRCode () {
+    await serverRequest.post<ServerResponse<null>>('/QQLogin/RefreshQRcode');
+  }
+
   public static async getQQLoginQrcode () {
     const data = await serverRequest.post<
       ServerResponse<{
-        qrcode: string
+        qrcode: string;
       }>
     >('/QQLogin/GetQQLoginQrcode');
 
