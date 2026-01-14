@@ -33,6 +33,10 @@ export class OB11PluginAdapter extends IOB11NetworkAdapter<PluginConfig> {
   private readonly pluginPath: string;
   private loadedPlugins: Map<string, LoadedPlugin> = new Map();
   declare config: PluginConfig;
+  override get isActive (): boolean {
+    return this.isEnable && this.loadedPlugins.size > 0;
+  }
+
   constructor (
     name: string, core: NapCatCore, obContext: NapCatOneBot11Adapter, actions: ActionMap
   ) {
