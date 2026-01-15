@@ -59,7 +59,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npm i -g pnpm
-          pnpm i --no-frozen-lockfile
+          pnpm i
           pnpm --filter napcat-webui-frontend run build || exit 1
           pnpm run build:framework
           mv packages/napcat-framework/dist framework-dist
@@ -88,7 +88,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npm i -g pnpm
-          pnpm i --no-frozen-lockfile
+          pnpm i
           pnpm --filter napcat-webui-frontend run build || exit 1
           pnpm run build:shell
           mv packages/napcat-shell/dist shell-dist
