@@ -1,6 +1,7 @@
 import { Button } from '@heroui/button';
 import { Switch } from '@heroui/switch';
-import clsx from 'clsx';
+import { Chip } from '@heroui/chip';
+
 import { useState } from 'react';
 import { MdDeleteForever, MdPublishedWithChanges } from 'react-icons/md';
 
@@ -21,7 +22,7 @@ const PluginDisplayCard: React.FC<PluginDisplayCardProps> = ({
   onUninstall,
 }) => {
   const { name, version, author, description, status } = data;
-  const isEnabled = status === 'active';
+  const isEnabled = status !== 'disabled';
   const [processing, setProcessing] = useState(false);
 
   const handleToggle = () => {
@@ -82,6 +83,16 @@ const PluginDisplayCard: React.FC<PluginDisplayCardProps> = ({
         />
       }
       title={name}
+      tag={
+        <Chip
+          className="ml-auto"
+          color={status === 'active' ? 'success' : status === 'stopped' ? 'warning' : 'default'}
+          size="sm"
+          variant="flat"
+        >
+          {status === 'active' ? '运行中' : status === 'stopped' ? '已停止' : '已禁用'}
+        </Chip>
+      }
     >
       <div className='grid grid-cols-2 gap-3'>
         <div className='flex flex-col gap-1 p-3 bg-default-100/50 dark:bg-white/10 rounded-xl border border-transparent hover:border-default-200 transition-colors'>

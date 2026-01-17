@@ -5,7 +5,7 @@ export interface PluginItem {
   version: string;
   description: string;
   author: string;
-  status: 'active' | 'disabled';
+  status: 'active' | 'disabled' | 'stopped';
   filename?: string;
 }
 

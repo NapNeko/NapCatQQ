@@ -4,6 +4,7 @@
   "type": "module",
   "main": "index.mjs",
   "description": "NapCat 内置插件",
+  "author": "NapNeko",
   "dependencies": {
     "napcat-onebot": "workspace:*"
   },
