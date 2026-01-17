@@ -26,6 +26,7 @@ const logger = new LogWrapper(pathWrapper.logsPath);
 let processManager: IProcessManager | null = null;
 let currentWorker: IWorkerProcess | null = null;
 let isElectron = false;
+let isRestarting = false;
 
 /**
  * 获取进程类型名称（用于日志）
@@ -72,10 +73,12 @@ function forceKillProcess (pid: number): void {
  */
 export async function restartWorker (): Promise<void> {
   logger.log('[NapCat] [Process] 正在重启Worker进程...');
+  isRestarting = true;
 
   if (!currentWorker) {
     logger.logWarn('[NapCat] [Process] 没有运行中的Worker进程');
     await startWorker();
+    isRestarting = false;
     return;
   }
 
@@ -133,6 +136,7 @@ export async function restartWorker (): Promise<void> {
 
   // 5. 启动新进程
   await startWorker();
+  isRestarting = false;
   logger.log('[NapCat] [Process] Worker进程重启完成');
 }
 
@@ -191,6 +195,13 @@ async function startWorker (): Promise<void> {
       logger.logError(`[NapCat] [${processType}] Worker进程退出，退出码: ${exitCode}`);
     } else {
       logger.log(`[NapCat] [${processType}] Worker进程正常退出`);
+    }
+    // 如果不是由于主动重启引起的退出，尝试自动重新拉起
+    if (!isRestarting) {
+      logger.logWarn(`[NapCat] [${processType}] Worker进程意外退出，正在尝试重新拉起...`);
+      startWorker().catch(e => {
+        logger.logError(`[NapCat] [${processType}] 重新拉起Worker进程失败:`, e);
+      });
     }
   });
 
