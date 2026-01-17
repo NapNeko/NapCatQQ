@@ -41,6 +41,7 @@ jobs:
           pnpm test || exit 1
           pnpm --filter napcat-webui-frontend run build || exit 1
           pnpm run build:framework
+          pnpm --filter napcat-plugin-builtin run build || exit 1
           mv packages/napcat-framework/dist framework-dist
           cd framework-dist
           npm install --omit=dev
@@ -83,6 +84,7 @@ jobs:
           pnpm test || exit 1
           pnpm --filter napcat-webui-frontend run build || exit 1
           pnpm run build:shell
+          pnpm --filter napcat-plugin-builtin run build || exit 1
           mv packages/napcat-shell/dist shell-dist
           cd shell-dist
           npm install --omit=dev
