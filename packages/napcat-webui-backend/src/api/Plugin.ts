@@ -60,11 +60,9 @@ export const GetPluginListHandler: RequestHandler = async (_req, res) => {
 
     for (const item of items) {
       let id = '';
-      let isFile = false;
 
       if (item.isFile()) {
         if (!['.js', '.mjs'].includes(path.extname(item.name))) continue;
-        isFile = true;
         id = getPluginId(item.name, true);
       } else if (item.isDirectory()) {
         id = getPluginId(item.name, false);
