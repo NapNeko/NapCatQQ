@@ -49,10 +49,11 @@ import {
   OneBotConfigSchema,
 } from './config/config';
 import { OB11Message } from './types';
+import { existsSync } from 'node:fs';
 import { IOB11NetworkAdapter } from '@/napcat-onebot/network/adapter';
 import { OB11HttpSSEServerAdapter } from './network/http-server-sse';
 import { OB11PluginMangerAdapter } from './network/plugin-manger';
-import { existsSync } from 'node:fs';
+
 import { proxiedListenerOf } from '@/napcat-core/helper/proxy-handler';
 import { OneBotFileApi } from './api/file';
 
@@ -160,6 +161,7 @@ export class NapCatOneBot11Adapter {
     // this.networkManager.registerAdapter(
     //     new OB11PluginAdapter('myPlugin', this.core, this,this.actions)
     // );
+    // 检查插件目录是否存在，不存在则不加载插件管理器
     if (existsSync(this.context.pathWrapper.pluginPath)) {
       this.context.logger.log('[Plugins] 插件目录存在，开始加载插件');
       this.networkManager.registerAdapter(

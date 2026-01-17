@@ -8,6 +8,7 @@ import {
   LuSignal,
   LuTerminal,
   LuZap,
+  LuPackage,
 } from 'react-icons/lu';
 
 export type SiteConfig = typeof siteConfig;
@@ -58,6 +59,11 @@ export const siteConfig = {
       label: '文件管理',
       icon: <LuFolderOpen className='w-5 h-5' />,
       href: '/file_manager',
+    },
+    {
+      label: '插件管理',
+      icon: <LuPackage className='w-5 h-5' />,
+      href: '/plugins',
     },
     {
       label: '系统终端',
