@@ -151,7 +151,8 @@ async function startWorker (): Promise<void> {
   const workerScript = getWorkerScriptPath();
   const processType = getProcessTypeName();
 
-  const child = processManager.createWorker(workerScript, [], {
+  // 传递 master 进程的命令行参数给 worker 进程
+  const child = processManager.createWorker(workerScript, process.argv.slice(2), {
     env: {
       ...process.env,
       NAPCAT_WORKER_PROCESS: '1',
