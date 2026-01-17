@@ -74,7 +74,7 @@ const Layout: React.FC<{ children: React.ReactNode; }> = ({ children }) => {
             onConfirm: async () => {
               setIsRestarting(true);
               try {
-                await ProcessManager.restartProcess('automatic');
+                await ProcessManager.restartProcess();
               } catch (_e) {
                 // 忽略错误，因为后端正在重启关闭连接
               }
@@ -84,7 +84,7 @@ const Layout: React.FC<{ children: React.ReactNode; }> = ({ children }) => {
                 15000, // 15秒超时
                 () => {
                   setIsRestarting(false);
-                  // 前端发起的重启不清除登录态，无感恢复
+                  window.location.reload();
                 },
                 () => {
                   setIsRestarting(false);
@@ -92,8 +92,7 @@ const Layout: React.FC<{ children: React.ReactNode; }> = ({ children }) => {
                     title: '启动超时',
                     content: '后端在 15 秒内未响应，请检查 NapCat 运行日志或手动重启。',
                   });
-                },
-                false // 前端发起的重启不清除登录态
+                }
               );
             },
             onCancel: () => {

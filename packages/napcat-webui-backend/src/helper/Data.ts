@@ -196,6 +196,7 @@ export const WebUiDataRuntime = {
   },
 
   refreshQRCode: async function () {
+    LoginRuntime.QQLoginError = '';
     await LoginRuntime.onRefreshQRCode();
   },
 };

@@ -60,7 +60,7 @@ const LoginConfigCard = () => {
   const onRestartProcess = async () => {
     setIsRestarting(true);
     try {
-      const result = await ProcessManager.restartProcess('manual');
+      const result = await ProcessManager.restartProcess();
       toast.success(result.message || '进程重启请求已发送');
 
       // 轮询探测后端是否恢复
@@ -73,8 +73,7 @@ const LoginConfigCard = () => {
         () => {
           setIsRestarting(false);
           toast.error('后端在 30 秒内未响应，请检查 NapCat 运行日志');
-        },
-        false // 前端发起的重启不清除登录态
+        }
       );
 
       if (!isReady) {
