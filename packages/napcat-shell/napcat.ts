@@ -24,9 +24,12 @@ declare global {
 // 判断是否为子进程（通过环境变量）
 const isWorkerProcess = process.env['NAPCAT_WORKER_PROCESS'] === '1';
 
+// 判断是否禁用多进程模式
+const isMultiProcessDisabled = process.env['NAPCAT_DISABLE_MULTI_PROCESS'] === '1';
+
 // 只在主进程中导入 utilityProcess
 let utilityProcess: any;
-if (!isWorkerProcess) {
+if (!isWorkerProcess && !isMultiProcessDisabled) {
   // @ts-ignore - electron 运行时存在但类型声明可能缺失
   const electron = await import('electron');
   utilityProcess = electron.utilityProcess;
@@ -73,13 +76,8 @@ export async function restartWorker () {
         // 如果没有抛出异常，说明进程还在运行
         logger.logWarn(`[NapCat] [UtilityProcess] 进程 ${workerPid} 仍在运行，强制杀掉`);
         try {
-          // Windows 使用 taskkill，Unix 使用 SIGKILL
-          if (process.platform === 'win32') {
-            const { execSync } = await import('child_process');
-            execSync(`taskkill /F /PID ${workerPid} /T`, { stdio: 'ignore' });
-          } else {
-            process.kill(workerPid, 'SIGKILL');
-          }
+          // 使用 SIGKILL 强制终止进程
+          process.kill(workerPid, 'SIGKILL');
           logger.log(`[NapCat] [UtilityProcess] 已强制终止进程 ${workerPid}`);
         } catch (killError) {
           logger.logError(`[NapCat] [UtilityProcess] 强制终止进程失败:`, killError);
@@ -167,8 +165,12 @@ async function startWorker () {
 async function startMasterProcess () {
   logger.log('[NapCat] [UtilityProcess] Master进程启动，PID:', process.pid);
 
-  // 连接命名管道，用于输出子进程内容
-  await connectToNamedPipe(logger).catch(e => logger.logError('命名管道连接失败', e));
+  // 连接命名管道，用于输出子进程内容（可通过环境变量禁用）
+  if (process.env['NAPCAT_DISABLE_PIPE'] !== '1') {
+    await connectToNamedPipe(logger).catch(e => logger.logError('命名管道连接失败', e));
+  } else {
+    logger.log('[NapCat] [UtilityProcess] 命名管道已禁用 (NAPCAT_DISABLE_PIPE=1)');
+  }
 
   // 启动 worker 进程
   await startWorker();
@@ -225,7 +227,14 @@ async function startWorkerProcess () {
 }
 
 // 主入口
-if (isWorkerProcess) {
+if (isMultiProcessDisabled) {
+  // 禁用多进程模式，直接启动 NCoreInitShell
+  logger.log('[NapCat] [SingleProcess] 多进程模式已禁用，直接启动核心');
+  NCoreInitShell().catch((e: Error) => {
+    logger.logError('[NapCat] [SingleProcess] 启动失败:', e);
+    process.exit(1);
+  });
+} else if (isWorkerProcess) {
   // Worker进程
   startWorkerProcess().catch((e: Error) => {
     logger.logError('[NapCat] [UtilityProcess] Worker进程启动失败:', e);
