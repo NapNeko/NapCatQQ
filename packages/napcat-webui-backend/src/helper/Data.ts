@@ -29,6 +29,9 @@ const LoginRuntime: LoginRuntimeType = {
     onQuickLoginRequested: async () => {
       return { result: false, message: '' };
     },
+    onRestartProcessRequested: async () => {
+      return { result: false, message: '重启功能未初始化' };
+    },
     QQLoginList: [],
     NewQQLoginList: [],
   },
@@ -162,5 +165,13 @@ export const WebUiDataRuntime = {
 
   getOneBotContext (): any | null {
     return LoginRuntime.OneBotContext;
+  },
+
+  setRestartProcessCall (func: () => Promise<{ result: boolean; message: string; }>): void {
+    LoginRuntime.NapCatHelper.onRestartProcessRequested = func;
+  },
+
+  requestRestartProcess: async function () {
+    return await LoginRuntime.NapCatHelper.onRestartProcessRequested();
   },
 };

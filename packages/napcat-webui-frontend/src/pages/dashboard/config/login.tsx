@@ -1,6 +1,7 @@
 import { Input } from '@heroui/input';
+import { Button } from '@heroui/button';
 import { useRequest } from 'ahooks';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
@@ -8,8 +9,10 @@ import SaveButtons from '@/components/button/save_buttons';
 import PageLoading from '@/components/page_loading';
 
 import QQManager from '@/controllers/qq_manager';
+import ProcessManager from '@/controllers/process_manager';
 
 const LoginConfigCard = () => {
+  const [isRestarting, setIsRestarting] = useState(false);
   const {
     data: quickLoginData,
     loading: quickLoginLoading,
@@ -53,6 +56,22 @@ const LoginConfigCard = () => {
     }
   };
 
+  const onRestartProcess = async () => {
+    setIsRestarting(true);
+    try {
+      const result = await ProcessManager.restartProcess();
+      toast.success(result.message || '进程重启成功');
+      // 等待 5 秒后刷新页面
+      setTimeout(() => {
+        window.location.reload();
+      }, 5000);
+    } catch (error) {
+      const msg = (error as Error).message;
+      toast.error(`进程重启失败: ${msg}`);
+      setIsRestarting(false);
+    }
+  };
+
   useEffect(() => {
     reset();
   }, [quickLoginData]);
@@ -82,6 +101,22 @@ const LoginConfigCard = () => {
         isSubmitting={isSubmitting || quickLoginLoading}
         refresh={onRefresh}
       />
+      <div className='flex-shrink-0 w-full mt-6 pt-6 border-t border-divider'>
+        <div className='mb-3 text-sm text-default-600'>进程管理</div>
+        <Button
+          color='warning'
+          variant='flat'
+          onPress={onRestartProcess}
+          isLoading={isRestarting}
+          isDisabled={isRestarting}
+          fullWidth
+        >
+          {isRestarting ? '正在重启进程...' : '重启进程'}
+        </Button>
+        <div className='mt-2 text-xs text-default-500'>
+          重启进程将关闭当前 Worker 进程，等待 3 秒后启动新进程，页面将在 5 秒后自动刷新
+        </div>
+      </div>
     </>
   );
 };
