@@ -67,6 +67,8 @@ import GoCQHTTPUploadPrivateFile from './go-cqhttp/UploadPrivateFile';
 import { FetchEmojiLike } from './extends/FetchEmojiLike';
 import { NapCatCore } from 'napcat-core';
 import { NapCatOneBot11Adapter } from '@/napcat-onebot/index';
+import type { NetworkAdapterConfig } from '../config/config';
+import { OneBotAction } from './OneBotAction';
 import { SetInputStatus } from './extends/SetInputStatus';
 import { GetCSRF } from './system/GetCSRF';
 import { DelGroupNotice } from './group/DelGroupNotice';
@@ -322,6 +324,30 @@ export function createActionMap (obContext: NapCatOneBot11Adapter, core: NapCatC
   function get<K extends keyof MapType> (key: K): MapType[K] | undefined {
     return _map.get(key as keyof MapType) as MapType[K] | undefined;
   }
-  return { get };
+
+  /**
+   * 类型安全的 action 调用辅助函数
+   * 根据 action 名称自动推导返回类型
+   */
+  async function call<K extends keyof MapType> (
+    actionName: K,
+    params: unknown,
+    adapter: string,
+    config: NetworkAdapterConfig
+  ): Promise<MapType[K] extends OneBotAction<any, infer R> ? R : never> {
+    const action = _map.get(actionName);
+    if (!action) {
+      throw new Error(`Action ${String(actionName)} not found`);
+    }
+
+    const result = await (action as any).handle(params, adapter, config);
+    if (result.status !== 'ok' || !result.data) {
+      throw new Error(`Action ${String(actionName)} failed: ${result.message || 'No data returned'}`);
+    }
+
+    return result.data;
+  }
+
+  return { get, call };
 }
 export type ActionMap = ReturnType<typeof createActionMap>;

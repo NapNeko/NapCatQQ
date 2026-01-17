@@ -220,6 +220,16 @@ importers:
         specifier: ^22.0.1
         version: 22.19.1
 
+  packages/napcat-plugin-builtin:
+    dependencies:
+      napcat-onebot:
+        specifier: workspace:*
+        version: link:../napcat-onebot
+    devDependencies:
+      '@types/node':
+        specifier: ^22.0.1
+        version: 22.19.1
+
   packages/napcat-protobuf:
     dependencies:
       '@protobuf-ts/runtime':
