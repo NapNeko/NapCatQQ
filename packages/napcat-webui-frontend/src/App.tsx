@@ -25,6 +25,7 @@ const FileManagerPage = lazy(() => import('@/pages/dashboard/file_manager'));
 const LogsPage = lazy(() => import('@/pages/dashboard/logs'));
 const NetworkPage = lazy(() => import('@/pages/dashboard/network'));
 const TerminalPage = lazy(() => import('@/pages/dashboard/terminal'));
+const PluginPage = lazy(() => import('@/pages/dashboard/plugin'));
 
 function App () {
   return (
@@ -42,7 +43,7 @@ function App () {
   );
 }
 
-function AuthChecker ({ children }: { children: React.ReactNode }) {
+function AuthChecker ({ children }: { children: React.ReactNode; }) {
   const { isAuth } = useAuth();
   const navigate = useNavigate();
 
@@ -76,6 +77,7 @@ function AppRoutes () {
         </Route>
         <Route path='file_manager' element={<FileManagerPage />} />
         <Route path='terminal' element={<TerminalPage />} />
+        <Route path='plugins' element={<PluginPage />} />
         <Route path='about' element={<AboutPage />} />
       </Route>
       <Route path='/qq_login' element={<QQLoginPage />} />

@@ -81,4 +81,4 @@ async function sendMessage (event: OB11Message, message: string, adapter: string
   }
 }
 
-export { plugin_init, plugin_onmessage, actions };
+export { plugin_init, plugin_onmessage };

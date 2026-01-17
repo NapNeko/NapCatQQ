@@ -11,6 +11,8 @@ export interface PluginPackageJson {
   name?: string;
   version?: string;
   main?: string;
+  description?: string;
+  author?: string;
 }
 
 export interface PluginModule<T extends OB11EmitEventContent = OB11EmitEventContent> {
@@ -85,7 +87,7 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
   /**
      * 加载单文件插件 (.mjs, .js)
      */
-  private async loadFilePlugin (filename: string): Promise<void> {
+  public async loadFilePlugin (filename: string): Promise<void> {
     // 只处理支持的文件类型
     if (!this.isSupportedFile(filename)) {
       return;
@@ -117,7 +119,7 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
   /**
      * 加载目录插件
      */
-  private async loadDirectoryPlugin (dirname: string): Promise<void> {
+  public async loadDirectoryPlugin (dirname: string): Promise<void> {
     const pluginDir = path.join(this.pluginPath, dirname);
 
     try {
@@ -253,6 +255,14 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
 
     this.loadedPlugins.delete(pluginName);
     this.logger.log(`[Plugin Adapter] Unloaded plugin: ${pluginName}`);
+  }
+
+  public async unregisterPlugin (pluginName: string): Promise<void> {
+    return this.unloadPlugin(pluginName);
+  }
+
+  public getPluginPath (): string {
+    return this.pluginPath;
   }
 
   async onEvent<T extends OB11EmitEventContent> (event: T) {

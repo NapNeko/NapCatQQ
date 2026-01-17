@@ -17,6 +17,7 @@ import { WebUIConfigRouter } from './WebUIConfig';
 import { UpdateNapCatRouter } from './UpdateNapCat';
 import DebugRouter from '@/napcat-webui-backend/src/api/Debug';
 import { ProcessRouter } from './Process';
+import { PluginRouter } from './Plugin';
 
 const router = Router();
 
@@ -47,5 +48,7 @@ router.use('/UpdateNapCat', UpdateNapCatRouter);
 router.use('/Debug', DebugRouter);
 // router:进程管理相关路由
 router.use('/Process', ProcessRouter);
+// router:插件管理相关路由
+router.use('/Plugin', PluginRouter);
 
 export { router as ALLRouter };
