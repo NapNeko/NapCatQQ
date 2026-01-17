@@ -20,6 +20,8 @@ import useDialog from '@/hooks/use-dialog';
 import type { MenuItem } from '@/config/site';
 import { siteConfig } from '@/config/site';
 import QQManager from '@/controllers/qq_manager';
+import ProcessManager from '@/controllers/process_manager';
+import { waitForBackendReady } from '@/utils/process_utils';
 
 const menus: MenuItem[] = siteConfig.navItems;
 
@@ -72,35 +74,27 @@ const Layout: React.FC<{ children: React.ReactNode; }> = ({ children }) => {
             onConfirm: async () => {
               setIsRestarting(true);
               try {
-                await QQManager.reboot();
+                await ProcessManager.restartProcess('automatic');
               } catch (_e) {
                 // 忽略错误，因为后端正在重启关闭连接
               }
 
-              // 开始轮询探测后端是否启动
-              const startTime = Date.now();
-              const maxWaitTime = 15000; // 15秒总超时
-
-              const timer = setInterval(async () => {
-                try {
-                  // 尝试请求后端，设置一个较短的请求超时避免挂起
-                  await QQManager.getQQLoginInfo({ timeout: 500 });
-                  // 如果能走到这一步说明请求成功了
-                  clearInterval(timer);
+              // 轮询探测后端是否恢复
+              await waitForBackendReady(
+                15000, // 15秒超时
+                () => {
                   setIsRestarting(false);
-                  window.location.reload();
-                } catch (_e) {
-                  // 如果请求失败（后端没起来），检查是否超时
-                  if (Date.now() - startTime > maxWaitTime) {
-                    clearInterval(timer);
-                    setIsRestarting(false);
-                    dialog.alert({
-                      title: '启动超时',
-                      content: '后端在 15 秒内未响应，请检查 NapCat 运行日志或手动重启。',
-                    });
-                  }
-                }
-              }, 500); // 每 500ms 探测一次
+                  // 前端发起的重启不清除登录态，无感恢复
+                },
+                () => {
+                  setIsRestarting(false);
+                  dialog.alert({
+                    title: '启动超时',
+                    content: '后端在 15 秒内未响应，请检查 NapCat 运行日志或手动重启。',
+                  });
+                },
+                false // 前端发起的重启不清除登录态
+              );
             },
             onCancel: () => {
               revokeAuth();

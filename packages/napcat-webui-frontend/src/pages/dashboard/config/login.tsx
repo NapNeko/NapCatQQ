@@ -10,6 +10,7 @@ import PageLoading from '@/components/page_loading';
 
 import QQManager from '@/controllers/qq_manager';
 import ProcessManager from '@/controllers/process_manager';
+import { waitForBackendReady } from '@/utils/process_utils';
 
 const LoginConfigCard = () => {
   const [isRestarting, setIsRestarting] = useState(false);
@@ -59,12 +60,26 @@ const LoginConfigCard = () => {
   const onRestartProcess = async () => {
     setIsRestarting(true);
     try {
-      const result = await ProcessManager.restartProcess();
-      toast.success(result.message || '进程重启成功');
-      // 等待 5 秒后刷新页面
-      setTimeout(() => {
-        window.location.reload();
-      }, 5000);
+      const result = await ProcessManager.restartProcess('manual');
+      toast.success(result.message || '进程重启请求已发送');
+
+      // 轮询探测后端是否恢复
+      const isReady = await waitForBackendReady(
+        30000, // 30秒超时
+        () => {
+          setIsRestarting(false);
+          toast.success('进程重启完成');
+        },
+        () => {
+          setIsRestarting(false);
+          toast.error('后端在 30 秒内未响应，请检查 NapCat 运行日志');
+        },
+        false // 前端发起的重启不清除登录态
+      );
+
+      if (!isReady) {
+        setIsRestarting(false);
+      }
     } catch (error) {
       const msg = (error as Error).message;
       toast.error(`进程重启失败: ${msg}`);
@@ -114,7 +129,7 @@ const LoginConfigCard = () => {
           {isRestarting ? '正在重启进程...' : '重启进程'}
         </Button>
         <div className='mt-2 text-xs text-default-500'>
-          重启进程将关闭当前 Worker 进程，等待 3 秒后启动新进程，页面将在 5 秒后自动刷新
+          重启进程将关闭当前 Worker 进程，等待 3 秒后启动新进程
         </div>
       </div>
     </>

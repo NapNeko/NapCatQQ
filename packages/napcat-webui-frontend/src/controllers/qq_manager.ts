@@ -93,8 +93,4 @@ export default class QQManager {
       uin,
     });
   }
-
-  public static async reboot () {
-    await serverRequest.post<ServerResponse<null>>('/QQLogin/Restart');
-  }
 }

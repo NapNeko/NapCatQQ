@@ -29,7 +29,6 @@ import { napCatVersion } from 'napcat-common/src/version';
 import { NodeIO3MiscListener } from 'napcat-core/listeners/NodeIO3MiscListener';
 import { sleep } from 'napcat-common/src/helper';
 import { FFmpegService } from '@/napcat-core/helper/ffmpeg/ffmpeg';
-import { connectToNamedPipe } from './pipe';
 import { NativePacketHandler } from 'napcat-core/packet/handler/client';
 import { logSubscription, LogWrapper } from '@/napcat-core/helper/log';
 import { proxiedListenerOf } from '@/napcat-core/helper/proxy-handler';

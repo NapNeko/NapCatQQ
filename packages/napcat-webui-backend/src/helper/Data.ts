@@ -178,4 +178,24 @@ export const WebUiDataRuntime = {
   requestRestartProcess: async function () {
     return await LoginRuntime.NapCatHelper.onRestartProcessRequested();
   },
+
+  setQQLoginError (error: string): void {
+    LoginRuntime.QQLoginError = error;
+  },
+
+  getQQLoginError (): string {
+    return LoginRuntime.QQLoginError;
+  },
+
+  setRefreshQRCodeCallback (func: () => Promise<void>): void {
+    LoginRuntime.onRefreshQRCode = func;
+  },
+
+  getRefreshQRCodeCallback (): () => Promise<void> {
+    return LoginRuntime.onRefreshQRCode;
+  },
+
+  refreshQRCode: async function () {
+    await LoginRuntime.onRefreshQRCode();
+  },
 };
