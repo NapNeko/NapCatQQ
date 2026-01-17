@@ -13,9 +13,9 @@ export async function RestartProcessHandler (_req: Request, res: Response) {
     if (result.result) {
       return sendSuccess(res, { message: result.message || '进程重启请求已发送' });
     } else {
-      return sendError(res, result.message || '进程重启失败', 500);
+      return sendError(res, result.message || '进程重启失败');
     }
   } catch (e) {
-    return sendError(res, '重启进程时发生错误: ' + (e as Error).message, 500);
+    return sendError(res, '重启进程时发生错误: ' + (e as Error).message);
   }
 }
