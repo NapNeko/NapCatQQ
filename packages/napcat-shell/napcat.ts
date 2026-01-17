@@ -252,14 +252,11 @@ async function startWorkerProcess (): Promise<void> {
   processManager.onParentMessage((msg: unknown) => {
     if (typeof msg === 'object' && msg !== null && 'type' in msg) {
       if (msg.type === 'restart-prepare') {
-        // 收到重启准备信号，主动退出
         logger.log(`[NapCat] [${processType}] 收到重启准备信号，正在主动退出...`);
-        // 给一点时间让日志输出
         setTimeout(() => {
           process.exit(0);
         }, 100);
       } else if (msg.type === 'shutdown') {
-        // 收到强制关闭信号
         logger.log(`[NapCat] [${processType}] 收到关闭信号，正在退出...`);
         process.exit(0);
       }
