@@ -19,58 +19,109 @@ export const GetPluginListHandler: RequestHandler = async (_req, res) => {
     return sendError(res, 'Plugin Manager not found');
   }
 
-  const loadedPlugins = pluginManager.getLoadedPlugins().map(p => ({
-    name: p.name,
-    version: p.version || '0.0.0',
-    description: p.packageJson?.description || '',
-    author: p.packageJson?.author || '',
-    status: 'active',
-  }));
+  // 辅助函数：根据文件名/路径生成唯一ID（作为配置键）
+  const getPluginId = (fsName: string, isFile: boolean): string => {
+    if (isFile) {
+      return path.parse(fsName).name;
+    }
+    return fsName;
+  };
 
-  // Find disabled plugins (those with .disabled extension)
+  const loadedPlugins = pluginManager.getLoadedPlugins();
+  const loadedPluginMap = new Map<string, any>(); // Map ID -> Loaded Info
+
+  // 1. 整理已加载的插件
+  for (const p of loadedPlugins) {
+    // 计算 ID：需要回溯到加载时的入口信息
+    // 对于已加载的插件，我们通过判断 pluginPath 是否等于根 pluginPath 来判断它是单文件还是目录
+    const isFilePlugin = p.pluginPath === pluginManager.getPluginPath();
+    const fsName = isFilePlugin ? path.basename(p.entryPath) : path.basename(p.pluginPath);
+    const id = getPluginId(fsName, isFilePlugin);
+
+    loadedPluginMap.set(id, {
+      name: p.packageJson?.name || p.name, // 优先使用 package.json 的 name
+      id: id,
+      version: p.version || '0.0.0',
+      description: p.packageJson?.description || '',
+      author: p.packageJson?.author || '',
+      status: 'active',
+      filename: fsName, // 真实文件/目录名
+      loadedName: p.name // 运行时注册的名称，用于重载/卸载
+    });
+  }
+
   const pluginPath = pluginManager.getPluginPath();
-  const disabledPlugins: any[] = [];
+  const pluginConfig = pluginManager.getPluginConfig();
+  const allPlugins: any[] = [];
+
+  // 2. 扫描文件系统，合并状态
   if (fs.existsSync(pluginPath)) {
     const items = fs.readdirSync(pluginPath, { withFileTypes: true });
+
     for (const item of items) {
-      if (item.name.endsWith('.disabled')) {
-        const originalName = item.name.replace(/\.disabled$/, '');
-        const isDirectory = item.isDirectory();
+      let id = '';
+      let isFile = false;
+
+      if (item.isFile()) {
+        if (!['.js', '.mjs'].includes(path.extname(item.name))) continue;
+        isFile = true;
+        id = getPluginId(item.name, true);
+      } else if (item.isDirectory()) {
+        id = getPluginId(item.name, false);
+      } else {
+        continue;
+      }
+
+      const isActiveConfig = pluginConfig[id] !== false; // 默认为 true
+
+      if (loadedPluginMap.has(id)) {
+        // 已加载，使用加载的信息
+        const loadedInfo = loadedPluginMap.get(id);
+        allPlugins.push(loadedInfo);
+      } else {
+        // 未加载 (可能是被禁用，或者加载失败，或者新增未运行)
         let version = '0.0.0';
         let description = '';
         let author = '';
-        let name = originalName;
+        // 默认显示名称为 ID (文件名/目录名)
+        let name = id;
 
         try {
-          if (isDirectory) {
+          // 尝试读取 package.json 获取信息
+          if (item.isDirectory()) {
             const packageJsonPath = path.join(pluginPath, item.name, 'package.json');
             if (fs.existsSync(packageJsonPath)) {
               const pkg = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
               version = pkg.version || version;
               description = pkg.description || description;
               author = pkg.author || author;
+              // 如果 package.json 有 name，优先使用
               name = pkg.name || name;
             }
           }
         } catch (e) { }
 
-        disabledPlugins.push({
+        allPlugins.push({
           name: name,
+          id: id,
           version,
           description,
           author,
-          status: 'disabled',
-          filename: item.name // Store real filename for operations
+          // 如果配置是 false，则为 disabled；否则是 stopped (应启动但未启动)
+          status: isActiveConfig ? 'stopped' : 'disabled',
+          filename: item.name
         });
       }
     }
   }
 
-  return sendSuccess(res, [...loadedPlugins, ...disabledPlugins]);
+  return sendSuccess(res, allPlugins);
 };
 
 export const ReloadPluginHandler: RequestHandler = async (req, res) => {
   const { name } = req.body;
+  // Note: we should probably accept ID or Name. But ReloadPlugin uses valid loaded name.
+  // Let's stick to name for now, but be aware of ambiguity.
   if (!name) return sendError(res, 'Plugin Name is required');
 
   const pluginManager = getPluginManager();
@@ -87,74 +138,51 @@ export const ReloadPluginHandler: RequestHandler = async (req, res) => {
 };
 
 export const SetPluginStatusHandler: RequestHandler = async (req, res) => {
-  const { name, enable, filename } = req.body; // filename required for enabling
-  if (!name) return sendError(res, 'Plugin Name is required');
+  const { enable, filename } = req.body;
+  // We Use filename / id to control config
+  // Front-end should pass the 'filename' or 'id' as the key identifier
+
+  if (!filename) return sendError(res, 'Plugin Filename/ID is required');
 
   const pluginManager = getPluginManager();
   if (!pluginManager) {
     return sendError(res, 'Plugin Manager not found');
   }
 
-  const pluginPath = pluginManager.getPluginPath();
+  // Calculate ID from filename (remove ext if file)
+  // Or just use the logic consistent with loadPlugins
+  let id = filename;
+  // If it has extension .js/.mjs, remove it to get the ID used in config
+  if (filename.endsWith('.js') || filename.endsWith('.mjs')) {
+    id = path.parse(filename).name;
+  }
 
-  if (enable) {
-    // Enable: Rename back from .disabled
-    // We need the filename since we can't guess if it was a dir or file easily without scanning or passing it
-    if (!filename) return sendError(res, 'Filename is required to enable');
+  try {
+    pluginManager.setPluginStatus(id, enable);
 
-    const disabledPath = path.join(pluginPath, filename);
-    const enabledPath = path.join(pluginPath, filename.replace(/\.disabled$/, ''));
+    // If enabling, trigger load
+    if (enable) {
+      const pluginPath = pluginManager.getPluginPath();
+      const fullPath = path.join(pluginPath, filename);
 
-    if (!fs.existsSync(disabledPath)) {
-      return sendError(res, 'Disabled plugin not found');
-    }
-
-    try {
-      fs.renameSync(disabledPath, enabledPath);
-      // After rename, we need to load it
-      const isDirectory = fs.statSync(enabledPath).isDirectory();
-      if (isDirectory) {
-        await pluginManager.loadDirectoryPlugin(path.basename(enabledPath));
+      if (fs.statSync(fullPath).isDirectory()) {
+        await pluginManager.loadDirectoryPlugin(filename);
       } else {
-        await pluginManager.loadFilePlugin(path.basename(enabledPath));
+        await pluginManager.loadFilePlugin(filename);
       }
-      return sendSuccess(res, { message: 'Enabled successfully' });
-    } catch (e: any) {
-      return sendError(res, 'Failed to enable: ' + e.message);
+    } else {
+      // Disabling is handled inside setPluginStatus usually if implemented,
+      // OR we can explicitly unload here using the loaded name.
+      // The Manager's setPluginStatus implementation (if added) might logic this out.
+      // But our current Manager implementation just saves config.
+      // Wait, I updated Manager to try to unload.
+      // Let's rely on Manager's setPluginStatus or do it here?
+      // I implemented a basic unload loop in Manager.setPluginStatus.
     }
 
-  } else {
-    // Disable: Unload and rename to .disabled
-    const plugin = pluginManager.getPluginInfo(name);
-    if (!plugin) return sendError(res, 'Plugin not found/loaded');
-
-    try {
-      await pluginManager.unregisterPlugin(name);
-      // Determine the file/dir key in the fs
-
-      // plugin.pluginPath is the directory for dir plugins, and the directory containing the file for file plugins??
-      // Let's check LoadedPlugin definition again.
-      // pluginPath: this.pluginPath (for file plugins), pluginDir (for dir plugins)
-
-      // Wait, for file plugins: pluginPath = this.pluginPath, entryPath = filePath
-      // For dir plugins: pluginPath = pluginDir, entryPath = join(pluginDir, entryFile)
-
-      let fsPath = '';
-      // We need to rename the whole thing that constitutes the plugin.
-      if (plugin.pluginPath === pluginManager.getPluginPath()) {
-        // It's a file plugin
-        fsPath = plugin.entryPath;
-      } else {
-        // It's a directory plugin
-        fsPath = plugin.pluginPath;
-      }
-
-      const disabledPath = fsPath + '.disabled';
-      fs.renameSync(fsPath, disabledPath);
-      return sendSuccess(res, { message: 'Disabled successfully' });
-    } catch (e: any) {
-      return sendError(res, 'Failed to disable: ' + e.message);
-    }
+    return sendSuccess(res, { message: 'Status updated successfully' });
+  } catch (e: any) {
+    return sendError(res, 'Failed to update status: ' + e.message);
   }
 };
 
