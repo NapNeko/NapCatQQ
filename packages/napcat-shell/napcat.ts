@@ -77,7 +77,7 @@ export async function restartWorker (): Promise<void> {
 
   if (!currentWorker) {
     logger.logWarn('[NapCat] [Process] 没有运行中的Worker进程');
-    await startWorker();
+    await startWorker(false);
     isRestarting = false;
     return;
   }
@@ -134,16 +134,17 @@ export async function restartWorker (): Promise<void> {
   logger.log('[NapCat] [Process] Worker进程已关闭，等待 3 秒后启动新进程...');
   await new Promise(resolve => setTimeout(resolve, 3000));
 
-  // 5. 启动新进程
-  await startWorker();
+  // 5. 启动新进程（重启模式不传递快速登录参数）
+  await startWorker(false);
   isRestarting = false;
   logger.log('[NapCat] [Process] Worker进程重启完成');
 }
 
 /**
  * 启动 Worker 进程
+ * @param passQuickLogin 是否传递快速登录参数，默认为 true，重启时为 false
  */
-async function startWorker (): Promise<void> {
+async function startWorker (passQuickLogin: boolean = true): Promise<void> {
   if (!processManager) {
     throw new Error('进程管理器未初始化');
   }
@@ -151,8 +152,21 @@ async function startWorker (): Promise<void> {
   const workerScript = getWorkerScriptPath();
   const processType = getProcessTypeName();
 
-  // 传递 master 进程的命令行参数给 worker 进程
-  const child = processManager.createWorker(workerScript, process.argv.slice(2), {
+  // 只在首次启动时传递 -q 或 --qq 参数给 worker 进程
+  const workerArgs: string[] = [];
+  if (passQuickLogin) {
+    const args = process.argv.slice(2);
+    const qIndex = args.findIndex(arg => arg === '-q' || arg === '--qq');
+    if (qIndex !== -1 && qIndex + 1 < args.length) {
+      const qFlag = args[qIndex];
+      const qValue = args[qIndex + 1];
+      if (qFlag && qValue) {
+        workerArgs.push(qFlag, qValue);
+      }
+    }
+  }
+
+  const child = processManager.createWorker(workerScript, workerArgs, {
     env: {
       ...process.env,
       NAPCAT_WORKER_PROCESS: '1',
@@ -197,10 +211,10 @@ async function startWorker (): Promise<void> {
     } else {
       logger.log(`[NapCat] [${processType}] Worker进程正常退出`);
     }
-    // 如果不是由于主动重启引起的退出，尝试自动重新拉起
+    // 如果不是由于主动重启引起的退出，尝试自动重新拉起（保留快速登录参数）
     if (!isRestarting) {
       logger.logWarn(`[NapCat] [${processType}] Worker进程意外退出，正在尝试重新拉起...`);
-      startWorker().catch(e => {
+      startWorker(true).catch(e => {
         logger.logError(`[NapCat] [${processType}] 重新拉起Worker进程失败:`, e);
       });
     }
