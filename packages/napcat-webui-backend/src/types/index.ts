@@ -51,6 +51,7 @@ export interface LoginRuntimeType {
   NapCatHelper: {
     onQuickLoginRequested: (uin: string) => Promise<{ result: boolean; message: string; }>;
     onOB11ConfigChanged: (ob11: OneBotConfig) => Promise<void>;
+    onRestartProcessRequested: () => Promise<{ result: boolean; message: string; }>;
     QQLoginList: string[];
     NewQQLoginList: LoginListItem[];
   };
