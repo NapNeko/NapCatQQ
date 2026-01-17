@@ -1,9 +1,9 @@
 import { RequestHandler } from 'express';
 
 import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
+import { WebUiConfig } from '@/napcat-webui-backend/index';
 import { isEmpty } from '@/napcat-webui-backend/src/utils/check';
 import { sendError, sendSuccess } from '@/napcat-webui-backend/src/utils/response';
-import { WebUiConfig } from '@/napcat-webui-backend/index';
 
 // 获取QQ登录二维码
 export const QQGetQRcodeHandler: RequestHandler = async (_, res) => {
@@ -27,9 +27,17 @@ export const QQGetQRcodeHandler: RequestHandler = async (_, res) => {
 
 // 获取QQ登录状态
 export const QQCheckLoginStatusHandler: RequestHandler = async (_, res) => {
+  // 从 OneBot 上下文获取实时的 selfInfo.online 状态
+  const oneBotContext = WebUiDataRuntime.getOneBotContext();
+  const selfInfo = oneBotContext?.core?.selfInfo;
+  const isOnline = selfInfo?.online;
+  const qqLoginStatus = WebUiDataRuntime.getQQLoginStatus();
+  // 必须同时满足：已登录且在线（online 必须明确为 true）
+  const isLogin = qqLoginStatus && isOnline === true;
   const data = {
-    isLogin: WebUiDataRuntime.getQQLoginStatus(),
+    isLogin,
     qrcodeurl: WebUiDataRuntime.getQQLoginQrcodeURL(),
+    loginError: WebUiDataRuntime.getQQLoginError(),
   };
   return sendSuccess(res, data);
 };
@@ -86,5 +94,17 @@ export const getAutoLoginAccountHandler: RequestHandler = async (_, res) => {
 export const setAutoLoginAccountHandler: RequestHandler = async (req, res) => {
   const { uin } = req.body;
   await WebUiConfig.UpdateAutoLoginAccount(uin);
+  return sendSuccess(res, null);
+};
+
+// 刷新QQ登录二维码
+export const QQRefreshQRcodeHandler: RequestHandler = async (_, res) => {
+  // 判断是否已经登录
+  if (WebUiDataRuntime.getQQLoginStatus()) {
+    // 已经登录
+    return sendError(res, 'QQ Is Logined');
+  }
+  // 刷新二维码
+  await WebUiDataRuntime.refreshQRCode();
   return sendSuccess(res, null);
 };

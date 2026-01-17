@@ -125,7 +125,7 @@ export class NapCatCore {
     container.bind(TypedEventEmitter).toConstantValue(this.event);
     ReceiverServiceRegistry.forEach((ServiceClass, serviceName) => {
       container.bind(ServiceClass).toSelf();
-      //console.log(`Registering service handler for: ${serviceName}`);
+      // console.log(`Registering service handler for: ${serviceName}`);
       this.context.packetHandler.onCmd(serviceName, ({ seq, hex_data }) => {
         const serviceInstance = container.get(ServiceClass);
         return serviceInstance.handler(seq, hex_data);
@@ -177,8 +177,10 @@ export class NapCatCore {
 
     msgListener.onKickedOffLine = (Info: KickedOffLineInfo) => {
       // 下线通知
-      this.context.logger.logError('[KickedOffLine] [' + Info.tipsTitle + '] ' + Info.tipsDesc);
+      const tips = `[KickedOffLine] [${Info.tipsTitle}] ${Info.tipsDesc}`;
+      this.context.logger.logError(tips);
       this.selfInfo.online = false;
+      this.event.emit('KickedOffLine', tips);
     };
     msgListener.onRecvMsg = (msgs) => {
       msgs.forEach(msg => this.context.logger.logMessage(msg, this.selfInfo));
