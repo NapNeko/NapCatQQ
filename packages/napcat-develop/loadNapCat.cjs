@@ -73,6 +73,8 @@ async function copyAll () {
   process.env.NAPCAT_QQ_PACKAGE_INFO_PATH = path.join(TARGET_DIR, 'package.json');
   process.env.NAPCAT_QQ_VERSION_CONFIG_PATH = path.join(TARGET_DIR, 'config.json');
   process.env.NAPCAT_DISABLE_PIPE = '1';
+  // 禁用重启和多进程功能
+  process.env.NAPCAT_DISABLE_MULTI_PROCESS = '1';
   process.env.NAPCAT_WORKDIR = TARGET_DIR;
   // 开发环境使用固定密钥
   process.env.NAPCAT_WEBUI_JWT_SECRET_KEY = 'napcat_dev_secret_key';
