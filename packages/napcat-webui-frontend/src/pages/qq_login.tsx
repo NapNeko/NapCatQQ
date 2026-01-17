@@ -16,14 +16,39 @@ import type { QQItem } from '@/components/quick_login';
 import { ThemeSwitch } from '@/components/theme-switch';
 
 import QQManager from '@/controllers/qq_manager';
+import useDialog from '@/hooks/use-dialog';
 import PureLayout from '@/layouts/pure';
 import { motion } from 'motion/react';
 
+const parseLoginError = (errorStr: string) => {
+  if (errorStr.startsWith('登录失败: ')) {
+    const jsonPart = errorStr.substring('登录失败: '.length);
+
+    try {
+      const parsed = JSON.parse(jsonPart);
+
+      if (Array.isArray(parsed) && parsed[1]) {
+        const info = parsed[1];
+        const codeStr = info.serverErrorCode ? ` (错误码: ${info.serverErrorCode})` : '';
+
+        return `${info.message || errorStr}${codeStr}`;
+      }
+    } catch (e) {
+      // 忽略解析错误
+    }
+  }
+
+  return errorStr;
+};
+
 export default function QQLoginPage () {
   const navigate = useNavigate();
+  const dialog = useDialog();
   const [uinValue, setUinValue] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [qrcode, setQrcode] = useState<string>('');
+  const [loginError, setLoginError] = useState<string>('');
+  const lastErrorRef = useRef<string>('');
   const [qqList, setQQList] = useState<(QQItem | LoginListItem)[]>([]);
   const [refresh, setRefresh] = useState<boolean>(false);
   const firstLoad = useRef<boolean>(true);
@@ -61,6 +86,20 @@ export default function QQLoginPage () {
         navigate('/', { replace: true });
       } else {
         setQrcode(data.qrcodeurl);
+        if (data.loginError && data.loginError !== lastErrorRef.current) {
+          lastErrorRef.current = data.loginError;
+          setLoginError(data.loginError);
+          const friendlyMsg = parseLoginError(data.loginError);
+
+          dialog.alert({
+            title: '登录失败',
+            content: friendlyMsg,
+            confirmText: '确定',
+          });
+        } else if (!data.loginError) {
+          lastErrorRef.current = '';
+          setLoginError('');
+        }
       }
     } catch (error) {
       const msg = (error as Error).message;
@@ -97,6 +136,18 @@ export default function QQLoginPage () {
     e
   ) => {
     setUinValue(e.target.value);
+  };
+
+  const onRefreshQRCode = async () => {
+    try {
+      lastErrorRef.current = '';
+      setLoginError('');
+      await QQManager.refreshQRCode();
+      toast.success('已发送刷新请求');
+    } catch (error) {
+      const msg = (error as Error).message;
+      toast.error(`刷新二维码失败: ${msg}`);
+    }
   };
 
   useEffect(() => {
@@ -159,7 +210,11 @@ export default function QQLoginPage () {
                   />
                 </Tab>
                 <Tab key='qrcode' title='扫码登录'>
-                  <QrCodeLogin qrcode={qrcode} />
+                  <QrCodeLogin
+                    loginError={parseLoginError(loginError)}
+                    qrcode={qrcode}
+                    onRefresh={onRefreshQRCode}
+                  />
                 </Tab>
               </Tabs>
               <Button

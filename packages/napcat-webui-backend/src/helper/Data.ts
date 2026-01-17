@@ -14,6 +14,7 @@ const LoginRuntime: LoginRuntimeType = {
     uin: '',
     nick: '',
   },
+  QQLoginError: '',
   QQVersion: 'unknown',
   OneBotContext: null,
   onQQLoginStatusChange: async (status: boolean) => {
@@ -21,6 +22,9 @@ const LoginRuntime: LoginRuntimeType = {
   },
   onWebUiTokenChange: async (_token: string) => {
 
+  },
+  onRefreshQRCode: async () => {
+    // 默认空实现，由 shell 注册真实回调
   },
   NapCatHelper: {
     onOB11ConfigChanged: async () => {
@@ -173,5 +177,26 @@ export const WebUiDataRuntime = {
 
   requestRestartProcess: async function () {
     return await LoginRuntime.NapCatHelper.onRestartProcessRequested();
+  },
+
+  setQQLoginError (error: string): void {
+    LoginRuntime.QQLoginError = error;
+  },
+
+  getQQLoginError (): string {
+    return LoginRuntime.QQLoginError;
+  },
+
+  setRefreshQRCodeCallback (func: () => Promise<void>): void {
+    LoginRuntime.onRefreshQRCode = func;
+  },
+
+  getRefreshQRCodeCallback (): () => Promise<void> {
+    return LoginRuntime.onRefreshQRCode;
+  },
+
+  refreshQRCode: async function () {
+    LoginRuntime.QQLoginError = '';
+    await LoginRuntime.onRefreshQRCode();
   },
 };

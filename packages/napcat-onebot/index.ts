@@ -387,6 +387,7 @@ export class NapCatOneBot11Adapter {
       }
     };
     msgListener.onKickedOffLine = async (kick) => {
+      WebUiDataRuntime.setQQLoginStatus(false);
       const event = new BotOfflineEvent(this.core, kick.tipsTitle, kick.tipsDesc);
       this.networkManager
         .emitEvent(event)

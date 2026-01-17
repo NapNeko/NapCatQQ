@@ -86,6 +86,7 @@ import { GetGroupMemberList } from './group/GetGroupMemberList';
 import { GetGroupFileUrl } from '@/napcat-onebot/action/file/GetGroupFileUrl';
 import { GetPacketStatus } from '@/napcat-onebot/action/packet/GetPacketStatus';
 import { GetCredentials } from './system/GetCredentials';
+import { SetRestart } from './system/SetRestart';
 import { SendGroupSign, SetGroupSign } from './extends/SetGroupSign';
 import { GoCQHTTPGetGroupAtAllRemain } from './go-cqhttp/GetGroupAtAllRemain';
 import { GoCQHTTPCheckUrlSafely } from './go-cqhttp/GoCQHTTPCheckUrlSafely';
@@ -266,6 +267,7 @@ export function createActionMap (obContext: NapCatOneBot11Adapter, core: NapCatC
     new GetGroupFileSystemInfo(obContext, core),
     new GetGroupFilesByFolder(obContext, core),
     new GetPacketStatus(obContext, core),
+    new SetRestart(obContext, core),
     new GroupPoke(obContext, core),
     new FriendPoke(obContext, core),
     new GetUserStatus(obContext, core),

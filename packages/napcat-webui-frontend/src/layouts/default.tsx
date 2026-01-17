@@ -3,7 +3,7 @@ import { Button } from '@heroui/button';
 import { useLocalStorage } from '@uidotdev/usehooks';
 import clsx from 'clsx';
 import { AnimatePresence, motion } from 'motion/react';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { MdMenu, MdMenuOpen } from 'react-icons/md';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -11,14 +11,17 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import key from '@/const/key';
 
 import errorFallbackRender from '@/components/error_fallback';
-// import PageLoading from "@/components/Loading/PageLoading";
+import PageLoading from '@/components/page_loading';
 import SideBar from '@/components/sidebar';
 
 import useAuth from '@/hooks/auth';
+import useDialog from '@/hooks/use-dialog';
 
 import type { MenuItem } from '@/config/site';
 import { siteConfig } from '@/config/site';
 import QQManager from '@/controllers/qq_manager';
+import ProcessManager from '@/controllers/process_manager';
+import { waitForBackendReady } from '@/utils/process_utils';
 
 const menus: MenuItem[] = siteConfig.navItems;
 
@@ -48,7 +51,67 @@ const Layout: React.FC<{ children: React.ReactNode; }> = ({ children }) => {
   const [openSideBar, setOpenSideBar] = useLocalStorage(key.sideBarOpen, true);
   const [b64img] = useLocalStorage(key.backgroundImage, '');
   const navigate = useNavigate();
-  const { isAuth } = useAuth();
+  const { isAuth, revokeAuth } = useAuth();
+  const dialog = useDialog();
+  const isOnlineRef = useRef(true);
+  const [isRestarting, setIsRestarting] = useState(false);
+
+  // 定期检查 QQ 在线状态，掉线时弹窗提示
+  useEffect(() => {
+    if (!isAuth) return;
+    const checkOnlineStatus = async () => {
+      const currentPath = location.pathname;
+      if (currentPath === '/qq_login' || currentPath === '/web_login') return;
+      try {
+        const info = await QQManager.getQQLoginInfo();
+        if (info?.online === false && isOnlineRef.current === true) {
+          isOnlineRef.current = false;
+          dialog.confirm({
+            title: '账号已离线',
+            content: '您的 QQ 账号已下线，请重新登录。',
+            confirmText: '重新登陆',
+            cancelText: '退出账户',
+            onConfirm: async () => {
+              setIsRestarting(true);
+              try {
+                await ProcessManager.restartProcess();
+              } catch (_e) {
+                // 忽略错误，因为后端正在重启关闭连接
+              }
+
+              // 轮询探测后端是否恢复
+              await waitForBackendReady(
+                15000, // 15秒超时
+                () => {
+                  setIsRestarting(false);
+                  window.location.reload();
+                },
+                () => {
+                  setIsRestarting(false);
+                  dialog.alert({
+                    title: '启动超时',
+                    content: '后端在 15 秒内未响应，请检查 NapCat 运行日志或手动重启。',
+                  });
+                }
+              );
+            },
+            onCancel: () => {
+              revokeAuth();
+              navigate('/web_login');
+            },
+          });
+        } else if (info?.online === true) {
+          isOnlineRef.current = true;
+        }
+      } catch (_e) {
+        // 忽略请求错误
+      }
+    };
+    const timer = setInterval(checkOnlineStatus, 5000);
+    checkOnlineStatus();
+    return () => clearInterval(timer);
+  }, [isAuth, location.pathname]);
+
   const checkIsQQLogin = async () => {
     try {
       const result = await QQManager.checkQQLoginStatus();
@@ -86,6 +149,7 @@ const Layout: React.FC<{ children: React.ReactNode; }> = ({ children }) => {
         backgroundPosition: 'center',
       }}
     >
+      <PageLoading loading={isRestarting} />
       <SideBar
         items={menus}
         open={openSideBar}

@@ -43,9 +43,11 @@ export interface LoginRuntimeType {
   QQQRCodeURL: string;
   QQLoginUin: string;
   QQLoginInfo: SelfInfo;
+  QQLoginError: string;
   QQVersion: string;
   onQQLoginStatusChange: (status: boolean) => Promise<void>;
   onWebUiTokenChange: (token: string) => Promise<void>;
+  onRefreshQRCode: () => Promise<void>;
   WebUiConfigQuickFunction: () => Promise<void>;
   OneBotContext: any | null; // OneBot 上下文，用于调试功能
   NapCatHelper: {
