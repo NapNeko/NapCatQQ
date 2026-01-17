@@ -156,7 +156,6 @@ async function startWorker (): Promise<void> {
   });
 
   currentWorker = child;
-  logger.log(`[NapCat] [${processType}] 已创建Worker进程，PID: ${child.pid}`);
 
   // 监听标准输出（直接转发）
   if (child.stdout) {
@@ -195,7 +194,6 @@ async function startWorker (): Promise<void> {
     }
   });
 
-  // 监听子进程生成
   child.on('spawn', () => {
     logger.log(`[NapCat] [${processType}] Worker进程已生成`);
   });
