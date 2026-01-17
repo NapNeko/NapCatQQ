@@ -5,6 +5,10 @@ import { OB11HttpServerAdapter } from './http-server';
 export class OB11HttpSSEServerAdapter extends OB11HttpServerAdapter {
   private sseClients: Response[] = [];
 
+  override get isActive (): boolean {
+    return this.isEnable && (this.sseClients.length > 0 || super.isActive);
+  }
+
   override async handleRequest (req: Request, res: Response) {
     if (req.path === '/_events') {
       this.createSseSupport(req, res);
@@ -25,7 +29,8 @@ export class OB11HttpSSEServerAdapter extends OB11HttpServerAdapter {
     });
   }
 
-  override async onEvent<T extends OB11EmitEventContent>(event: T) {
+  override async onEvent<T extends OB11EmitEventContent> (event: T) {
+    super.onEvent(event);
     const promises: Promise<void>[] = [];
     this.sseClients.forEach((res) => {
       promises.push(new Promise<void>((resolve, reject) => {

@@ -2,9 +2,9 @@ import GenericForm, { random_token } from './generic_form';
 import type { Field } from './generic_form';
 
 export interface HTTPServerFormProps {
-  data?: OneBotConfig['network']['httpServers'][0]
-  onClose: () => void
-  onSubmit: (data: OneBotConfig['network']['httpServers'][0]) => Promise<void>
+  data?: OneBotConfig['network']['httpServers'][0];
+  onClose: () => void;
+  onSubmit: (data: OneBotConfig['network']['httpServers'][0]) => Promise<void>;
 }
 
 type HTTPServerFormType = OneBotConfig['network']['httpServers'];
@@ -20,7 +20,7 @@ const HTTPServerForm: React.FC<HTTPServerFormProps> = ({
     host: '127.0.0.1',
     port: 3000,
     enableCors: true,
-    enableWebsocket: true,
+    enableWebsocket: false,
     messagePostFormat: 'array',
     token: random_token(16),
     debug: false,

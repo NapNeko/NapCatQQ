@@ -33,6 +33,9 @@ const LoginRuntime: LoginRuntimeType = {
     onQuickLoginRequested: async () => {
       return { result: false, message: '' };
     },
+    onRestartProcessRequested: async () => {
+      return { result: false, message: '重启功能未初始化' };
+    },
     QQLoginList: [],
     NewQQLoginList: [],
   },
@@ -168,21 +171,11 @@ export const WebUiDataRuntime = {
     return LoginRuntime.OneBotContext;
   },
 
-  setQQLoginError (error: string): void {
-    LoginRuntime.QQLoginError = error;
+  setRestartProcessCall (func: () => Promise<{ result: boolean; message: string; }>): void {
+    LoginRuntime.NapCatHelper.onRestartProcessRequested = func;
   },
 
-  getQQLoginError (): string {
-    return LoginRuntime.QQLoginError;
-  },
-
-  setRefreshQRCodeCallback (func: () => Promise<void>): void {
-    LoginRuntime.onRefreshQRCode = func;
-  },
-
-  async refreshQRCode (): Promise<void> {
-    // 清除错误信息
-    LoginRuntime.QQLoginError = '';
-    await LoginRuntime.onRefreshQRCode();
+  requestRestartProcess: async function () {
+    return await LoginRuntime.NapCatHelper.onRestartProcessRequested();
   },
 };

@@ -13,6 +13,10 @@ export class OB11WebSocketClientAdapter extends IOB11NetworkAdapter<WebsocketCli
   private connection: WebSocket | null = null;
   private heartbeatRef: NodeJS.Timeout | null = null;
 
+  override get isActive (): boolean {
+    return this.isEnable && !!this.connection && this.connection.readyState === WebSocket.OPEN;
+  }
+
   async onEvent<T extends OB11EmitEventContent> (event: T) {
     if (this.connection && this.connection.readyState === WebSocket.OPEN) {
       this.connection.send(JSON.stringify(event));

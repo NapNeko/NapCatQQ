@@ -21,6 +21,10 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
   private heartbeatIntervalId: NodeJS.Timeout | null = null;
   wsClientWithEvent: WebSocket[] = [];
 
+  override get isActive (): boolean {
+    return this.isEnable && this.wsClientWithEvent.length > 0;
+  }
+
   constructor (
     name: string, config: WebsocketServerConfig, core: NapCatCore, obContext: NapCatOneBot11Adapter, actions: ActionMap
   ) {
@@ -70,6 +74,9 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
           if (EventIndex !== -1) {
             this.wsClientWithEvent.splice(EventIndex, 1);
           }
+          if (this.wsClientWithEvent.length === 0) {
+            this.stopHeartbeat();
+          }
         });
       });
       await this.wsClientsMutex.runExclusive(async () => {
@@ -77,6 +84,9 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
           this.wsClientWithEvent.push(wsClient);
         }
         this.wsClients.push(wsClient);
+        if (this.wsClientWithEvent.length > 0) {
+          this.startHeartbeat();
+        }
       });
     }).on('error', (err) => this.logger.log('[OneBot] [WebSocket Server] Server Error:', err.message));
   }
@@ -114,9 +124,6 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
     this.logger.log('[OneBot] [WebSocket Server] Server Started', typeof (addressInfo) === 'string' ? addressInfo : addressInfo?.address + ':' + addressInfo?.port);
 
     this.isEnable = true;
-    if (this.config.heartInterval > 0) {
-      this.registerHeartBeat();
-    }
   }
 
   async close () {
@@ -128,10 +135,7 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
         this.logger.log('[OneBot] [WebSocket Server] Server Closed');
       }
     });
-    if (this.heartbeatIntervalId) {
-      clearInterval(this.heartbeatIntervalId);
-      this.heartbeatIntervalId = null;
-    }
+    this.stopHeartbeat();
     await this.wsClientsMutex.runExclusive(async () => {
       this.wsClients.forEach((wsClient) => {
         wsClient.close();
@@ -141,7 +145,8 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
     });
   }
 
-  private registerHeartBeat () {
+  private startHeartbeat () {
+    if (this.heartbeatIntervalId || this.config.heartInterval <= 0) return;
     this.heartbeatIntervalId = setInterval(() => {
       this.wsClientsMutex.runExclusive(async () => {
         this.wsClientWithEvent.forEach((wsClient) => {
@@ -151,6 +156,13 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
         });
       });
     }, this.config.heartInterval);
+  }
+
+  private stopHeartbeat () {
+    if (this.heartbeatIntervalId) {
+      clearInterval(this.heartbeatIntervalId);
+      this.heartbeatIntervalId = null;
+    }
   }
 
   private authorize (token: string | undefined, wsClient: WebSocket, wsReq: IncomingMessage) {
@@ -235,12 +247,9 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
     }
 
     if (oldHeartbeatInterval !== newConfig.heartInterval) {
-      if (this.heartbeatIntervalId) {
-        clearInterval(this.heartbeatIntervalId);
-        this.heartbeatIntervalId = null;
-      }
-      if (newConfig.heartInterval > 0 && this.isEnable) {
-        this.registerHeartBeat();
+      this.stopHeartbeat();
+      if (newConfig.heartInterval > 0 && this.isEnable && this.wsClientWithEvent.length > 0) {
+        this.startHeartbeat();
       }
       return OB11NetworkReloadType.NetWorkReload;
     }

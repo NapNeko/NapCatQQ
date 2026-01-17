@@ -2,11 +2,11 @@ import GenericForm, { random_token } from './generic_form';
 import type { Field } from './generic_form';
 
 export interface HTTPServerSSEFormProps {
-  data?: OneBotConfig['network']['httpSseServers'][0]
-  onClose: () => void
+  data?: OneBotConfig['network']['httpSseServers'][0];
+  onClose: () => void;
   onSubmit: (
     data: OneBotConfig['network']['httpSseServers'][0]
-  ) => Promise<void>
+  ) => Promise<void>;
 }
 
 type HTTPServerSSEFormType = OneBotConfig['network']['httpSseServers'];
@@ -22,7 +22,7 @@ const HTTPServerSSEForm: React.FC<HTTPServerSSEFormProps> = ({
     host: '127.0.0.1',
     port: 3000,
     enableCors: true,
-    enableWebsocket: true,
+    enableWebsocket: false,
     messagePostFormat: 'array',
     token: random_token(16),
     debug: false,

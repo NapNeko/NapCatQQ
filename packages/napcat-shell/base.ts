@@ -343,9 +343,9 @@ export async function NCoreInitShell () {
   // 初始化 FFmpeg 服务
   await FFmpegService.init(pathWrapper.binaryPath, logger);
 
-  if (process.env['NAPCAT_DISABLE_PIPE'] !== '1') {
-    await connectToNamedPipe(logger).catch(e => logger.logError('命名管道连接失败', e));
-  }
+  // if (process.env['NAPCAT_DISABLE_PIPE'] !== '1') {
+  //   await connectToNamedPipe(logger).catch(e => logger.logError('命名管道连接失败', e));
+  // }
   const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
   const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVersion());
   const nativePacketHandler = new NativePacketHandler({ logger }); // 初始化 NativePacketHandler 用于后续使用
