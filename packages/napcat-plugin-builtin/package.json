@@ -1,0 +1,16 @@
+{
+  "name": "napcat-plugin-builtin",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.mjs",
+  "description": "NapCat 内置插件",
+  "dependencies": {
+    "napcat-onebot": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.1"
+  },
+  "scripts": {
+    "build": "vite build"
+  }
+}
