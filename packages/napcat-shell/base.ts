@@ -35,7 +35,7 @@ import { proxiedListenerOf } from '@/napcat-core/helper/proxy-handler';
 import { QQBasicInfoWrapper } from '@/napcat-core/helper/qq-basic-info';
 import { statusHelperSubscription } from '@/napcat-core/helper/status';
 import { applyPendingUpdates } from '@/napcat-webui-backend/src/api/UpdateNapCat';
-import { connectToNamedPipe } from '@/napcat-shell/pipe';
+import { connectToNamedPipe } from './pipe';
 // NapCat Shell App ES 入口文件
 async function handleUncaughtExceptions (logger: LogWrapper) {
   process.on('uncaughtException', (err) => {
