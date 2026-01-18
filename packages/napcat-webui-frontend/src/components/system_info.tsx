@@ -45,7 +45,7 @@ const SystemInfoItem: React.FC<SystemInfoItemProps> = ({
   return (
     <div
       className={clsx(
-        'flex text-sm gap-3 py-2 items-center transition-colors',
+        'flex text-sm gap-3 py-2 items-baseline transition-colors',
         hasBackground
           ? 'text-white/90'
           : 'text-default-600 dark:text-gray-300',
@@ -53,13 +53,13 @@ const SystemInfoItem: React.FC<SystemInfoItemProps> = ({
       )}
       onClick={onClick}
     >
-      <div className="text-lg opacity-70">{icon}</div>
+      <div className="text-lg opacity-70 self-center">{icon}</div>
       <div className='w-24 font-medium'>{title}</div>
       <div className={clsx(
         'text-xs font-mono flex-1',
         hasBackground ? 'text-white/80' : 'text-default-500'
       )}>{value}</div>
-      <div>{endContent}</div>
+      <div className="self-center">{endContent}</div>
     </div>
   );
 };
@@ -84,9 +84,11 @@ const UpdateDialogContent: React.FC<{
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-8 bg-default-50 dark:bg-default-100/5 rounded-xl border border-default-100 dark:border-default-100/10">
         <div className="flex flex-col items-center gap-2 min-w-0 w-full sm:w-auto">
           <span className="text-xs text-default-500 font-medium uppercase tracking-wider">当前版本</span>
-          <Chip size="lg" variant="flat" color="default" classNames={{ content: "font-mono font-bold text-base sm:text-lg break-all whitespace-normal text-center h-auto py-1" }}>
-            v{currentVersion}
-          </Chip>
+          <Tooltip content={`v${currentVersion}`}>
+            <Chip size="md" variant="flat" color="default" classNames={{ content: "font-mono font-bold text-sm truncate max-w-[120px] sm:max-w-[160px]" }}>
+              v{currentVersion}
+            </Chip>
+          </Tooltip>
         </div>
 
         <div className="flex flex-col items-center text-primary-500 px-4 shrink-0">
@@ -99,9 +101,11 @@ const UpdateDialogContent: React.FC<{
 
         <div className="flex flex-col items-center gap-2 min-w-0 w-full sm:w-auto">
           <span className="text-xs text-primary-500 font-medium uppercase tracking-wider">最新版本</span>
-          <Chip size="lg" color="primary" variant="shadow" classNames={{ content: "font-mono font-bold text-base sm:text-lg break-all whitespace-normal text-center h-auto py-1" }}>
-            v{latestVersion}
-          </Chip>
+          <Tooltip content={`v${latestVersion}`}>
+            <Chip size="md" color="primary" variant="shadow" classNames={{ content: "font-mono font-bold text-sm truncate max-w-[120px] sm:max-w-[160px]" }}>
+              v{latestVersion}
+            </Chip>
+          </Tooltip>
         </div>
       </div>
 
@@ -136,12 +140,20 @@ const UpdateDialogContent: React.FC<{
             </p>
           </div>
           <div className='mt-2 p-3 rounded-lg bg-warning-50/50 dark:bg-warning-900/20 border border-warning-200/50 dark:border-warning-700/30'>
-            <p className='text-xs text-warning-700 dark:text-warning-400 flex items-center gap-1'>
+            <p className='text-xs text-warning-700 dark:text-warning-400 flex items-center gap-1 justify-center'>
               <svg className='w-4 h-4' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
                 <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z' />
               </svg>
-              <span>请手动重启 NapCat，更新才会生效</span>
+              <span>重启 NapCat 生效</span>
             </p>
+          </div>
+          <div className='flex gap-3 justify-center mt-2 w-full'>
+            <button
+              className='px-4 py-2 text-sm rounded-lg bg-primary-500 hover:bg-primary-600 text-white shadow-sm transition-colors shadow-primary-500/20 w-full'
+              onClick={() => WebUIManager.restart()}
+            >
+              立即重启
+            </button>
           </div>
         </div>
       )}
@@ -400,7 +412,7 @@ const VersionSelectDialogContent: React.FC<VersionSelectDialogProps> = ({
               稍后重启
             </button>
             <button
-              className='px-4 py-2 text-sm rounded-lg bg-success-500 hover:bg-success-600 text-white shadow-sm transition-colors shadow-success-500/20'
+              className='px-4 py-2 text-sm rounded-lg bg-primary-500 hover:bg-primary-600 text-white shadow-sm transition-colors shadow-primary-500/20'
               onClick={async () => {
                 await WebUIManager.restart();
                 onClose();
