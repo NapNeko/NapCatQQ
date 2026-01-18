@@ -72,7 +72,7 @@ export function setPendingTokenToSend (token: string | null) {
 export async function InitPort (parsedConfig: WebUiConfigType): Promise<[string, number, string]> {
   try {
     await tryUseHost(parsedConfig.host);
-    const port = await tryUsePort(parsedConfig.port, parsedConfig.host, 0, 5);
+    const port = await tryUsePort(parsedConfig.port, parsedConfig.host);
     return [parsedConfig.host, port, parsedConfig.token];
   } catch (error) {
     console.log('host或port不可用', error);
@@ -356,7 +356,7 @@ async function tryUseHost (host: string): Promise<string> {
   });
 }
 
-async function tryUsePort (port: number, host: string, tryCount: number = 0, retryCurrentCount: number = 0): Promise<number> {
+async function tryUsePort (port: number, host: string, tryCount: number = 0): Promise<number> {
   return new Promise((resolve, reject) => {
     try {
       const server = net.createServer();
@@ -367,17 +367,9 @@ async function tryUsePort (port: number, host: string, tryCount: number = 0, ret
 
       server.on('error', (err: any) => {
         if (err.code === 'EADDRINUSE') {
-          if (retryCurrentCount > 0) {
-            console.log(`[NapCat] [WebUi] 端口 ${port} 被占用，1秒后重试... (剩余重试次数: ${retryCurrentCount})`);
-            setTimeout(() => {
-              resolve(tryUsePort(port, host, tryCount, retryCurrentCount - 1));
-            }, 1000);
-            return;
-          }
-
           if (tryCount < MAX_PORT_TRY) {
             // 使用循环代替递归
-            resolve(tryUsePort(port + 1, host, tryCount + 1, 0));
+            resolve(tryUsePort(port + 1, host, tryCount + 1));
           } else {
             reject(new Error(`端口尝试失败，达到最大尝试次数: ${MAX_PORT_TRY}`));
           }
@@ -394,4 +386,3 @@ async function tryUsePort (port: number, host: string, tryCount: number = 0, ret
     }
   });
 }
-
