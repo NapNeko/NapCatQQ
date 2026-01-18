@@ -29,7 +29,7 @@ const SystemStatusItem: React.FC<SystemStatusItemProps> = ({
     <div
       className={clsx(
         'py-1.5 text-sm transition-colors',
-        size === 'lg' ? 'col-span-2' : 'col-span-1 flex justify-between',
+        size === 'lg' ? 'col-span-2' : 'col-span-1 flex justify-between items-center',
       )}
     >
       <div className={clsx(
