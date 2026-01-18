@@ -28,6 +28,7 @@ let processManager: IProcessManager | null = null;
 let currentWorker: IWorkerProcess | null = null;
 let isElectron = false;
 let isRestarting = false;
+let isShuttingDown = false;
 
 /**
  * 获取进程类型名称（用于日志）
@@ -63,9 +64,17 @@ function isProcessAlive (pid: number): boolean {
 function forceKillProcess (pid: number): void {
   try {
     process.kill(pid, 'SIGKILL');
-    logger.log(`[NapCat] [Process] 已强制终止进程 ${pid}`);
   } catch (error) {
-    logger.logError(`[NapCat] [Process] 强制终止进程失败:`, error);
+    // SIGKILL 失败，在 Windows 上使用 taskkill 兜底
+    if (process.platform === 'win32') {
+      try {
+        require('child_process').execSync(`taskkill /F /PID ${pid}`, { stdio: 'ignore' });
+      } catch {
+        logger.logError(`[NapCat] [Process] 强制终止进程失败: PID ${pid}`);
+      }
+    } else {
+      logger.logError(`[NapCat] [Process] 强制终止进程失败:`, error);
+    }
   }
 }
 
@@ -73,7 +82,6 @@ function forceKillProcess (pid: number): void {
  * 重启 Worker 进程
  */
 export async function restartWorker (secretKey?: string): Promise<void> {
-  logger.log('[NapCat] [Process] 正在重启Worker进程...');
   isRestarting = true;
 
   if (!currentWorker) {
@@ -84,7 +92,6 @@ export async function restartWorker (secretKey?: string): Promise<void> {
   }
 
   const workerPid = currentWorker.pid;
-  logger.log(`[NapCat] [Process] 准备关闭Worker进程，PID: ${workerPid}`);
 
   // 1. 通知旧进程准备重启（旧进程会自行退出）
   currentWorker.postMessage({ type: 'restart-prepare' });
@@ -105,40 +112,26 @@ export async function restartWorker (secretKey?: string): Promise<void> {
 
     currentWorker?.once('exit', () => {
       clearTimeout(timeout);
-      logger.log('[NapCat] [Process] Worker进程已正常退出');
       resolve();
     });
   });
 
   // 3. 二次确认进程是否真的被终止（兜底检查）
-  if (workerPid) {
-    logger.log(`[NapCat] [Process] 检查进程 ${workerPid} 是否已终止...`);
-
+  if (workerPid && isProcessAlive(workerPid)) {
+    logger.logWarn(`[NapCat] [Process] 进程 ${workerPid} 仍在运行，尝试强制杀掉`);
+    forceKillProcess(workerPid);
+    await new Promise(resolve => setTimeout(resolve, 1000));
     if (isProcessAlive(workerPid)) {
-      logger.logWarn(`[NapCat] [Process] 进程 ${workerPid} 仍在运行，尝试强制杀掉（兜底）`);
-      forceKillProcess(workerPid);
-
-      // 等待 1 秒后再次检查
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      if (isProcessAlive(workerPid)) {
-        logger.logError(`[NapCat] [Process] 进程 ${workerPid} 无法终止，可能需要手动处理`);
-      } else {
-        logger.log(`[NapCat] [Process] 进程 ${workerPid} 已被强制终止`);
-      }
-    } else {
-      logger.log(`[NapCat] [Process] 进程 ${workerPid} 已确认终止`);
+      logger.logError(`[NapCat] [Process] 进程 ${workerPid} 无法终止，可能需要手动处理`);
     }
   }
 
-  // 4. 等待 3 秒后启动新进程
-  logger.log('[NapCat] [Process] Worker进程已关闭，等待 3 秒后启动新进程...');
+  // 4. 等待后启动新进程
   await new Promise(resolve => setTimeout(resolve, 3000));
 
   // 5. 启动新进程（重启模式不传递快速登录参数，传递密钥）
   await startWorker(false, secretKey);
   isRestarting = false;
-  logger.log('[NapCat] [Process] Worker进程重启完成');
 }
 
 /**
@@ -194,11 +187,8 @@ async function startWorker (passQuickLogin: boolean = true, secretKey?: string):
 
   // 监听子进程消息
   child.on('message', (msg: unknown) => {
-    logger.log(`[NapCat] [${processType}] 收到Worker消息:`, msg);
-
     // 处理重启请求
     if (typeof msg === 'object' && msg !== null && 'type' in msg && msg.type === 'restart') {
-      logger.log(`[NapCat] [${processType}] 收到重启请求，正在重启Worker进程...`);
       const secretKey = 'secretKey' in msg ? (msg as any).secretKey : undefined;
       restartWorker(secretKey).catch(e => {
         logger.logError(`[NapCat] [${processType}] 重启Worker进程失败:`, e);
@@ -211,11 +201,9 @@ async function startWorker (passQuickLogin: boolean = true, secretKey?: string):
     const exitCode = typeof code === 'number' ? code : 0;
     if (exitCode !== 0) {
       logger.logError(`[NapCat] [${processType}] Worker进程退出，退出码: ${exitCode}`);
-    } else {
-      logger.log(`[NapCat] [${processType}] Worker进程正常退出`);
     }
-    // 如果不是由于主动重启引起的退出，尝试自动重新拉起（保留快速登录参数）
-    if (!isRestarting) {
+    // 如果不是由于主动重启或关闭引起的退出，尝试自动重新拉起
+    if (!isRestarting && !isShuttingDown) {
       logger.logWarn(`[NapCat] [${processType}] Worker进程意外退出，正在尝试重新拉起...`);
       startWorker(true).catch(e => {
         logger.logError(`[NapCat] [${processType}] 重新拉起Worker进程失败:`, e);
@@ -223,8 +211,20 @@ async function startWorker (passQuickLogin: boolean = true, secretKey?: string):
     }
   });
 
-  child.on('spawn', () => {
-    logger.log(`[NapCat] [${processType}] Worker进程已生成`);
+  // 等待进程成功 spawn
+  await new Promise<void>((resolve, reject) => {
+    const onSpawn = () => {
+      child.off('error', onError);
+      resolve();
+    };
+    const onError = (...args: unknown[]) => {
+      const err = args[0] as Error;
+      logger.logError(`[NapCat] [${processType}] Worker进程启动失败:`, err);
+      child.off('spawn', onSpawn);
+      reject(err);
+    };
+    child.once('spawn', onSpawn);
+    child.once('error', onError);
   });
 }
 
@@ -232,25 +232,19 @@ async function startWorker (passQuickLogin: boolean = true, secretKey?: string):
  * 启动 Master 进程
  */
 async function startMasterProcess (): Promise<void> {
-  const processType = getProcessTypeName();
-  logger.log(`[NapCat] [${processType}] Master进程启动，PID: ${process.pid}`);
-
   // 连接命名管道（可通过环境变量禁用）
   if (!ENV.isPipeDisabled) {
     await connectToNamedPipe(logger).catch(e =>
       logger.logError('命名管道连接失败', e)
     );
-  } else {
-    logger.log(`[NapCat] [${processType}] 命名管道已禁用 (NAPCAT_DISABLE_PIPE=1)`);
   }
 
   // 启动 Worker 进程
   await startWorker();
 
   // 优雅关闭处理
-  const shutdown = (signal: string) => {
-    logger.log(`[NapCat] [Process] 收到${signal}信号，正在关闭...`);
-
+  const shutdown = () => {
+    isShuttingDown = true;
     if (currentWorker) {
       currentWorker.postMessage({ type: 'shutdown' });
       setTimeout(() => {
@@ -262,8 +256,8 @@ async function startMasterProcess (): Promise<void> {
     }
   };
 
-  process.on('SIGINT', () => shutdown('SIGINT'));
-  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown());
+  process.on('SIGTERM', () => shutdown());
 }
 
 /**
@@ -274,20 +268,13 @@ async function startWorkerProcess (): Promise<void> {
     throw new Error('进程管理器未初始化');
   }
 
-  const processType = getProcessTypeName();
-  logger.log(`[NapCat] [${processType}] Worker进程启动，PID: ${process.pid}`);
-
   // 监听来自父进程的消息
   processManager.onParentMessage((msg: unknown) => {
     if (typeof msg === 'object' && msg !== null && 'type' in msg) {
-      if (msg.type === 'restart-prepare') {
-        logger.log(`[NapCat] [${processType}] 收到重启准备信号，正在主动退出...`);
+      if (msg.type === 'restart-prepare' || msg.type === 'shutdown') {
         setTimeout(() => {
           process.exit(0);
         }, 100);
-      } else if (msg.type === 'shutdown') {
-        logger.log(`[NapCat] [${processType}] 收到关闭信号，正在退出...`);
-        process.exit(0);
       }
     }
   });
@@ -322,7 +309,6 @@ async function startWorkerProcess (): Promise<void> {
 async function main (): Promise<void> {
   // 单进程模式：直接启动核心
   if (ENV.isMultiProcessDisabled) {
-    logger.log('[NapCat] [SingleProcess] 多进程模式已禁用，直接启动核心');
     await NCoreInitShell();
     return;
   }
@@ -331,8 +317,6 @@ async function main (): Promise<void> {
   const result = await createProcessManager();
   processManager = result.manager;
   isElectron = result.isElectron;
-
-  logger.log(`[NapCat] [Process] 检测到 ${isElectron ? 'Electron' : 'Node.js'} 环境`);
 
   // 根据进程类型启动
   if (ENV.isWorkerProcess) {
