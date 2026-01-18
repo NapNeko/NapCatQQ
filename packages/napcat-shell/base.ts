@@ -35,6 +35,7 @@ import { proxiedListenerOf } from '@/napcat-core/helper/proxy-handler';
 import { QQBasicInfoWrapper } from '@/napcat-core/helper/qq-basic-info';
 import { statusHelperSubscription } from '@/napcat-core/helper/status';
 import { applyPendingUpdates } from '@/napcat-webui-backend/src/api/UpdateNapCat';
+import { connectToNamedPipe } from '@/napcat-shell/pipe';
 // NapCat Shell App ES 入口文件
 async function handleUncaughtExceptions (logger: LogWrapper) {
   process.on('uncaughtException', (err) => {
@@ -342,9 +343,9 @@ export async function NCoreInitShell () {
   // 初始化 FFmpeg 服务
   await FFmpegService.init(pathWrapper.binaryPath, logger);
 
-  // if (process.env['NAPCAT_DISABLE_PIPE'] !== '1') {
-  //   await connectToNamedPipe(logger).catch(e => logger.logError('命名管道连接失败', e));
-  // }
+  if (process.env['NAPCAT_DISABLE_PIPE'] !== '1' && process.env['NAPCAT_DISABLE_MULTI_PROCESS'] !== '1') {
+    await connectToNamedPipe(logger).catch(e => logger.logError('命名管道连接失败', e));
+  }
   const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
   const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVersion());
   const nativePacketHandler = new NativePacketHandler({ logger }); // 初始化 NativePacketHandler 用于后续使用
