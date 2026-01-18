@@ -25,6 +25,7 @@ export interface IWorkerProcess {
   kill (): boolean;
   on (event: string, listener: (...args: unknown[]) => void): void;
   once (event: string, listener: (...args: unknown[]) => void): void;
+  off (event: string, listener: (...args: unknown[]) => void): void;
 }
 
 /**
@@ -78,6 +79,10 @@ class ElectronProcessManager implements IProcessManager {
 
       once (event: string, listener: (...args: unknown[]) => void): void {
         child.once(event, listener);
+      },
+
+      off (event: string, listener: (...args: unknown[]) => void): void {
+        child.off(event, listener);
       },
     };
   }
@@ -133,6 +138,10 @@ class NodeProcessManager implements IProcessManager {
 
       once (event: string, listener: (...args: unknown[]) => void): void {
         child.once(event, listener);
+      },
+
+      off (event: string, listener: (...args: unknown[]) => void): void {
+        child.off(event, listener);
       },
     };
   }
