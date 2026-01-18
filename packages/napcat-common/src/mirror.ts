@@ -133,7 +133,7 @@ const defaultConfig: MirrorConfig = {
   apiMirrors: GITHUB_API_MIRRORS,
   rawMirrors: GITHUB_RAW_MIRRORS,
   nightlyLinkMirrors: NIGHTLY_LINK_MIRRORS,
-  timeout: 10000, // 10秒超时，平衡速度和可靠性
+  timeout: 5000, // 5秒超时，平衡速度和可靠性
   enabled: true,
   customMirror: undefined,
 };
@@ -257,7 +257,7 @@ export async function getFastMirrors (forceRefresh: boolean = false): Promise<st
 async function performMirrorTest (): Promise<string[]> {
   // 开始镜像测速
 
-  const timeout = 8000; // 测速超时 8 秒
+  const timeout = 3000; // 测速超时 3 秒
 
   // 并行测试所有镜像
   const mirrors = currentConfig.fileMirrors.filter(m => m);
@@ -821,8 +821,8 @@ export async function getAllGitHubTags (owner: string, repo: string, mirror?: st
     // 如果指定了镜像，只使用该镜像
     mirrors = [mirror];
   } else {
-    // 否则使用 auto 逻辑
-    mirrors = ['', ...currentConfig.fileMirrors.filter(m => m)];
+    // 否则使用 auto 逻辑，利用缓存的快速镜像列表
+    mirrors = await getFastMirrors();
   }
 
   // 并行请求
@@ -907,7 +907,8 @@ async function getWorkflowRunsFromHtml (
   if (mirror) {
     mirrors = [mirror];
   } else {
-    mirrors = ['', ...currentConfig.fileMirrors.filter(m => m)];
+    // 使用缓存的快速镜像列表
+    mirrors = await getFastMirrors();
   }
 
   for (const mirrorItem of mirrors) {
