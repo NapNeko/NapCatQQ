@@ -4,7 +4,7 @@ import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
 import { sendSuccess } from '@/napcat-webui-backend/src/utils/response';
 import { WebUiConfig } from '@/napcat-webui-backend/index';
 import { getLatestTag, getAllTags, compareSemVer } from 'napcat-common/src/helper';
-import { getLatestActionArtifacts } from '@/napcat-common/src/mirror';
+import { getLatestActionArtifacts, getMirrorConfig } from '@/napcat-common/src/mirror';
 import { NapCatCoreWorkingEnv } from '@/napcat-webui-backend/src/types';
 
 export const GetNapCatVersion: RequestHandler = (_, res) => {
@@ -35,6 +35,7 @@ export interface VersionInfo {
   size?: number;
   workflowRunId?: number;
   headSha?: string;
+  workflowTitle?: string;
 }
 
 /**
@@ -47,10 +48,16 @@ export const getAllReleasesHandler: RequestHandler = async (req, res) => {
     const pageSize = parseInt(req.query['pageSize'] as string) || 20;
     const typeFilter = req.query['type'] as string | undefined; // 'release' | 'action' | 'all'
     const searchQuery = (req.query['search'] as string || '').toLowerCase().trim();
+    const mirror = req.query['mirror'] as string | undefined;
 
     let versions: VersionInfo[] = [];
     let actionVersions: VersionInfo[] = [];
     let usedMirror = '';
+
+    // If mirror is specified, report it as used (will be confirmed by actual fetching response)
+    if (mirror) {
+      usedMirror = mirror;
+    }
 
     // 懒加载：只获取需要的版本类型
     const needReleases = !typeFilter || typeFilter === 'all' || typeFilter === 'release';
@@ -59,9 +66,12 @@ export const getAllReleasesHandler: RequestHandler = async (req, res) => {
     // 获取正式版本（仅当需要时）
     if (needReleases) {
       try {
-        const result = await getAllTags();
-        usedMirror = result.mirror;
-        
+        const result = await getAllTags(mirror);
+        // 如果没有指定镜像，使用实际上使用的镜像
+        if (!mirror) {
+          usedMirror = result.mirror;
+        }
+
         versions = result.tags.map(tag => {
           const isPrerelease = /-(alpha|beta|rc|dev|pre|snapshot)/i.test(tag);
           return {
@@ -81,14 +91,19 @@ export const getAllReleasesHandler: RequestHandler = async (req, res) => {
     // 获取 Action Artifacts（仅当需要时）
     if (needActions) {
       try {
-        const artifacts = await getLatestActionArtifacts('NapNeko', 'NapCatQQ', 'build.yml', 'main');
+        const { artifacts, mirror: actionMirror } = await getLatestActionArtifacts('NapNeko', 'NapCatQQ', 'build.yml', 'main', 10, mirror);
 
         // 根据当前工作环境自动过滤对应的 artifact 类型
         const isFramework = WebUiDataRuntime.getWorkingEnv() === NapCatCoreWorkingEnv.Framework;
         const targetArtifactName = isFramework ? 'NapCat.Framework' : 'NapCat.Shell';
 
+        // 如果没有指定镜像，且 action 实际上用了一个镜像（自动选择的），更新 usedMirror
+        if (!mirror && actionMirror) {
+          usedMirror = actionMirror;
+        }
+
         actionVersions = artifacts
-          .filter(a => a.name === targetArtifactName)
+          .filter(a => a && a.name === targetArtifactName)
           .map(a => ({
             tag: `action-${a.id}`,
             type: 'action' as const,
@@ -99,6 +114,7 @@ export const getAllReleasesHandler: RequestHandler = async (req, res) => {
             size: a.size_in_bytes,
             workflowRunId: a.workflow_run_id,
             headSha: a.head_sha,
+            workflowTitle: a.workflow_title,
           }));
       } catch {
         // 获取失败时返回空列表
@@ -114,7 +130,9 @@ export const getAllReleasesHandler: RequestHandler = async (req, res) => {
       allVersions = allVersions.filter(v => {
         const tagMatch = v.tag.toLowerCase().includes(searchQuery);
         const nameMatch = v.artifactName?.toLowerCase().includes(searchQuery);
-        return tagMatch || nameMatch;
+        const titleMatch = v.workflowTitle?.toLowerCase().includes(searchQuery);
+        const shaMatch = v.headSha?.toLowerCase().includes(searchQuery);
+        return tagMatch || nameMatch || titleMatch || shaMatch;
       });
     }
 
@@ -154,4 +172,9 @@ export const SetThemeConfigHandler: RequestHandler = async (req, res) => {
   const { theme } = req.body;
   await WebUiConfig.UpdateTheme(theme);
   sendSuccess(res, { message: '更新成功' });
+};
+
+export const GetMirrorsHandler: RequestHandler = (_, res) => {
+  const config = getMirrorConfig();
+  sendSuccess(res, { mirrors: config.fileMirrors });
 };

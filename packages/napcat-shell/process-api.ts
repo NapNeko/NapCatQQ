@@ -60,7 +60,7 @@ class ElectronProcessManager implements IProcessManager {
     const child: any = this.utilityProcess.fork(modulePath, args, options);
 
     return {
-      pid: child.pid as number | undefined,
+      get pid () { return child.pid as number | undefined; },
       stdout: child.stdout as Readable | null,
       stderr: child.stderr as Readable | null,
 
@@ -113,7 +113,7 @@ class NodeProcessManager implements IProcessManager {
     const child = this.forkFn(modulePath, args, options as any);
 
     return {
-      pid: child.pid,
+      get pid () { return child.pid; },
       stdout: child.stdout,
       stderr: child.stderr,
 
@@ -164,6 +164,9 @@ export async function createProcessManager (): Promise<{
   if (isElectron) {
     // @ts-ignore - electron 运行时存在但类型声明可能缺失
     const electron = await import('electron');
+    if (electron.app && !electron.app.isReady()) {
+      await electron.app.whenReady();
+    }
     return {
       manager: new ElectronProcessManager(electron.utilityProcess),
       isElectron: true,

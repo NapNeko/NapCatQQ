@@ -23,66 +23,50 @@ import { PromiseTimer } from './helper';
  * 懒加载测速：首次使用时自动测速，缓存 30 分钟
  */
 export const GITHUB_FILE_MIRRORS = [
-  // 延迟 < 800ms 的最快镜像
-  'https://github.chenc.dev/',      // 666ms
-  'https://ghproxy.cfd/',           // 719ms - 支持重定向
-  'https://github.tbedu.top/',      // 760ms
-  'https://ghps.cc/',               // 768ms
-  'https://gh.llkk.cc/',            // 774ms
-  'https://ghproxy.cc/',            // 777ms
-  'https://gh.monlor.com/',         // 779ms
-  'https://cdn.akaere.online/',     // 784ms
-  // 延迟 800-1000ms 的快速镜像
-  'https://gh.idayer.com/',         // 869ms
-  'https://gh-proxy.net/',          // 885ms
-  'https://ghpxy.hwinzniej.top/',   // 890ms
-  'https://github-proxy.memory-echoes.cn/', // 896ms
-  'https://git.yylx.win/',          // 917ms
-  'https://gitproxy.mrhjx.cn/',     // 950ms
-  'https://jiashu.1win.eu.org/',    // 954ms
-  'https://ghproxy.cn/',            // 981ms
-  // 延迟 1000-1500ms 的中速镜像
-  'https://gh.fhjhy.top/',          // 1014ms
-  'https://gp.zkitefly.eu.org/',    // 1015ms
-  'https://gh-proxy.com/',          // 1022ms
-  'https://hub.gitmirror.com/',     // 1027ms
-  'https://ghfile.geekertao.top/',  // 1029ms
-  'https://j.1lin.dpdns.org/',      // 1037ms
-  'https://ghproxy.imciel.com/',    // 1047ms
-  'https://github-proxy.teach-english.tech/', // 1047ms
-  'https://gh.927223.xyz/',         // 1071ms
-  'https://github.ednovas.xyz/',    // 1099ms
-  'https://ghf.xn--eqrr82bzpe.top/',// 1122ms
-  'https://gh.dpik.top/',           // 1131ms
-  'https://gh.jasonzeng.dev/',      // 1139ms
-  'https://gh.xxooo.cf/',           // 1157ms
-  'https://gh.bugdey.us.kg/',       // 1228ms
-  'https://ghm.078465.xyz/',        // 1289ms
-  'https://j.1win.ggff.net/',       // 1329ms
-  'https://tvv.tw/',                // 1393ms
-  'https://gh.chjina.com/',         // 1446ms
-  'https://gitproxy.127731.xyz/',   // 1458ms
-  // 延迟 1500-2500ms 的较慢镜像
-  'https://gh.inkchills.cn/',       // 1617ms
-  'https://ghproxy.cxkpro.top/',    // 1651ms
-  'https://gh.sixyin.com/',         // 1686ms
-  'https://github.geekery.cn/',     // 1734ms
-  'https://git.669966.xyz/',        // 1824ms
-  'https://gh.5050net.cn/',         // 1858ms
-  'https://gh.felicity.ac.cn/',     // 1903ms
-  'https://gh.ddlc.top/',           // 2056ms
-  'https://cf.ghproxy.cc/',         // 2058ms
-  'https://gitproxy.click/',        // 2068ms
-  'https://github.dpik.top/',       // 2313ms
-  'https://gh.zwnes.xyz/',          // 2434ms
-  'https://ghp.keleyaa.com/',       // 2440ms
-  'https://gh.wsmdn.dpdns.org/',    // 2744ms
-  // 延迟 > 2500ms 的慢速镜像（作为备用）
-  'https://ghproxy.monkeyray.net/', // 3023ms
-  'https://fastgit.cc/',            // 3369ms
-  'https://cdn.gh-proxy.com/',      // 3394ms
-  'https://gh.catmak.name/',        // 4119ms
-  'https://gh.noki.icu/',           // 5990ms
+  'https://github.chenc.dev/',
+  'https://ghproxy.cfd/',
+  'https://github.tbedu.top/',
+  'https://ghproxy.cc/',
+  'https://gh.monlor.com/',
+  'https://cdn.akaere.online/',
+  'https://gh.idayer.com/',
+  'https://gh.llkk.cc/',
+  'https://ghpxy.hwinzniej.top/',
+  'https://github-proxy.memory-echoes.cn/',
+  'https://git.yylx.win/',
+  'https://gitproxy.mrhjx.cn/',
+  'https://gh.fhjhy.top/',
+  'https://gp.zkitefly.eu.org/',
+  'https://gh-proxy.com/',
+  'https://ghfile.geekertao.top/',
+  'https://j.1lin.dpdns.org/',
+  'https://ghproxy.imciel.com/',
+  'https://github-proxy.teach-english.tech/',
+  'https://gh.927223.xyz/',
+  'https://github.ednovas.xyz/',
+  'https://ghf.xn--eqrr82bzpe.top/',
+  'https://gh.dpik.top/',
+  'https://gh.jasonzeng.dev/',
+  'https://gh.xxooo.cf/',
+  'https://gh.bugdey.us.kg/',
+  'https://ghm.078465.xyz/',
+  'https://j.1win.ggff.net/',
+  'https://tvv.tw/',
+  'https://gitproxy.127731.xyz/',
+  'https://gh.inkchills.cn/',
+  'https://ghproxy.cxkpro.top/',
+  'https://gh.sixyin.com/',
+  'https://github.geekery.cn/',
+  'https://git.669966.xyz/',
+  'https://gh.5050net.cn/',
+  'https://gh.felicity.ac.cn/',
+  'https://github.dpik.top/',
+  'https://ghp.keleyaa.com/',
+  'https://gh.wsmdn.dpdns.org/',
+  'https://ghproxy.monkeyray.net/',
+  'https://fastgit.cc/',
+  'https://gh.catmak.name/',
+  'https://gh.noki.icu/',
   '', // 原始 URL（无镜像）
 ];
 
@@ -109,7 +93,6 @@ export const GITHUB_RAW_MIRRORS = [
   // 测试确认支持 raw 文件的镜像
   'https://github.chenc.dev/https://raw.githubusercontent.com',
   'https://ghproxy.cfd/https://raw.githubusercontent.com',
-  'https://gh.llkk.cc/https://raw.githubusercontent.com',
   'https://ghproxy.cc/https://raw.githubusercontent.com',
   'https://gh-proxy.net/https://raw.githubusercontent.com',
 ];
@@ -585,7 +568,7 @@ export async function findAvailableDownloadUrl (
   let testedCount = 0;
   for (const mirror of mirrors) {
     if (!mirror) continue; // 跳过空字符串
-    
+
     // 特殊处理 nightly.link URL
     let mirrorUrl: string;
     if (originalUrl.includes('nightly.link')) {
@@ -594,7 +577,7 @@ export async function findAvailableDownloadUrl (
     } else {
       mirrorUrl = buildMirrorUrl(originalUrl, mirror);
     }
-    
+
     testedCount++;
     if (await testWithValidation(mirrorUrl)) {
       return mirrorUrl;
@@ -650,8 +633,15 @@ function compareSemVerSimple (a: string, b: string): number {
  * 从 tags 列表中获取最新的 release tag
  * 不依赖 GitHub API
  */
-export async function getLatestReleaseTag (owner: string, repo: string): Promise<string> {
-  const result = await getAllGitHubTags(owner, repo);
+// Update definitions validation locally first if possible.
+// I'll assume valid typescript.
+// I will split this into two tool calls to avoid complexity.
+// 1. Update mirror.ts
+// 2. Update UpdateNapCat.ts
+
+// This tool call: Update mirror.ts
+export async function getLatestReleaseTag (owner: string, repo: string, mirror?: string): Promise<string> {
+  const result = await getAllGitHubTags(owner, repo, mirror);
 
   // 过滤出符合 semver 的 tags
   const releaseTags = result.tags.filter(tag => SEMVER_REGEX.test(tag));
@@ -701,6 +691,8 @@ export async function getGitHubRelease (
     assetNames?: string[];
     /** 是否需要获取 changelog（需要调用 API） */
     fetchChangelog?: boolean;
+    /** 指定镜像 */
+    mirror?: string;
   } = {}
 ): Promise<{
   tag_name: string;
@@ -710,15 +702,16 @@ export async function getGitHubRelease (
   }>;
   body?: string;
 }> {
-  const { assetNames = [], fetchChangelog = false } = options;
+  const { assetNames = [], fetchChangelog = false, mirror } = options;
 
   // 1. 获取实际的 tag 名称
   let actualTag: string;
   if (tag === 'latest') {
-    actualTag = await getLatestReleaseTag(owner, repo);
+    actualTag = await getLatestReleaseTag(owner, repo, mirror);
   } else {
     actualTag = tag;
   }
+  // ...
 
   // 2. 构建 assets 列表（不需要 API）
   const assets = assetNames.map(name => ({
@@ -782,8 +775,8 @@ const tagsCache: Map<string, TagsCache> = new Map();
  * 获取所有 GitHub tags（带缓存）
  * 优化：并行请求多个镜像，使用第一个成功返回的结果
  */
-export async function getAllGitHubTags (owner: string, repo: string): Promise<{ tags: string[], mirror: string; }> {
-  const cacheKey = `${owner}/${repo}`;
+export async function getAllGitHubTags (owner: string, repo: string, mirror?: string): Promise<{ tags: string[], mirror: string; }> {
+  const cacheKey = `${owner}/${repo}/${mirror || 'auto'}`;
 
   // 检查缓存
   const cached = tagsCache.get(cacheKey);
@@ -805,7 +798,7 @@ export async function getAllGitHubTags (owner: string, repo: string): Promise<{ 
   };
 
   // 尝试从 URL 获取 tags
-  const fetchFromUrl = async (url: string, mirror: string): Promise<{ tags: string[], mirror: string; } | null> => {
+  const fetchFromUrl = async (url: string, usedMirror: string): Promise<{ tags: string[], mirror: string; } | null> => {
     try {
       const raw = await PromiseTimer(
         RequestUtil.HttpGetText(url),
@@ -813,79 +806,55 @@ export async function getAllGitHubTags (owner: string, repo: string): Promise<{ 
       );
 
       // 检查返回内容是否有效（不是 HTML 错误页面）
-      if (raw.includes('<!DOCTYPE') || raw.includes('<html')) {
-        return null;
+      if (raw.includes('refs/tags')) {
+        return { tags: parseTags(raw), mirror: usedMirror };
       }
-
-      const tags = parseTags(raw);
-      if (tags.length > 0) {
-        return { tags, mirror };
-      }
-      return null;
     } catch {
-      return null;
+      // 忽略错误
     }
+    return null;
   };
 
-  // 获取快速镜像列表
-  let fastMirrors: string[] = [];
-  try {
-    fastMirrors = await getFastMirrors();
-  } catch {
-    // 忽略错误
+  // 准备镜像列表
+  let mirrors: string[] = [];
+  if (mirror) {
+    // 如果指定了镜像，只使用该镜像
+    mirrors = [mirror];
+  } else {
+    // 否则使用 auto 逻辑
+    mirrors = ['', ...currentConfig.fileMirrors.filter(m => m)];
   }
 
-  // 构建 URL 列表（取前 5 个快速镜像 + 原始 URL 并行请求）
-  const topMirrors = fastMirrors.slice(0, 5);
-  const mirrorUrls = [
-    { url: baseUrl, mirror: 'github.com' }, // 原始 URL
-    ...topMirrors.filter(m => m).map(m => ({ url: buildMirrorUrl(baseUrl, m), mirror: m })),
-  ];
+  // 并行请求
+  const promises = mirrors.map(m => {
+    const url = m ? buildMirrorUrl(baseUrl, m) : baseUrl;
+    return fetchFromUrl(url, m || 'https://github.com');
+  });
 
-  // 并行请求所有镜像，使用 Promise.any 获取第一个成功的结果
   try {
-    const result = await Promise.any(
-      mirrorUrls.map(async ({ url, mirror }) => {
-        const res = await fetchFromUrl(url, mirror);
-        if (res) return res;
-        throw new Error('Failed');
-      })
-    );
-    
-    // 缓存结果
-    tagsCache.set(cacheKey, { tags: result.tags, mirror: result.mirror, timestamp: Date.now() });
-    return result;
-  } catch {
-    // Promise.any 全部失败，回退到顺序尝试剩余镜像
-  }
-
-  // 回退：顺序尝试剩余镜像
-  const remainingMirrors = fastMirrors.slice(5).filter(m => m);
-  for (const mirror of remainingMirrors) {
-    const url = buildMirrorUrl(baseUrl, mirror);
-    const result = await fetchFromUrl(url, mirror);
+    const result = await Promise.any(promises.filter(p => p !== null) as Promise<{ tags: string[], mirror: string; } | null>[]);
     if (result) {
-      tagsCache.set(cacheKey, { tags: result.tags, mirror: result.mirror, timestamp: Date.now() });
+      tagsCache.set(cacheKey, {
+        tags: result.tags,
+        mirror: result.mirror,
+        timestamp: Date.now(),
+      });
       return result;
     }
+  } catch {
+    // all failed
   }
 
-  // 最后尝试所有镜像
-  const allMirrors = currentConfig.fileMirrors.filter(m => m && !fastMirrors.includes(m));
-  for (const mirror of allMirrors) {
-    const url = buildMirrorUrl(baseUrl, mirror);
-    const result = await fetchFromUrl(url, mirror);
-    if (result) {
-      tagsCache.set(cacheKey, { tags: result.tags, mirror: result.mirror, timestamp: Date.now() });
-      return result;
-    }
+  if (mirror) {
+    throw new Error(`指定镜像 ${mirror} 获取 tags 失败`);
   }
 
-  throw new Error('无法获取 tags，所有源都不可用');
+  throw new Error('无法获取 tags，所有镜像源都不可用');
 }
 
 // ============== Action Artifacts 支持 ==============
 
+// ActionArtifact 接口定义
 export interface ActionArtifact {
   id: number;
   name: string;
@@ -895,12 +864,14 @@ export interface ActionArtifact {
   archive_download_url: string;
   workflow_run_id?: number;
   head_sha?: string;
+  workflow_title?: string;
 }
 
 // ============== Action Artifacts 缓存 ==============
 
 interface ArtifactsCache {
   artifacts: ActionArtifact[];
+  mirror: string;
   timestamp: number;
 }
 
@@ -920,68 +891,115 @@ export function clearArtifactsCache (): void {
  * 当 api.github.com 不可用时使用
  * 页面格式: https://github.com/{owner}/{repo}/actions/workflows/{workflow}
  */
+
 async function getWorkflowRunsFromHtml (
   owner: string,
   repo: string,
   workflow: string = 'build.yml',
-  maxRuns: number = 10
-): Promise<Array<{ id: number; created_at: string; }>> {
+  maxRuns: number = 10,
+  mirror?: string
+): Promise<{ runs: Array<{ id: number; created_at: string; title: string; }>; mirror: string; }> {
   const baseUrl = `https://github.com/${owner}/${repo}/actions/workflows/${workflow}`;
-  
+
   // 尝试使用镜像获取 HTML
-  const mirrors = ['', ...currentConfig.fileMirrors.filter(m => m)];
-  
-  for (const mirror of mirrors) {
+  // 如果指定了 mirror，则只使用该 mirror
+  let mirrors: string[] = [];
+  if (mirror) {
+    mirrors = [mirror];
+  } else {
+    mirrors = ['', ...currentConfig.fileMirrors.filter(m => m)];
+  }
+
+  for (const mirrorItem of mirrors) {
     try {
-      const url = mirror ? buildMirrorUrl(baseUrl, mirror) : baseUrl;
-      
-      const html = await PromiseTimer(
-        RequestUtil.HttpGetText(url),
-        10000
-      );
-      
-      // 从 HTML 中提取 run IDs 和时间
-      // 格式: href="/NapNeko/NapCatQQ/actions/runs/20676123968"
-      // 时间格式: <relative-time datetime="2026-01-03T10:37:29Z"
-      const runPattern = new RegExp(`href="/${owner}/${repo}/actions/runs/(\\d+)"`, 'gi');
-      const timePattern = /<relative-time\s+datetime="([^"]+)"/gi;
-      
-      // 提取所有时间
-      const times: string[] = [];
-      let timeMatch;
-      while ((timeMatch = timePattern.exec(html)) !== null) {
-        times.push(timeMatch[1]);
-      }
-      
-      const runs: Array<{ id: number; created_at: string; }> = [];
+      const allRuns: Array<{ id: number; created_at: string; title: string; }> = [];
       const foundIds = new Set<number>();
-      let timeIndex = 0;
-      
-      let match;
-      while ((match = runPattern.exec(html)) !== null && runs.length < maxRuns) {
-        const id = parseInt(match[1]);
-        if (!foundIds.has(id)) {
-          foundIds.add(id);
-          // 尝试获取对应的时间，每个 run 通常有两个时间（桌面和移动端显示）
-          // 所以每找到一个 run，跳过两个时间
-          const created_at = times[timeIndex] || new Date().toISOString();
-          timeIndex += 2; // 跳过两个时间（桌面端和移动端各一个）
-          runs.push({
-            id,
-            created_at,
-          });
+      let page = 1;
+      const maxPages = 10; // 防止无限请求，最多翻10页（约250个条目）
+
+      while (allRuns.length < maxRuns && page <= maxPages) {
+        const pageUrl = page > 1 ? `${baseUrl}?page=${page}` : baseUrl;
+        const url = mirrorItem ? buildMirrorUrl(pageUrl, mirrorItem) : pageUrl;
+
+        const html = await PromiseTimer(
+          RequestUtil.HttpGetText(url),
+          10000
+        );
+
+        // 使用 Block 分割策略，更稳健地关联 ID 和时间
+        const rows = html.split('<div class="Box-row');
+        let foundOnThisPage = 0;
+
+        for (const row of rows) {
+          // 提取 Run ID 和 Status
+          // <a href="/NapNeko/NapCatQQ/actions/runs/20799940346" ... aria-label="completed successfully: ...">
+          const runMatch = new RegExp(`href="/${owner}/${repo}/actions/runs/(\\d+)"[^>]*aria-label="([^"]*)"`, 'i').exec(row);
+
+          if (!runMatch || !runMatch[1] || !runMatch[2]) continue;
+
+          const id = parseInt(runMatch[1]);
+          const ariaLabel = runMatch[2];
+          const ariaLabelLower = ariaLabel.toLowerCase();
+
+          // 只需要判断 completed
+          if (ariaLabelLower.includes('completed')) {
+            if (!foundIds.has(id)) {
+              // 提取时间 (取 Block 内的第一个 relative-time)
+              const timeMatch = /<relative-time\s+datetime="([^"]+)"/.exec(row);
+              if (timeMatch && timeMatch[1]) {
+                foundIds.add(id);
+                foundOnThisPage++;
+
+                // 优先从 markdown-title class 提取标题
+                let title = '';
+                const titleMatch = /class="[^"]*markdown-title[^"]*"[^>]*>([\s\S]*?)<\/span>/i.exec(row);
+                if (titleMatch && titleMatch[1]) {
+                  title = titleMatch[1].trim();
+                }
+
+                // 如果没找到，回退到 aria-label 逻辑
+                if (!title) {
+                  title = ariaLabel;
+                  const prefixMatch = /^(completed successfully:\s*)/i.exec(title);
+                  if (prefixMatch) {
+                    title = title.substring(prefixMatch[0].length);
+                  }
+                }
+
+                allRuns.push({
+                  id,
+                  created_at: timeMatch[1],
+                  title: title.trim()
+                });
+              }
+            }
+          }
         }
+
+        // 如果本页没有找到任何 completed 的 run（但页面可能不为空），或者页面内容太少（可能是最后一页或错误）
+        // 这里简化判断: 如果本页没提取到任何有效数据，就认为没有更多数据了
+        if (foundOnThisPage === 0) {
+          // 也要考虑到可能是页面解析失败或者全是 failed 状态
+          // 检查是否有翻页按钮可能更复杂，暂时假设如果一整页都没有 successful run，可能后面也没有了，或者我们已经获取够多了
+          // 为了稳健，如果本页没找到，且 allRuns 还没满，尝试下一页 (除非页面很小说明是空页)
+          if (rows.length < 2) { // 只有 split 的第一个空元素
+            break;
+          }
+        }
+
+        // 分页逻辑：总是尝试下一页，直到满足 maxRuns
+        page++;
       }
-      
-      if (runs.length > 0) {
-        return runs;
+
+      if (allRuns.length > 0) {
+        return { runs: allRuns, mirror: mirrorItem || 'https://github.com' };
       }
     } catch {
       continue;
     }
   }
-  
-  return [];
+
+  return { runs: [], mirror: '' };
 }
 
 /**
@@ -996,122 +1014,49 @@ async function getArtifactsFromNightlyLink (
   owner: string,
   repo: string,
   workflow: string = 'build.yml',
-  branch: string = 'main',
-  maxRuns: number = 10
-): Promise<ActionArtifact[]> {
-  let workflowRuns: Array<{ id: number; head_sha?: string; created_at: string; }> = [];
-  
-  // 策略1: 优先尝试 GitHub API
+  _branch: string = 'main',
+  maxRuns: number = 10,
+  mirror?: string
+): Promise<{ artifacts: ActionArtifact[], mirror: string; }> {
+  // 策略: 优先使用 nightly.link（更稳定，无需认证）+ HTML 解析
   try {
-    const endpoint = `https://api.github.com/repos/${owner}/${repo}/actions/workflows/${workflow}/runs?branch=${branch}&status=success&per_page=${maxRuns}`;
-    
-    const runsResponse = await PromiseTimer(
-      RequestUtil.HttpGetJson<{
-        workflow_runs: Array<{ id: number; head_sha: string; created_at: string; }>;
-      }>(endpoint, 'GET', undefined, {
-        'User-Agent': 'NapCat',
-        'Accept': 'application/vnd.github.v3+json',
-      }),
-      10000
-    );
+    // 以前尝试使用 GitHub API，现在弃用，完全使用 HTML 解析逻辑
+    // 并获取 workflow    // 直接从 HTML 页面解析
+    const { runs: workflowRuns, mirror: runsMirror } = await getWorkflowRunsFromHtml(owner, repo, workflow, maxRuns, mirror);
 
-    if (runsResponse.workflow_runs && runsResponse.workflow_runs.length > 0) {
-      workflowRuns = runsResponse.workflow_runs;
+    if (workflowRuns.length === 0) {
+      return { artifacts: [], mirror: runsMirror };
     }
-  } catch {
-    // API 请求失败，继续尝试 HTML 解析
-  }
 
-  // 策略2: API 失败时，从 HTML 页面解析
-  if (workflowRuns.length === 0) {
-    workflowRuns = await getWorkflowRunsFromHtml(owner, repo, workflow, maxRuns);
-  }
+    // 直接拼接 nightly.link URL
+    // 格式: https://nightly.link/{owner}/{repo}/actions/runs/{run_id}/{artifact_name}.zip
+    const artifacts: ActionArtifact[] = [];
+    const artifactNames = ['NapCat.Framework', 'NapCat.Shell']; // 已知的 artifact 名称
 
-  if (workflowRuns.length === 0) {
-    return [];
-  }
+    // 如果 HTML 解析使用的 mirror 是 github.com（空），则 nightly.link 使用默认配置
+    // 如果使用了镜像，可能需要特殊的 nightly.link 镜像，或者这里仅记录 HTML 来源镜像
+    // 实际上 nightly.link 本身就是一个服务，我们使用配置中的 nightlyLinkMirrors
+    const baseNightlyMirror = currentConfig.nightlyLinkMirrors[0] || 'https://nightly.link';
 
-  // 直接拼接 nightly.link URL
-  // 格式: https://nightly.link/{owner}/{repo}/actions/runs/{run_id}/{artifact_name}.zip
-  const artifacts: ActionArtifact[] = [];
-  const artifactNames = ['NapCat.Framework', 'NapCat.Shell']; // 已知的 artifact 名称
-
-  for (const run of workflowRuns) {
-    for (const artifactName of artifactNames) {
-      const mirror = currentConfig.nightlyLinkMirrors[0] || 'https://nightly.link';
-      artifacts.push({
-        id: run.id,
-        name: artifactName,
-        size_in_bytes: 0,
-        created_at: run.created_at,
-        expires_at: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-        archive_download_url: `${mirror}/${owner}/${repo}/actions/runs/${run.id}/${artifactName}.zip`,
-        workflow_run_id: run.id,
-        head_sha: run.head_sha,
-      });
-    }
-  }
-
-  return artifacts;
-}
-
-/**
- * 通过 GitHub API 获取 artifacts（主要方案）
- */
-async function getArtifactsFromAPI (
-  owner: string,
-  repo: string,
-  workflow: string = 'build.yml',
-  branch: string = 'main',
-  maxRuns: number = 10
-): Promise<ActionArtifact[]> {
-  const endpoint = `https://api.github.com/repos/${owner}/${repo}/actions/workflows/${workflow}/runs?branch=${branch}&status=success&per_page=${maxRuns}`;
-
-  const runsResponse = await PromiseTimer(
-    RequestUtil.HttpGetJson<{
-      workflow_runs: Array<{ id: number; head_sha: string; created_at: string; }>;
-    }>(endpoint, 'GET', undefined, {
-      'User-Agent': 'NapCat',
-      'Accept': 'application/vnd.github.v3+json',
-    }),
-    10000
-  );
-
-  const workflowRuns = runsResponse.workflow_runs;
-  if (!workflowRuns || workflowRuns.length === 0) {
-    throw new Error('No successful workflow runs found');
-  }
-
-  // 获取所有 runs 的 artifacts
-  const allArtifacts: ActionArtifact[] = [];
-
-  for (const run of workflowRuns) {
-    try {
-      const artifactsEndpoint = `https://api.github.com/repos/${owner}/${repo}/actions/runs/${run.id}/artifacts`;
-      const artifactsResponse = await PromiseTimer(
-        RequestUtil.HttpGetJson<{
-          artifacts: ActionArtifact[];
-        }>(artifactsEndpoint, 'GET', undefined, {
-          'User-Agent': 'NapCat',
-          'Accept': 'application/vnd.github.v3+json',
-        }),
-        10000
-      );
-
-      if (artifactsResponse.artifacts) {
-        // 为每个 artifact 添加 run 信息
-        for (const artifact of artifactsResponse.artifacts) {
-          artifact.workflow_run_id = run.id;
-          artifact.head_sha = run.head_sha;
-          allArtifacts.push(artifact);
-        }
+    for (const run of workflowRuns) {
+      for (const artifactName of artifactNames) {
+        artifacts.push({
+          id: run.id,
+          name: artifactName,
+          size_in_bytes: 0,
+          created_at: run.created_at,
+          expires_at: new Date(new Date(run.created_at).getTime() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+          archive_download_url: `${baseNightlyMirror}/${owner}/${repo}/actions/runs/${run.id}/${artifactName}.zip`,
+          workflow_run_id: run.id,
+          workflow_title: run.title,
+        });
       }
-    } catch {
-      // 单个 run 获取失败，继续下一个
     }
-  }
+    return { artifacts, mirror: runsMirror };
 
-  return allArtifacts;
+  } catch {
+    return { artifacts: [], mirror: '' };
+  }
 }
 
 /**
@@ -1121,48 +1066,41 @@ async function getArtifactsFromAPI (
  * 策略：
  * 1. 检查缓存（10分钟有效）
  * 2. 优先尝试从 nightly.link 获取（无需认证，更稳定）
- * 3. 如果失败，回退到 GitHub API
+ * 3. 这里的实现已经完全移除了对 GitHub API 的依赖，直接解析 HTML
  */
 export async function getLatestActionArtifacts (
   owner: string,
   repo: string,
   workflow: string = 'build.yml',
   branch: string = 'main',
-  maxRuns: number = 10
-): Promise<ActionArtifact[]> {
-  const cacheKey = `${owner}/${repo}/${workflow}/${branch}`;
-  
+  maxRuns: number = 10,
+  mirror?: string
+): Promise<{ artifacts: ActionArtifact[], mirror: string; }> {
+  const cacheKey = `${owner}/${repo}/${workflow}/${branch}/${mirror || 'auto'}`;
+
   // 检查缓存
   const cached = artifactsCache.get(cacheKey);
   if (cached && (Date.now() - cached.timestamp) < ARTIFACTS_CACHE_TTL) {
-    return cached.artifacts;
+    return { artifacts: cached.artifacts, mirror: cached.mirror };
   }
 
-  let artifacts: ActionArtifact[] = [];
+  let result: { artifacts: ActionArtifact[], mirror: string; } = { artifacts: [], mirror: '' };
 
-  // 策略1: 优先使用 nightly.link（更稳定，无需认证）
+  // 策略: 优先使用 nightly.link（更稳定，无需认证）+ HTML 解析
   try {
-    artifacts = await getArtifactsFromNightlyLink(owner, repo, workflow, branch, maxRuns);
+    result = await getArtifactsFromNightlyLink(owner, repo, workflow, branch, maxRuns, mirror);
   } catch {
-    // nightly.link 获取失败
-  }
-
-  // 策略2: 回退到 GitHub API
-  if (artifacts.length === 0) {
-    try {
-      artifacts = await getArtifactsFromAPI(owner, repo, workflow, branch, maxRuns);
-    } catch {
-      // API 获取失败
-    }
+    // 获取失败
   }
 
   // 缓存结果（即使为空也缓存，避免频繁请求）
-  if (artifacts.length > 0) {
+  if (result.artifacts.length > 0) {
     artifactsCache.set(cacheKey, {
-      artifacts,
+      artifacts: result.artifacts,
+      mirror: result.mirror,
       timestamp: Date.now(),
     });
   }
 
-  return artifacts;
+  return result;
 }

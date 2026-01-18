@@ -220,13 +220,13 @@ export function parseAppidFromMajor (nodeMajor: string): string | undefined {
 // ============== GitHub Tags 获取 ==============
 // 使用 mirror 模块统一管理镜像
 
-export async function getAllTags (): Promise<{ tags: string[], mirror: string; }> {
-  return getAllTagsFromMirror('NapNeko', 'NapCatQQ');
+export async function getAllTags (mirror?: string): Promise<{ tags: string[], mirror: string; }> {
+  return getAllTagsFromMirror('NapNeko', 'NapCatQQ', mirror);
 }
 
 
-export async function getLatestTag (): Promise<string> {
-  const { tags } = await getAllTags();
+export async function getLatestTag (mirror?: string): Promise<string> {
+  const { tags } = await getAllTags(mirror);
 
   // 使用 SemVer 规范排序
   tags.sort((a, b) => compareSemVer(a, b));
