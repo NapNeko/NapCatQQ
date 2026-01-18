@@ -65,9 +65,11 @@ export function compareSemVer (v1: string, v2: string): -1 | 0 | 1 {
   const a = parseSemVer(v1);
   const b = parseSemVer(v2);
 
-  if (!a.valid || !b.valid) {
-    return 0;
+  if (!a.valid && !b.valid) {
+    return v1.localeCompare(v2) as -1 | 0 | 1;
   }
+  if (!a.valid) return -1;
+  if (!b.valid) return 1;
 
   // 比较主版本号
   if (a.major !== b.major) return a.major > b.major ? 1 : -1;

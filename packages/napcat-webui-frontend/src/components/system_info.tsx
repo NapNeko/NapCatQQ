@@ -269,6 +269,7 @@ interface VersionInfo {
   size?: number;
   workflowRunId?: number;
   headSha?: string;
+  workflowTitle?: string;
 }
 
 // 版本选择对话框内容
@@ -290,6 +291,14 @@ const VersionSelectDialogContent: React.FC<VersionSelectDialogProps> = ({
   const [activeTab, setActiveTab] = useState<'release' | 'action'>('release');
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebounce(searchQuery, 300);
+
+  const [selectedMirror, setSelectedMirror] = useState<string | undefined>(undefined);
+  const { data: mirrorsData } = useRequest(WebUIManager.getMirrors, {
+    cacheKey: 'napcat-mirrors',
+    staleTime: 60 * 60 * 1000,
+  });
+  const mirrors = mirrorsData?.mirrors || [];
+
   const pageSize = 15;
 
   // 获取所有可用版本（带分页、过滤和搜索）
@@ -299,15 +308,16 @@ const VersionSelectDialogContent: React.FC<VersionSelectDialogProps> = ({
       page: currentPage,
       pageSize,
       type: activeTab,
-      search: debouncedSearch
+      search: debouncedSearch,
+      mirror: selectedMirror
     }),
     {
-      refreshDeps: [currentPage, activeTab, debouncedSearch],
+      refreshDeps: [currentPage, activeTab, debouncedSearch, selectedMirror],
     }
   );
 
   // 版本列表已在后端过滤，直接使用
-  const filteredVersions = releasesData?.versions || [];
+  const filteredVersions = (releasesData?.versions || []) as VersionInfo[];
 
   // 检查是否是降级（使用语义化版本比较）
   const isDowngrade = useCallback((targetTag: string): boolean => {
@@ -319,6 +329,22 @@ const VersionSelectDialogContent: React.FC<VersionSelectDialogProps> = ({
 
   const selectedVersionTag = selectedVersion?.tag || '';
   const isSelectedDowngrade = isDowngrade(selectedVersionTag);
+
+  const performUpdate = async (force: boolean) => {
+    if (!selectedVersion) return;
+    setUpdateStatus('updating');
+    setErrorMessage('');
+
+    try {
+      await WebUIManager.UpdateNapCatToVersion(selectedVersionTag, force, selectedMirror);
+      setUpdateStatus('success');
+    } catch (err) {
+      console.error('Update failed:', err);
+      const errMsg = err instanceof Error ? err.message : '未知错误';
+      setErrorMessage(errMsg);
+      setUpdateStatus('error');
+    }
+  };
 
   const handleUpdate = async () => {
     if (!selectedVersion) return;
@@ -346,22 +372,6 @@ const VersionSelectDialogContent: React.FC<VersionSelectDialogProps> = ({
     await performUpdate(forceUpdate);
   };
 
-  const performUpdate = async (force: boolean) => {
-    if (!selectedVersion) return;
-    setUpdateStatus('updating');
-    setErrorMessage('');
-
-    try {
-      await WebUIManager.UpdateNapCatToVersion(selectedVersionTag, force);
-      setUpdateStatus('success');
-    } catch (err) {
-      console.error('Update failed:', err);
-      const errMsg = err instanceof Error ? err.message : '未知错误';
-      setErrorMessage(errMsg);
-      setUpdateStatus('error');
-    }
-  };
-
   // 处理分页变化
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -375,13 +385,30 @@ const VersionSelectDialogContent: React.FC<VersionSelectDialogProps> = ({
             <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M5 13l4 4L19 7' />
           </svg>
         </div>
-        <div className='text-center'>
+        <div className='text-center w-full'>
           <p className='text-sm font-medium text-success-600 dark:text-success-400'>
             更新到 {selectedVersionTag} 完成
           </p>
-          <p className='text-xs text-default-500 mt-1'>
+          <p className='text-xs text-default-500 mt-1 mb-6'>
             请重启 NapCat 以应用新版本
           </p>
+          <div className='flex gap-3 justify-center'>
+            <button
+              className='px-4 py-2 text-sm rounded-lg bg-default-100 hover:bg-default-200 transition-colors text-default-700'
+              onClick={onClose}
+            >
+              稍后重启
+            </button>
+            <button
+              className='px-4 py-2 text-sm rounded-lg bg-success-500 hover:bg-success-600 text-white shadow-sm transition-colors shadow-success-500/20'
+              onClick={async () => {
+                await WebUIManager.restart();
+                onClose();
+              }}
+            >
+              立即重启
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -463,23 +490,46 @@ const VersionSelectDialogContent: React.FC<VersionSelectDialogProps> = ({
         <Tab key='action' title='临时版本 (Action)' />
       </Tabs>
 
-      {/* 搜索框 */}
-      <Input
-        placeholder='搜索版本号...'
-        size='sm'
-        value={searchQuery}
-        onValueChange={(value) => {
-          setSearchQuery(value);
-          setCurrentPage(1);
-          setSelectedVersion(null);
-        }}
-        startContent={<IoSearch className='text-default-400' />}
-        isClearable
-        onClear={() => setSearchQuery('')}
-        classNames={{
-          inputWrapper: 'h-9',
-        }}
-      />
+      <div className="flex gap-2">
+        {/* 搜索框 */}
+        <Input
+          placeholder='搜索版本号...'
+          size='sm'
+          value={searchQuery}
+          onValueChange={(value) => {
+            setSearchQuery(value);
+            setCurrentPage(1);
+            setSelectedVersion(null);
+          }}
+          startContent={<IoSearch className='text-default-400' />}
+          isClearable
+          onClear={() => setSearchQuery('')}
+          classNames={{
+            inputWrapper: 'h-9',
+            base: 'flex-1'
+          }}
+        />
+
+        {/* 镜像选择 */}
+        <Select
+          placeholder="自动选择 (默认)"
+          selectedKeys={selectedMirror ? [selectedMirror] : ['default']}
+          onSelectionChange={(keys) => {
+            const m = Array.from(keys)[0] as string;
+            setSelectedMirror(m === 'default' ? undefined : m);
+          }}
+          size="sm"
+          className="w-48"
+          classNames={{ trigger: 'h-9 min-h-9' }}
+          aria-label="选择镜像源"
+        >
+          {['default', ...mirrors].map(m => (
+            <SelectItem key={m} textValue={m === 'default' ? '自动选择' : m}>
+              {m === 'default' ? '自动选择 (默认)' : m}
+            </SelectItem>
+          ))}
+        </Select>
+      </div>
 
       {/* 版本选择 */}
       <div className='space-y-2'>
@@ -528,7 +578,12 @@ const VersionSelectDialogContent: React.FC<VersionSelectDialogProps> = ({
                 >
                   <div className='flex flex-col gap-0.5'>
                     <div className='flex items-center gap-2'>
-                      <span>{version.type === 'action' && version.artifactName ? version.artifactName : version.tag}</span>
+                      <span className="truncate max-w-[300px]">
+                        {version.type === 'action'
+                          ? (version.workflowTitle || version.artifactName || version.tag)
+                          : version.tag
+                        }
+                      </span>
                       {version.type === 'prerelease' && (
                         <Chip size='sm' color='secondary' variant='flat'>预发布</Chip>
                       )}
@@ -543,10 +598,11 @@ const VersionSelectDialogContent: React.FC<VersionSelectDialogProps> = ({
                       )}
                     </div>
                     {version.type === 'action' && (
-                      <div className='text-xs text-default-400'>
-                        {version.headSha && <span className='font-mono'>{version.headSha.slice(0, 7)}</span>}
-                        {version.createdAt && <span className='ml-2'>{new Date(version.createdAt).toLocaleString()}</span>}
-                        {version.size && <span className='ml-2'>{(version.size / 1024 / 1024).toFixed(1)} MB</span>}
+                      <div className='text-xs text-default-400 flex items-center gap-2'>
+                        <span className='font-mono bg-default-100 dark:bg-default-100/10 px-1 rounded'>{version.tag}</span>
+                        {version.headSha && <span className='font-mono' title={version.headSha}>{version.headSha.slice(0, 7)}</span>}
+                        {version.createdAt && <span>{new Date(version.createdAt).toLocaleString()}</span>}
+                        {version.size && <span>{(version.size / 1024 / 1024).toFixed(1)} MB</span>}
                       </div>
                     )}
                   </div>
@@ -568,6 +624,7 @@ const VersionSelectDialogContent: React.FC<VersionSelectDialogProps> = ({
               </span>
             )}
           </p>
+
         </div>
       )}
 

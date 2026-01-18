@@ -20,6 +20,8 @@ interface UpdateRequestBody {
   targetVersion?: string;
   /** 是否强制更新（即使是降级也更新） */
   force?: boolean;
+  /** 指定使用的镜像 */
+  mirror?: string;
 }
 
 // 更新配置文件接口
@@ -124,7 +126,7 @@ async function downloadFile (url: string, dest: string): Promise<void> {
 export const UpdateNapCatHandler: RequestHandler = async (req, res) => {
   try {
     // 从请求体获取目标版本（可选）
-    const { targetVersion, force } = req.body as UpdateRequestBody;
+    const { targetVersion, force, mirror } = req.body as UpdateRequestBody;
 
     // 确定要下载的文件名
     const ReleaseName = WebUiDataRuntime.getWorkingEnv() === NapCatCoreWorkingEnv.Framework ? 'NapCat.Framework.zip' : 'NapCat.Shell.zip';
@@ -150,20 +152,21 @@ export const UpdateNapCatHandler: RequestHandler = async (req, res) => {
 
       // 根据当前工作环境确定 artifact 名称
       const artifactName = ReleaseName.replace('.zip', ''); // NapCat.Framework 或 NapCat.Shell
-      
+
       // Action artifacts 通过 nightly.link 下载
       // 格式：https://nightly.link/{owner}/{repo}/actions/runs/{run_id}/{artifact_name}.zip
       const baseUrl = `https://nightly.link/NapNeko/NapCatQQ/actions/runs/${runId}/${artifactName}.zip`;
       actualVersion = targetTag;
 
       webUiLogger?.log(`[NapCat Update] Action artifact URL: ${baseUrl}`);
-      
+
       // 使用 mirror 模块查找可用的 nightly.link 镜像
       try {
         downloadUrl = await findAvailableDownloadUrl(baseUrl, {
           validateContent: true,
           minFileSize: 1024 * 1024,
           timeout: 10000,
+          customMirror: mirror,
         });
         webUiLogger?.log(`[NapCat Update] Using download URL: ${downloadUrl}`);
       } catch (error) {
@@ -178,6 +181,7 @@ export const UpdateNapCatHandler: RequestHandler = async (req, res) => {
       const release = await getGitHubRelease('NapNeko', 'NapCatQQ', targetTag, {
         assetNames: [ReleaseName, 'NapCat.Framework.zip', 'NapCat.Shell.zip'],
         fetchChangelog: false, // 不需要 changelog，避免 API 调用
+        mirror,
       });
 
       const shellZipAsset = release.assets.find(asset => asset.name === ReleaseName);
@@ -193,6 +197,7 @@ export const UpdateNapCatHandler: RequestHandler = async (req, res) => {
         validateContent: true,           // 验证 Content-Type 和状态码
         minFileSize: 1024 * 1024,        // 最小 1MB，确保不是错误页面
         timeout: 10000,                  // 10秒超时
+        customMirror: mirror,
       });
     }
 

@@ -72,8 +72,9 @@ export default class WebUIManager {
     pageSize?: number;
     type?: 'release' | 'action' | 'all';
     search?: string;
+    mirror?: string;
   } = {}) {
-    const { page = 1, pageSize = 20, type = 'release', search = '' } = options;
+    const { page = 1, pageSize = 20, type = 'release', search = '', mirror } = options;
     const { data } = await serverRequest.get<ServerResponse<{
       versions: Array<{
         tag: string;
@@ -94,15 +95,21 @@ export default class WebUIManager {
       };
       mirror?: string;
     }>>('/base/getAllReleases', {
-      params: { page, pageSize, type, search },
+      params: { page, pageSize, type, search, mirror },
     });
     return data.data;
   }
 
-  public static async UpdateNapCat () {
+  public static async getMirrors () {
+    const { data } =
+      await serverRequest.get<ServerResponse<{ mirrors: string[]; }>>('/base/getMirrors');
+    return data.data;
+  }
+
+  public static async UpdateNapCat (mirror?: string) {
     const { data } = await serverRequest.post<ServerResponse<any>>(
       '/UpdateNapCat/update',
-      {},
+      { mirror },
       { timeout: 120000 } // 2分钟超时
     );
     return data;
@@ -112,11 +119,12 @@ export default class WebUIManager {
    * 更新到指定版本
    * @param targetVersion 目标版本 tag，如 "v4.9.9" 或 "action-123456"
    * @param force 是否强制更新（允许降级）
+   * @param mirror 指定使用的镜像
    */
-  public static async UpdateNapCatToVersion (targetVersion: string, force: boolean = false) {
+  public static async UpdateNapCatToVersion (targetVersion: string, force: boolean = false, mirror?: string) {
     const { data } = await serverRequest.post<ServerResponse<any>>(
       '/UpdateNapCat/update',
-      { targetVersion, force },
+      { targetVersion, force, mirror },
       { timeout: 120000 } // 2分钟超时
     );
     return data;
@@ -139,6 +147,16 @@ export default class WebUIManager {
       '/base/SetTheme',
       { theme }
     );
+    return data.data;
+  }
+
+  public static async restart () {
+    const { data } = await serverRequest.post<ServerResponse<any>>('/Process/Restart');
+    return data.data;
+  }
+
+  public static async getAllUsers (): Promise<any> {
+    const { data } = await serverRequest.get<ServerResponse<any>>('/QQLogin/GetAllUsers');
     return data.data;
   }
 

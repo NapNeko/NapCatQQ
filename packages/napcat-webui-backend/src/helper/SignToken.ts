@@ -4,6 +4,10 @@ import type { WebUiCredentialJson, WebUiCredentialInnerJson } from '@/napcat-web
 export class AuthHelper {
   private static readonly secretKey = process.env['NAPCAT_WEBUI_JWT_SECRET_KEY'] || Math.random().toString(36).slice(2);
 
+  public static getSecretKey (): string {
+    return AuthHelper.secretKey;
+  }
+
   /**
      * 签名凭证方法。
      * @param hash 待签名的凭证字符串。
