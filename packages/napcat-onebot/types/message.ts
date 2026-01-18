@@ -159,7 +159,8 @@ export interface OB11MessageAt {
 export interface OB11MessageReply {
   type: OB11MessageDataType.reply;
   data: {
-    id: string;
+    id?: string;  // msg_id 的短ID映射
+    seq?: number; // msg_seq，优先使用
   };
 }
 
