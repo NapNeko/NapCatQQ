@@ -4,6 +4,7 @@ import { LogWrapper } from '@/napcat-core/helper/log';
 import { connectToNamedPipe } from './pipe';
 import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
 import { AuthHelper } from '@/napcat-webui-backend/src/helper/SignToken';
+import { webUiRuntimePort } from '@/napcat-webui-backend/index';
 import { createProcessManager, type IProcessManager, type IWorkerProcess } from './process-api';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -18,6 +19,13 @@ const ENV = {
   isMultiProcessDisabled: process.env['NAPCAT_DISABLE_MULTI_PROCESS'] === '1',
   isPipeDisabled: process.env['NAPCAT_DISABLE_PIPE'] === '1',
 } as const;
+
+// Worker 消息类型
+interface WorkerMessage {
+  type: 'restart' | 'restart-prepare' | 'shutdown';
+  secretKey?: string;
+  port?: number;
+}
 
 // 初始化日志
 const pathWrapper = new NapCatPathWrapper();
@@ -81,7 +89,7 @@ function forceKillProcess (pid: number): void {
 /**
  * 重启 Worker 进程
  */
-export async function restartWorker (secretKey?: string): Promise<void> {
+export async function restartWorker (secretKey?: string, port?: number): Promise<void> {
   isRestarting = true;
 
   if (!currentWorker) {
@@ -129,16 +137,18 @@ export async function restartWorker (secretKey?: string): Promise<void> {
   // 4. 等待后启动新进程
   await new Promise(resolve => setTimeout(resolve, 3000));
 
-  // 5. 启动新进程（重启模式不传递快速登录参数，传递密钥）
-  await startWorker(false, secretKey);
+  // 5. 启动新进程（重启模式不传递快速登录参数，传递密钥和端口）
+  await startWorker(false, secretKey, port);
   isRestarting = false;
 }
 
 /**
  * 启动 Worker 进程
  * @param passQuickLogin 是否传递快速登录参数，默认为 true，重启时为 false
+ * @param secretKey WebUI JWT 密钥
+ * @param preferredPort 优先使用的 WebUI 端口
  */
-async function startWorker (passQuickLogin: boolean = true, secretKey?: string): Promise<void> {
+async function startWorker (passQuickLogin: boolean = true, secretKey?: string, preferredPort?: number): Promise<void> {
   if (!processManager) {
     throw new Error('进程管理器未初始化');
   }
@@ -165,6 +175,7 @@ async function startWorker (passQuickLogin: boolean = true, secretKey?: string):
       ...process.env,
       NAPCAT_WORKER_PROCESS: '1',
       ...(secretKey ? { NAPCAT_WEBUI_JWT_SECRET_KEY: secretKey } : {}),
+      ...(preferredPort ? { NAPCAT_WEBUI_PREFERRED_PORT: String(preferredPort) } : {}),
     },
     stdio: isElectron ? 'pipe' : ['inherit', 'pipe', 'pipe', 'ipc'],
   });
@@ -188,11 +199,13 @@ async function startWorker (passQuickLogin: boolean = true, secretKey?: string):
   // 监听子进程消息
   child.on('message', (msg: unknown) => {
     // 处理重启请求
-    if (typeof msg === 'object' && msg !== null && 'type' in msg && msg.type === 'restart') {
-      const secretKey = 'secretKey' in msg ? (msg as any).secretKey : undefined;
-      restartWorker(secretKey).catch(e => {
-        logger.logError(`[NapCat] [${processType}] 重启Worker进程失败:`, e);
-      });
+    if (typeof msg === 'object' && msg !== null && 'type' in msg) {
+      const message = msg as WorkerMessage;
+      if (message.type === 'restart') {
+        restartWorker(message.secretKey, message.port).catch(e => {
+          logger.logError(`[NapCat] [${processType}] 重启Worker进程失败:`, e);
+        });
+      }
     }
   });
 
@@ -282,8 +295,11 @@ async function startWorkerProcess (): Promise<void> {
   // 注册重启进程函数到 WebUI
   WebUiDataRuntime.setRestartProcessCall(async () => {
     try {
-      const success = processManager!.sendToParent({ type: 'restart', secretKey: AuthHelper.getSecretKey() });
-
+      const success = processManager!.sendToParent({
+        type: 'restart',
+        secretKey: AuthHelper.getSecretKey(),
+        port: webUiRuntimePort,
+      });
 
       if (success) {
         return { result: true, message: '进程重启请求已发送' };
