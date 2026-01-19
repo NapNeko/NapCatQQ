@@ -54,7 +54,7 @@
     "@heroui/tooltip": "2.2.8",
     "@monaco-editor/loader": "^1.4.0",
     "@react-aria/visually-hidden": "^3.8.19",
-    "@reduxjs/toolkit": "^2.5.1",
+    "@reduxjs/toolkit": "^2.11.2",
     "@uidotdev/usehooks": "^2.4.1",
     "@uiw/react-codemirror": "^4.25.4",
     "@xterm/addon-canvas": "^0.7.0",
