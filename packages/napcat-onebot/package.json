@@ -24,7 +24,7 @@
         "@sinclair/typebox": "^0.34.38",
         "cors": "^2.8.5",
         "express": "^5.0.0",
-        "ws": "^8.18.3",
+        "ws": "^8.19.0",
         "file-type": "^21.0.0",
         "async-mutex": "^0.5.0",
         "napcat-protobuf": "workspace:*",

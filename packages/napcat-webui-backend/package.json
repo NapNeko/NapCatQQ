@@ -27,7 +27,7 @@
     "multer": "^2.0.1",
     "napcat-common": "workspace:*",
     "napcat-pty": "workspace:*",
-    "ws": "^8.18.3"
+    "ws": "^8.19.0"
   },
   "devDependencies": {
     "@types/compression": "^1.8.1",
