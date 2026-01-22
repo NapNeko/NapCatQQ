@@ -587,15 +587,33 @@ export class OneBotMsgApi {
       return at(atQQ, uid, NTMsgAtType.ATTYPEONE, info.nick || '');
     },
 
-    [OB11MessageDataType.reply]: async ({ data: { id } }) => {
-      const replyMsgM = MessageUnique.getMsgIdAndPeerByShortId(parseInt(id));
-      if (!replyMsgM) {
-        this.core.context.logger.logWarn('回复消息不存在', id);
+    [OB11MessageDataType.reply]: async ({ data: { id, seq } }, context) => {
+      let replyMsg: RawMessage | undefined;
+      let replyMsgPeer: Peer | undefined;
+
+      // 优先使用 seq
+      if (seq) {
+        const msgList = (await this.core.apis.MsgApi.getMsgsBySeqAndCount(
+          context.peer, seq.toString(), 1, true, true
+        )).msgList;
+        replyMsg = msgList[0];
+        replyMsgPeer = context.peer;
+      } else if (id) {
+        // 降级使用 id
+        const replyMsgM = MessageUnique.getMsgIdAndPeerByShortId(parseInt(id));
+        if (!replyMsgM) {
+          this.core.context.logger.logWarn('回复消息不存在', id);
+          return undefined;
+        }
+        replyMsg = (await this.core.apis.MsgApi.getMsgsByMsgId(
+          replyMsgM.Peer, [replyMsgM.MsgId])).msgList[0];
+        replyMsgPeer = replyMsgM.Peer;
+      } else {
+        this.core.context.logger.logWarn('回复消息缺少id或seq参数');
         return undefined;
       }
-      const replyMsg = (await this.core.apis.MsgApi.getMsgsByMsgId(
-        replyMsgM.Peer, [replyMsgM.MsgId])).msgList[0];
-      return replyMsg
+
+      return replyMsg && replyMsgPeer
         ? {
           elementType: ElementType.REPLY,
           elementId: '',
@@ -605,7 +623,7 @@ export class OneBotMsgApi {
             senderUin: replyMsg.senderUin,
             senderUinStr: replyMsg.senderUin,
             replyMsgClientSeq: replyMsg.clientSeq,
-            _replyMsgPeer: replyMsgM.Peer,
+            _replyMsgPeer: replyMsgPeer,
           },
         }
         : undefined;

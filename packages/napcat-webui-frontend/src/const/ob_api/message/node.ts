@@ -61,7 +61,8 @@ const messageNode = z.union([
     .object({
       type: z.literal('reply'),
       data: z.object({
-        id: z.number(),
+        id: z.number().optional(),
+        seq: z.number().optional(),
       }),
     })
     .describe('回复消息'),

@@ -24,196 +24,197 @@ export type OB11SegmentType =
   | 'file';
 
 export interface Segment {
-  type: OB11SegmentType
+  type: OB11SegmentType;
 }
 
 /** 纯文本 */
 export interface TextSegment extends Segment {
-  type: 'text'
+  type: 'text';
   data: {
-    text: string
-  }
+    text: string;
+  };
 }
 
 /** QQ表情 */
 export interface FaceSegment extends Segment {
-  type: 'face'
+  type: 'face';
   data: {
-    id: string
-  }
+    id: string;
+  };
 }
 
 /** 图片消息段 */
 export interface ImageSegment extends Segment {
-  type: 'image'
+  type: 'image';
   data: {
-    file: string
-    type?: 'flash'
-    url?: string
-    cache?: 0 | 1
-    proxy?: 0 | 1
-    timeout?: number
-  }
+    file: string;
+    type?: 'flash';
+    url?: string;
+    cache?: 0 | 1;
+    proxy?: 0 | 1;
+    timeout?: number;
+  };
 }
 
 /** 语音消息段 */
 export interface RecordSegment extends Segment {
-  type: 'record'
+  type: 'record';
   data: {
-    file: string
-    magic?: 0 | 1
-    url?: string
-    cache?: 0 | 1
-    proxy?: 0 | 1
-    timeout?: number
-  }
+    file: string;
+    magic?: 0 | 1;
+    url?: string;
+    cache?: 0 | 1;
+    proxy?: 0 | 1;
+    timeout?: number;
+  };
 }
 
 /** 短视频消息段 */
 export interface VideoSegment extends Segment {
-  type: 'video'
+  type: 'video';
   data: {
-    file: string
-    url?: string
-    cache?: 0 | 1
-    proxy?: 0 | 1
-    timeout?: number
-  }
+    file: string;
+    url?: string;
+    cache?: 0 | 1;
+    proxy?: 0 | 1;
+    timeout?: number;
+  };
 }
 
 /** @某人消息段 */
 export interface AtSegment extends Segment {
-  type: 'at'
+  type: 'at';
   data: {
-    qq: string | 'all'
-    name?: string
-  }
+    qq: string | 'all';
+    name?: string;
+  };
 }
 
 /** 猜拳魔法表情消息段 */
 export interface RpsSegment extends Segment {
-  type: 'rps'
+  type: 'rps';
 }
 
 /** 掷骰子魔法表情消息段 */
 export interface DiceSegment extends Segment {
-  type: 'dice'
+  type: 'dice';
 }
 
 /** 窗口抖动（戳一戳）消息段 */
 export interface ShakeSegment extends Segment {
-  type: 'shake'
-  data: object
+  type: 'shake';
+  data: object;
 }
 
 /** 戳一戳消息段 */
 export interface PokeSegment extends Segment {
-  type: 'poke'
+  type: 'poke';
   data: {
-    type: string
-    id: string
-    name?: string
-  }
+    type: string;
+    id: string;
+    name?: string;
+  };
 }
 
 /** 匿名发消息消息段 */
 export interface AnonymousSegment extends Segment {
-  type: 'anonymous'
+  type: 'anonymous';
   data: {
-    ignore?: 0 | 1
-  }
+    ignore?: 0 | 1;
+  };
 }
 
 /** 链接分享消息段 */
 export interface ShareSegment extends Segment {
-  type: 'share'
+  type: 'share';
   data: {
-    url: string
-    title: string
-    content?: string
-    image?: string
-  }
+    url: string;
+    title: string;
+    content?: string;
+    image?: string;
+  };
 }
 
 /** 推荐好友/群消息段 */
 export interface ContactSegment extends Segment {
-  type: 'contact'
+  type: 'contact';
   data: {
-    type: 'qq' | 'group'
-    id: string
-  }
+    type: 'qq' | 'group';
+    id: string;
+  };
 }
 
 /** 位置消息段 */
 export interface LocationSegment extends Segment {
-  type: 'location'
+  type: 'location';
   data: {
-    lat: string
-    lon: string
-    title?: string
-    content?: string
-  }
+    lat: string;
+    lon: string;
+    title?: string;
+    content?: string;
+  };
 }
 
 /** 音乐分享消息段 */
 export interface MusicSegment extends Segment {
-  type: 'music'
+  type: 'music';
   data: {
-    type: 'qq' | '163' | 'xm'
-    id: string
-  }
+    type: 'qq' | '163' | 'xm';
+    id: string;
+  };
 }
 
 /** 音乐自定义分享消息段 */
 export interface CustomMusicSegment extends Segment {
-  type: 'music'
+  type: 'music';
   data: {
-    type: 'custom'
-    url: string
-    audio: string
-    title: string
-    content?: string
-    image?: string
-  }
+    type: 'custom';
+    url: string;
+    audio: string;
+    title: string;
+    content?: string;
+    image?: string;
+  };
 }
 
 /** 回复消息段 */
 export interface ReplySegment extends Segment {
-  type: 'reply'
+  type: 'reply';
   data: {
-    id: string
-  }
+    id?: string;      // msg_id 的短ID映射
+    seq?: number;     // msg_seq，优先使用
+  };
 }
 
 export interface FileSegment extends Segment {
-  type: 'file'
+  type: 'file';
   data: {
-    file: string
-  }
+    file: string;
+  };
 }
 
 /** 合并转发消息段 */
 export interface ForwardSegment extends Segment {
-  type: 'forward'
+  type: 'forward';
   data: {
-    id: string
-  }
+    id: string;
+  };
 }
 
 /** XML消息段 */
 export interface XmlSegment extends Segment {
-  type: 'xml'
+  type: 'xml';
   data: {
-    data: string
-  }
+    data: string;
+  };
 }
 
 /** JSON消息段 */
 export interface JsonSegment extends Segment {
-  type: 'json'
+  type: 'json';
   data: {
-    data: string
-  }
+    data: string;
+  };
 }
 
 /** OneBot11消息段 */
@@ -242,23 +243,23 @@ export type OB11SegmentBase =
 
 /** 合并转发已有消息节点消息段 */
 export interface DirectNodeSegment extends Segment {
-  type: 'node'
+  type: 'node';
   data: {
-    id: string
-  }
+    id: string;
+  };
 }
 
 /** 合并转发自定义节点消息段 */
 export interface CustomNodeSegments extends Segment {
-  type: 'node'
+  type: 'node';
   data: {
-    user_id: string
-    nickname: string
-    content: OB11Segment[]
-    prompt?: string
-    summary?: string
-    source?: string
-  }
+    user_id: string;
+    nickname: string;
+    content: OB11Segment[];
+    prompt?: string;
+    summary?: string;
+    source?: string;
+  };
 }
 
 /** 合并转发消息段 */

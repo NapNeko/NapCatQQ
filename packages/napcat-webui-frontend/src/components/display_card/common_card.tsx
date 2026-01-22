@@ -93,7 +93,7 @@ const NetworkDisplayCard = <T extends keyof NetworkType> ({
             onPress={handleEnableDebug}
             isDisabled={editing}
           >
-            {debug ? '关闭调试' : '开启调试'}
+            {debug ? '默认' : '调试'}
           </Button>
           <Button
             fullWidth
