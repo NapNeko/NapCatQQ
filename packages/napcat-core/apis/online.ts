@@ -31,6 +31,7 @@ export class NTQQOnlineApi {
 
     const fileElementToSend = [{
       elementType: 23,
+      elementId: '',
       fileElement: {
         fileName: actualFileName,
         filePath,
