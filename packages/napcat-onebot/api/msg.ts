@@ -42,11 +42,18 @@ import { OB11GroupIncreaseEvent } from '../event/notice/OB11GroupIncreaseEvent';
 import { GroupDecreaseSubType, OB11GroupDecreaseEvent } from '../event/notice/OB11GroupDecreaseEvent';
 import { GroupAdmin } from 'napcat-core/packet/transformer/proto/message/groupAdmin';
 import { OB11GroupAdminNoticeEvent } from '../event/notice/OB11GroupAdminNoticeEvent';
-import { GroupChange, GroupChangeInfo, GroupInvite, PushMsgBody } from 'napcat-core/packet/transformer/proto';
+import {
+  GroupChange,
+  GroupChangeInfo,
+  GroupInvite,
+  PushMsgBody,
+} from 'napcat-core/packet/transformer/proto';
 import { OB11GroupRequestEvent } from '../event/request/OB11GroupRequest';
 import { LRUCache } from 'napcat-common/src/lru-cache';
 import { cleanTaskQueue } from 'napcat-common/src/clean-task';
 import { registerResource } from 'napcat-common/src/health';
+import { OB11OnlineFileReceiveEvent } from '@/napcat-onebot/event/notice/OB11OnlineFileReceiveEvent';
+import { OB11OnlineFileSendEvent } from '@/napcat-onebot/event/notice/OB11OnlineFileSendEvent';
 
 type RawToOb11Converters = {
   [Key in keyof MessageElement as Key extends `${string}Element` ? Key : never]: (
@@ -143,6 +150,18 @@ export class OneBotMsgApi {
     },
 
     fileElement: async (element, msg, elementWrapper, { disableGetUrl }) => {
+      // 让在线文件/文件夹的消息单独出去（否则无法正确处理UUID！！！）
+      if (+elementWrapper.elementType === 23 || +elementWrapper.elementType === 30) {
+        // 判断为在线文件/文件夹
+        return {
+          type: OB11MessageDataType.onlinefile,
+          data: {
+            msgId: msg.msgId,
+            elementId: elementWrapper.elementId,
+          },
+        };
+      }
+
       const peer = {
         chatType: msg.chatType,
         peerUid: msg.peerUid,
@@ -538,12 +557,22 @@ export class OneBotMsgApi {
     },
 
     markdownElement: async (element) => {
-      return {
-        type: OB11MessageDataType.markdown,
-        data: {
-          content: element.content,
-        },
-      };
+      // 让QQ闪传消息独立出去
+      if (element.mdExtInfo !== undefined && element.mdExtInfo.flashTransferInfo) {
+        return {
+          type: OB11MessageDataType.flashtransfer,
+          data: {
+            fileSetId: element.mdExtInfo.flashTransferInfo.filesetId,
+          },
+        };
+      } else {
+        return {
+          type: OB11MessageDataType.markdown,
+          data: {
+            content: element.content,
+          },
+        };
+      }
     },
   };
 
@@ -880,6 +909,10 @@ export class OneBotMsgApi {
       }
       return undefined;
     },
+    // 不需要支持发送
+    [OB11MessageDataType.onlinefile]: async () => undefined,
+
+    [OB11MessageDataType.flashtransfer]: async () => undefined,
   };
 
   constructor (obContext: NapCatOneBot11Adapter, core: NapCatCore) {
@@ -1329,6 +1362,7 @@ export class OneBotMsgApi {
   async parseSysMessage (msg: number[]) {
     const SysMessage = new NapProtoMsg(PushMsgBody).decode(Uint8Array.from(msg));
     // 邀请需要解grayTipElement
+    // console.log(SysMessage.body?.msgContent);
     if (SysMessage.contentHead.type === 33 && SysMessage.body?.msgContent) {
       const groupChange = new NapProtoMsg(GroupChange).decode(SysMessage.body.msgContent);
       await this.core.apis.GroupApi.refreshGroupMemberCache(groupChange.groupUin.toString(), true);
@@ -1484,6 +1518,63 @@ export class OneBotMsgApi {
       );
     } else if (SysMessage.contentHead.type === 528 && SysMessage.contentHead.subType === 39 && SysMessage.body?.msgContent) {
       return await this.obContext.apis.UserApi.parseLikeEvent(SysMessage.body?.msgContent);
+    } else if (SysMessage.contentHead.type === 166 && SysMessage.contentHead.c2CCmd === 133 && SysMessage.body?.msgContent) {
+      this.core.context.logger.logDebug('在线文件通道断开');
+      // 可能原因： 对方取消 对方拒绝 对方转离线
+      // body不是proto，只能手动提取，可能是错的！！
+      // console.log(SysMessage.body?.msgContent);
+      const mainCmd = SysMessage.body.msgContent[15];
+      const subCmd = SysMessage.body.msgContent[17];
+      if (mainCmd === 101) {
+        // 在线文件
+        if (subCmd === 225) {
+          // 对方取消或转离线
+          this.core.context.logger.log(`好友：${SysMessage.responseHead.fromUin}取消了在线文件的传输（或转离线）`);
+          return new OB11OnlineFileReceiveEvent(
+            this.core,
+            +SysMessage.responseHead.fromUin
+          );
+        } else if (subCmd === 230) {
+          // 对方拒绝接收
+          this.core.context.logger.log(`好友：${SysMessage.responseHead.fromUin}拒绝了你的在线文件传输`);
+          return new OB11OnlineFileSendEvent(
+            this.core,
+            +SysMessage.responseHead.fromUin,
+            'refuse'
+          );
+        }
+      } else if (mainCmd === 136) {
+        if (subCmd === 225) {
+          // 对方取消或转离线
+          this.core.context.logger.log(`好友：${SysMessage.responseHead.fromUin}取消了在线文件夹的传输（或转离线）`);
+          return new OB11OnlineFileReceiveEvent(
+            this.core,
+            +SysMessage.responseHead.fromUin
+          );
+        } else if (subCmd === 230) {
+          // 对方拒绝接收
+          this.core.context.logger.log(`好友：${SysMessage.responseHead.fromUin}拒绝了你的在线文件夹传输`);
+          return new OB11OnlineFileSendEvent(
+            this.core,
+            +SysMessage.responseHead.fromUin,
+            'refuse'
+          );
+        }
+      }
+      this.core.context.logger.logDebug('未知的系统消息事件:', mainCmd, subCmd);
+      return undefined;
+    } else if (SysMessage.contentHead.type === 166 && SysMessage.contentHead.c2CCmd === 131 && SysMessage.body?.msgContent) {
+      const mainCmd = SysMessage.body.msgContent[15];
+      if (mainCmd === 101) {
+        this.core.context.logger.log('在线文件传输成功！');
+      } else if (mainCmd === 136) {
+        this.core.context.logger.log('在线文件夹传输成功！');
+      }
+      return new OB11OnlineFileSendEvent(
+        this.core,
+        +SysMessage.responseHead.fromUin,
+        'receive'
+      );
     }
     // else if (SysMessage.contentHead.type == 732 && SysMessage.contentHead.subType == 16 && SysMessage.body?.msgContent) {
     //     let data_wrap = PBString(2);

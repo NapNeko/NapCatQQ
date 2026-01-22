@@ -5,6 +5,7 @@ import fs from 'node:fs/promises';
 import { NTMsgAtType, ChatType, ElementType, MessageElement, RawMessage, SelfInfo } from '@/napcat-core/index';
 import { ILogWrapper } from 'napcat-common/src/log-interface';
 import EventEmitter from 'node:events';
+
 export enum LogLevel {
   DEBUG = 'debug',
   INFO = 'info',
@@ -263,7 +264,13 @@ function msgElementToText (element: MessageElement, msg: RawMessage, recursiveLe
   }
 
   if (element.fileElement) {
-    return `[文件 ${element.fileElement.fileName}]`;
+    if (element.fileElement.fileUuid) {
+      return `[文件 ${element.fileElement.fileName}]`;
+    } else if (element.elementType === ElementType.TOFURECORD) {
+      return `[在线文件 ${element.fileElement.fileName}]`;
+    } else if (element.elementType === ElementType.ONLINEFOLDER) {
+      return `[在线文件夹 ${element.fileElement.fileName}/]`;
+    }
   }
 
   if (element.videoElement) {
@@ -287,7 +294,12 @@ function msgElementToText (element: MessageElement, msg: RawMessage, recursiveLe
   }
 
   if (element.markdownElement) {
-    return '[Markdown 消息]';
+    // console.log(element.markdownElement);
+    if (element.markdownElement.mdExtInfo.flashTransferInfo) {
+      return element.markdownElement.mdSummary;
+    } else {
+      return '[Markdown 消息]';
+    }
   }
 
   if (element.multiForwardMsgElement) {
@@ -296,6 +308,8 @@ function msgElementToText (element: MessageElement, msg: RawMessage, recursiveLe
 
   if (element.elementType === ElementType.GreyTip) {
     return '[灰条消息]';
+  } else if (element.elementType === ElementType.FILE) {
+    return '[文件发送中]';
   }
 
   return `[未实现 (ElementType = ${element.elementType})]`;

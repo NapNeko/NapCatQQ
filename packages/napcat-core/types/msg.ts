@@ -66,13 +66,14 @@ export enum ElementType {
   YOLOGAMERESULT = 20,
   AVRECORD = 21,
   FEED = 22,
-  TOFURECORD = 23,
+  TOFURECORD = 23,  // tofu record??  在线文件的id是这个
   ACEBUBBLE = 24,
   ACTIVITY = 25,
   TOFU = 26,
   FACEBUBBLE = 27,
   SHARELOCATION = 28,
   TASKTOPMSG = 29,
+  ONLINEFOLDER = 30, // 在线文件夹
   RECOMMENDEDMSG = 43,
   ACTIONBAR = 44,
 }
@@ -304,10 +305,39 @@ export enum NTVideoType {
 }
 
 /**
+ * 闪传图标
+ */
+export interface FlashTransferIcon {
+  spec: number;
+  url: string;
+}
+
+/**
+ * 闪传文件信息
+ */
+export interface FlashTransferInfo {
+  filesetId: string;
+  name: string;
+  fileSize: string;
+  thnumbnail: {
+    id: string;
+    urls: FlashTransferIcon[];
+    localCachePath: string;
+  }
+}
+
+/**
  * Markdown元素接口
  */
 export interface MarkdownElement {
   content: string;
+  style?: {};
+  processMsg?: string;
+  mdSummary?: string;
+  mdExtType?: number;
+  mdExtInfo?: {
+    flashTransferInfo: FlashTransferInfo;
+  }
 }
 
 /**
