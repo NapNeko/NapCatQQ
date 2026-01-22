@@ -38,7 +38,7 @@ export async function NCoreInitFramework (
   const logger = new LogWrapper(pathWrapper.logsPath);
   await applyPendingUpdates(pathWrapper, logger);
   const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
-  const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVersion());
+  const wrapper = loadQQWrapper(basicInfoWrapper.QQMainPath, basicInfoWrapper.getFullQQVersion());
   const nativePacketHandler = new NativePacketHandler({ logger }); // 初始化 NativePacketHandler 用于后续使用
   // nativePacketHandler.onAll((packet) => {
   //     console.log('[Packet]', packet.uin, packet.cmd, packet.hex_data);
