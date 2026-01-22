@@ -281,6 +281,18 @@ async function startWorkerProcess (): Promise<void> {
     throw new Error('进程管理器未初始化');
   }
 
+  // 预加载 Node Addon（如果设置了环境变量）
+  const preloadAddonPath = process.env['NAPCAT_PRELOAD_NODE_ADDON_PATH'];
+  if (preloadAddonPath) {
+    try {
+      const os = await import('os');
+      process.dlopen({ exports: {} }, preloadAddonPath, os.constants.dlopen.RTLD_NOW | os.constants.dlopen.RTLD_GLOBAL);
+      logger.log(`[NapCat] [Worker] 已预加载 Node Addon: ${preloadAddonPath}`);
+    } catch (error) {
+      logger.logError(`[NapCat] [Worker] 预加载 Node Addon 失败: ${preloadAddonPath}`, error);
+    }
+  }
+
   // 监听来自父进程的消息
   processManager.onParentMessage((msg: unknown) => {
     if (typeof msg === 'object' && msg !== null && 'type' in msg) {
