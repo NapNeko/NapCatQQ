@@ -81,6 +81,14 @@ jobs:
                 -H "Authorization: Bearer $GH_TOKEN" \
                 https://api.github.com/repos/NapNeko/NapCatLinuxNodeLoader/actions/workflows/release.yml/dispatches \
                 -d "{\"ref\":\"main\",\"inputs\":{\"napcat_version\":\"${NAPCAT_VERSION}\",\"qq_url_amd64\":\"${QQ_VERSION_X86_64}\",\"qq_url_arm64\":\"${QQ_VERSION_ARM64}\"}}"
+      - name: Trigger Release NapCat AppImage Workflow
+        env:
+            GH_TOKEN: ${{ secrets.NAPCAT_BUILD }}
+            NAPCAT_VERSION: ${{ env.latest_tag }}
+            QQ_VERSION_X86_64: 'https://dldir1v6.qq.com/qqfile/qq/QQNT/94704804/linuxqq_3.2.23-44343_x86_64.AppImage' # 写死 QQ 版本
+            QQ_VERSION_ARM64: 'https://dldir1v6.qq.com/qqfile/qq/QQNT/94704804/linuxqq_3.2.23-44343_arm64.AppImage' # 写死 QQ 版本
+        run: |
+            echo "Debug: Triggering Release NapCat AppImage with napcat_version=${NAPCAT_VERSION}, qq_url_amd64=${QQ_VERSION_X86_64}, qq_url_arm64=${QQ_VERSION_ARM64}"
             curl -X POST \
                 -H "Accept: application/vnd.github+json" \
                 -H "Authorization: Bearer $GH_TOKEN" \
