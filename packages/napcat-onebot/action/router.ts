@@ -125,8 +125,8 @@ export const ActionName = {
   // 以下为扩展napcat扩展
   Unknown: 'unknown',
   SetDiyOnlineStatus: 'set_diy_online_status',
-  SharePeer: 'ArkSharePeer',// @deprecated
-  ShareGroupEx: 'ArkShareGroup',// @deprecated
+  SharePeer: 'ArkSharePeer', // @deprecated
+  ShareGroupEx: 'ArkShareGroup', // @deprecated
   // 标准化接口
   SendGroupArkShare: 'send_group_ark_share',
   SendArkShare: 'send_ark_share',
@@ -185,4 +185,22 @@ export const ActionName = {
   GetClientkey: 'get_clientkey',
 
   SendPoke: 'send_poke',
+
+  // Flash (闪传) 扩展
+  CreateFlashTask: 'create_flash_task',
+  SendFlashMsg: 'send_flash_msg',      // 因为不可能手动构造element，所以不走sendMsg
+  GetShareLink: 'get_share_link',
+  DownloadFileset: 'download_fileset',
+  GetFilesetInfo: 'get_fileset_info',
+  GetFlashFileList: 'get_flash_file_list',
+  GetFlashFileUrl: 'get_flash_file_url',
+  GetFilesetId: 'get_fileset_id',
+
+  // Online File (在线文件) 扩展
+  SendOnlineFile: 'send_online_file',
+  SendOnlineFolder: 'send_online_folder',
+  GetOnlineFileMessages: 'get_online_file_msg',
+  ReceiveOnlineFile: 'receive_online_file',
+  RefuseOnlineFile: 'refuse_online_file',
+  CancelOnlineFile: 'cancel_online_file',
 } as const;

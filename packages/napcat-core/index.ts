@@ -6,6 +6,8 @@ import {
   NTQQSystemApi,
   NTQQUserApi,
   NTQQWebApi,
+  NTQQFlashApi,
+  NTQQOnlineApi,
 } from '@/napcat-core/apis';
 import { NTQQCollectionApi } from '@/napcat-core/apis/collection';
 import {
@@ -23,7 +25,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { hostname, systemName, systemVersion } from 'napcat-common/src/system';
 import { NTEventWrapper } from '@/napcat-core/helper/event';
-import { KickedOffLineInfo, SelfInfo, SelfStatusInfo } from '@/napcat-core/types';
+import { KickedOffLineInfo, RawMessage, SelfInfo, SelfStatusInfo } from '@/napcat-core/types';
 import { NapCatConfigLoader, NapcatConfigSchema } from '@/napcat-core/helper/config';
 import os from 'node:os';
 import { NodeIKernelMsgListener, NodeIKernelProfileListener } from '@/napcat-core/listeners';
@@ -123,6 +125,8 @@ export class NapCatCore {
       MsgApi: new NTQQMsgApi(this.context, this),
       UserApi: new NTQQUserApi(this.context, this),
       GroupApi: new NTQQGroupApi(this.context, this),
+      FlashApi: new NTQQFlashApi(this.context, this),
+      OnlineApi: new NTQQOnlineApi(this.context, this),
     };
     container.bind(NapCatCore).toConstantValue(this);
     container.bind(TypedEventEmitter).toConstantValue(this.event);
@@ -177,6 +181,11 @@ export class NapCatCore {
   // Renamed from 'InitDataListener'
   async initNapCatCoreListeners () {
     const msgListener = new NodeIKernelMsgListener();
+
+    // 在线文件/文件夹消息
+    msgListener.onRecvOnlineFileMsg = (msgs: RawMessage[]) => {
+      msgs.forEach(msg => this.context.logger.logMessage(msg, this.selfInfo));
+    };
 
     msgListener.onKickedOffLine = (Info: KickedOffLineInfo) => {
       // 下线通知
@@ -297,4 +306,6 @@ export interface StableNTApiWrapper {
   MsgApi: NTQQMsgApi,
   UserApi: NTQQUserApi,
   GroupApi: NTQQGroupApi;
+  FlashApi: NTQQFlashApi,
+  OnlineApi: NTQQOnlineApi,
 }
