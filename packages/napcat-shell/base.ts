@@ -343,7 +343,7 @@ export async function NCoreInitShell () {
   // 初始化 FFmpeg 服务
   await FFmpegService.init(pathWrapper.binaryPath, logger);
 
-  if (process.env['NAPCAT_DISABLE_PIPE'] !== '1' && process.env['NAPCAT_DISABLE_MULTI_PROCESS'] !== '1') {
+  if (!(process.env['NAPCAT_DISABLE_PIPE'] == '1' || process.env['NAPCAT_WORKER_PROCESS'] == '1')) {
     await connectToNamedPipe(logger).catch(e => logger.logError('命名管道连接失败', e));
   }
   const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
