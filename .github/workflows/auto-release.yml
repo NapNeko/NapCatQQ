@@ -81,3 +81,8 @@ jobs:
                 -H "Authorization: Bearer $GH_TOKEN" \
                 https://api.github.com/repos/NapNeko/NapCatLinuxNodeLoader/actions/workflows/release.yml/dispatches \
                 -d "{\"ref\":\"main\",\"inputs\":{\"napcat_version\":\"${NAPCAT_VERSION}\",\"qq_url_amd64\":\"${QQ_VERSION_X86_64}\",\"qq_url_arm64\":\"${QQ_VERSION_ARM64}\"}}"
+            curl -X POST \
+                -H "Accept: application/vnd.github+json" \
+                -H "Authorization: Bearer $GH_TOKEN" \
+                https://api.github.com/repos/NapNeko/NapCatLinuxNodeLoader/actions/workflows/docker-publish.yml/dispatches \
+                -d "{\"ref\":\"main\",\"inputs\":{\"napcat_version\":\"${NAPCAT_VERSION}\",\"qq_url_amd64\":\"${QQ_VERSION_X86_64}\",\"qq_url_arm64\":\"${QQ_VERSION_ARM64}\"}}"
