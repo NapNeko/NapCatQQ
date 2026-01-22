@@ -328,6 +328,38 @@ export class NapCatOneBot11Adapter {
         );
       }
     };
+
+    /**
+     * 加入在线文件的listener
+     */
+    msgListener.onRecvOnlineFileMsg = async (msg: RawMessage[]) => {
+      if (!this.networkManager.hasActiveAdapters()) {
+        return;
+      }
+
+      for (const m of msg) {
+        // this.context.logger.logMessage(m, this.core.selfInfo);
+
+        if (this.bootTime > parseInt(m.msgTime)) {
+          this.context.logger.logDebug(`在线文件消息时间${m.msgTime}早于启动时间${this.bootTime}，忽略上报`);
+          continue;
+        }
+
+        m.id = MessageUnique.createUniqueMsgId(
+          {
+            chatType: m.chatType,
+            peerUid: m.peerUid,
+            guildId: '',
+          },
+          m.msgId
+        );
+
+        await this.emitMsg(m).catch((e) =>
+          this.context.logger.logError('处理在线文件消息失败', e)
+        );
+      }
+    };
+
     msgListener.onAddSendMsg = async (msg) => {
       try {
         if (msg.sendStatus === SendStatusType.KSEND_STATUS_SENDING) {
