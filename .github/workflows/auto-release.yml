@@ -3,7 +3,6 @@ name: Auto Release Docker
 on:
   release:
     types: [published]
-  workflow_dispatch:
 
 jobs:
   shell-docker:
