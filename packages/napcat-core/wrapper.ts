@@ -27,6 +27,7 @@ import { NodeIKernelMSFService } from './services/NodeIKernelMSFService';
 import { NodeIkernelTestPerformanceService } from './services/NodeIkernelTestPerformanceService';
 import { NodeIKernelECDHService } from './services/NodeIKernelECDHService';
 import { NodeIO3MiscService } from './services/NodeIO3MiscService';
+import { NodeIKernelFlashTransferService } from "./services/NodeIKernelFlashTransferService";
 
 export interface NodeQQNTWrapperUtil {
   get(): NodeQQNTWrapperUtil;
@@ -201,6 +202,8 @@ export interface NodeIQQNTWrapperSession {
   getUnitedConfigService(): NodeIKernelUnitedConfigService;
 
   getSearchService(): NodeIKernelSearchService;
+
+  getFlashTransferService(): NodeIKernelFlashTransferService;
 
   getDirectSessionService(): unknown;
 

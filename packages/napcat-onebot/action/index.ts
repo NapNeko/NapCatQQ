@@ -66,9 +66,9 @@ import { FetchCustomFace } from './extends/FetchCustomFace';
 import GoCQHTTPUploadPrivateFile from './go-cqhttp/UploadPrivateFile';
 import { FetchEmojiLike } from './extends/FetchEmojiLike';
 import { NapCatCore } from 'napcat-core';
-import { NapCatOneBot11Adapter } from '@/napcat-onebot/index';
 import type { NetworkAdapterConfig } from '../config/config';
 import { OneBotAction } from './OneBotAction';
+import { NapCatOneBot11Adapter } from '@/napcat-onebot';
 import { SetInputStatus } from './extends/SetInputStatus';
 import { GetCSRF } from './system/GetCSRF';
 import { DelGroupNotice } from './group/DelGroupNotice';
@@ -140,6 +140,20 @@ import { DownloadFileImageStream } from './stream/DownloadFileImageStream';
 import { TestDownloadStream } from './stream/TestStreamDownload';
 import { UploadFileStream } from './stream/UploadFileStream';
 import { AutoRegisterRouter } from './auto-register';
+import { CreateFlashTask } from './file/flash/CreateFlashTask';
+import { SendFlashMsg } from './file/flash/SendFlashMsg';
+import { GetFlashFileList } from './file/flash/GetFlashFileList';
+import { GetFlashFileUrl } from './file/flash/GetFlashFileUrl';
+import { GetShareLink } from './file/flash/GetShareLink';
+import { GetFilesetInfo } from './file/flash/GetFilesetInfo';
+import { DownloadFileset } from './file/flash/DownloadFileset';
+import { GetOnlineFileMessages } from './file/online/GetOnlineFileMessages';
+import { SendOnlineFile } from './file/online/SendOnlineFile';
+import { SendOnlineFolder } from './file/online/SendOnlineFolder';
+import { CancelOnlineFile } from './file/online/CancelOnlineFile';
+import { ReceiveOnlineFile } from './file/online/ReceiveOnlineFile';
+import { RefuseOnlineFile } from './file/online/RefuseOnlineFile';
+import { GetFilesetId } from './file/flash/GetFilesetIdByCode';
 
 export function createActionMap (obContext: NapCatOneBot11Adapter, core: NapCatCore) {
   const actionHandlers = [
@@ -293,6 +307,20 @@ export function createActionMap (obContext: NapCatOneBot11Adapter, core: NapCatC
     new CleanCache(obContext, core),
     new GetGroupAddRequest(obContext, core),
     new GetCollectionList(obContext, core),
+    new CreateFlashTask(obContext, core),
+    new GetFlashFileList(obContext, core),
+    new GetFlashFileUrl(obContext, core),
+    new SendFlashMsg(obContext, core),
+    new GetShareLink(obContext, core),
+    new GetFilesetInfo(obContext, core),
+    new GetOnlineFileMessages(obContext, core),
+    new SendOnlineFile(obContext, core),
+    new SendOnlineFolder(obContext, core),
+    new ReceiveOnlineFile(obContext, core),
+    new RefuseOnlineFile(obContext, core),
+    new CancelOnlineFile(obContext, core),
+    new DownloadFileset(obContext, core),
+    new GetFilesetId(obContext, core),
   ];
 
   type HandlerUnion = typeof actionHandlers[number];

@@ -73,6 +73,8 @@ export enum OB11MessageDataType {
   miniapp = 'miniapp', // json类
   contact = 'contact',
   location = 'location',
+  onlinefile = 'onlinefile',  // 在线文件/文件夹
+  flashtransfer = 'flashtransfer',  // QQ闪传
 }
 
 export interface OB11MessagePoke {
@@ -254,6 +256,24 @@ export interface OB11MessageForward {
   };
 }
 
+export interface OB11MessageOnlineFile {
+  type: OB11MessageDataType.onlinefile;
+  data: {
+    msgId: string;
+    elementId: string;
+    fileName: string;
+    fileSize: string;
+    isDir: boolean;
+  }
+}
+
+export interface OB11MessageFlashTransfer {
+  type: OB11MessageDataType.flashtransfer;
+  data: {
+    fileSetId: string;
+  }
+}
+
 // 消息数据类型定义
 export type OB11MessageData =
   OB11MessageText |
@@ -261,7 +281,8 @@ export type OB11MessageData =
   OB11MessageAt | OB11MessageReply |
   OB11MessageImage | OB11MessageRecord | OB11MessageFile | OB11MessageVideo |
   OB11MessageNode | OB11MessageIdMusic | OB11MessageCustomMusic | OB11MessageJson |
-  OB11MessageDice | OB11MessageRPS | OB11MessageMarkdown | OB11MessageForward | OB11MessageContact | OB11MessagePoke;
+  OB11MessageDice | OB11MessageRPS | OB11MessageMarkdown | OB11MessageForward | OB11MessageContact |
+  OB11MessagePoke | OB11MessageOnlineFile | OB11MessageFlashTransfer;
 
 // 发送消息接口定义
 export interface OB11PostSendMsg {
