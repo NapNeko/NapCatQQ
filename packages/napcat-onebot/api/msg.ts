@@ -158,6 +158,7 @@ export class OneBotMsgApi {
           data: {
             msgId: msg.msgId,
             elementId: elementWrapper.elementId,
+            fileName: element.fileName,
           },
         };
       }
