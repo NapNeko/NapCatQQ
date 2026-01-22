@@ -12,7 +12,7 @@ import {
   QQRefreshQRcodeHandler,
 } from '@/napcat-webui-backend/src/api/QQLogin';
 
-const router = Router();
+const router: Router = Router();
 // router:获取快速登录列表
 router.all('/GetQuickLoginList', QQGetQuickLoginListHandler);
 // router:获取快速登录列表（新）

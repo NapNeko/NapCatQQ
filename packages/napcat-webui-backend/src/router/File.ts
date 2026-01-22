@@ -18,7 +18,7 @@ import {
   DeleteWebUIFontHandler, // 添加上传处理器
 } from '../api/File';
 
-const router = Router();
+const router: Router = Router();
 
 const apiLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1分钟内

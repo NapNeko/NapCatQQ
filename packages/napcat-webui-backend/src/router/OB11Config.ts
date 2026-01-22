@@ -2,7 +2,7 @@ import { Router } from 'express';
 
 import { OB11GetConfigHandler, OB11SetConfigHandler } from '@/napcat-webui-backend/src/api/OB11Config';
 
-const router = Router();
+const router: Router = Router();
 // router:读取配置
 router.post('/GetConfig', OB11GetConfigHandler);
 // router:写入配置

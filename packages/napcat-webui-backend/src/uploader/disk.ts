@@ -1,5 +1,5 @@
 import multer from 'multer';
-import { Request, Response } from 'express';
+import { Request, Response, RequestHandler } from 'express';
 import fs from 'fs';
 import path from 'path';
 import { randomUUID } from 'crypto';
@@ -65,7 +65,7 @@ export const createDiskStorage = (uploadPath: string) => {
   });
 };
 
-export const createDiskUpload = (uploadPath: string) => {
+export const createDiskUpload = (uploadPath: string): RequestHandler => {
   const upload = multer({
     storage: createDiskStorage(uploadPath),
     limits: {
