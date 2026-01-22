@@ -3,7 +3,7 @@ import { GetThemeConfigHandler, GetNapCatVersion, QQVersionHandler, SetThemeConf
 import { StatusRealTimeHandler } from '@/napcat-webui-backend/src/api/Status';
 import { GetProxyHandler } from '../api/Proxy';
 
-const router = Router();
+const router: Router = Router();
 // router: 获取nc的package.json信息
 router.get('/QQVersion', QQVersionHandler);
 router.get('/GetNapCatVersion', GetNapCatVersion);

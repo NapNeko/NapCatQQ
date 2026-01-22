@@ -57,24 +57,24 @@ export interface BaseInfo {
 }
 
 // 音乐信息
-interface MusicInfo {
+export interface MusicInfo {
   buf: string;
 }
 
 // 视频业务信息
-interface VideoBizInfo {
+export interface VideoBizInfo {
   cid: string;
   tvUrl: string;
   synchType: string;
 }
 
 // 视频信息
-interface VideoInfo {
+export interface VideoInfo {
   name: string;
 }
 
 // 扩展在线业务信息
-interface ExtOnlineBusinessInfo {
+export interface ExtOnlineBusinessInfo {
   buf: string;
   customStatus: unknown;
   videoBizInfo: VideoBizInfo;
@@ -82,12 +82,12 @@ interface ExtOnlineBusinessInfo {
 }
 
 // 扩展缓冲区
-interface ExtBuffer {
+export interface ExtBuffer {
   buf: string;
 }
 
 // 用户状态
-interface UserStatus {
+export interface UserStatus {
   uid: string;
   uin: string;
   status: number;
@@ -109,14 +109,14 @@ interface UserStatus {
 }
 
 // 特权图标
-interface PrivilegeIcon {
+export interface PrivilegeIcon {
   jumpUrl: string;
   openIconList: unknown[];
   closeIconList: unknown[];
 }
 
 // 增值服务信息
-interface VasInfo {
+export interface VasInfo {
   vipFlag: boolean;
   yearVipFlag: boolean;
   svipFlag: boolean;
@@ -149,7 +149,7 @@ interface VasInfo {
 }
 
 // 关系标志
-interface RelationFlags {
+export interface RelationFlags {
   topTime: string;
   isBlock: boolean;
   isMsgDisturb: boolean;
@@ -167,7 +167,7 @@ interface RelationFlags {
 }
 
 // 通用扩展信息
-interface CommonExt {
+export interface CommonExt {
   constellation: number;
   shengXiao: number;
   kBloodType: number;
@@ -193,14 +193,14 @@ export enum BuddyListReqType {
 }
 
 // 图片信息
-interface Pic {
+export interface Pic {
   picId: string;
   picTime: number;
   picUrlMap: Record<string, string>;
 }
 
 // 照片墙
-interface PhotoWall {
+export interface PhotoWall {
   picList: Pic[];
 }
 
@@ -247,7 +247,7 @@ export interface ModifyProfileParams {
   nick: string;
   longNick: string;
   sex: NTSex;
-  birthday: { birthday_year: string, birthday_month: string, birthday_day: string };
+  birthday: { birthday_year: string, birthday_month: string, birthday_day: string; };
   location: unknown;
 }
 

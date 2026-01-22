@@ -16,7 +16,7 @@ import json5 from 'json5';
 
 type ActionNameType = typeof ActionName[keyof typeof ActionName];
 
-const router = Router();
+const router: Router = Router();
 const DEFAULT_ADAPTER_NAME = 'debug-primary';
 
 /**

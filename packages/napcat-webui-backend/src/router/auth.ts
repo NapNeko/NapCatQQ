@@ -11,7 +11,7 @@ import {
   VerifyPasskeyAuthenticationHandler,
 } from '@/napcat-webui-backend/src/api/Auth';
 
-const router = Router();
+const router: Router = Router();
 // router:登录
 router.post('/login', LoginHandler);
 // router:检查登录状态

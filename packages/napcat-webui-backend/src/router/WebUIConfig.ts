@@ -8,7 +8,7 @@ import {
   UpdateWebUIConfigHandler,
 } from '@/napcat-webui-backend/src/api/WebUIConfig';
 
-const router = Router();
+const router: Router = Router();
 
 // 获取WebUI基础配置
 router.get('/GetConfig', GetWebUIConfigHandler);

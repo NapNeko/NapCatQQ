@@ -19,7 +19,7 @@ import DebugRouter from '@/napcat-webui-backend/src/api/Debug';
 import { ProcessRouter } from './Process';
 import { PluginRouter } from './Plugin';
 
-const router = Router();
+const router: Router = Router();
 
 // 鉴权中间件
 router.use(auth);

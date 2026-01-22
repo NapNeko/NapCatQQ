@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { RestartProcessHandler } from '../api/Process';
 
-const router = Router();
+const router: Router = Router();
 
 // POST /api/Process/Restart - 重启进程
 router.post('/Restart', RestartProcessHandler);

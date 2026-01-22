@@ -8,7 +8,7 @@ import {
   CloseTerminalHandler,
 } from '../api/Log';
 
-const router = Router();
+const router: Router = Router();
 
 // 日志相关路由
 router.get('/GetLog', LogHandler);

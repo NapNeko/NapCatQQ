@@ -1,7 +1,7 @@
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
-import type { Request, Response } from 'express';
+import type { Request, Response, RequestHandler } from 'express';
 import { WebUiConfig } from '@/napcat-webui-backend/index';
 
 // 支持的字体格式
@@ -42,7 +42,7 @@ export const webUIFontStorage = multer.diskStorage({
   },
 });
 
-export const webUIFontUpload = multer({
+export const webUIFontUpload: RequestHandler = multer({
   storage: webUIFontStorage,
   fileFilter: (_, file, cb) => {
     // 验证文件类型
