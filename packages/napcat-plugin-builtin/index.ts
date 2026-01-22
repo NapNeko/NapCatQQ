@@ -4,6 +4,7 @@ import type { PluginModule } from 'napcat-onebot/network/plugin';
 import type { OB11Message, OB11PostSendMsg } from 'napcat-onebot/types/message';
 
 let actions: ActionMap | undefined = undefined;
+let startTime: number = Date.now();
 
 /**
  * 插件初始化
@@ -55,10 +56,31 @@ async function getVersionInfo (adapter: string, config: any) {
 }
 
 /**
+ * 格式化运行时间
+ */
+function formatUptime (ms: number): string {
+  const seconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+
+  if (days > 0) {
+    return `${days}天 ${hours % 24}小时 ${minutes % 60}分钟`;
+  } else if (hours > 0) {
+    return `${hours}小时 ${minutes % 60}分钟`;
+  } else if (minutes > 0) {
+    return `${minutes}分钟 ${seconds % 60}秒`;
+  } else {
+    return `${seconds}秒`;
+  }
+}
+
+/**
  * 格式化版本信息消息
  */
 function formatVersionMessage (info: { appName: string; appVersion: string; protocolVersion: string; }) {
-  return `NapCat 信息\n版本: ${info.appVersion}\n平台: ${process.platform}${process.arch === 'x64' ? ' (64-bit)' : ''}`;
+  const uptime = Date.now() - startTime;
+  return `NapCat 信息\n版本: ${info.appVersion}\n平台: ${process.platform}${process.arch === 'x64' ? ' (64-bit)' : ''}\n运行时间: ${formatUptime(uptime)}`;
 }
 
 /**
