@@ -103,7 +103,7 @@ export interface OB11MessageText {
 }
 
 // 联系人消息接口定义
-export interface OB11MessageContext {
+export interface OB11MessageContact {
   type: OB11MessageDataType.contact;
   data: {
     type: 'qq' | 'group';
@@ -260,7 +260,7 @@ export type OB11MessageData =
   OB11MessageAt | OB11MessageReply |
   OB11MessageImage | OB11MessageRecord | OB11MessageFile | OB11MessageVideo |
   OB11MessageNode | OB11MessageIdMusic | OB11MessageCustomMusic | OB11MessageJson |
-  OB11MessageDice | OB11MessageRPS | OB11MessageMarkdown | OB11MessageForward | OB11MessageContext | OB11MessagePoke;
+  OB11MessageDice | OB11MessageRPS | OB11MessageMarkdown | OB11MessageForward | OB11MessageContact | OB11MessagePoke;
 
 // 发送消息接口定义
 export interface OB11PostSendMsg {
