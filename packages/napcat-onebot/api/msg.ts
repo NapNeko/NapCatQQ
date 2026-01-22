@@ -159,6 +159,8 @@ export class OneBotMsgApi {
             msgId: msg.msgId,
             elementId: elementWrapper.elementId,
             fileName: element.fileName,
+            fileSize: element.fileSize,
+            isDir: (elementWrapper.elementType === 30),
           },
         };
       }

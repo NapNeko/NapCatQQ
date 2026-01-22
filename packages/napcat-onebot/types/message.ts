@@ -262,6 +262,8 @@ export interface OB11MessageOnlineFile {
     msgId: string;
     elementId: string;
     fileName: string;
+    fileSize: string;
+    isDir: boolean;
   }
 }
 
