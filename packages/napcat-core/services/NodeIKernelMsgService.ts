@@ -1,4 +1,4 @@
-import { ElementType, MessageElement, Peer, RawMessage, SendMessageElement } from '@/napcat-core/types';
+import { ElementType, MessageElement, Peer, RawMessage, FileElement } from '@/napcat-core/types';
 import { NodeIKernelMsgListener } from '@/napcat-core/listeners/NodeIKernelMsgListener';
 import { GeneralCallResult } from '@/napcat-core/services/common';
 import { MsgReqType, QueryMsgsParams, TmpChatInfoApi } from '@/napcat-core/types/msg';
@@ -10,7 +10,10 @@ export interface NodeIKernelMsgService {
 
   addKernelMsgListener(nodeIKernelMsgListener: NodeIKernelMsgListener): number;
 
-  sendMsg(msgId: string, peer: Peer, msgElements: SendMessageElement[], map: Map<unknown, unknown>): Promise<GeneralCallResult>;
+  sendMsg(msgId: string, peer: Peer, msgElements: {
+    elementType: number;
+    fileElement: { fileName: string; filePath: string; fileSize: string }
+  }[], map: Map<unknown, unknown>): Promise<GeneralCallResult>;
 
   recallMsg(peer: Peer, msgIds: string[]): Promise<GeneralCallResult>;
 
@@ -70,7 +73,7 @@ export interface NodeIKernelMsgService {
 
   addSendMsg(...args: unknown[]): unknown;
 
-  cancelSendMsg(...args: unknown[]): unknown;
+  cancelSendMsg(peer: Peer, msgId: string): Promise<void> ;
 
   switchToOfflineSendMsg(peer: Peer, MsgId: string): unknown;
 
@@ -78,7 +81,7 @@ export interface NodeIKernelMsgService {
 
   refuseReceiveOnlineFileMsg(peer: Peer, MsgId: string): unknown;
 
-  resendMsg(...args: unknown[]): unknown;
+  resendMsg(peer: Peer, msgId: string): Promise<void>;
 
   recallMsg(...args: unknown[]): unknown;
 
@@ -132,7 +135,20 @@ export interface NodeIKernelMsgService {
 
   isMsgMatched(...args: unknown[]): unknown;
 
-  getOnlineFileMsgs(...args: unknown[]): unknown;
+  getOnlineFileMsgs(peer: Peer): Promise <GeneralCallResult & {
+    msgList: {
+      msgId: string;
+      msgRandom: string;
+      senderUid: string;
+      peerUid: string;
+      msgTime: string;
+      elements: {
+        elementType: number;
+        elementId: string;
+        fileElement: FileElement
+      }[];
+    }[]  // 一大坨，懒得写
+  } >;
 
   getAllOnlineFileMsgs(...args: unknown[]): unknown;
 
@@ -418,11 +434,25 @@ export interface NodeIKernelMsgService {
 
   refreshMsgAbstractsByGuildIds(...args: unknown[]): unknown;
 
-  getRichMediaElement(...args: unknown[]): unknown;
+  getRichMediaElement(arg: {
+    msgId: string,
+    peerUid: string,
+    chatType: number,
+    elementId: string,
+    downSourceType: number,
+    downloadType: number,
+  }): Promise<any>;
 
   cancelGetRichMediaElement(...args: unknown[]): unknown;
 
-  refuseGetRichMediaElement(...args: unknown[]): unknown;
+  refuseGetRichMediaElement(args: {
+    msgId: string,
+    peerUid: string,
+    chatType: number,
+    elementId: string,
+    downloadType: number, // 1
+    downSourceType: number, // 1
+  }): Promise<void>;
 
   switchToOfflineGetRichMediaElement(...args: unknown[]): unknown;
 

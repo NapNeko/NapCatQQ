@@ -245,7 +245,7 @@ export class NTQQMsgApi {
       [
         '0',
         peer,
-        msgElements,
+        msgElements as any,
         new Map(),
       ],
       (ret) => ret.result === 0,

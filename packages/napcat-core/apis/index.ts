@@ -7,3 +7,5 @@ export * from './webapi';
 export * from './system';
 export * from './packet';
 export * from './file';
+export * from './online';
+export * from './flash';
