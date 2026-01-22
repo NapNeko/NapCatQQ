@@ -253,17 +253,17 @@ const NewVersionTip = (props: NewVersionTipProps) => {
 
   return (
     <Tooltip content='有新版本可用'>
-      <div className="cursor-pointer" onClick={updateStatus === 'updating' ? undefined : showUpdateDialog}>
+      <div className="cursor-pointer flex items-center justify-center" onClick={updateStatus === 'updating' ? undefined : showUpdateDialog}>
         <Chip
           size="sm"
           color="danger"
           variant="flat"
           classNames={{
-            content: "font-bold text-[10px] px-1",
-            base: "h-5 min-h-5"
+            content: "font-bold text-[10px] px-1 flex items-center justify-center",
+            base: "h-5 min-h-5 min-w-[42px]"
           }}
         >
-          {updateStatus === 'updating' ? <Spinner size="sm" color="danger" /> : 'New'}
+          {updateStatus === 'updating' ? <Spinner size="sm" color="danger" classNames={{ wrapper: "w-3 h-3" }} /> : 'New'}
         </Chip>
       </div>
     </Tooltip>
