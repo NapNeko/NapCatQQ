@@ -8,7 +8,6 @@ import { webUiRuntimePort } from '@/napcat-webui-backend/index';
 import { createProcessManager, type IProcessManager, type IWorkerProcess } from './process-api';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { createRequire } from 'module';
 
 // ES 模块中获取 __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -324,20 +323,6 @@ async function startWorkerProcess (): Promise<void> {
  * 主入口
  */
 async function main (): Promise<void> {
-  // 检查是否启用了 CJS 环境加载器
-  const cjsLoaderPath = process.env['NAPCAT_NODE_CJS_ENV_LOADER_PATH'];
-  if (cjsLoaderPath) {
-    try {
-      logger.log(`[NapCat] [Process] 使用 CJS 环境加载器: ${cjsLoaderPath}`);
-      const require = createRequire(import.meta.url);
-      require(cjsLoaderPath);
-      return;
-    } catch (e) {
-      logger.logError('[NapCat] [Process] CJS 环境加载器加载失败:', e);
-      process.exit(1);
-    }
-  }
-
   // 单进程模式：直接启动核心
   if (ENV.isMultiProcessDisabled) {
     await NCoreInitShell();
