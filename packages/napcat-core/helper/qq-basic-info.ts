@@ -5,6 +5,7 @@ import AppidTable from '@/napcat-core/external/appid.json';
 import { LogWrapper } from './log';
 import { getMajorPath } from '@/napcat-core/index';
 import { QQAppidTableType, QQPackageInfoType, QQVersionConfigType } from 'napcat-common/src/types';
+import path from 'node:path';
 
 export class QQBasicInfoWrapper {
   QQMainPath: string | undefined;
@@ -21,6 +22,10 @@ export class QQBasicInfoWrapper {
     // 基础目录获取
     this.context = context;
     this.QQMainPath = process.execPath;
+    if (process.platform === 'darwin' && path.basename(this.QQMainPath) === 'QQ Helper') {
+      // 实用进程特殊处理 实用进程目录和QQ差远了
+      this.QQMainPath = path.resolve(path.dirname(this.QQMainPath), '../../../../', 'MacOS', 'QQ');
+    }
     this.QQVersionConfigPath = getQQVersionConfigPath(this.QQMainPath);
 
     // 基础信息获取 无快更则启用默认模板填充
@@ -99,7 +104,10 @@ export class QQBasicInfoWrapper {
   }
 
   getAppidV2ByMajor (QQVersion: string) {
-    const majorPath = getMajorPath(QQVersion);
+    if (!this.QQMainPath) {
+      throw new Error('QQMainPath未定义 无法通过Major获取Appid');
+    }
+    const majorPath = getMajorPath(QQVersion, this.QQMainPath);
     const appid = parseAppidFromMajor(majorPath);
     return appid;
   }
