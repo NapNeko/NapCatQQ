@@ -74,6 +74,7 @@ export function loadQQWrapper (execPath: string | undefined, QQVersion: string):
   }
   const nativemodule: { exports: WrapperNodeApi; } = { exports: {} as WrapperNodeApi };
   process.dlopen(nativemodule, wrapperNodePath);
+  process.env['NAPCAT_WRAPPER_PATH'] = wrapperNodePath;
   return nativemodule.exports;
 }
 export function getMajorPath (execPath: string, QQVersion: string): string {

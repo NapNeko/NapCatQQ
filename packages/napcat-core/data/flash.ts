@@ -202,21 +202,25 @@ export interface createFlashTransferResult {
 }
 
 export interface StartFlashTaskRequests {
-  screen?: number; // 1 PC-QQ
+  screen: number; // 1 PC-QQ
+  name?: string;
   uploaders: UploaderInfo[];
   permission?: {};
   coverPath?: string;
   paths: string[];   // 文件的绝对路径，可以是文件夹
-  // excludePaths: [];
-  // expireLeftTime: 0,
-  // isNeedDelDeviceInfo: boolean,
-  // isNeedDelLocation: boolean,
-  // coverOriginalInfos: [],
-  // uploadSceneType: 10, // 不知道怎么枚举 先硬编码吧
-  // detectPrivacyInfoResult: {
-  //   exists: boolean,
-  //   allDetectResults: {}
-  // }
+  excludePaths?: any[];
+  expireLeftTime?: number, // 0
+  isNeedDelDeviceInfo: boolean,
+  isNeedDelLocation: boolean,
+  coverOriginalInfos?: {
+    path: string,
+    thumbnailPath: string,
+  }[],
+  uploadSceneType: number, // 不知道怎么枚举 先硬编码吧 (PC QQ 10)
+  detectPrivacyInfoResult: {
+    exists: boolean,
+    allDetectResults: {}
+  }
 }
 
 export interface FileListInfoRequests {

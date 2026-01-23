@@ -1,5 +1,6 @@
 import { NodeIDependsAdapter, NodeIDispatcherAdapter, NodeIGlobalAdapter } from './adapters';
 import {
+  GeneralCallResult,
   NodeIKernelAvatarService,
   NodeIKernelBuddyService,
   NodeIKernelGroupService,
@@ -27,7 +28,7 @@ import { NodeIKernelMSFService } from './services/NodeIKernelMSFService';
 import { NodeIkernelTestPerformanceService } from './services/NodeIkernelTestPerformanceService';
 import { NodeIKernelECDHService } from './services/NodeIKernelECDHService';
 import { NodeIO3MiscService } from './services/NodeIO3MiscService';
-import { NodeIKernelFlashTransferService } from "./services/NodeIKernelFlashTransferService";
+import { NodeIKernelFlashTransferService } from './services/NodeIKernelFlashTransferService';
 
 export interface NodeQQNTWrapperUtil {
   get(): NodeQQNTWrapperUtil;
@@ -139,6 +140,18 @@ export interface NodeQQNTWrapperUtil {
   getNvidiaDriverVersion(): unknown;
 
   isNull(): unknown;
+
+  createThumbnailImage(
+    serviceName: string,
+    filePath: string,
+    targetPath: string,
+    imgSize: {
+      width: number,
+      height: number
+    },
+    fileFormat: string,
+    arg: unknown, // null
+  ): Promise < GeneralCallResult & { targetPath?: string } >;
 }
 export interface NodeIQQNTStartupSessionWrapper {
   create(): NodeIQQNTStartupSessionWrapper;

@@ -19,8 +19,10 @@ export class NTQQFlashApi {
   /**
    * 发起闪传上传任务
    * @param fileListToUpload 上传文件绝对路径的列表，可以是文件夹！！
+   * @param thumbnailPath
+   * @param filesetName
    */
-  async createFlashTransferUploadTask (fileListToUpload: string[]): Promise < GeneralCallResult & {
+  async createFlashTransferUploadTask (fileListToUpload: string[], thumbnailPath: string, filesetName: string): Promise < GeneralCallResult & {
     createFlashTransferResult: createFlashTransferResult;
     seq: number;
   } > {
@@ -29,15 +31,34 @@ export class NTQQFlashApi {
     const timestamp : number = Date.now();
     const selfInfo = this.core.selfInfo;
 
+    console.log(thumbnailPath);
+
     const fileUploadArg = {
       screen: 1, // 1
+      name: filesetName,
       uploaders: [{
         uin: selfInfo.uin,
         uid: selfInfo.uid,
         sendEntrance: '',
         nickname: selfInfo.nick,
       }],
+      coverPath: thumbnailPath,
       paths: fileListToUpload,
+      excludePaths: [],
+      expireLeftTime: 0,
+      isNeedDelDeviceInfo: false,
+      isNeedDelLocation: false,
+      coverOriginalInfos: [
+        {
+          path: fileListToUpload[0] || '',
+          thumbnailPath,
+        },
+      ],
+      uploadSceneType: 10,
+      detectPrivacyInfoResult: {
+        exists: false,
+        allDetectResults: new Map(),
+      },
     };
 
     const uploadResult = await flashService.createFlashTransferUploadTask(timestamp, fileUploadArg);
@@ -260,5 +281,28 @@ export class NTQQFlashApi {
         transferUrl: res.url,
       };
     }
+  }
+
+  async createFileThumbnail (filePath: string): Promise<any> {
+    const msgService = this.context.session.getMsgService();
+    const savePath = msgService.getFileThumbSavePathForSend(750, true);
+
+    const result = await this.core.util.createThumbnailImage(
+      'flashtransfer',
+      filePath,
+      savePath,
+      {
+        width: 520,
+        height: 520,
+      },
+      'jpeg',
+      null
+    );
+    if (result.result === 0) {
+      this.context.logger.log('获取缩略图成功！！');
+      result.targetPath = savePath;
+      return result;
+    }
+    return result;
   }
 }
