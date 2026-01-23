@@ -32,9 +32,9 @@ export class NTQQMsgApi {
     return this.context.session.getMsgService().getSourceOfReplyMsgV2(peer, clientSeq, time);
   }
 
-  async getMsgEmojiLikesList (peer: Peer, msgSeq: string, emojiId: string, emojiType: string, count: number = 20) {
+  async getMsgEmojiLikesList (peer: Peer, msgSeq: string, emojiId: string, emojiType: string, cookie: string = '', count: number = 20) {
     // 注意此处emojiType 可选值一般为1-2 2好像是unicode表情dec值 大部分情况 Taged Mlikiowa
-    return this.context.session.getMsgService().getMsgEmojiLikesList(peer, msgSeq, emojiId, emojiType, '', false, count);
+    return this.context.session.getMsgService().getMsgEmojiLikesList(peer, msgSeq, emojiId, emojiType, cookie, false, count);
   }
 
   async setEmojiLike (peer: Peer, msgSeq: string, emojiId: string, set: boolean = true) {
