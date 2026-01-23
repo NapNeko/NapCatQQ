@@ -9,6 +9,7 @@ const SchemaData = Type.Object({
   emojiId: Type.Union([Type.Number(), Type.String()]),
   emojiType: Type.Union([Type.Number(), Type.String()]),
   count: Type.Union([Type.Number(), Type.String()], { default: 20 }),
+  cookie: Type.String({ default: '' })
 });
 
 type Payload = Static<typeof SchemaData>;
@@ -23,7 +24,7 @@ export class FetchEmojiLike extends OneBotAction<Payload, Awaited<ReturnType<NTQ
     const msg = (await this.core.apis.MsgApi.getMsgsByMsgId(msgIdPeer.Peer, [msgIdPeer.MsgId])).msgList[0];
     if (!msg) throw new Error('消息不存在');
     return await this.core.apis.MsgApi.getMsgEmojiLikesList(
-      msgIdPeer.Peer, msg.msgSeq, payload.emojiId.toString(), payload.emojiType.toString(), +payload.count
+      msgIdPeer.Peer, msg.msgSeq, payload.emojiId.toString(), payload.emojiType.toString(), payload.cookie, +payload.count
     );
   }
 }
