@@ -55,7 +55,7 @@ const NetworkFormModal = <T extends keyof OneBotConfig['network']> (
 
     if (['httpServers', 'httpSseServers', 'websocketServers'].includes(field)) {
       const serverData = data as any;
-      if (!serverData.token) {
+      if (!serverData.token && serverData.host !== '127.0.0.1') {
         await new Promise<void>((resolve, reject) => {
           dialog.confirm({
             title: '安全警告',
