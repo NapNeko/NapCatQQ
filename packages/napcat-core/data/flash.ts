@@ -53,7 +53,7 @@ export interface DownloadStatusInfo {
     isAllFileAlreadyDownloaded: boolean,
     saveFileSetDir: string,
     allWaitingStatusTask: boolean,
-    downloadSceneType: number,
+    downloadSceneType: DownloadSceneType,
     retryCount: number,
     statisticInfo: {
       downloadTaskId: string,
@@ -261,7 +261,21 @@ export interface FileListInfoRequests {
     isNeedPhysicalInfoReady: boolean;
   }[];
 }
-
+export enum DownloadSceneType {
+  KDOWNLOADSCENEUNKNOWN,
+  KDOWNLOADSCENEARKC2C,
+  KDOWNLOADSCENEARKC2CDETAILPAGE,
+  KDOWNLOADSCENEARKGROUP,
+  KDOWNLOADSCENEARKGROUPDETAILPAGE,
+  KDOWNLOADSCENELINKC2C,
+  KDOWNLOADSCENELINKGROUP,
+  KDOWNLOADSCENELINKCHANNEL,
+  KDOWNLOADSCENELINKTEMPCHAT,
+  KDOWNLOADSCENELINKOTHERINQQ,
+  KDOWNLOADSCENESCANQRCODE,
+  KDWONLOADSCENEFLASHTRANSFERCENTERCLIENT,
+  KDWONLOADSCENEFLASHTRANSFERCENTERSCHEMA
+}
 export interface FlashFileSetInfo {
   fileSetId: string,
   name: string,
@@ -327,7 +341,7 @@ export interface FlashFileSetInfo {
   downloadPauseReason: 0,
   saveFileSetDir: string,
   uploadSceneType: UploadSceneType,
-  downloadSceneType: 0, // 0 PC-QQ  103 web
+  downloadSceneType: DownloadSceneType, // 0 PC-QQ  103 web
   retryCount: number,
   isMergeShareUpload: 0,
   isRemoveDeviceInfo: boolean,
