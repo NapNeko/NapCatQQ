@@ -235,12 +235,15 @@ export interface StartFlashTaskRequests {
     allDetectResults: {};
   };
 }
-
+export enum BusiScene {
+  KBUSISCENEINVALID,
+  KBUSISCENEFLASHSCENE
+}
 export interface FileListInfoRequests {
   seq: number,  // 0
   fileSetId: string,
   isUseCache: boolean,
-  sceneType: number, // 1
+  sceneType: BusiScene, // 1
   reqInfos: {
     count: number, // 18 ??  硬编码吧  不懂
     paginationInfo: {},
