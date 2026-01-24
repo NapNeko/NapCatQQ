@@ -150,7 +150,7 @@ export interface NodeQQNTWrapperUtil {
       height: number;
     },
     fileFormat: string,
-    arg?: number, // null undefined都行
+    arg: number | null | undefined, // null undefined都行
   ): Promise<GeneralCallResult & { targetPath?: string; }>;
 }
 export interface NodeIQQNTStartupSessionWrapper {
