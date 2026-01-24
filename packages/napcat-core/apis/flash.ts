@@ -4,6 +4,7 @@ import {
   FileListResponse,
   FlashFileSetInfo,
   SendStatus,
+  UploadSceneType,
 } from '@/napcat-core/data/flash';
 import { Peer } from '@/napcat-core/types';
 
@@ -22,13 +23,13 @@ export class NTQQFlashApi {
    * @param thumbnailPath
    * @param filesetName
    */
-  async createFlashTransferUploadTask (fileListToUpload: string[], thumbnailPath: string, filesetName: string): Promise < GeneralCallResult & {
+  async createFlashTransferUploadTask (fileListToUpload: string[], thumbnailPath: string, filesetName: string): Promise<GeneralCallResult & {
     createFlashTransferResult: createFlashTransferResult;
     seq: number;
-  } > {
+  }> {
     const flashService = this.context.session.getFlashTransferService();
 
-    const timestamp : number = Date.now();
+    const timestamp: number = Date.now();
     const selfInfo = this.core.selfInfo;
 
     console.log(thumbnailPath);
@@ -54,7 +55,7 @@ export class NTQQFlashApi {
           thumbnailPath,
         },
       ],
-      uploadSceneType: 10,
+      uploadSceneType: UploadSceneType.KUPLOADSCENEAIOFILESELECTOR, // 不知道怎么枚举 先硬编码吧 (PC QQ 10)
       detectPrivacyInfoResult: {
         exists: false,
         allDetectResults: new Map(),
@@ -75,9 +76,9 @@ export class NTQQFlashApi {
    * 下载闪传文件集
    * @param fileSetId
    */
-  async downloadFileSetBySetId (fileSetId: string): Promise < GeneralCallResult & {
-    extraInfo: unknown
-  } > {
+  async downloadFileSetBySetId (fileSetId: string): Promise<GeneralCallResult & {
+    extraInfo: unknown;
+  }> {
     const flashService = this.context.session.getFlashTransferService();
 
     const result = await flashService.startFileSetDownload(fileSetId, 1, { isIncludeCompressInnerFiles: false });  // 为了方便，暂时硬编码
@@ -93,7 +94,7 @@ export class NTQQFlashApi {
    * 获取闪传的外链分享
    * @param fileSetId
    */
-  async getShareLinkBySetId (fileSetId: string): Promise < GeneralCallResult & {
+  async getShareLinkBySetId (fileSetId: string): Promise<GeneralCallResult & {
     shareLink: string;
     expireTimestamp: string;
   }> {
@@ -112,9 +113,9 @@ export class NTQQFlashApi {
    * 从分享外链获取文件集id
    * @param shareCode
    */
-  async fromShareLinkFindSetId (shareCode: string): Promise < GeneralCallResult & {
+  async fromShareLinkFindSetId (shareCode: string): Promise<GeneralCallResult & {
     fileSetId: string;
-  } > {
+  }> {
     const flashService = this.context.session.getFlashTransferService();
 
     const result = await flashService.getFileSetIdByCode(shareCode);
@@ -131,7 +132,7 @@ export class NTQQFlashApi {
    * == 注意返回结构和其它的不同，没有GeneralCallResult!!! ==
    * @param fileSetId
    */
-  async getFileListBySetId (fileSetId: string): Promise < FileListResponse > {
+  async getFileListBySetId (fileSetId: string): Promise<FileListResponse> {
     const flashService = this.context.session.getFlashTransferService();
 
     const requestArg = {
@@ -174,11 +175,11 @@ export class NTQQFlashApi {
    * 获取闪传文件集合信息
    * @param fileSetId
    */
-  async getFileSetIndoBySetId (fileSetId: string): Promise < GeneralCallResult & {
+  async getFileSetIndoBySetId (fileSetId: string): Promise<GeneralCallResult & {
     seq: number;
     isCache: boolean;
     fileSet: FlashFileSetInfo;
-  } > {
+  }> {
     const flashService = this.context.session.getFlashTransferService();
 
     const requestArg = {
@@ -199,13 +200,13 @@ export class NTQQFlashApi {
    * @param fileSetId
    * @param peer
    */
-  async sendFlashMessage (fileSetId: string, peer:Peer): Promise < {
+  async sendFlashMessage (fileSetId: string, peer: Peer): Promise<{
     errCode: number,
     errMsg: string,
     rsp: {
-      sendStatus: SendStatus[]
-    }
-  } > {
+      sendStatus: SendStatus[];
+    };
+  }> {
     const flashService = this.context.session.getFlashTransferService();
 
     const target = {
@@ -233,9 +234,9 @@ export class NTQQFlashApi {
    * @param fileSetId
    * @param options
    */
-  async getFileTransUrl (fileSetId: string, options: { fileName?: string; fileIndex?: number }): Promise < GeneralCallResult & {
+  async getFileTransUrl (fileSetId: string, options: { fileName?: string; fileIndex?: number; }): Promise<GeneralCallResult & {
     transferUrl: string;
-  } > {
+  }> {
     const flashService = this.context.session.getFlashTransferService();
     const result = await this.getFileListBySetId(fileSetId);
 
