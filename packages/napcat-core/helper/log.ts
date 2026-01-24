@@ -294,8 +294,7 @@ function msgElementToText (element: MessageElement, msg: RawMessage, recursiveLe
   }
 
   if (element.markdownElement) {
-    // console.log(element.markdownElement);
-    if (element.markdownElement.mdSummary !== undefined && element.markdownElement.mdExtInfo !== undefined && element.markdownElement.mdExtInfo.flashTransferInfo) {
+    if (element.markdownElement?.mdSummary) {
       return element.markdownElement.mdSummary;
     } else {
       return '[Markdown 消息]';
