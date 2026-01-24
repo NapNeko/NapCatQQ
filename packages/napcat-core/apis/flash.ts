@@ -32,8 +32,6 @@ export class NTQQFlashApi {
     const timestamp: number = Date.now();
     const selfInfo = this.core.selfInfo;
 
-    console.log(thumbnailPath);
-
     const fileUploadArg = {
       screen: 1, // 1
       name: filesetName,
