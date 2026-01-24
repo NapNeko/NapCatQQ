@@ -561,7 +561,7 @@ export class OneBotMsgApi {
 
     markdownElement: async (element) => {
       // 让QQ闪传消息独立出去
-      if (element.mdExtInfo !== undefined && element.mdExtInfo.flashTransferInfo) {
+      if (element?.mdExtInfo?.flashTransferInfo?.filesetId) {
         return {
           type: OB11MessageDataType.flashtransfer,
           data: {

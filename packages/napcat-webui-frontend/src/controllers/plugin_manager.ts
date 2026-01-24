@@ -1,4 +1,5 @@
 import { serverRequest } from '@/utils/request';
+import { PluginStoreList, PluginStoreItem } from '@/types/plugin-store';
 
 export interface PluginItem {
   name: string;
@@ -9,6 +10,11 @@ export interface PluginItem {
   filename?: string;
 }
 
+export interface PluginListResponse {
+  plugins: PluginItem[];
+  pluginManagerNotFound: boolean;
+}
+
 export interface ServerResponse<T> {
   code: number;
   message: string;
@@ -17,7 +23,7 @@ export interface ServerResponse<T> {
 
 export default class PluginManager {
   public static async getPluginList () {
-    const { data } = await serverRequest.get<ServerResponse<PluginItem[]>>('/Plugin/List');
+    const { data } = await serverRequest.get<ServerResponse<PluginListResponse>>('/Plugin/List');
     return data.data;
   }
 
@@ -31,5 +37,20 @@ export default class PluginManager {
 
   public static async uninstallPlugin (name: string, filename?: string) {
     await serverRequest.post<ServerResponse<void>>('/Plugin/Uninstall', { name, filename });
+  }
+
+  // 插件商店相关方法
+  public static async getPluginStoreList () {
+    const { data } = await serverRequest.get<ServerResponse<PluginStoreList>>('/Plugin/Store/List');
+    return data.data;
+  }
+
+  public static async getPluginStoreDetail (id: string) {
+    const { data } = await serverRequest.get<ServerResponse<PluginStoreItem>>(`/Plugin/Store/Detail/${id}`);
+    return data.data;
+  }
+
+  public static async installPluginFromStore (id: string) {
+    await serverRequest.post<ServerResponse<void>>('/Plugin/Store/Install', { id });
   }
 }
