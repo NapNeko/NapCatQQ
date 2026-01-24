@@ -11,13 +11,20 @@ import useDialog from '@/hooks/use-dialog';
 export default function PluginPage () {
   const [plugins, setPlugins] = useState<PluginItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [pluginManagerNotFound, setPluginManagerNotFound] = useState(false);
   const dialog = useDialog();
 
   const loadPlugins = async () => {
     setLoading(true);
+    setPluginManagerNotFound(false);
     try {
-      const data = await PluginManager.getPluginList();
-      setPlugins(data);
+      const result = await PluginManager.getPluginList();
+      if (result.pluginManagerNotFound) {
+        setPluginManagerNotFound(true);
+        setPlugins([]);
+      } else {
+        setPlugins(result.plugins);
+      }
     } catch (e: any) {
       toast.error(e.message);
     } finally {
@@ -94,7 +101,17 @@ export default function PluginPage () {
           </Button>
         </div>
 
-        {plugins.length === 0 ? (
+        {pluginManagerNotFound ? (
+          <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
+            <div className="text-6xl mb-4">📦</div>
+            <h2 className="text-xl font-semibold text-default-700 dark:text-white/90 mb-2">
+              无插件加载
+            </h2>
+            <p className="text-default-500 dark:text-white/60 max-w-md">
+              插件管理器未加载，请检查 plugins 目录是否存在
+            </p>
+          </div>
+        ) : plugins.length === 0 ? (
           <div className="text-default-400">暂时没有安装插件</div>
         ) : (
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 justify-start items-stretch gap-x-2 gap-y-4'>

@@ -16,7 +16,8 @@ const getPluginManager = (): OB11PluginMangerAdapter | null => {
 export const GetPluginListHandler: RequestHandler = async (_req, res) => {
   const pluginManager = getPluginManager();
   if (!pluginManager) {
-    return sendError(res, 'Plugin Manager not found');
+    // 返回成功但带特殊标记
+    return sendSuccess(res, { plugins: [], pluginManagerNotFound: true });
   }
 
   // 辅助函数：根据文件名/路径生成唯一ID（作为配置键）
@@ -113,7 +114,7 @@ export const GetPluginListHandler: RequestHandler = async (_req, res) => {
     }
   }
 
-  return sendSuccess(res, allPlugins);
+  return sendSuccess(res, { plugins: allPlugins, pluginManagerNotFound: false });
 };
 
 export const ReloadPluginHandler: RequestHandler = async (req, res) => {
@@ -124,7 +125,7 @@ export const ReloadPluginHandler: RequestHandler = async (req, res) => {
 
   const pluginManager = getPluginManager();
   if (!pluginManager) {
-    return sendError(res, 'Plugin Manager not found');
+    return sendError(res, '插件管理器未加载，请检查 plugins 目录是否存在');
   }
 
   const success = await pluginManager.reloadPlugin(name);
