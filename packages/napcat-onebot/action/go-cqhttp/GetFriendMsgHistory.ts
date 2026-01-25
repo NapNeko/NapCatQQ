@@ -50,7 +50,7 @@ export default class GetFriendMsgHistory extends OneBotAction<PayloadType, Retur
     // 烘焙消息
     const ob11MsgList = (await Promise.all(
       msgList.map(msg => this.obContext.apis.MsgApi.parseMessage(msg, config.messagePostFormat, payload.parse_mult_msg, payload.disable_get_url)))
-    ).filter(msg => msg !== undefined);
-    return { messages: ob11MsgList as OB11Message[] };
+    ).filter((msg): msg is OB11Message => msg !== undefined);
+    return { messages: ob11MsgList };
   }
 }

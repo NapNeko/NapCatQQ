@@ -1,6 +1,5 @@
 import { ActionName } from '@/napcat-onebot/action/router';
 import { GetPacketStatusDepends } from '@/napcat-onebot/action/packet/GetPacketStatus';
-import { AIVoiceChatType } from 'napcat-core/packet/entities/aiChat';
 import { Type, Static } from '@sinclair/typebox';
 
 const PayloadSchema = Type.Object({
@@ -33,7 +32,8 @@ export class GetAiCharacters extends GetPacketStatusDepends<PayloadType, ReturnT
   override returnSchema = ReturnSchema;
 
   async _handle (payload: PayloadType) {
-    const rawList = await this.core.apis.PacketApi.pkt.operation.FetchAiVoiceList(+payload.group_id, +payload.chat_type as AIVoiceChatType);
+    const chatTypeNum = Number(payload.chat_type);
+    const rawList = await this.core.apis.PacketApi.pkt.operation.FetchAiVoiceList(+payload.group_id, chatTypeNum);
     return rawList?.map((item) => ({
       type: item.category,
       characters: item.voices.map((voice) => ({

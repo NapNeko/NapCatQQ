@@ -39,16 +39,18 @@ export class GetUnidirectionalFriendList extends OneBotAction<void, ReturnType> 
     };
     const packed_data = await this.pack_data(JSON.stringify(req_json));
     const data = Buffer.from(packed_data);
-    const rsq = { cmd: 'MQUpdateSvc_com_qq_ti.web.OidbSvc.0xe17_0', data: data as PacketBuf };
+    const rsq = { cmd: 'MQUpdateSvc_com_qq_ti.web.OidbSvc.0xe17_0', data: data as unknown as PacketBuf };
     const rsp_data = await this.core.apis.PacketApi.pkt.operation.sendPacket(rsq, true);
     const block_json = ProtoBuf(class extends ProtoBufBase { data = PBString(4); }).decode(rsp_data);
-    const block_list = JSON.parse(block_json.data).rpt_block_list as {
+    interface BlockItem {
       uint64_uin: number;
       str_uid: string;
       bytes_nick: string;
       uint32_age: number;
       bytes_source: string;
-    }[];
+    }
+    const block_data: { rpt_block_list: BlockItem[]; } = JSON.parse(block_json.data);
+    const block_list = block_data.rpt_block_list;
 
     return block_list.map((block) => ({
       uin: block.uint64_uin,

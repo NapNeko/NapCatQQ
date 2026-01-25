@@ -10,12 +10,19 @@ export const SetGroupPortraitPayloadSchema = Type.Object({
 
 export type SetGroupPortraitPayload = Static<typeof SetGroupPortraitPayloadSchema>;
 
-export default class SetGroupPortrait extends OneBotAction<SetGroupPortraitPayload, any> {
+const ReturnSchema = Type.Object({
+  result: Type.Number(),
+  errMsg: Type.String(),
+}, { description: '设置结果' });
+
+export type ReturnType = Static<typeof ReturnSchema>;
+
+export default class SetGroupPortrait extends OneBotAction<SetGroupPortraitPayload, ReturnType> {
   override actionName = ActionName.SetGroupPortrait;
   override payloadSchema = SetGroupPortraitPayloadSchema;
-  override returnSchema = Type.Any({ description: '设置结果' });
+  override returnSchema = ReturnSchema;
 
-  async _handle (payload: SetGroupPortraitPayload): Promise<any> {
+  async _handle (payload: SetGroupPortraitPayload): Promise<ReturnType> {
     const { path, success } = (await uriToLocalFile(this.core.NapCatTempPath, payload.file));
     if (!success) {
       throw new Error(`头像${payload.file}设置失败,file字段可能格式不正确`);
@@ -27,12 +34,15 @@ export default class SetGroupPortrait extends OneBotAction<SetGroupPortraitPaylo
       if (!ret) {
         throw new Error(`头像${payload.file}设置失败,api无返回`);
       }
-      if (ret.result as number === 1004022) {
+      if (Number(ret.result) === 1004022) {
         throw new Error(`头像${payload.file}设置失败，文件可能不是图片格式或权限不足`);
-      } else if (ret.result !== 0) {
+      } else if (Number(ret.result) !== 0) {
         throw new Error(`头像${payload.file}设置失败,未知的错误,${ret.result}:${ret.errMsg}`);
       }
-      return ret;
+      return {
+        result: Number(ret.result),
+        errMsg: ret.errMsg,
+      };
     } else {
       fs.unlink(path).catch(() => { });
       throw new Error(`头像${payload.file}设置失败,无法获取头像,文件可能不存在`);

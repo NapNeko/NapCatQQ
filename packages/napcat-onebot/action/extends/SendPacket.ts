@@ -21,7 +21,8 @@ export class SendPacket extends GetPacketStatusDepends<PayloadType, ReturnType> 
   override actionName = ActionName.SendPacket;
   async _handle (payload: PayloadType) {
     const rsp = typeof payload.rsp === 'boolean' ? payload.rsp : payload.rsp === 'true';
-    const data = await this.core.apis.PacketApi.pkt.operation.sendPacket({ cmd: payload.cmd, data: Buffer.from(payload.data, 'hex') as PacketBuf }, rsp);
+    const packetData = Buffer.from(payload.data, 'hex') as unknown as PacketBuf;
+    const data = await this.core.apis.PacketApi.pkt.operation.sendPacket({ cmd: payload.cmd, data: packetData }, rsp);
     return typeof data === 'object' ? data.toString('hex') : undefined;
   }
 }
