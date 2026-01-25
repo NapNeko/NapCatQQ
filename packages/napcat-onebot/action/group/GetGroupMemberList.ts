@@ -3,6 +3,7 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 import { GroupMember } from 'napcat-core';
+import { GroupActionsExamples } from './examples';
 
 const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
@@ -18,17 +19,12 @@ type ReturnType = Static<typeof ReturnSchema>;
 export class GetGroupMemberList extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.GetGroupMemberList;
   override payloadSchema = PayloadSchema;
-  override returnSchema = ReturnSchema; override actionDescription = '获取群成员列表';
-  override payloadExample = { group_id: '123456789' };
-  override returnExample = [
-    {
-      group_id: 123456789,
-      user_id: 987654321,
-      nickname: '测试成员',
-      card: '群名片',
-      role: 'member'
-    }
-  ];
+  override returnSchema = ReturnSchema;
+  override actionDescription = '获取群成员列表';
+  override actionTags = ['群组接口'];
+  override payloadExample = GroupActionsExamples.GetGroupMemberList.payload;
+  override returnExample = GroupActionsExamples.GetGroupMemberList.response;
+
   async _handle (payload: PayloadType) {
     const groupIdStr = payload.group_id.toString();
     const noCache = this.parseBoolean(payload.no_cache ?? false);
