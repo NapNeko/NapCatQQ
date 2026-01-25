@@ -1,0 +1,19 @@
+{
+  "name": "napcat-schema",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "index.ts",
+  "scripts": {
+    "generate:openapi": "node ./dist/schemas.mjs",
+    "build:schema": "vite build"
+  },
+  "dependencies": {
+    "@sinclair/typebox": "^0.34.38",
+    "napcat-onebot": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.7.1",
+    "vite": "^6.0.0"
+  }
+}
