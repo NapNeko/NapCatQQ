@@ -43,7 +43,7 @@ export class NTQQFriendApi {
     return retMap;
   }
 
-  async delBuudy (uid: string, tempBlock = false, tempBothDel = false) {
+  async delBuddy (uid: string, tempBlock = false, tempBothDel = false) {
     return this.context.session.getBuddyService().delBuddy({
       friendUid: uid,
       tempBlock,
