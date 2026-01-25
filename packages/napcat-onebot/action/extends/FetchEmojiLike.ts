@@ -21,7 +21,7 @@ export class FetchEmojiLike extends OneBotAction<Payload, Awaited<ReturnType<NTQ
     if (!msgIdPeer) throw new Error('消息不存在');
     const msg = (await this.core.apis.MsgApi.getMsgsByMsgId(msgIdPeer.Peer, [msgIdPeer.MsgId])).msgList[0];
     if (!msg) throw new Error('消息不存在');
-    let cookie = payload.cookie ?? '';
+    let cookie = '';
     let isLastPage = false;
     const allEmojiLikesList: any[] = [];
     let finalResult: any = null;
