@@ -49,8 +49,8 @@ export class GetEmojiLikes extends OneBotAction<PayloadType, ReturnType> {
     const emojiType = payload.emoji_type ?? (payload.emoji_id.length > 3 ? '2' : '1');
     const emojiLikeList: Array<{ user_id: string; nick_name: string; }> = [];
     let cookie = '';
-
-    for (let page = 0; page < 200; page++) {
+    let needFetchCount = payload.count == 0 ? 200 : Math.ceil(payload.count / 15);
+    for (let page = 0; page < needFetchCount; page++) {
       const res = await this.core.apis.MsgApi.getMsgEmojiLikesList(
         peer, msg.msgSeq, payload.emoji_id.toString(), emojiType, cookie, 15
       );
@@ -64,7 +64,10 @@ export class GetEmojiLikes extends OneBotAction<PayloadType, ReturnType> {
       if (res.isLastPage || !res.cookie) break;
       cookie = res.cookie;
     }
-
+    // 切断多余部分
+    if (payload.count > 0) {
+      emojiLikeList.splice(payload.count);
+    }
     return { emoji_like_list: emojiLikeList };
   }
 }
