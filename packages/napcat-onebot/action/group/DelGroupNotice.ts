@@ -19,7 +19,8 @@ export class DelGroupNotice extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.DelGroupNotice;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
-  override actionDescription = '删除群公告';
+  override actionSummary = '删除群公告';
+  override actionDescription = '删除群聊中的公告';
   override actionTags = ['群组接口'];
   override payloadExample = ActionExamples.DelGroupNotice.payload;
 

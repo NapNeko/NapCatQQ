@@ -43,6 +43,7 @@ export abstract class OneBotAction<PayloadType, ReturnDataType> {
   returnSchema?: TSchema = undefined;
   payloadExample?: unknown = undefined;
   returnExample?: unknown = undefined;
+  actionSummary: string = '';
   actionDescription: string = '';
   actionTags: string[] = [];
   obContext: NapCatOneBot11Adapter;

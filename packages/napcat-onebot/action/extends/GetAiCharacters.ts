@@ -32,7 +32,8 @@ export class GetAiCharacters extends GetPacketStatusDepends<PayloadType, ReturnT
   override actionName = ActionName.GetAiCharacters;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
-  override actionDescription = '获取AI角色列表';
+  override actionSummary = '获取 AI 角色列表';
+  override actionDescription = '获取群聊中的 AI 角色列表';
   override actionTags = ['扩展接口'];
   override payloadExample = ActionExamples.GetAiCharacters.payload;
   override returnExample = ActionExamples.GetAiCharacters.return;

@@ -15,7 +15,8 @@ export default class SendLike extends OneBotAction<SendLikePayload, void> {
   override actionName = ActionName.SendLike;
   override payloadSchema = SendLikePayloadSchema;
   override returnSchema = Type.Null();
-  override actionDescription = '点赞';
+  override actionSummary = '点赞';
+  override actionDescription = '给指定用户点赞';
   override actionTags = ['用户接口'];
   override payloadExample = ActionExamples.SendLike.payload;
   override errorExamples = [

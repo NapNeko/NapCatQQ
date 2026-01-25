@@ -20,7 +20,8 @@ class GetGroupList extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.GetGroupList;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
-  override actionDescription = '获取群列表';
+  override actionSummary = '获取群列表';
+  override actionDescription = '获取当前帐号的群聊列表';
   override actionTags = ['群组接口'];
   override payloadExample = ActionExamples.GetGroupList.payload;
   override returnExample = ActionExamples.GetGroupList.return;

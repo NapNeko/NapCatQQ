@@ -20,7 +20,8 @@ export default class GetFriendList extends OneBotAction<PayloadType, ReturnType>
   override actionName = ActionName.GetFriendList;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
-  override actionDescription = '获取好友列表';
+  override actionSummary = '获取好友列表';
+  override actionDescription = '获取当前帐号的好友列表';
   override actionTags = ['用户接口'];
   override payloadExample = ActionExamples.GetFriendList.payload;
   override returnExample = ActionExamples.GetFriendList.return;

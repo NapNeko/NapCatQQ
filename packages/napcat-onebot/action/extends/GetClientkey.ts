@@ -14,7 +14,8 @@ export class GetClientkey extends OneBotAction<void, ReturnType> {
   override actionName = ActionName.GetClientkey;
   override payloadSchema = Type.Void();
   override returnSchema = ReturnSchema;
-  override actionDescription = '获取 ClientKey';
+  override actionSummary = '获取 ClientKey';
+  override actionDescription = '获取当前登录帐号的 ClientKey';
   override actionTags = ['扩展接口'];
   override payloadExample = ActionExamples.GetClientkey.payload;
   override returnExample = ActionExamples.GetClientkey.return;

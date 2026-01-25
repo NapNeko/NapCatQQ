@@ -19,7 +19,8 @@ const ReturnSchema = Type.Null({ description: '操作结果' });
 type ReturnType = Static<typeof ReturnSchema>;
 
 class MarkMsgAsRead extends OneBotAction<PayloadType, ReturnType> {
-  override actionDescription = '标记消息已读';
+  override actionSummary = '标记消息已读';
+  override actionDescription = '标记指定渠道的消息为已读';
   override actionTags = ['消息接口'];
   override payloadExample = ActionExamples.MarkMsgAsRead.payload;
 
@@ -62,18 +63,21 @@ export class MarkPrivateMsgAsRead extends MarkMsgAsRead {
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
   override actionName = ActionName.MarkPrivateMsgAsRead;
+  override actionSummary = '标记私聊已读';
 }
 
 export class MarkGroupMsgAsRead extends MarkMsgAsRead {
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
   override actionName = ActionName.MarkGroupMsgAsRead;
+  override actionSummary = '标记群聊已读';
 }
 
 export class GoCQHTTPMarkMsgAsRead extends MarkMsgAsRead {
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
   override actionName = ActionName.GoCQHTTP_MarkMsgAsRead;
+  override actionSummary = '标记消息已读 (Go-CQHTTP)';
 }
 
 export class MarkAllMsgAsRead extends OneBotAction<void, null> {

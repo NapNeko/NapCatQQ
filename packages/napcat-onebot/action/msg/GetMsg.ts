@@ -4,7 +4,7 @@ import { MessageUnique } from 'napcat-common/src/message-unique';
 import { Static, Type } from '@sinclair/typebox';
 import { NetworkAdapterConfig } from '@/napcat-onebot/config/config';
 
-import { ActionExamples } from '../examples';
+import { MsgActionsExamples } from './examples';
 
 const PayloadSchema = Type.Object({
   message_id: Type.Union([Type.Number(), Type.String()], { description: '消息ID' }),
@@ -33,10 +33,11 @@ class GetMsg extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.GetMsg;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
-  override actionDescription = '获取消息';
+  override actionSummary = '获取消息';
+  override actionDescription = '根据消息 ID 获取消息详细信息';
   override actionTags = ['消息接口'];
-  override payloadExample = ActionExamples.GetMsg.payload;
-  override returnExample = ActionExamples.GetMsg.return;
+  override payloadExample = MsgActionsExamples.GetMsg.payload;
+  override returnExample = MsgActionsExamples.GetMsg.response;
 
   async _handle (payload: PayloadType, _adapter: string, config: NetworkAdapterConfig) {
     if (!payload.message_id) {

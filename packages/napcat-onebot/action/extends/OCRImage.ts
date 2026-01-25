@@ -19,7 +19,8 @@ type ReturnType = Static<typeof ReturnSchema>;
 class OCRImageBase extends OneBotAction<PayloadType, ReturnType> {
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
-  override actionDescription = '图片 OCR 识别';
+  override actionSummary = '图片 OCR 识别';
+  override actionDescription = '识别图片中的文字内容';
   override actionTags = ['扩展接口'];
   override payloadExample = ExtendsActionsExamples.OCRImage.payload;
 
@@ -46,8 +47,10 @@ class OCRImageBase extends OneBotAction<PayloadType, ReturnType> {
 
 export class OCRImage extends OCRImageBase {
   override actionName = ActionName.OCRImage;
+  override actionSummary = '图片 OCR 识别';
 }
 
 export class IOCRImage extends OCRImageBase {
   override actionName = ActionName.IOCRImage;
+  override actionSummary = '图片 OCR 识别 (内部)';
 }

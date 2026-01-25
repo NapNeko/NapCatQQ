@@ -37,7 +37,8 @@ export default class GoCQHTTPGetStrangerInfo extends OneBotAction<PayloadType, R
   override actionName = ActionName.GoCQHTTP_GetStrangerInfo;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
-  override actionDescription = '获取陌生人信息';
+  override actionSummary = '获取陌生人信息';
+  override actionDescription = '获取指定非好友用户的信息';
   override actionTags = ['Go-CQHTTP'];
   override payloadExample = GoCQHTTPActionsExamples.GetStrangerInfo.payload;
 

@@ -2,6 +2,7 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 
 import { Type } from '@sinclair/typebox';
+import { GuildActionsExamples } from './examples';
 
 export class GetGuildProfile extends OneBotAction<void, void> {
   override actionName = ActionName.GetGuildProfile;
@@ -9,6 +10,8 @@ export class GetGuildProfile extends OneBotAction<void, void> {
   override returnSchema = Type.Null();
   override actionDescription = '获取频道个人信息';
   override actionTags = ['频道接口'];
+  override payloadExample = GuildActionsExamples.GetGuildProfile.payload;
+  override returnExample = GuildActionsExamples.GetGuildProfile.response;
 
   async _handle (): Promise<void> {
 

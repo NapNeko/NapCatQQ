@@ -20,7 +20,8 @@ export class GetGroupMemberList extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.GetGroupMemberList;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
-  override actionDescription = '获取群成员列表';
+  override actionSummary = '获取群成员列表';
+  override actionDescription = '获取群聊中的所有成员列表';
   override actionTags = ['群组接口'];
   override payloadExample = GroupActionsExamples.GetGroupMemberList.payload;
   override returnExample = GroupActionsExamples.GetGroupMemberList.response;

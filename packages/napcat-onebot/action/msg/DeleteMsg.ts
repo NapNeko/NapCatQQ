@@ -19,7 +19,8 @@ class DeleteMsg extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.DeleteMsg;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
-  override actionDescription = '撤回消息';
+  override actionSummary = '撤回消息';
+  override actionDescription = '撤回已发送的消息';
   override actionTags = ['消息接口'];
   override payloadExample = ActionExamples.DeleteMsg.payload;
 

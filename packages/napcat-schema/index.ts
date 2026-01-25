@@ -12,6 +12,7 @@ const __dirname = dirname(__filename);
 interface ActionSchemaInfo {
   payload?: TSchema;
   return?: TSchema;
+  summary?: string;
   description?: string;
   tags?: string[];
   payloadExample?: unknown;
@@ -30,6 +31,7 @@ export function initSchemas () {
       actionSchemas[handler.actionName] = {
         payload: action.payloadSchema,
         return: action.returnSchema,
+        summary: action.actionSummary,
         description: action.actionDescription,
         tags: action.actionTags,
         payloadExample: action.payloadExample,
@@ -45,6 +47,7 @@ export function initSchemas () {
       actionSchemas[handler.actionName] = {
         payload: action.payloadSchema,
         return: action.returnSchema,
+        summary: action.actionSummary,
         description: action.actionDescription,
         tags: action.actionTags,
         payloadExample: action.payloadExample,
@@ -65,8 +68,8 @@ export function generateOpenAPI () {
   const openapi: Record<string, unknown> = {
     openapi: '3.1.0',
     info: {
-      title: 'NapCat OneBot 11 API',
-      description: 'Auto-generated OpenAPI schema for NapCat OneBot 11 actions',
+      title: 'NapCat OneBot 11 接口文档',
+      description: 'NapCatOneBot11 旨在提供更先进、更统一、更美观的 OneBot 11 协议实现。',
       version: '1.0.0'
     },
     paths: {} as Record<string, unknown>
@@ -79,12 +82,27 @@ export function generateOpenAPI () {
     const cleanPayload = JSON.parse(JSON.stringify(schemas.payload || { type: 'object', properties: {} }));
     const cleanReturn = JSON.parse(JSON.stringify(schemas.return || { type: 'object', properties: {} }));
 
-    if (schemas.payloadExample) {
-      cleanPayload.example = schemas.payloadExample;
-    }
-    if (schemas.returnExample) {
-      cleanReturn.example = schemas.returnExample;
-    }
+    const wrappedPayload = {
+      type: 'object',
+      properties: {
+        action: { type: 'string', example: actionName },
+        params: cleanPayload,
+        echo: { type: 'string', example: `${actionName}:1234567890` }
+      }
+    };
+
+    const wrappedReturn = {
+      type: 'object',
+      properties: {
+        status: { type: 'string', example: 'ok' },
+        retcode: { type: 'number', example: 0 },
+        data: cleanReturn,
+        message: { type: 'string', example: '' },
+        wording: { type: 'string', example: '' },
+        echo: { type: 'string', example: `${actionName}:1234567890` }
+      },
+      required: ['status', 'retcode', 'data', 'message', 'wording']
+    };
 
     const paths = openapi['paths'] as Record<string, any>;
     const responses: Record<string, unknown> = {
@@ -92,7 +110,7 @@ export function generateOpenAPI () {
         description: '成功',
         content: {
           'application/json': {
-            schema: cleanReturn
+            schema: wrappedReturn
           }
         }
       }
@@ -121,13 +139,18 @@ export function generateOpenAPI () {
 
     paths[path] = {
       post: {
-        summary: actionName,
-        description: schemas.description || actionName,
+        summary: schemas.summary || actionName,
+        description: schemas.description || schemas.summary || actionName,
         tags: schemas.tags || ['Default'],
         requestBody: {
           content: {
             'application/json': {
-              schema: cleanPayload
+              schema: wrappedPayload,
+              example: {
+                action: actionName,
+                params: schemas.payloadExample || {},
+                echo: `${actionName}:1234567890`
+              }
             }
           }
         },

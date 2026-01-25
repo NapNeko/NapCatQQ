@@ -11,7 +11,8 @@ class GetLoginInfo extends OneBotAction<void, OB11User> {
   override actionName = ActionName.GetLoginInfo;
   override payloadSchema = Type.Object({});
   override returnSchema = OB11UserSchema;
-  override actionDescription = '获取登录号信息';
+  override actionSummary = '获取登录号信息';
+  override actionDescription = '获取当前登录帐号的信息';
   override actionTags = ['系统接口'];
   override payloadExample = ActionExamples.GetLoginInfo.payload;
   override returnExample = ActionExamples.GetLoginInfo.return;
