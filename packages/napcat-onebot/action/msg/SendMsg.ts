@@ -195,7 +195,7 @@ export class SendMsgBase extends OneBotAction<SendMsgPayload, ReturnDataType> {
       //   const music: OB11MessageCustomMusic = messages[0] as OB11MessageCustomMusic;
       //   if (music) {
       //   }
-      // }\r
+      // }
     }
     // log("send msg:", peer, sendElements)
 

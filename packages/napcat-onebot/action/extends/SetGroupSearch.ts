@@ -4,8 +4,8 @@ import { Static, Type } from '@sinclair/typebox';
 
 const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
-  no_code_finger_open: Type.Optional(Type.Number({ description: '是否开启无码指纹' })),
-  no_finger_open: Type.Optional(Type.Number({ description: '是否开启无指纹' })),
+  no_code_finger_open: Type.Optional(Type.Number({ description: '未知' })),
+  no_finger_open: Type.Optional(Type.Number({ description: '未知' })),
 });
 
 type PayloadType = Static<typeof PayloadSchema>;

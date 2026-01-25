@@ -8,8 +8,8 @@ export class GoCQHTTPSetModelShow extends OneBotAction<void, void> {
   override actionName = ActionName.GoCQHTTP_SetModelShow;
   override payloadSchema = Type.Object({});
   override returnSchema = Type.Null();
-  override actionSummary = '设置模型显示';
-  override actionDescription = '设置当前账号的设备模型显示名称';
+  override actionSummary = '设置机型';
+  override actionDescription = '设置当前账号的设备机型名称';
   override actionTags = ['Go-CQHTTP'];
   override payloadExample = GoCQHTTPActionsExamples.GoCQHTTPSetModelShow.payload;
   override returnExample = GoCQHTTPActionsExamples.GoCQHTTPSetModelShow.response;

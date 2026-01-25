@@ -1,6 +1,6 @@
 import { getAllHandlers } from '@/napcat-onebot/action/index';
 import { AutoRegisterRouter } from '@/napcat-onebot/action/auto-register';
-import { writeFileSync, mkdirSync, existsSync } from 'node:fs';
+import { writeFileSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { TSchema } from '@sinclair/typebox';
 import { fileURLToPath } from 'node:url';
@@ -17,7 +17,7 @@ interface ActionSchemaInfo {
   tags?: string[];
   payloadExample?: unknown;
   returnExample?: unknown;
-  errorExamples?: Array<{ code: number, description: string }>;
+  errorExamples?: Array<{ code: number, description: string; }>;
 }
 
 export const actionSchemas: Record<string, ActionSchemaInfo> = {};
@@ -191,7 +191,7 @@ export function generateOpenAPI () {
   generateMissingReport();
 }
 
-function generateMissingReport() {
+function generateMissingReport () {
   const missingReport: string[] = [];
   for (const [actionName, schemas] of Object.entries(actionSchemas)) {
     const missing: string[] = [];

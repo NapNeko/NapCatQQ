@@ -12,12 +12,47 @@ import { ActionMap } from '@/napcat-onebot/action';
 import { NapCatCore } from '@/napcat-core/index';
 import { NapCatOneBot11Adapter } from '@/napcat-onebot/index';
 import { OB11EmitEventContent, OB11NetworkReloadType } from '@/napcat-onebot/network/index';
+import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import json5 from 'json5';
 
 type ActionNameType = typeof ActionName[keyof typeof ActionName];
 
 const router: Router = Router();
 const DEFAULT_ADAPTER_NAME = 'debug-primary';
+
+/**
+ * 获取所有 Action 的 Schema 信息
+ */
+router.get('/schemas', async (_req: Request, res: Response) => {
+  try {
+    const obContext = WebUiDataRuntime.getOneBotContext();
+    if (!obContext) {
+      return sendError(res, 'OneBot 未初始化');
+    }
+    const schemas: Record<string, any> = {};
+
+    // 遍历 ActionName 中定义的所有路由
+    for (const key in ActionName) {
+      const actionName = (ActionName as any)[key];
+      if (actionName === ActionName.Unknown) continue;
+
+      const handler = obContext.actions.get(actionName);
+      if (handler) {
+        const action = handler as OneBotAction<unknown, unknown>;
+        schemas[actionName] = {
+          description: action.actionSummary || action.actionDescription,
+          payload: action.payloadSchema,
+          response: action.returnSchema,
+          payloadExample: action.payloadExample,
+        };
+      }
+    }
+
+    sendSuccess(res, schemas);
+  } catch (error: unknown) {
+    sendError(res, (error as Error).message);
+  }
+});
 
 /**
  * 统一的调试适配器

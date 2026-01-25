@@ -9,7 +9,7 @@ import { GoCQHTTPActionsExamples } from './examples';
 
 export const GoCQHTTPUploadGroupFilePayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
-  file: Type.String({ description: '本地文件路径' }),
+  file: Type.String({ description: '资源路径或URL' }),
   name: Type.String({ description: '文件名' }),
   folder: Type.Optional(Type.String({ description: '父目录 ID' })),
   folder_id: Type.Optional(Type.String({ description: '父目录 ID (兼容性字段)' })), // 临时扩展
@@ -29,7 +29,7 @@ export default class GoCQHTTPUploadGroupFile extends OneBotAction<GoCQHTTPUpload
   override payloadSchema = GoCQHTTPUploadGroupFilePayloadSchema;
   override returnSchema = GoCQHTTPUploadGroupFileReturnSchema;
   override actionSummary = '上传群文件';
-  override actionDescription = '上传本地文件到指定群聊的文件系统中';
+  override actionDescription = '上传资源路径或URL指定的文件到指定群聊的文件系统中';
   override actionTags = ['Go-CQHTTP'];
   override payloadExample = GoCQHTTPActionsExamples.UploadGroupFile.payload;
   override returnExample = GoCQHTTPActionsExamples.UploadGroupFile.response;

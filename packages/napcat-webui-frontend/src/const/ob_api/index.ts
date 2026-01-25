@@ -1,34 +1,39 @@
-import { ZodSchema } from 'zod';
+import { TSchema } from '@sinclair/typebox';
 
-import oneBotHttpApiGroup from './group';
-import oneBotHttpApiMessage from './message';
-import oneBotHttpApiSystem from './system';
-import oneBotHttpApiUser from './user';
+export interface OneBotHttpApiContent {
+  description?: string;
+  payload: TSchema;
+  response: TSchema;
+  payloadExample?: any;
+}
 
-type AllKey =
-  | keyof typeof oneBotHttpApiUser
-  | keyof typeof oneBotHttpApiMessage
-  | keyof typeof oneBotHttpApiGroup
-  | keyof typeof oneBotHttpApiSystem;
+export type OneBotHttpApi = Record<string, OneBotHttpApiContent>;
 
-export type OneBotHttpApi = Record<
-  AllKey,
-  {
-    description?: string
-    request: ZodSchema
-    response: ZodSchema
+let oneBotHttpApi: OneBotHttpApi = {};
+
+export async function fetchOneBotHttpApi (): Promise<OneBotHttpApi> {
+  try {
+    const response = await fetch('/api/Debug/schemas', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+    const data = await response.json();
+    if (data.code === 0) {
+      oneBotHttpApi = data.data;
+      return oneBotHttpApi;
+    }
+  } catch (error) {
+    console.error('Failed to fetch OneBot HTTP API schemas:', error);
   }
->;
+  return {};
+}
 
-const oneBotHttpApi: OneBotHttpApi = {
-  ...oneBotHttpApiUser,
-  ...oneBotHttpApiMessage,
-  ...oneBotHttpApiGroup,
-  ...oneBotHttpApiSystem,
-} as const;
+export function getOneBotHttpApi () {
+  return oneBotHttpApi;
+}
 
-export type OneBotHttpApiPath = keyof OneBotHttpApi;
-
-export type OneBotHttpApiContent = OneBotHttpApi[OneBotHttpApiPath];
+export type OneBotHttpApiPath = string;
 
 export default oneBotHttpApi;
+

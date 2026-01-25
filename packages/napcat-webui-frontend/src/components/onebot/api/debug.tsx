@@ -21,7 +21,8 @@ import PageLoading from '@/components/page_loading';
 
 import { request } from '@/utils/request';
 
-import { generateDefaultJson, parse } from '@/utils/zod';
+import { BaseResponseSchema, parseTypeBox, generateDefaultFromTypeBox } from '@/utils/typebox';
+import { Type } from '@sinclair/typebox';
 
 import DisplayStruct from './display_struct';
 
@@ -58,8 +59,16 @@ const OneBotApiDebug = forwardRef<OneBotApiDebugRef, OneBotApiDebugProps>((props
   const [responseHeight, setResponseHeight] = useState(240);
   const [storedHeight, setStoredHeight] = useLocalStorage('napcat_debug_response_height', 240);
 
-  const parsedRequest = parse(data.request);
-  const parsedResponse = parse(data.response);
+  const parsedRequest = parseTypeBox(data?.payload);
+
+  // 将返回值的 data 结构包装进 BaseResponseSchema 进行展示
+  // 使用解构属性的方式重新构建对象，确保 parseTypeBox 能够识别为 object 类型
+  const wrappedResponseSchema = Type.Object({
+    ...BaseResponseSchema.properties,
+    data: data?.response || Type.Any({ description: '数据' })
+  });
+
+  const parsedResponse = parseTypeBox(wrappedResponseSchema);
   const [backgroundImage] = useLocalStorage<string>(key.backgroundImage, '');
   const hasBackground = !!backgroundImage;
 
@@ -75,7 +84,7 @@ const OneBotApiDebug = forwardRef<OneBotApiDebugRef, OneBotApiDebugProps>((props
       // 如果有 adapterName，走后端转发
       if (adapterName) {
         request.post(`/api/Debug/call/${adapterName}`, {
-          action: path.replace(/^\//, ''), // 去掉开头的 /
+          action: path,
           params: parsedRequestBody
         }, {
           headers: {
@@ -154,7 +163,11 @@ const OneBotApiDebug = forwardRef<OneBotApiDebugRef, OneBotApiDebugProps>((props
   }));
 
   useEffect(() => {
-    setRequestBody(generateDefaultJson(data.request));
+    if (data?.payloadExample) {
+      setRequestBody(JSON.stringify(data.payloadExample, null, 2));
+    } else {
+      setRequestBody(JSON.stringify(generateDefaultFromTypeBox(data?.payload), null, 2));
+    }
     setResponseContent('');
     setResponseStatus(null);
   }, [path]);

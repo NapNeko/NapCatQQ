@@ -5,9 +5,9 @@ import { Static, Type } from '@sinclair/typebox';
 import { PacketActionsExamples } from './examples';
 
 export const SendPokePayloadSchema = Type.Object({
-  group_id: Type.Optional(Type.Union([Type.String(), Type.Number()], { description: '群号' })),
-  user_id: Type.Optional(Type.Union([Type.String(), Type.Number()], { description: '用户QQ' })),
-  target_id: Type.Optional(Type.Union([Type.String(), Type.Number()], { description: '目标QQ' })),
+  group_id: Type.Optional(Type.String({ description: '群号' })),
+  user_id: Type.Optional(Type.String({ description: '用户QQ' })),
+  target_id: Type.Optional(Type.String({ description: '目标QQ' })),
 });
 
 export type SendPokePayload = Static<typeof SendPokePayloadSchema>;
