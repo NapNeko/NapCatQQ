@@ -6,8 +6,8 @@ import { ActionName } from '../router';
 
 export const SetGroupTodoPayloadSchema = Type.Object({
   group_id: Type.Union([Type.String(), Type.Number()], { description: '群号' }),
-  message_id: Type.Union([Type.String(), Type.Number()], { description: '消息ID' }),
-  message_seq: Type.Optional(Type.Union([Type.String(), Type.Number()], { description: '消息Seq (可选)' })),
+  message_id: Type.Optional(Type.String({ description: '消息ID' })),
+  message_seq: Type.Optional(Type.String({ description: '消息Seq (可选)' })),
 });
 
 export type SetGroupTodoPayload = Static<typeof SetGroupTodoPayloadSchema>;
@@ -18,6 +18,9 @@ export class SetGroupTodo extends GetPacketStatusDepends<SetGroupTodoPayload, vo
   async _handle (payload: SetGroupTodoPayload) {
     if (payload.message_seq) {
       return await this.core.apis.PacketApi.pkt.operation.SetGroupTodo(+payload.group_id, payload.message_seq.toString());
+    }
+    if (!payload.message_id) {
+      throw new Error('缺少参数 message_id 或 message_seq');
     }
     const peer: Peer = {
       chatType: ChatType.KCHATTYPEGROUP,

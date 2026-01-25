@@ -3,7 +3,7 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
 export const SetFriendRemarkPayloadSchema = Type.Object({
-  user_id: Type.Union([Type.String(), Type.Number()], { description: '好友 QQ 号' }),
+  user_id: Type.String({ description: '好友 QQ 号' }),
   remark: Type.String({ description: '备注' }),
 });
 

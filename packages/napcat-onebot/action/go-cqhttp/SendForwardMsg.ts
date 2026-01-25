@@ -2,17 +2,19 @@ import { ContextMode, normalize, ReturnDataType, SendMsgBase, SendMsgPayload } f
 import { ActionName } from '@/napcat-onebot/action/router';
 
 // 未验证
+type GoCQHTTPSendForwardMsgPayload = SendMsgPayload & { messages?: any; };
+
 export class GoCQHTTPSendForwardMsgBase extends SendMsgBase {
-  protected override async check (payload: SendMsgPayload) {
-    if ((payload as any).messages) payload.message = normalize((payload as any).messages);
+  protected override async check (payload: GoCQHTTPSendForwardMsgPayload) {
+    if (payload.messages) payload.message = normalize(payload.messages);
     return super.check(payload);
   }
 }
 export class GoCQHTTPSendForwardMsg extends GoCQHTTPSendForwardMsgBase {
   override actionName = ActionName.GoCQHTTP_SendForwardMsg;
 
-  protected override async check (payload: SendMsgPayload) {
-    if ((payload as any).messages) payload.message = normalize((payload as any).messages);
+  protected override async check (payload: GoCQHTTPSendForwardMsgPayload) {
+    if (payload.messages) payload.message = normalize(payload.messages);
     return super.check(payload);
   }
 }

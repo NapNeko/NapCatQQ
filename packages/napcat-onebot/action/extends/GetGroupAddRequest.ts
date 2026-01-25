@@ -29,7 +29,7 @@ export default class GetGroupAddRequest extends OneBotAction<void, ReturnType> {
     const NTQQUserApi = this.core.apis.UserApi;
     const NTQQGroupApi = this.core.apis.GroupApi;
     const ignoredNotifies = await NTQQGroupApi.getSingleScreenNotifies(true, 10);
-    const retData: any[] = [];
+    const retData: ReturnType = [];
 
     const notifyPromises = ignoredNotifies
       .filter(notify => notify.type === 7)

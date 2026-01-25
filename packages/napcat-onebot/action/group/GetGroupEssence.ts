@@ -5,6 +5,7 @@ import { MessageUnique } from 'napcat-common/src/message-unique';
 import crypto from 'crypto';
 import { Static, Type } from '@sinclair/typebox';
 import { NetworkAdapterConfig } from '@/napcat-onebot/config/config';
+import { OB11MessageData, OB11MessageDataType } from '@/napcat-onebot/types';
 
 const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
@@ -58,12 +59,12 @@ export class GetGroupEssence extends OneBotAction<PayloadType, ReturnType> {
       if (msgOriginData) {
         const { id: message_id, msg: rawMessage } = msgOriginData;
         const parsed = await this.obContext.apis.MsgApi.parseMessage(rawMessage, config.messagePostFormat);
-        let content: any[] = [];
+        let content: OB11MessageData[] = [];
         if (parsed) {
           if (Array.isArray(parsed.message)) {
             content = parsed.message;
           } else {
-            content = [{ type: 'text', data: { text: parsed.message } }];
+            content = [{ type: OB11MessageDataType.text, data: { text: parsed.message } }];
           }
         }
         return {
@@ -99,24 +100,25 @@ export class GetGroupEssence extends OneBotAction<PayloadType, ReturnType> {
         operator_nick: msg.add_digest_nick,
         message_id: shortId,
         operator_time: msg.add_digest_time,
-        content: msg.msg_content.map((msg) => {
+        content: msg.msg_content.map((msg): OB11MessageData | undefined => {
           if (msg.msg_type === 1) {
             return {
-              type: 'text',
+              type: OB11MessageDataType.text,
               data: {
-                text: msg?.text,
+                text: msg?.text ?? '',
               },
             };
           } else if (msg.msg_type === 3) {
             return {
-              type: 'image',
+              type: OB11MessageDataType.image,
               data: {
+                file: '',
                 url: msg?.image_url,
               },
             };
           }
           return undefined;
-        }).filter((e): e is any => e !== undefined),
+        }).filter((e): e is OB11MessageData => e !== undefined),
       };
     }));
   }

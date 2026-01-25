@@ -4,7 +4,7 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
 const PayloadSchema = Type.Object({
-  flag: Type.Union([Type.String(), Type.Number()], { description: '请求flag' }),
+  flag: Type.String({ description: '请求flag' }),
   approve: Type.Optional(Type.Union([Type.Boolean(), Type.String()], { description: '是否同意' })),
   reason: Type.Optional(Type.Union([Type.String({ default: ' ' }), Type.Null()], { description: '拒绝理由' })),
   count: Type.Optional(Type.Number({ default: 100, description: '搜索通知数量' })),

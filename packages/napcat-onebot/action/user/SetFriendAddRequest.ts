@@ -3,7 +3,7 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
 export const SetFriendAddRequestPayloadSchema = Type.Object({
-  flag: Type.Union([Type.String(), Type.Number()], { description: '加好友请求的 flag (需从上报中获取)' }),
+  flag: Type.String({ description: '加好友请求的 flag (需从上报中获取)' }),
   approve: Type.Optional(Type.Union([Type.String(), Type.Boolean()], { description: '是否同意请求' })),
   remark: Type.Optional(Type.String({ description: '添加后的好友备注' })),
 });
