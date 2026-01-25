@@ -65,10 +65,10 @@ export function generateOpenAPI () {
   }
 
   const openapi: Record<string, unknown> = {
-    openapi: '3.1.0',
+    openapi: '3.0.1',
     info: {
       title: 'NapCat OneBot 11 HTTP API',
-      description: '本文档描述 NapCat OneBot 11 的 HTTP POST 接口协议。所有接口均通过 POST 请求调用，请求体为 JSON 格式。',
+      description: 'NapCatOneBot11 HTTP POST 接口文档',
       version: '1.0.0'
     },
     tags: [
@@ -76,108 +76,118 @@ export function generateOpenAPI () {
       { name: '群组接口', description: '群组管理、成员管理相关接口' },
       { name: '用户接口', description: '好友管理、个人信息相关接口' },
       { name: '系统接口', description: '状态获取、重启、缓存清理相关接口' },
-      { name: '文件接口', description: '文件上传下载、预览相关接口' },
-      { name: '系统扩展', description: 'NapCat 特有的系统级扩展功能' },
-      { name: '群扩展', description: 'NapCat 特有的群组级扩展功能' },
-      { name: '用户扩展', description: 'NapCat 特有的用户级扩展功能' },
-      { name: '文件扩展', description: 'NapCat 特有的文件级扩展功能' },
-      { name: 'Go-CQHTTP', description: '兼容 Go-CQHTTP 的特定接口' }
+      { name: '文件接口', description: '文件上传下载、预览相关接口' }
     ],
-    paths: {} as Record<string, unknown>
+    paths: {} as Record<string, unknown>,
+    components: {
+      schemas: {},
+      responses: {},
+      securitySchemes: {}
+    },
+    servers: [],
+    security: []
   };
 
   for (const [actionName, schemas] of Object.entries(actionSchemas)) {
-    // 忽略没有定义参数且没有 Summary 的占位接口
     if (!schemas.payload && !schemas.summary) continue;
 
     const path = '/' + actionName;
     const cleanPayload = schemas.payload ? JSON.parse(JSON.stringify(schemas.payload)) : { type: 'object', properties: {} };
     const cleanReturn = schemas.return ? JSON.parse(JSON.stringify(schemas.return)) : { type: 'object', properties: {} };
 
-    // HTTP 响应结构: {"status": "ok", "retcode": 0, "data": ...}
-    const httpResponseSchema = {
-      type: 'object',
-      properties: {
-        status: { type: 'string', enum: ['ok', 'async', 'failed'], description: '执行状态', example: 'ok' },
-        retcode: { type: 'number', description: '响应码 (0 为成功)', example: 0 },
-        data: { ...cleanReturn, description: '响应数据' },
-        message: { type: 'string', description: '错误消息', example: '' },
-        wording: { type: 'string', description: '提示消息', example: '' }
-      },
-      required: ['status', 'retcode', 'data']
-    };
-
-    const responses: Record<string, unknown> = {
-      '200': {
-        description: '成功响应',
-        content: {
-          'application/json': {
-            schema: httpResponseSchema,
-            example: {
-              status: 'ok',
-              retcode: 0,
-              data: schemas.returnExample || {},
-              message: '',
-              wording: ''
-            }
-          }
+    // 构造响应示例
+    const responseExamples: Record<string, any> = {
+      'Success': {
+        summary: '成功响应',
+        value: {
+          status: 'ok',
+          retcode: 0,
+          data: schemas.returnExample || {},
+          message: '',
+          wording: ''
         }
       }
     };
 
-    // 处理错误示例
     if (schemas.errorExamples) {
       schemas.errorExamples.forEach(error => {
-        const codeStr = error.code.toString();
-        responses[codeStr] = {
-          description: error.description,
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  status: { type: 'string', example: 'failed' },
-                  retcode: { type: 'number', example: error.code },
-                  data: { type: 'null' },
-                  message: { type: 'string', example: error.description }
-                }
-              }
-            }
+        responseExamples['Error_' + error.code] = {
+          summary: error.description,
+          value: {
+            status: 'failed',
+            retcode: error.code,
+            data: null,
+            message: error.description,
+            wording: error.description
           }
         };
       });
+    } else {
+      // 默认提供一个通用错误
+      responseExamples['Generic_Error'] = {
+        summary: '通用错误',
+        value: {
+          status: 'failed',
+          retcode: 1400,
+          data: null,
+          message: '请求参数错误或业务逻辑执行失败',
+          wording: '请求参数错误或业务逻辑执行失败'
+        }
+      };
     }
 
     const paths = openapi['paths'] as Record<string, any>;
     paths[path] = {
       post: {
         summary: schemas.summary || actionName,
-        description: schemas.description || 'API Action: ' + actionName,
-        tags: schemas.tags || ['Default'],
+        deprecated: false,
+        description: schemas.description || '',
+        tags: schemas.tags || [],
+        parameters: [],
         requestBody: {
-          description: 'API 请求参数',
+          description: 'API 参数',
           content: {
             'application/json': {
               schema: cleanPayload,
-              example: schemas.payloadExample || {}
+              examples: {
+                'Default': {
+                  summary: '默认请求示例',
+                  value: schemas.payloadExample || {}
+                }
+              }
             }
           }
         },
-        responses: responses
+        responses: {
+          '200': {
+            description: '业务响应',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    status: { type: 'string', description: '状态 (ok/failed)' },
+                    retcode: { type: 'number', description: '返回码' },
+                    data: { ...cleanReturn, description: '数据' },
+                    message: { type: 'string', description: '消息' },
+                    wording: { type: 'string', description: '提示' }
+                  },
+                  required: ['status', 'retcode', 'data']
+                },
+                examples: responseExamples
+              }
+            }
+          }
+        },
+        security: []
       }
     };
   }
 
-  const outputDir = resolve(__dirname, 'dist');
-  if (!existsSync(outputDir)) {
-    mkdirSync(outputDir, { recursive: true });
-  }
-  
-  const outputPath = resolve(outputDir, 'openapi.json');
+  const outputPath = resolve(__dirname, 'openapi.json');
   writeFileSync(outputPath, JSON.stringify(openapi, null, 2));
-  console.log('OpenAPI schema (HTTP Format) generated at: ' + outputPath);
+  console.log('OpenAPI schema (3.0.1 Format) generated at: ' + outputPath);
 
-  // 生成审计报告
   generateMissingReport();
 }
 
@@ -195,7 +205,7 @@ function generateMissingReport() {
     }
   }
 
-  const reportPath = resolve(__dirname, 'dist', 'missing_props.log');
+  const reportPath = resolve(__dirname, 'missing_props.log');
   if (missingReport.length > 0) {
     writeFileSync(reportPath, missingReport.join('\n'));
     console.warn('\n检查到 ' + missingReport.length + ' 个接口存在元数据缺失，报告已保存至: ' + reportPath);
