@@ -7,8 +7,7 @@ import { type NTQQMsgApi } from 'napcat-core/apis';
 const SchemaData = Type.Object({
   message_id: Type.Union([Type.Number(), Type.String()]),
   emojiId: Type.Union([Type.Number(), Type.String()]),
-  emojiType: Type.Union([Type.Number(), Type.String()]),
-  cookie: Type.String({ default: '' })
+  emojiType: Type.Union([Type.Number(), Type.String()])
 });
 
 type Payload = Static<typeof SchemaData>;
@@ -36,7 +35,7 @@ export class FetchEmojiLike extends OneBotAction<Payload, Awaited<ReturnType<NTQ
       const res = await this.core.apis.MsgApi.getMsgEmojiLikesList(
       msgIdPeer.Peer, msg.msgSeq, payload.emojiId.toString(), payload.emojiType.toString(), cookie,
     );
-      // 保存第一份返回结构（原样） 防止有用户解析这部分
+      // 保存第一份返回结构（原样） 防止有用户解析这部分，为兼容性保留
       if (!finalResult) finalResult = { ...res };
       if (Array.isArray(res.emojiLikesList)) allEmojiLikesList.push(...res.emojiLikesList);
       isLastPage = !!res.isLastPage;
@@ -47,6 +46,9 @@ export class FetchEmojiLike extends OneBotAction<Payload, Awaited<ReturnType<NTQ
     finalResult.emojiLikesList = allEmojiLikesList;
     finalResult.isLastPage = true;
     finalResult.cookie = '';
+    delete finalResult.cookie;
+    delete finalResult.isLastPage;
+    // delete可为兼容性保留
     return finalResult;
   }
 }
