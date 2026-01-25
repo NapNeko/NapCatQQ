@@ -4,7 +4,7 @@ import { promises as fs } from 'fs';
 import { FFmpegService } from '@/napcat-core/helper/ffmpeg/ffmpeg';
 import { Static, Type } from '@sinclair/typebox';
 
-import { ActionExamples } from '../examples';
+import { FileActionsExamples } from './examples';
 
 const out_format_list = ['mp3', 'amr', 'wma', 'm4a', 'spx', 'ogg', 'wav', 'flac'];
 
@@ -19,9 +19,11 @@ type PayloadType = Static<typeof PayloadSchema>;
 export default class GetRecord extends GetFileBase {
   override actionName = ActionName.GetRecord;
   override payloadSchema = PayloadSchema;
-  override actionDescription = '获取语音';
-  override payloadExample = ActionExamples.GetRecord.payload;
-  override returnExample = ActionExamples.GetRecord.return;
+  override actionSummary = '获取语音';
+  override actionDescription = '获取指定语音文件的信息，并支持格式转换';
+  override actionTags = ['文件接口'];
+  override payloadExample = FileActionsExamples.GetRecord.payload;
+  override returnExample = FileActionsExamples.GetRecord.response;
 
   override async _handle (payload: PayloadType): Promise<GetFileResponse> {
     const res = await super._handle(payload as GetFilePayload);

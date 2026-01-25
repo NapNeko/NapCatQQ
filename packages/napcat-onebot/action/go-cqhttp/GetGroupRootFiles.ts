@@ -26,6 +26,7 @@ export class GetGroupRootFiles extends OneBotAction<PayloadType, ReturnType> {
   override actionDescription = '获取群文件根目录下的所有文件和文件夹';
   override actionTags = ['Go-CQHTTP'];
   override payloadExample = GoCQHTTPActionsExamples.GetGroupRootFiles.payload;
+  override returnExample = GoCQHTTPActionsExamples.GetGroupRootFiles.response;
 
   async _handle (payload: PayloadType) {
     const ret = await this.core.apis.MsgApi.getGroupFileList(payload.group_id.toString(), {

@@ -2,7 +2,7 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
-import { ActionExamples } from '../examples';
+import { GroupActionsExamples } from './examples';
 
 const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
@@ -22,7 +22,8 @@ export class DelGroupNotice extends OneBotAction<PayloadType, ReturnType> {
   override actionSummary = '删除群公告';
   override actionDescription = '删除群聊中的公告';
   override actionTags = ['群组接口'];
-  override payloadExample = ActionExamples.DelGroupNotice.payload;
+  override payloadExample = GroupActionsExamples.DelGroupNotice.payload;
+  override returnExample = GroupActionsExamples.DelGroupNotice.response;
 
   async _handle (payload: PayloadType) {
     const group = payload.group_id.toString();

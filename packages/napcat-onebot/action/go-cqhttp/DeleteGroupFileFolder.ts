@@ -19,9 +19,11 @@ export class DeleteGroupFileFolder extends OneBotAction<PayloadType, ReturnType>
   override actionName = ActionName.GoCQHTTP_DeleteGroupFileFolder;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
-  override actionDescription = '删除群文件目录';
+  override actionSummary = '删除群文件目录';
+  override actionDescription = '在群文件系统中删除指定的文件夹';
   override actionTags = ['Go-CQHTTP'];
   override payloadExample = GoCQHTTPActionsExamples.DeleteGroupFileFolder.payload;
+  override returnExample = GoCQHTTPActionsExamples.DeleteGroupFileFolder.response;
 
   async _handle (payload: PayloadType) {
     return (await this.core.apis.GroupApi.delGroupFileFolder(

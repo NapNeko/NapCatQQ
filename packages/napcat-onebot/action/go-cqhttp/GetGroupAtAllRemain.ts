@@ -21,9 +21,11 @@ export class GoCQHTTPGetGroupAtAllRemain extends OneBotAction<PayloadType, Retur
   override actionName = ActionName.GoCQHTTP_GetGroupAtAllRemain;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
-  override actionDescription = '获取群艾特全体剩余次数';
+  override actionSummary = '获取群艾特全体剩余次数';
+  override actionDescription = '获取指定群聊中艾特全体成员的剩余次数';
   override actionTags = ['Go-CQHTTP'];
   override payloadExample = GoCQHTTPActionsExamples.GetGroupAtAllRemain.payload;
+  override returnExample = GoCQHTTPActionsExamples.GetGroupAtAllRemain.response;
 
   async _handle (payload: PayloadType) {
     const ret = await this.core.apis.GroupApi.getGroupRemainAtTimes(payload.group_id.toString());

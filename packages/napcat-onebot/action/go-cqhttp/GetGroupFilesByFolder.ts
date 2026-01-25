@@ -24,9 +24,11 @@ export class GetGroupFilesByFolder extends OneBotAction<PayloadType, ReturnType>
   override actionName = ActionName.GoCQHTTP_GetGroupFilesByFolder;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
-  override actionDescription = '获取群文件夹文件列表';
+  override actionSummary = '获取群文件夹文件列表';
+  override actionDescription = '获取指定群文件夹下的文件及子文件夹列表';
   override actionTags = ['Go-CQHTTP'];
   override payloadExample = GoCQHTTPActionsExamples.GetGroupFilesByFolder.payload;
+  override returnExample = GoCQHTTPActionsExamples.GetGroupFilesByFolder.response;
 
   async _handle (payload: PayloadType): Promise<ReturnType> {
     const retRaw = await this.core.apis.MsgApi.getGroupFileList(payload.group_id.toString(), {

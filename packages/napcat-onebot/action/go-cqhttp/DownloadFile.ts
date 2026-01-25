@@ -26,9 +26,11 @@ export default class GoCQHTTPDownloadFile extends OneBotAction<PayloadType, Retu
   override actionName = ActionName.GoCQHTTP_DownloadFile;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
-  override actionDescription = '下载文件';
+  override actionSummary = '下载文件';
+  override actionDescription = '下载网络文件到本地临时目录';
   override actionTags = ['Go-CQHTTP'];
   override payloadExample = GoCQHTTPActionsExamples.DownloadFile.payload;
+  override returnExample = GoCQHTTPActionsExamples.DownloadFile.response;
 
   async _handle (payload: PayloadType): Promise<ReturnType> {
     const isRandomName = !payload.name;

@@ -27,9 +27,11 @@ export default class GoCQHTTPUploadPrivateFile extends OneBotAction<GoCQHTTPUplo
   override actionName = ActionName.GOCQHTTP_UploadPrivateFile;
   override payloadSchema = GoCQHTTPUploadPrivateFilePayloadSchema;
   override returnSchema = GoCQHTTPUploadPrivateFileReturnSchema;
-  override actionDescription = '上传私聊文件';
+  override actionSummary = '上传私聊文件';
+  override actionDescription = '上传本地文件到指定私聊会话中';
   override actionTags = ['Go-CQHTTP'];
   override payloadExample = GoCQHTTPActionsExamples.UploadPrivateFile.payload;
+  override returnExample = GoCQHTTPActionsExamples.UploadPrivateFile.response;
 
   async getPeer (payload: GoCQHTTPUploadPrivateFilePayload): Promise<Peer> {
     if (payload.user_id) {

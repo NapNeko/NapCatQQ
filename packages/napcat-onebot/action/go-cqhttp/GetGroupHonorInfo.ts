@@ -27,9 +27,11 @@ export class GetGroupHonorInfo extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.GetGroupHonorInfo;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
-  override actionDescription = '获取群荣誉信息';
+  override actionSummary = '获取群荣誉信息';
+  override actionDescription = '获取指定群聊的荣誉信息，如龙王等';
   override actionTags = ['Go-CQHTTP'];
   override payloadExample = GoCQHTTPActionsExamples.GetGroupHonorInfo.payload;
+  override returnExample = GoCQHTTPActionsExamples.GetGroupHonorInfo.response;
 
   async _handle (payload: PayloadType): Promise<ReturnType> {
     if (!payload.type) {

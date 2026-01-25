@@ -16,9 +16,11 @@ export class GoCQHTTPDeleteFriend extends OneBotAction<GoCQHTTPDeleteFriendPaylo
   override actionName = ActionName.GoCQHTTP_DeleteFriend;
   override payloadSchema = GoCQHTTPDeleteFriendPayloadSchema;
   override returnSchema = Type.Any();
-  override actionDescription = '删除好友';
+  override actionSummary = '删除好友';
+  override actionDescription = '从好友列表中删除指定用户';
   override actionTags = ['Go-CQHTTP'];
   override payloadExample = GoCQHTTPActionsExamples.GoCQHTTPDeleteFriend.payload;
+  override returnExample = GoCQHTTPActionsExamples.GoCQHTTPDeleteFriend.response;
 
   async _handle (payload: GoCQHTTPDeleteFriendPayload) {
     const uin = payload.friend_id ?? payload.user_id ?? '';

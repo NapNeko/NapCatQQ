@@ -3,7 +3,7 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { MessageUnique } from 'napcat-common/src/message-unique';
 import { Static, Type } from '@sinclair/typebox';
 
-import { ActionExamples } from '../examples';
+import { GroupActionsExamples } from './examples';
 
 const PayloadSchema = Type.Object({
   message_id: Type.Optional(Type.Union([Type.Number(), Type.String()], { description: '消息ID' })),
@@ -22,9 +22,11 @@ export default class DelEssenceMsg extends OneBotAction<PayloadType, ReturnType>
   override actionName = ActionName.DelEssenceMsg;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
-  override actionDescription = '移出精华消息';
+  override actionSummary = '移出精华消息';
+  override actionDescription = '将一条消息从群精华消息列表中移出';
   override actionTags = ['群组接口'];
-  override payloadExample = ActionExamples.DelEssenceMsg.payload;
+  override payloadExample = GroupActionsExamples.DelEssenceMsg.payload;
+  override returnExample = GroupActionsExamples.DelEssenceMsg.response;
 
   async _handle (payload: PayloadType): Promise<ReturnType> {
     // 如果直接提供了 msg_seq, msg_random, group_id,优先使用

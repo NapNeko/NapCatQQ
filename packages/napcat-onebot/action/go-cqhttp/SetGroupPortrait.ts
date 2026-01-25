@@ -23,9 +23,11 @@ export default class SetGroupPortrait extends OneBotAction<SetGroupPortraitPaylo
   override actionName = ActionName.SetGroupPortrait;
   override payloadSchema = SetGroupPortraitPayloadSchema;
   override returnSchema = ReturnSchema;
-  override actionDescription = '设置群头像';
+  override actionSummary = '设置群头像';
+  override actionDescription = '修改指定群聊的头像';
   override actionTags = ['Go-CQHTTP'];
   override payloadExample = GoCQHTTPActionsExamples.SetGroupPortrait.payload;
+  override returnExample = GoCQHTTPActionsExamples.SetGroupPortrait.response;
 
   async _handle (payload: SetGroupPortraitPayload): Promise<ReturnType> {
     const { path, success } = (await uriToLocalFile(this.core.NapCatTempPath, payload.file));

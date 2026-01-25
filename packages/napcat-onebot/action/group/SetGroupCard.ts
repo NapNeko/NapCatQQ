@@ -2,7 +2,7 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
-import { ActionExamples } from '../examples';
+import { GroupActionsExamples } from './examples';
 
 const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
@@ -20,9 +20,11 @@ export default class SetGroupCard extends OneBotAction<PayloadType, ReturnType> 
   override actionName = ActionName.SetGroupCard;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
-  override actionDescription = '设置群名片';
+  override actionSummary = '设置群名片';
+  override actionDescription = '设置群聊中指定成员的群名片';
   override actionTags = ['群组接口'];
-  override payloadExample = ActionExamples.SetGroupCard.payload;
+  override payloadExample = GroupActionsExamples.SetGroupCard.payload;
+  override returnExample = GroupActionsExamples.SetGroupCard.response;
 
   async _handle (payload: PayloadType): Promise<null> {
     const member = await this.core.apis.GroupApi.getGroupMember(payload.group_id.toString(), payload.user_id.toString());

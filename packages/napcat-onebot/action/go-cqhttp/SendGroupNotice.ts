@@ -22,9 +22,11 @@ export class SendGroupNotice extends OneBotAction<SendGroupNoticePayload, void> 
   override actionName = ActionName.GoCQHTTP_SendGroupNotice;
   override payloadSchema = SendGroupNoticePayloadSchema;
   override returnSchema = Type.Null();
-  override actionDescription = '发送群公告';
+  override actionSummary = '发送群公告';
+  override actionDescription = '在指定群聊中发布新的公告';
   override actionTags = ['Go-CQHTTP'];
   override payloadExample = GoCQHTTPActionsExamples.SendGroupNotice.payload;
+  override returnExample = GoCQHTTPActionsExamples.SendGroupNotice.response;
 
   async _handle (payload: SendGroupNoticePayload) {
     let UploadImage: { id: string, width: number, height: number; } | undefined;

@@ -31,9 +31,11 @@ export default class GetFriendMsgHistory extends OneBotAction<PayloadType, Retur
   override actionName = ActionName.GetFriendMsgHistory;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
-  override actionDescription = '获取好友历史消息';
+  override actionSummary = '获取好友历史消息';
+  override actionDescription = '获取指定好友的历史聊天记录';
   override actionTags = ['Go-CQHTTP'];
   override payloadExample = GoCQHTTPActionsExamples.GetFriendMsgHistory.payload;
+  override returnExample = GoCQHTTPActionsExamples.GetFriendMsgHistory.response;
 
   async _handle (payload: PayloadType, _adapter: string, config: NetworkAdapterConfig): Promise<ReturnType> {
     // 处理参数

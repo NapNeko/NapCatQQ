@@ -3,7 +3,7 @@ import { NTGroupMemberRole } from 'napcat-core/types';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
-import { ActionExamples } from '../examples';
+import { GroupActionsExamples } from './examples';
 
 const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
@@ -21,9 +21,11 @@ export default class SetGroupAdmin extends OneBotAction<PayloadType, ReturnType>
   override actionName = ActionName.SetGroupAdmin;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
-  override actionDescription = '设置群管理员';
+  override actionSummary = '设置群管理员';
+  override actionDescription = '设置或取消群聊中的管理员';
   override actionTags = ['群组接口'];
-  override payloadExample = ActionExamples.SetGroupAdmin.payload;
+  override payloadExample = GroupActionsExamples.SetGroupAdmin.payload;
+  override returnExample = GroupActionsExamples.SetGroupAdmin.response;
 
   async _handle (payload: PayloadType): Promise<null> {
     const enable = typeof payload.enable === 'string' ? payload.enable === 'true' : !!payload.enable;

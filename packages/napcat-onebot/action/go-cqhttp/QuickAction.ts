@@ -63,9 +63,11 @@ export class GoCQHTTPHandleQuickAction extends OneBotAction<GoCQHTTPHandleQuickA
   override actionName = ActionName.GoCQHTTP_HandleQuickAction;
   override payloadSchema = GoCQHTTPHandleQuickActionPayloadSchema;
   override returnSchema = Type.Null();
-  override actionDescription = '处理快速操作';
+  override actionSummary = '处理快速操作';
+  override actionDescription = '处理来自事件上报的快速操作请求';
   override actionTags = ['Go-CQHTTP'];
   override payloadExample = GoCQHTTPActionsExamples.QuickAction.payload;
+  override returnExample = GoCQHTTPActionsExamples.QuickAction.response;
 
   async _handle (payload: GoCQHTTPHandleQuickActionPayload): Promise<void> {
     this.obContext.apis.QuickActionApi

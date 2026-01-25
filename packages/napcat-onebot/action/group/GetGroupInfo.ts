@@ -24,6 +24,7 @@ class GetGroupInfo extends OneBotAction<PayloadType, ReturnType> {
   override actionDescription = '获取群聊的基本信息';
   override actionTags = ['群组接口'];
   override payloadExample = GroupActionsExamples.GetGroupInfo.payload;
+  override returnExample = GroupActionsExamples.GetGroupInfo.response;
 
   async _handle (payload: PayloadType) {
     const group = (await this.core.apis.GroupApi.getGroups()).find(e => e.groupCode === payload.group_id.toString());

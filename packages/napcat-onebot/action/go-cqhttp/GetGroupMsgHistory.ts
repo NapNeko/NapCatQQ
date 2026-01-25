@@ -30,9 +30,11 @@ export default class GoCQHTTPGetGroupMsgHistory extends OneBotAction<PayloadType
   override actionName = ActionName.GoCQHTTP_GetGroupMsgHistory;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
-  override actionDescription = '获取群历史消息';
+  override actionSummary = '获取群历史消息';
+  override actionDescription = '获取指定群聊的历史聊天记录';
   override actionTags = ['Go-CQHTTP'];
   override payloadExample = GoCQHTTPActionsExamples.GetGroupMsgHistory.payload;
+  override returnExample = GoCQHTTPActionsExamples.GetGroupMsgHistory.response;
 
   async _handle (payload: PayloadType, _adapter: string, config: NetworkAdapterConfig): Promise<ReturnType> {
     const peer: Peer = { chatType: ChatType.KCHATTYPEGROUP, peerUid: payload.group_id.toString() };

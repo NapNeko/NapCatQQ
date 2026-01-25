@@ -2,7 +2,7 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
-import { ActionExamples } from '../examples';
+import { GroupActionsExamples } from './examples';
 
 const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
@@ -20,9 +20,11 @@ export default class SetGroupBan extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.SetGroupBan;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
-  override actionDescription = '群组禁言';
+  override actionSummary = '群组禁言';
+  override actionDescription = '禁言群聊中的指定成员';
   override actionTags = ['群组接口'];
-  override payloadExample = ActionExamples.SetGroupBan.payload;
+  override payloadExample = GroupActionsExamples.SetGroupBan.payload;
+  override returnExample = GroupActionsExamples.SetGroupBan.response;
 
   async _handle (payload: PayloadType): Promise<null> {
     const uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());

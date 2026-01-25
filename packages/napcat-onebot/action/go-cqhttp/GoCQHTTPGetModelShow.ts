@@ -22,9 +22,11 @@ export class GoCQHTTPGetModelShow extends OneBotAction<GoCQHTTPGetModelShowPaylo
   override actionName = ActionName.GoCQHTTP_GetModelShow;
   override payloadSchema = GoCQHTTPGetModelShowPayloadSchema;
   override returnSchema = GoCQHTTPGetModelShowReturnSchema;
-  override actionDescription = '获取模型显示';
+  override actionSummary = '获取模型显示';
+  override actionDescription = '获取当前账号可用的设备模型显示名称列表';
   override actionTags = ['Go-CQHTTP'];
   override payloadExample = GoCQHTTPActionsExamples.GoCQHTTPGetModelShow.payload;
+  override returnExample = GoCQHTTPActionsExamples.GoCQHTTPGetModelShow.response;
 
   async _handle (payload: GoCQHTTPGetModelShowPayload) {
     if (!payload.model) {

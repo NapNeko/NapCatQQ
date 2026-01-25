@@ -7,6 +7,8 @@ import { Static, Type } from '@sinclair/typebox';
 import { NetworkAdapterConfig } from '@/napcat-onebot/config/config';
 import { OB11MessageData, OB11MessageDataType } from '@/napcat-onebot/types';
 
+import { GroupActionsExamples } from './examples';
+
 const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
 });
@@ -31,6 +33,11 @@ export class GetGroupEssence extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.GoCQHTTP_GetEssenceMsg;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
+  override actionSummary = '获取群精华消息';
+  override actionDescription = '获取指定群聊中的精华消息列表';
+  override actionTags = ['群组接口'];
+  override payloadExample = GroupActionsExamples.GetGroupEssence.payload;
+  override returnExample = GroupActionsExamples.GetGroupEssence.response;
 
   private async msgSeqToMsgId (peer: Peer, msgSeq: string, msgRandom: string) {
     const replyMsgList = (await this.core.apis.MsgApi.getMsgsBySeqAndCount(peer, msgSeq, 1, true, true)).msgList.find((msg) => msg.msgSeq === msgSeq && msg.msgRandom === msgRandom);

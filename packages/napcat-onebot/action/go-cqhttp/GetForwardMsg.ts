@@ -28,9 +28,11 @@ export class GoCQHTTPGetForwardMsgAction extends OneBotAction<PayloadType, Retur
   override actionName = ActionName.GoCQHTTP_GetForwardMsg;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
-  override actionDescription = '获取合并转发消息';
+  override actionSummary = '获取合并转发消息';
+  override actionDescription = '获取合并转发消息的具体内容';
   override actionTags = ['Go-CQHTTP'];
   override payloadExample = GoCQHTTPActionsExamples.GetForwardMsg.payload;
+  override returnExample = GoCQHTTPActionsExamples.GetForwardMsg.response;
 
   private createTemplateNode (message: OB11Message): OB11MessageNode {
     return {

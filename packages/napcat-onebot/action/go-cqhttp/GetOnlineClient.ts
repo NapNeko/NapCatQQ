@@ -16,9 +16,11 @@ export class GetOnlineClient extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.GetOnlineClient;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
-  override actionDescription = '获取在线客户端';
+  override actionSummary = '获取在线客户端';
+  override actionDescription = '获取当前登录账号的在线客户端列表';
   override actionTags = ['Go-CQHTTP'];
   override payloadExample = GoCQHTTPActionsExamples.GetOnlineClient.payload;
+  override returnExample = GoCQHTTPActionsExamples.GetOnlineClient.response;
 
   async _handle () {
     // 注册监听

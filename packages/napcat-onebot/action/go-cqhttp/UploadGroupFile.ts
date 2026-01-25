@@ -28,9 +28,11 @@ export default class GoCQHTTPUploadGroupFile extends OneBotAction<GoCQHTTPUpload
   override actionName = ActionName.GoCQHTTP_UploadGroupFile;
   override payloadSchema = GoCQHTTPUploadGroupFilePayloadSchema;
   override returnSchema = GoCQHTTPUploadGroupFileReturnSchema;
-  override actionDescription = '上传群文件';
+  override actionSummary = '上传群文件';
+  override actionDescription = '上传本地文件到指定群聊的文件系统中';
   override actionTags = ['Go-CQHTTP'];
   override payloadExample = GoCQHTTPActionsExamples.UploadGroupFile.payload;
+  override returnExample = GoCQHTTPActionsExamples.UploadGroupFile.response;
 
   async _handle (payload: GoCQHTTPUploadGroupFilePayload): Promise<GoCQHTTPUploadGroupFileResponse> {
     let file = payload.file;

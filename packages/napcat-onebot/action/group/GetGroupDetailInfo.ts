@@ -2,6 +2,8 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
+import { GroupActionsExamples } from './examples';
+
 const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
 });
@@ -23,6 +25,11 @@ export class GetGroupDetailInfo extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.GetGroupDetailInfo;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
+  override actionSummary = '获取群详细信息';
+  override actionDescription = '获取群聊的详细信息，包括成员数、最大成员数等';
+  override actionTags = ['群组接口'];
+  override payloadExample = GroupActionsExamples.GetGroupDetailInfo.payload;
+  override returnExample = GroupActionsExamples.GetGroupDetailInfo.response;
 
   async _handle (payload: PayloadType): Promise<ReturnType> {
     const data = await this.core.apis.GroupApi.fetchGroupDetail(payload.group_id.toString());

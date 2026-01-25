@@ -2,7 +2,7 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
-import { ActionExamples } from '../examples';
+import { GroupActionsExamples } from './examples';
 
 const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
@@ -20,9 +20,11 @@ export default class SetGroupKick extends OneBotAction<PayloadType, ReturnType> 
   override actionName = ActionName.SetGroupKick;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
-  override actionDescription = '群组踢人';
+  override actionSummary = '群组踢人';
+  override actionDescription = '将指定成员踢出群聊';
   override actionTags = ['群组接口'];
-  override payloadExample = ActionExamples.SetGroupKick.payload;
+  override payloadExample = GroupActionsExamples.SetGroupKick.payload;
+  override returnExample = GroupActionsExamples.SetGroupKick.response;
 
   async _handle (payload: PayloadType): Promise<null> {
     const rejectReq = payload.reject_add_request?.toString() === 'true';

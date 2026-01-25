@@ -19,9 +19,11 @@ export class DeleteGroupFile extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.GOCQHTTP_DeleteGroupFile;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
-  override actionDescription = '删除群文件';
+  override actionSummary = '删除群文件';
+  override actionDescription = '在群文件系统中删除指定的文件';
   override actionTags = ['Go-CQHTTP'];
   override payloadExample = GoCQHTTPActionsExamples.DeleteGroupFile.payload;
+  override returnExample = GoCQHTTPActionsExamples.DeleteGroupFile.response;
 
   async _handle (payload: PayloadType) {
     const data = FileNapCatOneBotUUID.decodeModelId(payload.file_id);

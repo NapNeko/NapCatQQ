@@ -3,7 +3,7 @@ import { FileNapCatOneBotUUID } from 'napcat-common/src/file-uuid';
 import { GetPacketStatusDepends } from '@/napcat-onebot/action/packet/GetPacketStatus';
 import { Static, Type } from '@sinclair/typebox';
 
-import { ActionExamples } from '../examples';
+import { FileActionsExamples } from './examples';
 
 const PayloadSchema = Type.Object({
   file_id: Type.String({ description: '文件ID' }),
@@ -21,10 +21,11 @@ export class GetPrivateFileUrl extends GetPacketStatusDepends<PayloadType, Retur
   override actionName = ActionName.NapCat_GetPrivateFileUrl;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
-  override actionDescription = '获取私聊文件URL';
+  override actionSummary = '获取私聊文件URL';
+  override actionDescription = '获取指定私聊文件的下载链接';
   override actionTags = ['文件接口'];
-  override payloadExample = ActionExamples.GetPrivateFileUrl.payload;
-  override returnExample = ActionExamples.GetPrivateFileUrl.return;
+  override payloadExample = FileActionsExamples.GetPrivateFileUrl.payload;
+  override returnExample = FileActionsExamples.GetPrivateFileUrl.response;
 
   async _handle (payload: PayloadType) {
     const contextMsgFile = FileNapCatOneBotUUID.decode(payload.file_id);

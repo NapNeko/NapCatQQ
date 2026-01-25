@@ -41,6 +41,7 @@ export default class GoCQHTTPGetStrangerInfo extends OneBotAction<PayloadType, R
   override actionDescription = '获取指定非好友用户的信息';
   override actionTags = ['Go-CQHTTP'];
   override payloadExample = GoCQHTTPActionsExamples.GetStrangerInfo.payload;
+  override returnExample = GoCQHTTPActionsExamples.GetStrangerInfo.response;
 
   async _handle (payload: PayloadType): Promise<ReturnType> {
     const user_id = payload.user_id.toString();

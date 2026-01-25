@@ -26,6 +26,7 @@ export class GetGroupFileSystemInfo extends OneBotAction<PayloadType, ReturnType
   override actionDescription = '获取群聊文件系统的空间及状态信息';
   override actionTags = ['Go-CQHTTP'];
   override payloadExample = GoCQHTTPActionsExamples.GetGroupFileSystemInfo.payload;
+  override returnExample = GoCQHTTPActionsExamples.GetGroupFileSystemInfo.response;
 
   async _handle (payload: PayloadType) {
     const groupFileCount = (await this.core.apis.GroupApi.getGroupFileCount([payload.group_id.toString()])).groupFileCounts[0];
