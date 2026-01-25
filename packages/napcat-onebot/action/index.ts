@@ -65,6 +65,7 @@ import SetGroupPortrait from './go-cqhttp/SetGroupPortrait';
 import { FetchCustomFace } from './extends/FetchCustomFace';
 import GoCQHTTPUploadPrivateFile from './go-cqhttp/UploadPrivateFile';
 import { FetchEmojiLike } from './extends/FetchEmojiLike';
+import { FetchEmojiLikesAll } from './extends/FetchEmojiLikesAll';
 import { NapCatCore } from 'napcat-core';
 import type { NetworkAdapterConfig } from '../config/config';
 import { OneBotAction } from './OneBotAction';
