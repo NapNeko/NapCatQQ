@@ -5,6 +5,7 @@ import { ChatType, Peer } from 'napcat-core/types';
 import { MessageUnique } from 'napcat-common/src/message-unique';
 import { Static, Type } from '@sinclair/typebox';
 import { NetworkAdapterConfig } from '@/napcat-onebot/config/config';
+import { GoCQHTTPActionsExamples } from './examples';
 
 const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
@@ -29,6 +30,9 @@ export default class GoCQHTTPGetGroupMsgHistory extends OneBotAction<PayloadType
   override actionName = ActionName.GoCQHTTP_GetGroupMsgHistory;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
+  override actionDescription = '获取群历史消息';
+  override actionTags = ['Go-CQHTTP'];
+  override payloadExample = GoCQHTTPActionsExamples.GetGroupMsgHistory.payload;
 
   async _handle (payload: PayloadType, _adapter: string, config: NetworkAdapterConfig): Promise<ReturnType> {
     const peer: Peer = { chatType: ChatType.KCHATTYPEGROUP, peerUid: payload.group_id.toString() };

@@ -5,6 +5,7 @@ import { join as joinPath } from 'node:path';
 import { calculateFileMD5, uriToLocalFile } from 'napcat-common/src/file';
 import { randomUUID } from 'crypto';
 import { Static, Type } from '@sinclair/typebox';
+import { GoCQHTTPActionsExamples } from './examples';
 
 const PayloadSchema = Type.Object({
   url: Type.Optional(Type.String({ description: '下载链接' })),
@@ -25,6 +26,9 @@ export default class GoCQHTTPDownloadFile extends OneBotAction<PayloadType, Retu
   override actionName = ActionName.GoCQHTTP_DownloadFile;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
+  override actionDescription = '下载文件';
+  override actionTags = ['Go-CQHTTP'];
+  override payloadExample = GoCQHTTPActionsExamples.DownloadFile.payload;
 
   async _handle (payload: PayloadType): Promise<ReturnType> {
     const isRandomName = !payload.name;

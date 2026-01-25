@@ -3,6 +3,8 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { checkFileExistV2, uriToLocalFile } from 'napcat-common/src/file';
 import { Static, Type } from '@sinclair/typebox';
 import fs from 'node:fs/promises';
+import { GoCQHTTPActionsExamples } from './examples';
+
 export const SetGroupPortraitPayloadSchema = Type.Object({
   file: Type.String({ description: '头像文件路径或 URL' }),
   group_id: Type.String({ description: '群号' }),
@@ -21,6 +23,9 @@ export default class SetGroupPortrait extends OneBotAction<SetGroupPortraitPaylo
   override actionName = ActionName.SetGroupPortrait;
   override payloadSchema = SetGroupPortraitPayloadSchema;
   override returnSchema = ReturnSchema;
+  override actionDescription = '设置群头像';
+  override actionTags = ['Go-CQHTTP'];
+  override payloadExample = GoCQHTTPActionsExamples.SetGroupPortrait.payload;
 
   async _handle (payload: SetGroupPortraitPayload): Promise<ReturnType> {
     const { path, success } = (await uriToLocalFile(this.core.NapCatTempPath, payload.file));

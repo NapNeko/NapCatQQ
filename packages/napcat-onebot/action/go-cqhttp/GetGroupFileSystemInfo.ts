@@ -1,6 +1,7 @@
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
+import { GoCQHTTPActionsExamples } from './examples';
 
 const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
@@ -21,6 +22,9 @@ export class GetGroupFileSystemInfo extends OneBotAction<PayloadType, ReturnType
   override actionName = ActionName.GoCQHTTP_GetGroupFileSystemInfo;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
+  override actionDescription = '获取群文件系统信息';
+  override actionTags = ['Go-CQHTTP'];
+  override payloadExample = GoCQHTTPActionsExamples.GetGroupFileSystemInfo.payload;
 
   async _handle (payload: PayloadType) {
     const groupFileCount = (await this.core.apis.GroupApi.getGroupFileCount([payload.group_id.toString()])).groupFileCounts[0];

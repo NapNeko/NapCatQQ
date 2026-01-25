@@ -1,6 +1,7 @@
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
+import { GoCQHTTPActionsExamples } from './examples';
 
 export const GoCQHTTPDeleteFriendPayloadSchema = Type.Object({
   friend_id: Type.Optional(Type.Union([Type.String(), Type.Number()], { description: '好友 QQ 号' })),
@@ -15,6 +16,9 @@ export class GoCQHTTPDeleteFriend extends OneBotAction<GoCQHTTPDeleteFriendPaylo
   override actionName = ActionName.GoCQHTTP_DeleteFriend;
   override payloadSchema = GoCQHTTPDeleteFriendPayloadSchema;
   override returnSchema = Type.Any();
+  override actionDescription = '删除好友';
+  override actionTags = ['Go-CQHTTP'];
+  override payloadExample = GoCQHTTPActionsExamples.GoCQHTTPDeleteFriend.payload;
 
   async _handle (payload: GoCQHTTPDeleteFriendPayload) {
     const uin = payload.friend_id ?? payload.user_id ?? '';

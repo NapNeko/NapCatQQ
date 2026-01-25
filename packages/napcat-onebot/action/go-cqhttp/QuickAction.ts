@@ -2,6 +2,7 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { QuickAction, QuickActionEvent } from '@/napcat-onebot/types';
 import { Static, Type } from '@sinclair/typebox';
+import { GoCQHTTPActionsExamples } from './examples';
 
 const SenderSchema = Type.Object({
   user_id: Type.String({ description: '用户ID' }),
@@ -62,6 +63,9 @@ export class GoCQHTTPHandleQuickAction extends OneBotAction<GoCQHTTPHandleQuickA
   override actionName = ActionName.GoCQHTTP_HandleQuickAction;
   override payloadSchema = GoCQHTTPHandleQuickActionPayloadSchema;
   override returnSchema = Type.Null();
+  override actionDescription = '处理快速操作';
+  override actionTags = ['Go-CQHTTP'];
+  override payloadExample = GoCQHTTPActionsExamples.QuickAction.payload;
 
   async _handle (payload: GoCQHTTPHandleQuickActionPayload): Promise<void> {
     this.obContext.apis.QuickActionApi

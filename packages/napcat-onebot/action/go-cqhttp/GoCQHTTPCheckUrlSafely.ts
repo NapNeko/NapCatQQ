@@ -1,6 +1,7 @@
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
+import { GoCQHTTPActionsExamples } from './examples';
 
 export const GoCQHTTPCheckUrlSafelyPayloadSchema = Type.Object({
   url: Type.String({ description: '要检查的 URL' }),
@@ -18,6 +19,9 @@ export class GoCQHTTPCheckUrlSafely extends OneBotAction<GoCQHTTPCheckUrlSafelyP
   override actionName = ActionName.GoCQHTTP_CheckUrlSafely;
   override payloadSchema = GoCQHTTPCheckUrlSafelyPayloadSchema;
   override returnSchema = GoCQHTTPCheckUrlSafelyReturnSchema;
+  override actionDescription = '检查 URL 安全性';
+  override actionTags = ['Go-CQHTTP'];
+  override payloadExample = GoCQHTTPActionsExamples.GoCQHTTPCheckUrlSafely.payload;
 
   async _handle () {
     return { level: 1 };

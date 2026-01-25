@@ -2,6 +2,7 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { OB11Construct } from '@/napcat-onebot/helper/data';
 import { Static, Type } from '@sinclair/typebox';
+import { GoCQHTTPActionsExamples } from './examples';
 
 const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
@@ -23,6 +24,10 @@ export class GetGroupFilesByFolder extends OneBotAction<PayloadType, ReturnType>
   override actionName = ActionName.GoCQHTTP_GetGroupFilesByFolder;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
+  override actionDescription = '获取群文件夹文件列表';
+  override actionTags = ['Go-CQHTTP'];
+  override payloadExample = GoCQHTTPActionsExamples.GetGroupFilesByFolder.payload;
+
   async _handle (payload: PayloadType): Promise<ReturnType> {
     const retRaw = await this.core.apis.MsgApi.getGroupFileList(payload.group_id.toString(), {
       sortType: 1,

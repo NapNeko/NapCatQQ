@@ -6,6 +6,7 @@ import { MessageUnique } from 'napcat-common/src/message-unique';
 
 import { Static, Type } from '@sinclair/typebox';
 import { NetworkAdapterConfig } from '@/napcat-onebot/config/config';
+import { GoCQHTTPActionsExamples } from './examples';
 
 const PayloadSchema = Type.Object({
   user_id: Type.String({ description: '用户QQ' }),
@@ -30,6 +31,9 @@ export default class GetFriendMsgHistory extends OneBotAction<PayloadType, Retur
   override actionName = ActionName.GetFriendMsgHistory;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
+  override actionDescription = '获取好友历史消息';
+  override actionTags = ['Go-CQHTTP'];
+  override payloadExample = GoCQHTTPActionsExamples.GetFriendMsgHistory.payload;
 
   async _handle (payload: PayloadType, _adapter: string, config: NetworkAdapterConfig): Promise<ReturnType> {
     // 处理参数

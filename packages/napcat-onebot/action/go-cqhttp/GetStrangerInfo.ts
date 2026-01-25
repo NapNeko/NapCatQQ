@@ -4,8 +4,7 @@ import { OB11Construct } from '@/napcat-onebot/helper/data';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { calcQQLevel } from 'napcat-common/src/helper';
 import { Static, Type } from '@sinclair/typebox';
-
-import { ActionExamples } from '../examples';
+import { GoCQHTTPActionsExamples } from './examples';
 
 const PayloadSchema = Type.Object({
   user_id: Type.String({ description: '用户QQ' }),
@@ -39,9 +38,8 @@ export default class GoCQHTTPGetStrangerInfo extends OneBotAction<PayloadType, R
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
   override actionDescription = '获取陌生人信息';
-  override actionTags = ['用户接口'];
-  override payloadExample = ActionExamples.GetStrangerInfo.payload;
-  override returnExample = ActionExamples.GetStrangerInfo.return;
+  override actionTags = ['Go-CQHTTP'];
+  override payloadExample = GoCQHTTPActionsExamples.GetStrangerInfo.payload;
 
   async _handle (payload: PayloadType): Promise<ReturnType> {
     const user_id = payload.user_id.toString();

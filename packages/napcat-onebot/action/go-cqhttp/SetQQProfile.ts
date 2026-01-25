@@ -1,6 +1,7 @@
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
+import { GoCQHTTPActionsExamples } from './examples';
 
 export const SetQQProfilePayloadSchema = Type.Object({
   nickname: Type.String({ description: '昵称' }),
@@ -13,6 +14,9 @@ export class SetQQProfile extends OneBotAction<SetQQProfilePayload, any> {
   override actionName = ActionName.SetQQProfile;
   override payloadSchema = SetQQProfilePayloadSchema;
   override returnSchema = Type.Any({ description: '设置结果' });
+  override actionDescription = '设置 QQ 资料';
+  override actionTags = ['Go-CQHTTP'];
+  override payloadExample = GoCQHTTPActionsExamples.SetQQProfile.payload;
 
   async _handle (payload: SetQQProfilePayload) {
     const self = this.core.selfInfo;

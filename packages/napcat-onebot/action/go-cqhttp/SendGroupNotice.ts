@@ -3,6 +3,7 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { unlink } from 'node:fs/promises';
 import { Static, Type } from '@sinclair/typebox';
+import { GoCQHTTPActionsExamples } from './examples';
 
 export const SendGroupNoticePayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
@@ -21,6 +22,10 @@ export class SendGroupNotice extends OneBotAction<SendGroupNoticePayload, void> 
   override actionName = ActionName.GoCQHTTP_SendGroupNotice;
   override payloadSchema = SendGroupNoticePayloadSchema;
   override returnSchema = Type.Null();
+  override actionDescription = '发送群公告';
+  override actionTags = ['Go-CQHTTP'];
+  override payloadExample = GoCQHTTPActionsExamples.SendGroupNotice.payload;
+
   async _handle (payload: SendGroupNoticePayload) {
     let UploadImage: { id: string, width: number, height: number; } | undefined;
     if (payload.image) {

@@ -2,6 +2,7 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { sleep } from 'napcat-common/src/helper';
 import { Static, Type } from '@sinclair/typebox';
+import { GoCQHTTPActionsExamples } from './examples';
 
 const PayloadSchema = Type.Object({}, { description: '在线客户端负载' });
 
@@ -15,6 +16,9 @@ export class GetOnlineClient extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.GetOnlineClient;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
+  override actionDescription = '获取在线客户端';
+  override actionTags = ['Go-CQHTTP'];
+  override payloadExample = GoCQHTTPActionsExamples.GetOnlineClient.payload;
 
   async _handle () {
     // 注册监听

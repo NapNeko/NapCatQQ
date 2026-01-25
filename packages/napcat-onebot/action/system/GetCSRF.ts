@@ -1,6 +1,7 @@
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Type, Static } from '@sinclair/typebox';
+import { SystemActionsExamples } from './examples';
 
 export const GetCSRFReturnSchema = Type.Object({
   token: Type.Number({ description: 'CSRF Token' }),
@@ -12,6 +13,9 @@ export class GetCSRF extends OneBotAction<void, GetCSRFReturnType> {
   override actionName = ActionName.GetCSRF;
   override payloadSchema = Type.Object({});
   override returnSchema = GetCSRFReturnSchema;
+  override actionDescription = '获取 CSRF Token';
+  override actionTags = ['系统接口'];
+  override payloadExample = SystemActionsExamples.GetCSRF.payload;
 
   async _handle () {
     const sKey = await this.core.apis.UserApi.getSKey();

@@ -6,6 +6,7 @@ import { uriToLocalFile } from 'napcat-common/src/file';
 import { SendMessageContext } from '@/napcat-onebot/api';
 import { ContextMode, createContext } from '@/napcat-onebot/action/msg/SendMsg';
 import { Static, Type } from '@sinclair/typebox';
+import { GoCQHTTPActionsExamples } from './examples';
 
 export const GoCQHTTPUploadPrivateFilePayloadSchema = Type.Object({
   user_id: Type.String({ description: '用户 QQ' }),
@@ -26,6 +27,9 @@ export default class GoCQHTTPUploadPrivateFile extends OneBotAction<GoCQHTTPUplo
   override actionName = ActionName.GOCQHTTP_UploadPrivateFile;
   override payloadSchema = GoCQHTTPUploadPrivateFilePayloadSchema;
   override returnSchema = GoCQHTTPUploadPrivateFileReturnSchema;
+  override actionDescription = '上传私聊文件';
+  override actionTags = ['Go-CQHTTP'];
+  override payloadExample = GoCQHTTPActionsExamples.UploadPrivateFile.payload;
 
   async getPeer (payload: GoCQHTTPUploadPrivateFilePayload): Promise<Peer> {
     if (payload.user_id) {

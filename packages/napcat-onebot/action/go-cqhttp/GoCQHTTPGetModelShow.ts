@@ -1,6 +1,7 @@
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
+import { GoCQHTTPActionsExamples } from './examples';
 
 export const GoCQHTTPGetModelShowPayloadSchema = Type.Object({
   model: Type.Optional(Type.String({ description: '模型名称' })),
@@ -21,6 +22,9 @@ export class GoCQHTTPGetModelShow extends OneBotAction<GoCQHTTPGetModelShowPaylo
   override actionName = ActionName.GoCQHTTP_GetModelShow;
   override payloadSchema = GoCQHTTPGetModelShowPayloadSchema;
   override returnSchema = GoCQHTTPGetModelShowReturnSchema;
+  override actionDescription = '获取模型显示';
+  override actionTags = ['Go-CQHTTP'];
+  override payloadExample = GoCQHTTPActionsExamples.GoCQHTTPGetModelShow.payload;
 
   async _handle (payload: GoCQHTTPGetModelShowPayload) {
     if (!payload.model) {

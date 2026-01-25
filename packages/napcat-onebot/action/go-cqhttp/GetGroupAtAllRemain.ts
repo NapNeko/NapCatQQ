@@ -1,6 +1,7 @@
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
+import { GoCQHTTPActionsExamples } from './examples';
 
 const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
@@ -21,7 +22,8 @@ export class GoCQHTTPGetGroupAtAllRemain extends OneBotAction<PayloadType, Retur
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
   override actionDescription = '获取群艾特全体剩余次数';
-  override actionTags = ['群组接口'];
+  override actionTags = ['Go-CQHTTP'];
+  override payloadExample = GoCQHTTPActionsExamples.GetGroupAtAllRemain.payload;
 
   async _handle (payload: PayloadType) {
     const ret = await this.core.apis.GroupApi.getGroupRemainAtTimes(payload.group_id.toString());

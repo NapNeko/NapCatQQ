@@ -5,6 +5,7 @@ import fs from 'fs';
 import { uriToLocalFile } from 'napcat-common/src/file';
 import { SendMessageContext } from '@/napcat-onebot/api';
 import { Static, Type } from '@sinclair/typebox';
+import { GoCQHTTPActionsExamples } from './examples';
 
 export const GoCQHTTPUploadGroupFilePayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
@@ -27,6 +28,9 @@ export default class GoCQHTTPUploadGroupFile extends OneBotAction<GoCQHTTPUpload
   override actionName = ActionName.GoCQHTTP_UploadGroupFile;
   override payloadSchema = GoCQHTTPUploadGroupFilePayloadSchema;
   override returnSchema = GoCQHTTPUploadGroupFileReturnSchema;
+  override actionDescription = '上传群文件';
+  override actionTags = ['Go-CQHTTP'];
+  override payloadExample = GoCQHTTPActionsExamples.UploadGroupFile.payload;
 
   async _handle (payload: GoCQHTTPUploadGroupFilePayload): Promise<GoCQHTTPUploadGroupFileResponse> {
     let file = payload.file;

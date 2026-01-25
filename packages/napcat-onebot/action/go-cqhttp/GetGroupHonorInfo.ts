@@ -2,6 +2,7 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { WebHonorType } from 'napcat-core/types';
 import { Static, Type } from '@sinclair/typebox';
+import { GoCQHTTPActionsExamples } from './examples';
 
 const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
@@ -27,7 +28,8 @@ export class GetGroupHonorInfo extends OneBotAction<PayloadType, ReturnType> {
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
   override actionDescription = '获取群荣誉信息';
-  override actionTags = ['群组接口'];
+  override actionTags = ['Go-CQHTTP'];
+  override payloadExample = GoCQHTTPActionsExamples.GetGroupHonorInfo.payload;
 
   async _handle (payload: PayloadType): Promise<ReturnType> {
     if (!payload.type) {

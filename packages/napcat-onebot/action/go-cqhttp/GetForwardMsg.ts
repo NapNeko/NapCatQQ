@@ -5,6 +5,7 @@ import { MessageUnique } from 'napcat-common/src/message-unique';
 import { Static, Type } from '@sinclair/typebox';
 import { ChatType, ElementType, MsgSourceType, NTMsgType, RawMessage } from 'napcat-core';
 import { isNumeric } from 'napcat-common/src/helper';
+import { GoCQHTTPActionsExamples } from './examples';
 
 const PayloadSchema = Type.Object({
   message_id: Type.Optional(Type.String({ description: '消息ID' })),
@@ -28,7 +29,8 @@ export class GoCQHTTPGetForwardMsgAction extends OneBotAction<PayloadType, Retur
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
   override actionDescription = '获取合并转发消息';
-  override actionTags = ['消息接口'];
+  override actionTags = ['Go-CQHTTP'];
+  override payloadExample = GoCQHTTPActionsExamples.GetForwardMsg.payload;
 
   private createTemplateNode (message: OB11Message): OB11MessageNode {
     return {
