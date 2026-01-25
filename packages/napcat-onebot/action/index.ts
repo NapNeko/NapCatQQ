@@ -65,6 +65,7 @@ import SetGroupPortrait from './go-cqhttp/SetGroupPortrait';
 import { FetchCustomFace } from './extends/FetchCustomFace';
 import GoCQHTTPUploadPrivateFile from './go-cqhttp/UploadPrivateFile';
 import { FetchEmojiLike } from './extends/FetchEmojiLike';
+import { GetEmojiLikes } from './extends/GetEmojiLikes';
 import { NapCatCore } from 'napcat-core';
 import type { NetworkAdapterConfig } from '../config/config';
 import { OneBotAction } from './OneBotAction';
@@ -183,6 +184,7 @@ export function createActionMap (obContext: NapCatOneBot11Adapter, core: NapCatC
     new SetGroupRemark(obContext, core),
     new GetGroupInfoEx(obContext, core),
     new FetchEmojiLike(obContext, core),
+    new GetEmojiLikes(obContext, core),
     new GetFile(obContext, core),
     new SetQQProfile(obContext, core),
     new ShareGroupEx(obContext, core),

@@ -201,12 +201,8 @@ const oneBotHttpApiMessage = {
       message_id: z.union([z.string(), z.number()]).describe('消息ID'),
       emojiId: z.string().describe('表情ID'),
       emojiType: z.string().describe('表情类型'),
-      group_id: z.union([z.string(), z.number()]).optional().describe('群号'),
-      user_id: z
-        .union([z.string(), z.number()])
-        .optional()
-        .describe('用户QQ号'),
       count: z.number().int().positive().optional().describe('获取数量'),
+      cookie: z.string().describe('cookie,首次为空,后续为上次返回'),
     }),
     response: baseResponseSchema.extend({
       data: z.object({
@@ -216,16 +212,41 @@ const oneBotHttpApiMessage = {
           .array(
             z
               .object({
-                tinyId: z.string().describe('表情ID'),
+                tinyId: z.string().describe('点击者QQ号'),
                 nickName: z.string().describe('昵称?'),
                 headUrl: z.string().describe('头像?'),
               })
-              .describe('表情点赞列表')
+              .describe('表情点击列表')
           )
-          .describe('表情点赞列表'),
+          .describe('表情点击列表'),
         cookie: z.string().describe('cookie'),
         isLastPage: z.boolean().describe('是否最后一页'),
         isFirstPage: z.boolean().describe('是否第一页'),
+      }),
+    }),
+  },
+  '/get_emoji_likes': {
+    description: '获取贴表情详情列表',
+    request: z.object({
+      message_id: z.union([z.string(), z.number()]).describe('消息ID'),
+      emojiId: z.string().describe('表情ID'),
+      emojiType: z.string().describe('表情类型'),
+    }),
+    response: baseResponseSchema.extend({
+      data: z.object({
+        result: z.number().describe('结果'),
+        errMsg: z.string().describe('错误信息'),
+        emojiLikesList: z
+          .array(
+            z
+              .object({
+                tinyId: z.string().describe('点击者QQ号'),
+                nickName: z.string().describe('昵称?'),
+                headUrl: z.string().describe('头像?'),
+              })
+              .describe('表情点击列表')
+          )
+          .describe('表情点击列表'),
       }),
     }),
   },
