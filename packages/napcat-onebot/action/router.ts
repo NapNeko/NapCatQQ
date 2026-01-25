@@ -152,6 +152,7 @@ export const ActionName = {
   GetProfileLike: 'get_profile_like',
   FetchCustomFace: 'fetch_custom_face',
   FetchEmojiLike: 'fetch_emoji_like',
+  FetchEmojiLikesAll: 'fetch_emoji_likes_all',
   SetInputStatus: 'set_input_status',
   GetGroupInfoEx: 'get_group_info_ex',
   GetGroupDetailInfo: 'get_group_detail_info',
