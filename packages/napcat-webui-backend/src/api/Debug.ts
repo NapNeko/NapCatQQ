@@ -44,6 +44,7 @@ router.get('/schemas', async (_req: Request, res: Response) => {
           payload: action.payloadSchema,
           response: action.returnSchema,
           payloadExample: action.payloadExample,
+          tags: action.actionTags,
         };
       }
     }

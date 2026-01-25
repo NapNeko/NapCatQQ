@@ -5,6 +5,7 @@ export interface OneBotHttpApiContent {
   payload: TSchema;
   response: TSchema;
   payloadExample?: any;
+  tags?: string[];
 }
 
 export type OneBotHttpApi = Record<string, OneBotHttpApiContent>;

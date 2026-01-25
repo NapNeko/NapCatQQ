@@ -16,7 +16,7 @@ class SetGroupSignBase extends GetPacketStatusDepends<PayloadType, ReturnType> {
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
   override actionSummary = '设置群签名';
-  override actionTags = ['群扩展'];
+  override actionTags = ['群组扩展'];
   override payloadExample = {
     group_id: '123456789'
   };
