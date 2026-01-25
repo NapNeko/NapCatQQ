@@ -8,7 +8,6 @@ const SchemaData = Type.Object({
   message_id: Type.Union([Type.Number(), Type.String()]),
   emojiId: Type.Union([Type.Number(), Type.String()]),
   emojiType: Type.Union([Type.Number(), Type.String()]),
-  count: Type.Union([Type.Number(), Type.String()], { default: 20 }),
   cookie: Type.String({ default: '' })
 });
 
@@ -23,8 +22,31 @@ export class FetchEmojiLike extends OneBotAction<Payload, Awaited<ReturnType<NTQ
     if (!msgIdPeer) throw new Error('消息不存在');
     const msg = (await this.core.apis.MsgApi.getMsgsByMsgId(msgIdPeer.Peer, [msgIdPeer.MsgId])).msgList[0];
     if (!msg) throw new Error('消息不存在');
-    return await this.core.apis.MsgApi.getMsgEmojiLikesList(
-      msgIdPeer.Peer, msg.msgSeq, payload.emojiId.toString(), payload.emojiType.toString(), payload.cookie, +payload.count
+    let cookie = payload.cookie ?? '';
+    let isLastPage = false;
+    const allEmojiLikesList: any[] = [];
+    let finalResult: any = null;
+    const MAX_PAGES = 200;
+    // 按3000人群计算
+    let pages = 0;
+    while (!isLastPage) {
+      if (++pages > MAX_PAGES) {
+        throw new Error('分页拉取超过上限，疑似出现循环 cookie');
+      }
+      const res = await this.core.apis.MsgApi.getMsgEmojiLikesList(
+      msgIdPeer.Peer, msg.msgSeq, payload.emojiId.toString(), payload.emojiType.toString(), cookie,
     );
+      // 保存第一份返回结构（原样） 防止有用户解析这部分
+      if (!finalResult) finalResult = { ...res };
+      if (Array.isArray(res.emojiLikesList)) allEmojiLikesList.push(...res.emojiLikesList);
+      isLastPage = !!res.isLastPage;
+      const nextCookie = res.cookie ?? '';
+      if (!isLastPage && nextCookie !== '') cookie = nextCookie;
+      else break;
+    }
+    finalResult.emojiLikesList = allEmojiLikesList;
+    finalResult.isLastPage = true;
+    finalResult.cookie = '';
+    return finalResult;
   }
 }
