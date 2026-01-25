@@ -2,6 +2,8 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { GetPacketStatusDepends } from '@/napcat-onebot/action/packet/GetPacketStatus';
 import { Static, Type } from '@sinclair/typebox';
 
+import { ActionExamples } from '../examples';
+
 const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
   user_id: Type.String({ description: 'QQ号' }),
@@ -18,6 +20,9 @@ export class SetSpecialTitle extends GetPacketStatusDepends<PayloadType, ReturnT
   override actionName = ActionName.SetSpecialTitle;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
+  override actionDescription = '设置专属头衔';
+  override actionTags = ['扩展接口'];
+  override payloadExample = ActionExamples.SetSpecialTitle.payload;
 
   async _handle (payload: PayloadType) {
     const uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());

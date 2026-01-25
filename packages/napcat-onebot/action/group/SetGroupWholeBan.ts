@@ -2,6 +2,8 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
+import { ActionExamples } from '../examples';
+
 const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
   enable: Type.Optional(Type.Union([Type.Boolean(), Type.String()], { description: '是否开启全员禁言' })),
@@ -17,6 +19,9 @@ export default class SetGroupWholeBan extends OneBotAction<PayloadType, ReturnTy
   override actionName = ActionName.SetGroupWholeBan;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
+  override actionDescription = '全员禁言';
+  override actionTags = ['群组接口'];
+  override payloadExample = ActionExamples.SetGroupWholeBan.payload;
 
   async _handle (payload: PayloadType): Promise<null> {
     const enable = payload.enable?.toString() !== 'false';

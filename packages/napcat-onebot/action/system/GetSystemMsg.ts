@@ -4,6 +4,8 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 import { OB11NotifySchema } from '../schemas';
 
+import { ActionExamples } from '../examples';
+
 export const GetGroupSystemMsgPayloadSchema = Type.Object({
   count: Type.Union([Type.Number(), Type.String()], { default: 50, description: '获取的消息数量' }),
 });
@@ -22,6 +24,10 @@ export class GetGroupSystemMsg extends OneBotAction<GetGroupSystemMsgPayload, Ge
   override actionName = ActionName.GetGroupSystemMsg;
   override payloadSchema = GetGroupSystemMsgPayloadSchema;
   override returnSchema = GetGroupSystemMsgReturnSchema;
+  override actionDescription = '获取群系统消息';
+  override actionTags = ['系统接口'];
+  override payloadExample = ActionExamples.GetGroupSystemMsg.payload;
+  override returnExample = ActionExamples.GetGroupSystemMsg.return;
 
   async _handle (params: GetGroupSystemMsgPayload): Promise<GetGroupSystemMsgReturn> {
     const SingleScreenNotifies = await this.core.apis.GroupApi.getSingleScreenNotifies(false, +params.count);

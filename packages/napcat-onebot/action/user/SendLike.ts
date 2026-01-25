@@ -2,6 +2,8 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
+import { ActionExamples } from '../examples';
+
 export const SendLikePayloadSchema = Type.Object({
   user_id: Type.String({ description: '对方 QQ 号' }),
   times: Type.Union([Type.Number(), Type.String()], { default: 1, description: '点赞次数' }),
@@ -13,6 +15,13 @@ export default class SendLike extends OneBotAction<SendLikePayload, void> {
   override actionName = ActionName.SendLike;
   override payloadSchema = SendLikePayloadSchema;
   override returnSchema = Type.Null();
+  override actionDescription = '点赞';
+  override actionTags = ['用户接口'];
+  override payloadExample = ActionExamples.SendLike.payload;
+  override errorExamples = [
+    ...ActionExamples.Common.errors,
+    { code: 1400, description: '点赞失败（频率过快或用户不存在）' }
+  ];
 
   async _handle (payload: SendLikePayload): Promise<void> {
     const qq = payload.user_id.toString();

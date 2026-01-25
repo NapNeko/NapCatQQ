@@ -4,6 +4,8 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { MessageUnique } from 'napcat-common/src/message-unique';
 import { Static, Type } from '@sinclair/typebox';
 
+import { ActionExamples } from '../examples';
+
 const PayloadSchema = Type.Object({
   message_id: Type.Union([Type.Number(), Type.String()], { description: '消息ID' }),
   group_id: Type.Optional(Type.String({ description: '目标群号' })),
@@ -17,6 +19,10 @@ const ReturnSchema = Type.Null({ description: '操作结果' });
 type ReturnType = Static<typeof ReturnSchema>;
 
 class ForwardSingleMsg extends OneBotAction<PayloadType, ReturnType> {
+  override actionDescription = '转发单条消息';
+  override actionTags = ['消息接口'];
+  override payloadExample = ActionExamples.ForwardSingleMsg.payload;
+
   protected async getTargetPeer (payload: PayloadType): Promise<Peer> {
     if (payload.user_id) {
       const peerUid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());

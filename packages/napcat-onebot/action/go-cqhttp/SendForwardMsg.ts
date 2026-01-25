@@ -13,6 +13,8 @@ export class GoCQHTTPSendForwardMsgBase extends SendMsgBase {
 }
 export class GoCQHTTPSendForwardMsg extends GoCQHTTPSendForwardMsgBase {
   override actionName = ActionName.GoCQHTTP_SendForwardMsg;
+  override actionDescription = '发送合并转发消息';
+  override actionTags = ['消息接口'];
 
   protected override async check (payload: GoCQHTTPSendForwardMsgPayload) {
     if (payload.messages) payload.message = normalize(payload.messages);

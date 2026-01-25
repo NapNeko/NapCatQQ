@@ -2,6 +2,8 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
+import { ActionExamples } from '../examples';
+
 export const GetCredentialsPayloadSchema = Type.Object({
   domain: Type.String({ description: '需要获取 cookies 的域名' }),
 });
@@ -19,6 +21,10 @@ export class GetCredentials extends OneBotAction<GetCredentialsPayload, GetCrede
   override actionName = ActionName.GetCredentials;
   override payloadSchema = GetCredentialsPayloadSchema;
   override returnSchema = GetCredentialsReturnSchema;
+  override actionDescription = '获取身份信息';
+  override actionTags = ['系统接口'];
+  override payloadExample = ActionExamples.GetCredentials.payload;
+  override returnExample = ActionExamples.GetCredentials.return;
 
   async _handle (payload: GetCredentialsPayload) {
     const cookiesObject = await this.core.apis.UserApi.getCookies(payload.domain);

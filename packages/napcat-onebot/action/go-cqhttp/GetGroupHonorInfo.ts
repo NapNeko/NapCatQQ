@@ -26,6 +26,8 @@ export class GetGroupHonorInfo extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.GetGroupHonorInfo;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
+  override actionDescription = '获取群荣誉信息';
+  override actionTags = ['群组接口'];
 
   async _handle (payload: PayloadType): Promise<ReturnType> {
     if (!payload.type) {

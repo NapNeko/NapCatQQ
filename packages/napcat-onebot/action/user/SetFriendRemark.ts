@@ -2,9 +2,11 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
+import { ActionExamples } from '../examples';
+
 export const SetFriendRemarkPayloadSchema = Type.Object({
-  user_id: Type.String({ description: '好友 QQ 号' }),
-  remark: Type.String({ description: '备注' }),
+  user_id: Type.String({ description: '对方 QQ 号' }),
+  remark: Type.String({ description: '备注内容' }),
 });
 
 export type SetFriendRemarkPayload = Static<typeof SetFriendRemarkPayloadSchema>;
@@ -13,6 +15,13 @@ export default class SetFriendRemark extends OneBotAction<SetFriendRemarkPayload
   override actionName = ActionName.SetFriendRemark;
   override payloadSchema = SetFriendRemarkPayloadSchema;
   override returnSchema = Type.Null();
+  override actionDescription = '设置好友备注';
+  override actionTags = ['用户接口'];
+  override payloadExample = ActionExamples.SetFriendRemark.payload;
+  override errorExamples = [
+    ...ActionExamples.Common.errors,
+    { code: 1400, description: '备注设置失败（好友不存在或非法输入）' }
+  ];
 
   async _handle (payload: SetFriendRemarkPayload): Promise<void> {
     const friendUid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());

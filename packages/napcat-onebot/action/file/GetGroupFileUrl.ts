@@ -3,6 +3,8 @@ import { FileNapCatOneBotUUID } from 'napcat-common/src/file-uuid';
 import { GetPacketStatusDepends } from '@/napcat-onebot/action/packet/GetPacketStatus';
 import { Static, Type } from '@sinclair/typebox';
 
+import { ActionExamples } from '../examples';
+
 const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
   file_id: Type.String({ description: '文件ID' }),
@@ -20,6 +22,10 @@ export class GetGroupFileUrl extends GetPacketStatusDepends<PayloadType, ReturnT
   override actionName = ActionName.GOCQHTTP_GetGroupFileUrl;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
+  override actionDescription = '获取群文件URL';
+  override actionTags = ['文件接口'];
+  override payloadExample = ActionExamples.GetGroupFileUrl.payload;
+  override returnExample = ActionExamples.GetGroupFileUrl.return;
 
   async _handle (payload: PayloadType) {
     const contextMsgFile = FileNapCatOneBotUUID.decode(payload.file_id) || FileNapCatOneBotUUID.decodeModelId(payload.file_id);

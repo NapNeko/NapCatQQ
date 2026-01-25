@@ -19,6 +19,8 @@ export class GetPacketStatus extends GetPacketStatusDepends<void, void> {
   override actionName = ActionName.GetPacketStatus;
   override payloadSchema = Type.Object({});
   override returnSchema = Type.Null();
+  override actionDescription = '获取 Packet 状态';
+  override actionTags = ['系统接口'];
 
   async _handle () {
 

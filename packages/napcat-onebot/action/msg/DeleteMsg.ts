@@ -3,6 +3,8 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { MessageUnique } from 'napcat-common/src/message-unique';
 import { Static, Type } from '@sinclair/typebox';
 
+import { ActionExamples } from '../examples';
+
 const PayloadSchema = Type.Object({
   message_id: Type.Union([Type.Number(), Type.String()], { description: '消息ID' }),
 });
@@ -17,6 +19,9 @@ class DeleteMsg extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.DeleteMsg;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
+  override actionDescription = '撤回消息';
+  override actionTags = ['消息接口'];
+  override payloadExample = ActionExamples.DeleteMsg.payload;
 
   async _handle (payload: PayloadType) {
     const msg = MessageUnique.getMsgIdAndPeerByShortId(Number(payload.message_id));

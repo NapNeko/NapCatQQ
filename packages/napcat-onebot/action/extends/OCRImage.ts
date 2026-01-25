@@ -4,6 +4,8 @@ import { checkFileExist, uriToLocalFile } from 'napcat-common/src/file';
 import fs from 'fs';
 import { Static, Type } from '@sinclair/typebox';
 
+import { ActionExamples } from '../examples';
+
 const PayloadSchema = Type.Object({
   image: Type.String({ description: '图片路径、URL或Base64' }),
 });
@@ -17,6 +19,10 @@ type ReturnType = Static<typeof ReturnSchema>;
 class OCRImageBase extends OneBotAction<PayloadType, ReturnType> {
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
+  override actionDescription = '图片 OCR 识别';
+  override actionTags = ['扩展接口'];
+  override payloadExample = ActionExamples.OCRImage.payload;
+  override returnExample = ActionExamples.OCRImage.return;
 
   async _handle (payload: PayloadType): Promise<ReturnType> {
     const { path, success } = await uriToLocalFile(this.core.NapCatTempPath, payload.image);

@@ -11,9 +11,15 @@ const ReturnSchema = Type.Object({
 
 type ReturnType = Static<typeof ReturnSchema>;
 
+import { ActionExamples } from '../examples';
+
 export default class GetVersionInfo extends OneBotAction<void, ReturnType> {
   override actionName = ActionName.GetVersionInfo;
   override returnSchema = ReturnSchema;
+  override actionDescription = '获取版本信息';
+  override actionTags = ['系统接口'];
+  override payloadExample = ActionExamples.GetVersionInfo.payload;
+  override returnExample = ActionExamples.GetVersionInfo.return;
 
   async _handle (): Promise<ReturnType> {
     return {

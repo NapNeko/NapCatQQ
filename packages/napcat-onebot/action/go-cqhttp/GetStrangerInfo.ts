@@ -5,6 +5,8 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { calcQQLevel } from 'napcat-common/src/helper';
 import { Static, Type } from '@sinclair/typebox';
 
+import { ActionExamples } from '../examples';
+
 const PayloadSchema = Type.Object({
   user_id: Type.String({ description: '用户QQ' }),
   no_cache: Type.Union([Type.Boolean(), Type.String()], { default: false, description: '是否不使用缓存' }),
@@ -36,6 +38,11 @@ export default class GoCQHTTPGetStrangerInfo extends OneBotAction<PayloadType, R
   override actionName = ActionName.GoCQHTTP_GetStrangerInfo;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
+  override actionDescription = '获取陌生人信息';
+  override actionTags = ['用户接口'];
+  override payloadExample = ActionExamples.GetStrangerInfo.payload;
+  override returnExample = ActionExamples.GetStrangerInfo.return;
+
   async _handle (payload: PayloadType): Promise<ReturnType> {
     const user_id = payload.user_id.toString();
     const isNocache = typeof payload.no_cache === 'string' ? payload.no_cache === 'true' : !!payload.no_cache;

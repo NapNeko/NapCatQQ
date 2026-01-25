@@ -4,6 +4,8 @@ import { GetPacketStatusDepends } from '@/napcat-onebot/action/packet/GetPacketS
 import { Static, Type } from '@sinclair/typebox';
 import { ActionName } from '../router';
 
+import { ActionExamples } from '../examples';
+
 export const SetGroupTodoPayloadSchema = Type.Object({
   group_id: Type.Union([Type.String(), Type.Number()], { description: '群号' }),
   message_id: Type.Optional(Type.String({ description: '消息ID' })),
@@ -15,6 +17,10 @@ export class SetGroupTodo extends GetPacketStatusDepends<SetGroupTodoPayload, vo
   override payloadSchema = SetGroupTodoPayloadSchema;
   override returnSchema = Type.Null();
   override actionName = ActionName.SetGroupTodo;
+  override actionDescription = '设置群待办';
+  override actionTags = ['核心接口'];
+  override payloadExample = ActionExamples.SetGroupTodo.payload;
+
   async _handle (payload: SetGroupTodoPayload) {
     if (payload.message_seq) {
       return await this.core.apis.PacketApi.pkt.operation.SetGroupTodo(+payload.group_id, payload.message_seq.toString());

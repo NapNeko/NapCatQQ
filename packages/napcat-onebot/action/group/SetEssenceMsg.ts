@@ -3,6 +3,8 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { MessageUnique } from 'napcat-common/src/message-unique';
 import { Static, Type } from '@sinclair/typebox';
 
+import { ActionExamples } from '../examples';
+
 const PayloadSchema = Type.Object({
   message_id: Type.Union([Type.Number(), Type.String()], { description: '消息ID' }),
 });
@@ -17,6 +19,9 @@ export default class SetEssenceMsg extends OneBotAction<PayloadType, ReturnType>
   override actionName = ActionName.SetEssenceMsg;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
+  override actionDescription = '设置精华消息';
+  override actionTags = ['群组接口'];
+  override payloadExample = ActionExamples.SetEssenceMsg.payload;
 
   async _handle (payload: PayloadType) {
     const msg = MessageUnique.getMsgIdAndPeerByShortId(+payload.message_id);

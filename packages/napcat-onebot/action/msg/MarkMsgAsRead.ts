@@ -4,6 +4,8 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { MessageUnique } from 'napcat-common/src/message-unique';
 import { Static, Type } from '@sinclair/typebox';
 
+import { ActionExamples } from '../examples';
+
 const PayloadSchema = Type.Object({
   user_id: Type.Optional(Type.Union([Type.String(), Type.Number()], { description: '用户QQ' })),
   group_id: Type.Optional(Type.Union([Type.String(), Type.Number()], { description: '群号' })),
@@ -17,6 +19,10 @@ const ReturnSchema = Type.Null({ description: '操作结果' });
 type ReturnType = Static<typeof ReturnSchema>;
 
 class MarkMsgAsRead extends OneBotAction<PayloadType, ReturnType> {
+  override actionDescription = '标记消息已读';
+  override actionTags = ['消息接口'];
+  override payloadExample = ActionExamples.MarkMsgAsRead.payload;
+
   async getPeer (payload: PayloadType): Promise<Peer> {
     if (payload.message_id) {
       const s_peer = MessageUnique.getMsgIdAndPeerByShortId(+payload.message_id)?.Peer;

@@ -5,6 +5,7 @@ import { NapCatOneBot11Adapter, OB11Return } from '@/napcat-onebot/index';
 import { NetworkAdapterConfig } from '../config/config';
 import { TSchema } from '@sinclair/typebox';
 import { StreamPacket, StreamPacketBasic, StreamStatus } from './stream/StreamBasic';
+import { ActionExamples } from './examples';
 
 export class OB11Response {
   private static createResponse<T> (data: T, status: string, retcode: number, message: string = '', echo: unknown = null, useStream: boolean = false): OB11Return<T> {
@@ -40,8 +41,13 @@ export abstract class OneBotAction<PayloadType, ReturnDataType> {
   private validate?: ValidateFunction<unknown> = undefined;
   payloadSchema?: TSchema = undefined;
   returnSchema?: TSchema = undefined;
+  payloadExample?: unknown = undefined;
+  returnExample?: unknown = undefined;
+  actionDescription: string = '';
+  actionTags: string[] = [];
   obContext: NapCatOneBot11Adapter;
   useStream: boolean = false;
+  errorExamples: Array<{ code: number, description: string; }> = ActionExamples.Common.errors;
 
   constructor (obContext: NapCatOneBot11Adapter, core: NapCatCore) {
     this.obContext = obContext;

@@ -3,6 +3,8 @@ import { GetPacketStatusDepends } from '@/napcat-onebot/action/packet/GetPacketS
 import { AIVoiceChatType } from 'napcat-core/packet/entities/aiChat';
 import { Static, Type } from '@sinclair/typebox';
 
+import { ActionExamples } from '../examples';
+
 const PayloadSchema = Type.Object({
   character: Type.String({ description: '角色ID' }),
   group_id: Type.String({ description: '群号' }),
@@ -19,6 +21,9 @@ export class GetAiRecord extends GetPacketStatusDepends<PayloadType, ReturnType>
   override actionName = ActionName.GetAiRecord;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
+  override actionDescription = '获取AI语音';
+  override actionTags = ['群组接口'];
+  override payloadExample = ActionExamples.GetAiRecord.payload;
 
   async _handle (payload: PayloadType) {
     const rawRsp = await this.core.apis.PacketApi.pkt.operation.GetAiVoice(+payload.group_id, payload.character, payload.text, AIVoiceChatType.Sound);

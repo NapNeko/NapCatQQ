@@ -3,6 +3,8 @@ import { GroupNotify, NTGroupRequestOperateTypes } from 'napcat-core/types';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
+import { ActionExamples } from '../examples';
+
 const PayloadSchema = Type.Object({
   flag: Type.String({ description: '请求flag' }),
   approve: Type.Optional(Type.Union([Type.Boolean(), Type.String()], { description: '是否同意' })),
@@ -20,6 +22,9 @@ export default class SetGroupAddRequest extends OneBotAction<PayloadType, Return
   override actionName = ActionName.SetGroupAddRequest;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
+  override actionDescription = '处理加群请求';
+  override actionTags = ['群组接口'];
+  override payloadExample = ActionExamples.SetGroupAddRequest.payload;
 
   async _handle (payload: PayloadType): Promise<null> {
     const flag = payload.flag.toString();

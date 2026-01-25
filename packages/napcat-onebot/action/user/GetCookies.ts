@@ -2,6 +2,8 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
+import { ActionExamples } from '../examples';
+
 export const GetCookiesPayloadSchema = Type.Object({
   domain: Type.String({ description: '需要获取 cookies 的域名' }),
 });
@@ -19,6 +21,10 @@ export class GetCookies extends OneBotAction<GetCookiesPayload, GetCookiesRespon
   override actionName = ActionName.GetCookies;
   override payloadSchema = GetCookiesPayloadSchema;
   override returnSchema = GetCookiesReturnSchema;
+  override actionDescription = '获取 Cookies';
+  override actionTags = ['用户接口'];
+  override payloadExample = ActionExamples.GetCookies.payload;
+  override returnExample = ActionExamples.GetCookies.return;
 
   async _handle (payload: GetCookiesPayload) {
     const cookiesObject = await this.core.apis.UserApi.getCookies(payload.domain);

@@ -16,6 +16,8 @@ import { PacketMsg } from 'napcat-core/packet/message/message';
 import { rawMsgWithSendMsg } from 'napcat-core/packet/message/converter';
 import { Static, Type } from '@sinclair/typebox';
 
+import { ActionExamples } from '../examples';
+
 export const SendMsgPayloadSchema = Type.Object({
   message_type: Type.Optional(Type.Union([Type.Literal('private'), Type.Literal('group')], { description: '消息类型 (private/group)' })),
   user_id: Type.Optional(Type.String({ description: '用户QQ' })),
@@ -129,6 +131,7 @@ function isNode (msg: OB11MessageData): msg is OB11MessageNode {
 export class SendMsgBase extends OneBotAction<SendMsgPayload, ReturnDataType> {
   override payloadSchema = SendMsgPayloadSchema;
   override returnSchema = SendMsgReturnSchema;
+  override actionTags = ['消息接口'];
 
   protected override async check (payload: SendMsgPayload): Promise<BaseCheckResult> {
     const messages = normalize(payload.message);
@@ -442,4 +445,7 @@ export class SendMsgBase extends OneBotAction<SendMsgPayload, ReturnDataType> {
 }
 export default class SendMsg extends SendMsgBase {
   override actionName = ActionName.SendMsg;
+  override actionDescription = '发送消息';
+  override payloadExample = ActionExamples.SendMsg.payload;
+  override returnExample = ActionExamples.SendMsg.return;
 }
