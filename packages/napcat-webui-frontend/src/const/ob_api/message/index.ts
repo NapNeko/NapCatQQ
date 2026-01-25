@@ -225,8 +225,8 @@ const oneBotHttpApiMessage = {
       }),
     }),
   },
-  '/fetch_emoji_likes_all': {
-    description: '获取贴表情详情全部列表',
+  '/get_emoji_likes': {
+    description: '获取贴表情详情列表',
     request: z.object({
       message_id: z.union([z.string(), z.number()]).describe('消息ID'),
       emojiId: z.string().describe('表情ID'),

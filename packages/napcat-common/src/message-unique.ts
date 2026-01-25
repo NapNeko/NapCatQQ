@@ -58,12 +58,12 @@ export class LimitedHashTable<K, V> {
   }
 
   // 获取最近刚写入的几个值
-  getHeads (size: number): { key: K; value: V }[] | undefined {
+  getHeads (size: number): { key: K; value: V; }[] | undefined {
     const keyList = this.getKeyList();
     if (keyList.length === 0) {
       return undefined;
     }
-    const result: { key: K; value: V }[] = [];
+    const result: { key: K; value: V; }[] = [];
     const listSize = Math.min(size, keyList.length);
     for (let i = 0; i < listSize; i++) {
       const key = keyList[listSize - i];
@@ -108,7 +108,7 @@ class MessageUniqueWrapper {
     return shortId;
   }
 
-  getMsgIdAndPeerByShortId (shortId: number): { MsgId: string; Peer: Peer } | undefined {
+  getMsgIdAndPeerByShortId (shortId: number): { MsgId: string; Peer: Peer; } | undefined {
     const data = this.msgDataMap.getKey(shortId);
     if (data) {
       const [msgId, chatTypeStr, peerUid] = data.split('|');
@@ -135,6 +135,12 @@ class MessageUniqueWrapper {
   resize (maxSize: number): void {
     this.msgIdMap.resize(maxSize);
     this.msgDataMap.resize(maxSize);
+  }
+
+  isShortId (message_id: string): boolean {
+    const num = Number(message_id);
+    // 判断是否是整数并且在 INT32 的范围内
+    return Number.isInteger(num) && num >= -2147483648 && num <= 2147483647;
   }
 }
 
