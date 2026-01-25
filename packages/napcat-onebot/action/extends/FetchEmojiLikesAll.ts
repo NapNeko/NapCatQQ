@@ -13,7 +13,7 @@ const SchemaData = Type.Object({
 type Payload = Static<typeof SchemaData>;
 
 export class FetchEmojiLikesAll extends OneBotAction<Payload, Awaited<ReturnType<NTQQMsgApi['getMsgEmojiLikesList']>>> {
-  override actionName = ActionName.FetchEmojiLike;
+  override actionName = ActionName.FetchEmojiLikesAll;
   override payloadSchema = SchemaData;
 
   async _handle (payload: Payload) {
