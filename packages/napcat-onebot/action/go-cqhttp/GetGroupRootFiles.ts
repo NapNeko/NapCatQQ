@@ -22,7 +22,8 @@ export class GetGroupRootFiles extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.GoCQHTTP_GetGroupRootFiles;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
-  override actionDescription = '获取群根目录文件列表';
+  override actionSummary = '获取群根目录文件列表';
+  override actionDescription = '获取群文件根目录下的所有文件和文件夹';
   override actionTags = ['Go-CQHTTP'];
   override payloadExample = GoCQHTTPActionsExamples.GetGroupRootFiles.payload;
 

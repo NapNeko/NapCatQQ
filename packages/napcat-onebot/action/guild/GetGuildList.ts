@@ -8,7 +8,8 @@ export class GetGuildList extends OneBotAction<void, void> {
   override actionName = ActionName.GetGuildList;
   override payloadSchema = Type.Object({});
   override returnSchema = Type.Null();
-  override actionDescription = '获取频道列表';
+  override actionSummary = '获取频道列表';
+  override actionDescription = '获取当前帐号已加入的频道列表';
   override actionTags = ['频道接口'];
   override payloadExample = GuildActionsExamples.GetGuildList.payload;
   override returnExample = GuildActionsExamples.GetGuildList.response;

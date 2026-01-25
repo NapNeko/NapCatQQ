@@ -22,7 +22,8 @@ export class GetGroupFileSystemInfo extends OneBotAction<PayloadType, ReturnType
   override actionName = ActionName.GoCQHTTP_GetGroupFileSystemInfo;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
-  override actionDescription = '获取群文件系统信息';
+  override actionSummary = '获取群文件系统信息';
+  override actionDescription = '获取群聊文件系统的空间及状态信息';
   override actionTags = ['Go-CQHTTP'];
   override payloadExample = GoCQHTTPActionsExamples.GetGroupFileSystemInfo.payload;
 

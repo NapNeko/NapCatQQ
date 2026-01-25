@@ -5,7 +5,6 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { OB11MessageImage, OB11MessageVideo } from '@/napcat-onebot/types';
 import { Static, Type } from '@sinclair/typebox';
 
-import { ActionExamples } from '../examples';
 
 export const GetFilePayloadSchema = Type.Object({
   file: Type.Optional(Type.String({ description: '文件路径、URL或Base64' })),
@@ -119,7 +118,7 @@ export class GetFileBase extends OneBotAction<GetFilePayload, GetFileResponse> {
 
 export default class GetFile extends GetFileBase {
   override actionName = ActionName.GetFile;
-  override actionDescription = '获取文件';
-  override payloadExample = ActionExamples.GetFile.payload;
-  override returnExample = ActionExamples.GetFile.return;
+  override actionSummary = '获取文件';
+  override actionDescription = '获取指定文件的详细信息及下载路径';
+  override actionTags = ['文件接口'];
 }

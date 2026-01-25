@@ -20,7 +20,8 @@ export default class SetAvatar extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.SetQQAvatar;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
-  override actionDescription = '设置 QQ 头像';
+  override actionSummary = '设置 QQ 头像';
+  override actionDescription = '设置当前帐号的 QQ 头像';
   override actionTags = ['扩展接口'];
   override payloadExample = ActionExamples.SetQQAvatar.payload;
 

@@ -1,7 +1,6 @@
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
-import { ExtendsActionsExamples } from './examples';
 
 const PayloadSchema = Type.Object({
   longNick: Type.String({ description: '签名内容' }),

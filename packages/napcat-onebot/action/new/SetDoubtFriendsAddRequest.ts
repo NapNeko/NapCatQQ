@@ -1,6 +1,7 @@
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
+import { NewActionsExamples } from './examples';
 
 export const SetDoubtFriendsAddRequestPayloadSchema = Type.Object({
   flag: Type.String({ description: '请求 flag' }),
@@ -15,6 +16,10 @@ export class SetDoubtFriendsAddRequest extends OneBotAction<SetDoubtFriendsAddRe
   override actionName = ActionName.SetDoubtFriendsAddRequest;
   override payloadSchema = SetDoubtFriendsAddRequestPayloadSchema;
   override returnSchema = Type.Any();
+  override actionSummary = '处理可疑好友申请';
+  override actionDescription = '同意或拒绝系统的可疑好友申请';
+  override actionTags = ['系统接口'];
+  override payloadExample = NewActionsExamples.SetDoubtFriendsAddRequest.payload;
 
   async _handle (payload: SetDoubtFriendsAddRequestPayload) {
     return await this.core.apis.FriendApi.handleDoubtFriendRequest(payload.flag);
