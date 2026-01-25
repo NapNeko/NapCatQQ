@@ -336,7 +336,7 @@ export interface NodeIKernelMsgService {
 
   assembleMobileQQRichMediaFilePath (...args: unknown[]): unknown;
 
-  getFileThumbSavePathForSend (...args: unknown[]): unknown;
+  getFileThumbSavePathForSend (thumbSize: number, createNeed: boolean): string;
 
   getFileThumbSavePath (...args: unknown[]): unknown;
 
