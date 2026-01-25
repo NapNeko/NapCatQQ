@@ -20,6 +20,17 @@ export class GetFriendWithCategory extends OneBotAction<void, ReturnType> {
   override actionName = ActionName.GetFriendsWithCategory;
   override payloadSchema = Type.Void();
   override returnSchema = ReturnSchema;
+  override actionSummary = '获取带分组的好友列表';
+  override actionTags = ['用户扩展'];
+  override payloadExample = {};
+  override returnExample = [
+    {
+      categoryId: 1,
+      categoryName: '我的好友',
+      categoryMbCount: 1,
+      buddyList: []
+    }
+  ];
 
   async _handle () {
     const categories = await this.core.apis.FriendApi.getBuddyV2ExWithCate();

@@ -17,6 +17,16 @@ export class CreateCollection extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.CreateCollection;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
+  override actionSummary = '创建收藏';
+  override actionTags = ['扩展接口'];
+  override payloadExample = {
+    rawData: '收藏内容',
+    brief: '收藏标题'
+  };
+  override returnExample = {
+    result: 0,
+    errMsg: ''
+  };
 
   async _handle (payload: PayloadType) {
     return await this.core.apis.CollectionApi.createCollection(

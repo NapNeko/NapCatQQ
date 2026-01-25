@@ -8,6 +8,12 @@ type ReturnType = Static<typeof ReturnSchema>;
 
 export class GetRobotUinRange extends OneBotAction<void, ReturnType> {
   override actionName = ActionName.GetRobotUinRange;
+  override actionSummary = '获取机器人 UIN 范围';
+  override actionTags = ['系统扩展'];
+  override payloadExample = {};
+  override returnExample = [
+    { minUin: '12345678', maxUin: '87654321' }
+  ];
   override payloadSchema = Type.Void();
   override returnSchema = ReturnSchema;
 

@@ -15,6 +15,12 @@ type ReturnType = Static<typeof ReturnSchema>;
 class SetGroupSignBase extends GetPacketStatusDepends<PayloadType, ReturnType> {
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
+  override actionSummary = '设置群签名';
+  override actionTags = ['群扩展'];
+  override payloadExample = {
+    group_id: '123456789'
+  };
+  override returnExample = null;
 
   async _handle (payload: PayloadType) {
     return await this.core.apis.PacketApi.pkt.operation.GroupSign(+payload.group_id);

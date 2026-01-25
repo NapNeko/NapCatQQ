@@ -22,6 +22,15 @@ export class CreateFlashTask extends OneBotAction<CreateFlashTaskPayload, any> {
   override actionName = ActionName.CreateFlashTask;
   override payloadSchema = CreateFlashTaskPayloadSchema;
   override returnSchema = Type.Any({ description: '任务创建结果' });
+  override actionSummary = '创建闪照任务';
+  override actionTags = ['文件扩展'];
+  override payloadExample = {
+    files: 'C:\\test.jpg',
+    name: 'test_task'
+  };
+  override returnExample = {
+    task_id: 'task_123'
+  };
 
   async _handle (payload: CreateFlashTaskPayload) {
     const fileList = Array.isArray(payload.files) ? payload.files : [payload.files];

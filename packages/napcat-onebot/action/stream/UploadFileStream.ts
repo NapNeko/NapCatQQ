@@ -73,6 +73,20 @@ export class UploadFileStream extends OneBotAction<UploadFileStreamPayload, Stre
   override actionSummary = '上传文件流';
   override actionDescription = '以流式方式上传文件数据到机器人';
   override actionTags = ['流式接口'];
+  override payloadExample = {
+    stream_id: 'uuid-1234-5678',
+    chunk_data: 'SGVsbG8gV29ybGQ=',
+    chunk_index: 0,
+    total_chunks: 1,
+    file_size: 11
+  };
+  override returnExample = {
+    type: 'stream',
+    stream_id: 'uuid-1234-5678',
+    status: 'chunk_received',
+    received_chunks: 1,
+    total_chunks: 1
+  };
   override useStream = true;
 
   private static streams = new Map<string, StreamState>();

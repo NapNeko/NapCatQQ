@@ -13,6 +13,16 @@ type ReturnType = Static<typeof ReturnSchema>;
 
 export class GetGroupInfoEx extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.GetGroupInfoEx;
+  override actionSummary = '获取群详细信息 (扩展)';
+  override actionTags = ['群组扩展'];
+  override payloadExample = {
+    group_id: 123456
+  };
+  override returnExample = {
+    group_id: 123456,
+    group_name: '测试群',
+    member_count: 100
+  };
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
 

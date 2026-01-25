@@ -1,7 +1,6 @@
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
-import { GoCQHTTPActionsExamples } from './examples';
 
 const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
@@ -27,7 +26,14 @@ export class CreateGroupFileFolder extends OneBotAction<PayloadType, ReturnType>
   override actionSummary = '创建群文件目录';
   override actionDescription = '在群文件系统中创建新的文件夹';
   override actionTags = ['Go-CQHTTP'];
-  override payloadExample = GoCQHTTPActionsExamples.CreateGroupFileFolder.payload;
+  override payloadExample = {
+    group_id: '123456789',
+    folder_name: '新建文件夹'
+  };
+  override returnExample = {
+    result: {},
+    groupItem: {}
+  };
 
   async _handle (payload: PayloadType) {
     const folderName = payload.folder_name || payload.name;

@@ -6,6 +6,12 @@ import { Type } from '@sinclair/typebox';
 
 export class CleanStreamTempFile extends OneBotAction<void, void> {
   override actionName = ActionName.CleanStreamTempFile;
+  override actionSummary = '清理流式传输临时文件';
+  override actionTags = ['流式传输扩展'];
+  override payloadExample = {};
+  override returnExample = {
+    message: 'success'
+  };
   override payloadSchema = Type.Object({});
   override returnSchema = Type.Null();
 

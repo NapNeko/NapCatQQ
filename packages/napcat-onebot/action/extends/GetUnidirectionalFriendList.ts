@@ -21,6 +21,18 @@ export class GetUnidirectionalFriendList extends OneBotAction<void, ReturnType> 
   override actionName = ActionName.GetUnidirectionalFriendList;
   override payloadSchema = Type.Void();
   override returnSchema = ReturnSchema;
+  override actionSummary = '获取单向好友列表';
+  override actionTags = ['用户扩展'];
+  override payloadExample = {};
+  override returnExample = [
+    {
+      uin: 123456789,
+      uid: 'u_123',
+      nick_name: '单向好友',
+      age: 20,
+      source: '来源'
+    }
+  ];
 
   async pack_data (data: string): Promise<Uint8Array> {
     return ProtoBuf(class extends ProtoBufBase {

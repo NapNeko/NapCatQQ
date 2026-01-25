@@ -2,8 +2,6 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Type, Static } from '@sinclair/typebox';
 
-import { SystemActionsExamples } from './examples';
-
 export const CanSendReturnSchema = Type.Object({
   yes: Type.Boolean({ description: '是否可以发送' }),
 });
@@ -24,7 +22,9 @@ export class CanSend extends OneBotAction<void, CanSendReturnType> {
 
 export default class CanSendRecord extends CanSend {
   override actionName = ActionName.CanSendRecord;
+  override actionSummary = '是否可以发送语音';
   override actionDescription = '检查是否可以发送语音';
   override actionTags = ['系统接口'];
-  override payloadExample = SystemActionsExamples.CanSendRecord.payload;
+  override payloadExample = {};
+  override returnExample = { yes: true };
 }

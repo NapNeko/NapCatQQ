@@ -16,6 +16,15 @@ type ReturnType = Static<typeof ReturnSchema>;
 
 export default class SetGroupSearch extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.SetGroupSearch;
+  override actionSummary = '设置群搜索选项';
+  override actionTags = ['群组扩展'];
+  override payloadExample = {
+    group_id: 123456,
+    is_searchable: true
+  };
+  override returnExample = {
+    result: true
+  };
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
   async _handle (payload: PayloadType): Promise<ReturnType> {

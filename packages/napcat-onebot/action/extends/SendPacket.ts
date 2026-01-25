@@ -19,6 +19,15 @@ export class SendPacket extends GetPacketStatusDepends<PayloadType, ReturnType> 
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
   override actionName = ActionName.SendPacket;
+  override actionSummary = '发送原始数据包';
+  override actionTags = ['系统扩展'];
+  override payloadExample = {
+    cmd: 'Example.Cmd',
+    data: '123456',
+    rsp: true
+  };
+  override returnExample = '123456';
+
   async _handle (payload: PayloadType) {
     const rsp = typeof payload.rsp === 'boolean' ? payload.rsp : payload.rsp === 'true';
     const packetData = Buffer.from(payload.data, 'hex') as unknown as PacketBuf;

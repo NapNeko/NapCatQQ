@@ -16,6 +16,17 @@ type ReturnType = Static<typeof ReturnSchema>;
 
 export class GetGroupAlbumMediaList extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.GetGroupAlbumMediaList;
+  override actionSummary = '获取群相册媒体列表';
+  override actionTags = ['群组扩展'];
+  override payloadExample = {
+    group_code: 123456,
+    album_id: 'album_id_1'
+  };
+  override returnExample = {
+    media_list: [
+      { media_id: 'media_id_1', url: 'http://example.com/1.jpg' }
+    ]
+  };
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
 

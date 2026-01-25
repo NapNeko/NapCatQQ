@@ -15,6 +15,14 @@ export class SendOnlineFile extends OneBotAction<SendOnlineFilePayload, any> {
   override actionName = ActionName.SendOnlineFile;
   override payloadSchema = SendOnlineFilePayloadSchema;
   override returnSchema = Type.Any({ description: '发送结果' });
+  override actionSummary = '发送在线文件';
+  override actionTags = ['文件扩展'];
+  override payloadExample = {
+    user_id: '123456789',
+    file_path: 'C:\\path\\to\\file.txt',
+    file_name: 'test.txt'
+  };
+  override returnExample = null;
 
   async _handle (payload: SendOnlineFilePayload) {
     const uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());

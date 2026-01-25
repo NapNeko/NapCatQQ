@@ -13,6 +13,12 @@ export type GetRkeyServerReturn = Static<typeof GetRkeyServerReturnSchema>;
 
 export class GetRkeyServer extends GetPacketStatusDepends<void, GetRkeyServerReturn> {
   override actionName = ActionName.GetRkeyServer;
+  override actionSummary = '获取 RKey 服务器';
+  override actionTags = ['系统扩展'];
+  override payloadExample = {};
+  override returnExample = {
+    server: 'http://rkey-server.com'
+  };
   override payloadSchema = Type.Object({});
   override returnSchema = GetRkeyServerReturnSchema;
 

@@ -1,7 +1,6 @@
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName, BaseCheckResult } from '@/napcat-onebot/action/router';
 import { Type } from '@sinclair/typebox';
-import { PacketActionsExamples } from './examples';
 
 export abstract class GetPacketStatusDepends<PT, RT> extends OneBotAction<PT, RT> {
   protected override async check (payload: PT): Promise<BaseCheckResult> {
@@ -23,8 +22,8 @@ export class GetPacketStatus extends GetPacketStatusDepends<void, void> {
   override actionSummary = '获取Packet状态';
   override actionDescription = '获取底层Packet服务的运行状态';
   override actionTags = ['系统接口'];
-  override payloadExample = PacketActionsExamples.GetPacketStatus.payload;
-  override returnExample = PacketActionsExamples.GetPacketStatus.response;
+  override payloadExample = {};
+  override returnExample = null;
 
   async _handle () {
 

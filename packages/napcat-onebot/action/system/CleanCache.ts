@@ -8,8 +8,11 @@ export class CleanCache extends OneBotAction<void, void> {
   override actionName = ActionName.CleanCache;
   override payloadSchema = Type.Object({});
   override returnSchema = Type.Null();
+  override actionSummary = '清理缓存';
   override actionDescription = '清理缓存';
   override actionTags = ['系统接口'];
+  override payloadExample = {};
+  override returnExample = null;
 
   async _handle () {
     try {

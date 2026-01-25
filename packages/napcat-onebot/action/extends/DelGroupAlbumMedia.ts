@@ -16,6 +16,15 @@ type ReturnType = Static<typeof ReturnSchema>;
 
 export class DelGroupAlbumMedia extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.DelGroupAlbumMedia;
+  override actionSummary = '删除群相册媒体';
+  override actionTags = ['群组扩展'];
+  override payloadExample = {
+    group_code: 123456,
+    media_id_list: ['media_id_1', 'media_id_2']
+  };
+  override returnExample = {
+    result: true
+  };
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
 

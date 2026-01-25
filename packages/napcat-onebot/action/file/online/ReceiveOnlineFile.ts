@@ -15,6 +15,14 @@ export class ReceiveOnlineFile extends OneBotAction<ReceiveOnlineFilePayload, an
   override actionName = ActionName.ReceiveOnlineFile;
   override payloadSchema = ReceiveOnlineFilePayloadSchema;
   override returnSchema = Type.Any({ description: '接收结果' });
+  override actionSummary = '接收在线文件';
+  override actionTags = ['文件扩展'];
+  override payloadExample = {
+    user_id: '123456789',
+    msg_id: '123',
+    save_path: 'C:\\save'
+  };
+  override returnExample = null;
 
   async _handle (payload: ReceiveOnlineFilePayload) {
     // 默认下载路径

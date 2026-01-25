@@ -15,9 +15,14 @@ export default class SetFriendRemark extends OneBotAction<SetFriendRemarkPayload
   override actionName = ActionName.SetFriendRemark;
   override payloadSchema = SetFriendRemarkPayloadSchema;
   override returnSchema = Type.Null();
+  override actionSummary = '设置好友备注';
   override actionDescription = '设置好友备注';
   override actionTags = ['用户接口'];
-  override payloadExample = ActionExamples.SetFriendRemark.payload;
+  override payloadExample = {
+    user_id: '123456',
+    remark: '测试备注'
+  };
+  override returnExample = {};
   override errorExamples = [
     ...ActionExamples.Common.errors,
     { code: 1400, description: '备注设置失败（好友不存在或非法输入）' }

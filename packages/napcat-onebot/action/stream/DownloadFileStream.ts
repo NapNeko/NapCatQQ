@@ -20,6 +20,15 @@ export class DownloadFileStream extends BaseDownloadStream<DownloadFileStreamPay
   override actionSummary = '下载文件流';
   override actionDescription = '以流式方式从网络或本地下载文件';
   override actionTags = ['流式接口'];
+  override payloadExample = {
+    file: 'http://example.com/file.png'
+  };
+  override returnExample = {
+    type: 'stream',
+    data_type: 'file_info',
+    file_name: 'file.png',
+    file_size: 1024
+  };
   override useStream = true;
 
   async _handle (payload: DownloadFileStreamPayload, _adaptername: string, _config: NetworkAdapterConfig, req: OneBotRequestToolkit): Promise<StreamPacket<DownloadResult>> {

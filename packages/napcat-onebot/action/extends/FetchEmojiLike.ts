@@ -30,6 +30,14 @@ type ReturnType = Static<typeof ReturnSchema>;
 
 export class FetchEmojiLike extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.FetchEmojiLike;
+  override actionSummary = '获取表情点赞详情';
+  override actionTags = ['消息扩展'];
+  override payloadExample = {
+    message_id: 12345
+  };
+  override returnExample = {
+    likes: [{ emoji_id: '123', count: 10 }]
+  };
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
 

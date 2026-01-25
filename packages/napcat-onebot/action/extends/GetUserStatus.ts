@@ -19,6 +19,15 @@ export class GetUserStatus extends GetPacketStatusDepends<PayloadType, ReturnTyp
   override actionName = ActionName.GetUserStatus;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
+  override actionSummary = '获取用户在线状态';
+  override actionTags = ['系统扩展'];
+  override payloadExample = {
+    user_id: '123456789'
+  };
+  override returnExample = {
+    status: 10,
+    ext_status: 0
+  };
 
   async _handle (payload: PayloadType) {
     const res = await this.core.apis.PacketApi.pkt.operation.GetStrangerStatus(+payload.user_id);

@@ -21,9 +21,15 @@ export class SendGroupAiRecord extends GetPacketStatusDepends<PayloadType, Retur
   override actionName = ActionName.SendGroupAiRecord;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
-  override actionSummary = '发送群AI语音';
-  override actionDescription = '在群聊中发送由AI引擎生成的语音';
-  override actionTags = ['群组接口'];
+  override actionSummary = '发送群 AI 语音';
+  override actionDescription = '发送 AI 生成的语音到指定群聊';
+  override actionTags = ['AI 扩展'];
+  override payloadExample = {
+    character: 'ai_char_1',
+    group_id: '123456',
+    text: '你好'
+  };
+  override returnExample = {};
 
   async _handle (payload: PayloadType) {
     await this.core.apis.PacketApi.pkt.operation.GetAiVoice(+payload.group_id, payload.character, payload.text, AIVoiceChatType.Sound);

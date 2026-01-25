@@ -17,8 +17,15 @@ type ReturnType = Static<typeof ReturnSchema>;
 export class SetDiyOnlineStatus extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.SetDiyOnlineStatus;
   override payloadSchema = PayloadSchema;
-  override returnSchema = ReturnSchema;
-
+  override returnSchema = ReturnSchema; override actionSummary = '设置自定义在线状态';
+  override actionDescription = '设置自定义在线状态';
+  override actionTags = ['用户扩展'];
+  override payloadExample = {
+    status: 11
+  };
+  override returnExample = {
+    result: 0
+  };
   async _handle (payload: PayloadType) {
     const ret = await this.core.apis.UserApi.setDiySelfOnlineStatus(
       payload.face_id.toString(),

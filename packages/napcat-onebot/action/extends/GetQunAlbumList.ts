@@ -15,6 +15,16 @@ type GetQunAlbumListReturn = Awaited<globalThis.ReturnType<NTQQWebApi['getAlbumL
 
 export class GetQunAlbumList extends OneBotAction<PayloadType, GetQunAlbumListReturn> {
   override actionName = ActionName.GetQunAlbumList;
+  override actionSummary = '获取群相册列表';
+  override actionTags = ['群组扩展'];
+  override payloadExample = {
+    group_code: 123456
+  };
+  override returnExample = {
+    album_list: [
+      { album_id: 'album_id_1', album_name: '相册1' }
+    ]
+  };
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
 

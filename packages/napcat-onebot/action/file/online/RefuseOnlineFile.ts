@@ -15,6 +15,13 @@ export class RefuseOnlineFile extends OneBotAction<RefuseOnlineFilePayload, any>
   override actionName = ActionName.RefuseOnlineFile;
   override payloadSchema = RefuseOnlineFilePayloadSchema;
   override returnSchema = Type.Any({ description: '拒绝结果' });
+  override actionSummary = '拒绝在线文件';
+  override actionTags = ['文件扩展'];
+  override payloadExample = {
+    user_id: '123456789',
+    msg_id: '123'
+  };
+  override returnExample = null;
 
   async _handle (payload: RefuseOnlineFilePayload) {
     const uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());

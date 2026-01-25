@@ -15,6 +15,13 @@ export class SendOnlineFolder extends OneBotAction<SendOnlineFolderPayload, any>
   override actionName = ActionName.SendOnlineFolder;
   override payloadSchema = SendOnlineFolderPayloadSchema;
   override returnSchema = Type.Any({ description: '发送结果' });
+  override actionSummary = '发送在线文件夹';
+  override actionTags = ['文件扩展'];
+  override payloadExample = {
+    user_id: '123456789',
+    folder_path: 'C:\\path\\to\\folder'
+  };
+  override returnExample = null;
 
   async _handle (payload: SendOnlineFolderPayload) {
     const uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());

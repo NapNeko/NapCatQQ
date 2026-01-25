@@ -2,7 +2,6 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { NetworkAdapterConfig } from '@/napcat-onebot/config/config';
 import { Static, Type } from '@sinclair/typebox';
-import { UserActionsExamples } from './examples';
 
 export const GetRecentContactPayloadSchema = Type.Object({
   count: Type.Union([Type.Number(), Type.String()], { default: 10, description: '获取的数量' }),
@@ -28,9 +27,21 @@ export default class GetRecentContact extends OneBotAction<GetRecentContactPaylo
   override actionName = ActionName.GetRecentContact;
   override payloadSchema = GetRecentContactPayloadSchema;
   override returnSchema = GetRecentContactReturnSchema;
+  override actionSummary = '获取最近会话';
   override actionDescription = '获取最近会话';
   override actionTags = ['用户接口'];
-  override payloadExample = UserActionsExamples.GetRecentContact.payload;
+  override payloadExample = {
+    count: 10
+  };
+  override returnExample = [
+    {
+      peerUin: '123456',
+      peerName: '测试',
+      msgTime: '1734567890',
+      msgId: '12345',
+      lastestMsg: []
+    }
+  ];
 
   async _handle (payload: GetRecentContactPayload, _adapter: string, config: NetworkAdapterConfig): Promise<GetRecentContactReturn> {
     const ret = await this.core.apis.UserApi.getRecentContactListSnapShot(+payload.count);

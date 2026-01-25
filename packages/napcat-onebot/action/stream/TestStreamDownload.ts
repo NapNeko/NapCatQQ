@@ -12,6 +12,14 @@ export type TestDownloadStreamPayload = Static<typeof TestDownloadStreamPayloadS
 
 export class TestDownloadStream extends OneBotAction<TestDownloadStreamPayload, StreamPacket<{ data: string; }>> {
   override actionName = ActionName.TestDownloadStream;
+  override actionSummary = '测试下载流';
+  override actionTags = ['流式传输扩展'];
+  override payloadExample = {
+    url: 'http://example.com/file'
+  };
+  override returnExample = {
+    success: true
+  };
   override payloadSchema = TestDownloadStreamPayloadSchema;
   override returnSchema = Type.Any({ description: '测试流数据' });
   override useStream = true;

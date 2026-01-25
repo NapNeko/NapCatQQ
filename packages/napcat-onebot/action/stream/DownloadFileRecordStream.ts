@@ -20,6 +20,14 @@ export type DownloadFileRecordStreamPayload = Static<typeof DownloadFileRecordSt
 
 export class DownloadFileRecordStream extends BaseDownloadStream<DownloadFileRecordStreamPayload, DownloadResult> {
   override actionName = ActionName.DownloadFileRecordStream;
+  override actionSummary = '下载语音文件流';
+  override actionTags = ['流式传输扩展'];
+  override payloadExample = {
+    file: 'record_file_id'
+  };
+  override returnExample = {
+    file: 'temp_record_path'
+  };
   override payloadSchema = DownloadFileRecordStreamPayloadSchema;
   override returnSchema = Type.Any({ description: '下载结果 (流式)' });
   override useStream = true;

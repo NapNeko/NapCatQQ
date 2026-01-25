@@ -16,6 +16,14 @@ export class FetchCustomFace extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.FetchCustomFace;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
+  override actionSummary = '获取自定义表情';
+  override actionTags = ['系统扩展'];
+  override payloadExample = {
+    count: 10
+  };
+  override returnExample = [
+    'http://example.com/face1.png'
+  ];
 
   async _handle (payload: PayloadType) {
     const ret = await this.core.apis.MsgApi.fetchFavEmojiList(+payload.count);

@@ -45,8 +45,14 @@ type ReturnType = Static<typeof ReturnSchema>;
 export class GetMiniAppArk extends GetPacketStatusDepends<PayloadType, ReturnType> {
   override actionName = ActionName.GetMiniAppArk;
   override payloadSchema = PayloadSchema;
-  override returnSchema = ReturnSchema;
-
+  override returnSchema = ReturnSchema; override actionSummary = '获取小程序 Ark';
+  override actionTags = ['系统扩展'];
+  override payloadExample = {
+    app_id: 'wx123456'
+  };
+  override returnExample = {
+    ark: 'ark_content'
+  };
   async _handle (payload: PayloadType) {
     let reqParam: MiniAppReqParams;
     const customParams: MiniAppReqCustomParams = {

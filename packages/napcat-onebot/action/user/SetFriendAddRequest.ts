@@ -10,15 +10,19 @@ export const SetFriendAddRequestPayloadSchema = Type.Object({
 
 export type SetFriendAddRequestPayload = Static<typeof SetFriendAddRequestPayloadSchema>;
 
-import { ActionExamples } from '../examples';
-
 export default class SetFriendAddRequest extends OneBotAction<SetFriendAddRequestPayload, void> {
   override actionName = ActionName.SetFriendAddRequest;
   override payloadSchema = SetFriendAddRequestPayloadSchema;
   override returnSchema = Type.Null();
-  override actionDescription = '处理加好友请求';
+  override actionSummary = '处理加好友请求';
+  override actionDescription = '同意或拒绝加好友请求';
   override actionTags = ['用户接口'];
-  override payloadExample = ActionExamples.SetFriendAddRequest.payload;
+  override payloadExample = {
+    flag: 'flag_12345',
+    approve: true,
+    remark: '新朋友'
+  };
+  override returnExample = {};
 
   async _handle (payload: SetFriendAddRequestPayload): Promise<void> {
     const approve = payload.approve?.toString() !== 'false';

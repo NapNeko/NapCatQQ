@@ -22,6 +22,12 @@ export class GetGroupIgnoredNotifies extends OneBotAction<PayloadType, ReturnTyp
   override actionSummary = '获取群忽略通知';
   override actionDescription = '获取被忽略的入群申请和邀请通知';
   override actionTags = ['群组接口'];
+  override payloadExample = {};
+  override returnExample = {
+    invited_requests: [],
+    InvitedRequest: [],
+    join_requests: []
+  };
 
   async _handle (): Promise<ReturnType> {
     const SingleScreenNotifies = await this.core.apis.GroupApi.getSingleScreenNotifies(false, 50);

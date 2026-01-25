@@ -7,8 +7,11 @@ export class SetRestart extends OneBotAction<void, void> {
   override actionName = ActionName.Reboot;
   override payloadSchema = Type.Object({});
   override returnSchema = Type.Null();
+  override actionSummary = '重启服务';
   override actionDescription = '重启服务';
   override actionTags = ['系统接口'];
+  override payloadExample = {};
+  override returnExample = null;
 
   async _handle () {
     const result = await WebUiDataRuntime.requestRestartProcess();

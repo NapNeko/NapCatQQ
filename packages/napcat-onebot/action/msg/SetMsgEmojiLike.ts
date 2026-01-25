@@ -17,6 +17,16 @@ type ReturnType = Static<typeof ReturnSchema>;
 
 export class SetMsgEmojiLike extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.SetMsgEmojiLike;
+  override actionSummary = '设置消息表情点赞';
+  override actionTags = ['消息扩展'];
+  override payloadExample = {
+    message_id: 12345,
+    emoji_id: '123',
+    set: true
+  };
+  override returnExample = {
+    result: true
+  };
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
 

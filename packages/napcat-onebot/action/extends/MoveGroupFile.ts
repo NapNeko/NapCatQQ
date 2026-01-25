@@ -20,6 +20,16 @@ type ReturnType = Static<typeof ReturnSchema>;
 
 export class MoveGroupFile extends GetPacketStatusDepends<PayloadType, ReturnType> {
   override actionName = ActionName.MoveGroupFile;
+  override actionSummary = '移动群文件';
+  override actionTags = ['文件扩展'];
+  override payloadExample = {
+    group_id: 123456,
+    file_id: '/file_id',
+    parent_id: '/target_folder_id'
+  };
+  override returnExample = {
+    result: true
+  };
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
 

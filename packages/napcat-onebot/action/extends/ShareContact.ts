@@ -18,6 +18,16 @@ export class SharePeerBase extends OneBotAction<PayloadType, ReturnType> {
 
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
+  override actionSummary = '分享用户 (Ark)';
+  override actionDescription = '获取用户推荐的 Ark 内容';
+  override actionTags = ['消息扩展'];
+  override payloadExample = {
+    user_id: '123456',
+    phone_number: ''
+  };
+  override returnExample = {
+    ark: '...'
+  };
 
   async _handle (payload: PayloadType) {
     if (payload.group_id) {
@@ -44,6 +54,13 @@ type ReturnTypeGroupEx = Static<typeof ReturnSchemaGroupEx>;
 export class ShareGroupExBase extends OneBotAction<PayloadTypeGroupEx, ReturnTypeGroupEx> {
   override payloadSchema = PayloadSchemaGroupEx;
   override returnSchema = ReturnSchemaGroupEx;
+  override actionSummary = '分享群 (Ark)';
+  override actionDescription = '获取群分享的 Ark 内容';
+  override actionTags = ['消息扩展'];
+  override payloadExample = {
+    group_id: '123456'
+  };
+  override returnExample = '{"app": "com.tencent.structmsg", ...}';
 
   async _handle (payload: PayloadTypeGroupEx) {
     return await this.core.apis.GroupApi.getArkJsonGroupShare(payload.group_id.toString());

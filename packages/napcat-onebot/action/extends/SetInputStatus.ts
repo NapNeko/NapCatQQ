@@ -18,6 +18,14 @@ export class SetInputStatus extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.SetInputStatus;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
+  override actionSummary = '设置输入状态';
+  override actionTags = ['系统扩展'];
+  override payloadExample = {
+    user_id: '123456789',
+    event_type: 1
+  };
+  override returnExample = null;
+
   async _handle (payload: PayloadType) {
     const uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
     if (!uid) throw new Error('uid is empty');

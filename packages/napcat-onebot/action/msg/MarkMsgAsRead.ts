@@ -4,8 +4,6 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { MessageUnique } from 'napcat-common/src/message-unique';
 import { Static, Type } from '@sinclair/typebox';
 
-import { ActionExamples } from '../examples';
-
 const PayloadSchema = Type.Object({
   user_id: Type.Optional(Type.Union([Type.String(), Type.Number()], { description: '用户QQ' })),
   group_id: Type.Optional(Type.Union([Type.String(), Type.Number()], { description: '群号' })),
@@ -22,7 +20,10 @@ class MarkMsgAsRead extends OneBotAction<PayloadType, ReturnType> {
   override actionSummary = '标记消息已读';
   override actionDescription = '标记指定渠道的消息为已读';
   override actionTags = ['消息接口'];
-  override payloadExample = ActionExamples.MarkMsgAsRead.payload;
+  override payloadExample = {
+    message_id: 12345
+  };
+  override returnExample = {};
 
   async getPeer (payload: PayloadType): Promise<Peer> {
     if (payload.message_id) {
@@ -82,6 +83,10 @@ export class GoCQHTTPMarkMsgAsRead extends MarkMsgAsRead {
 
 export class MarkAllMsgAsRead extends OneBotAction<void, null> {
   override actionName = ActionName._MarkAllMsgAsRead;
+  override actionSummary = '标记所有消息已读';
+  override actionTags = ['消息接口'];
+  override payloadExample = {};
+  override returnExample = {};
 
   async _handle (): Promise<null> {
     await this.core.apis.MsgApi.markAllMsgAsRead();

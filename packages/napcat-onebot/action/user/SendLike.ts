@@ -18,7 +18,11 @@ export default class SendLike extends OneBotAction<SendLikePayload, void> {
   override actionSummary = '点赞';
   override actionDescription = '给指定用户点赞';
   override actionTags = ['用户接口'];
-  override payloadExample = ActionExamples.SendLike.payload;
+  override payloadExample = {
+    user_id: '123456',
+    times: 10
+  };
+  override returnExample = {};
   override errorExamples = [
     ...ActionExamples.Common.errors,
     { code: 1400, description: '点赞失败（频率过快或用户不存在）' }

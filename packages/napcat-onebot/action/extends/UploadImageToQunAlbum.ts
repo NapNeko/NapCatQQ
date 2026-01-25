@@ -20,6 +20,16 @@ type ReturnType = Static<typeof ReturnSchema>;
 
 export class UploadImageToQunAlbum extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.UploadImageToQunAlbum;
+  override actionSummary = '上传图片到群相册';
+  override actionTags = ['群组扩展'];
+  override payloadExample = {
+    group_code: 123456,
+    album_id: 'album_id_1',
+    file: '/path/to/image.jpg'
+  };
+  override returnExample = {
+    result: true
+  };
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
 

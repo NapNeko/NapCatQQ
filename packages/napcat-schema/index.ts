@@ -1,6 +1,6 @@
 import { getAllHandlers } from '@/napcat-onebot/action/index';
 import { AutoRegisterRouter } from '@/napcat-onebot/action/auto-register';
-import { writeFileSync } from 'node:fs';
+import { writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { TSchema } from '@sinclair/typebox';
 import { fileURLToPath } from 'node:url';
@@ -21,7 +21,6 @@ interface ActionSchemaInfo {
 }
 
 export const actionSchemas: Record<string, ActionSchemaInfo> = {};
-
 
 export function initSchemas () {
   const handlers = getAllHandlers(null as any, null as any);
@@ -62,63 +61,75 @@ export function generateOpenAPI () {
   try {
     initSchemas();
   } catch (e) {
-    console.warn('Init schemas partial failure (expected due to complex imports), proceeding with collected data...');
+    console.warn('Init schemas partial failure, proceeding with collected data...');
   }
 
   const openapi: Record<string, unknown> = {
     openapi: '3.1.0',
     info: {
-      title: 'NapCat OneBot 11 接口文档',
-      description: 'NapCatOneBot11 旨在提供更先进、更统一、更美观的 OneBot 11 协议实现。',
+      title: 'NapCat OneBot 11 HTTP API',
+      description: '本文档描述 NapCat OneBot 11 的 HTTP POST 接口协议。所有接口均通过 POST 请求调用，请求体为 JSON 格式。',
       version: '1.0.0'
     },
+    tags: [
+      { name: '消息接口', description: '发送、删除、获取消息相关接口' },
+      { name: '群组接口', description: '群组管理、成员管理相关接口' },
+      { name: '用户接口', description: '好友管理、个人信息相关接口' },
+      { name: '系统接口', description: '状态获取、重启、缓存清理相关接口' },
+      { name: '文件接口', description: '文件上传下载、预览相关接口' },
+      { name: '系统扩展', description: 'NapCat 特有的系统级扩展功能' },
+      { name: '群扩展', description: 'NapCat 特有的群组级扩展功能' },
+      { name: '用户扩展', description: 'NapCat 特有的用户级扩展功能' },
+      { name: '文件扩展', description: 'NapCat 特有的文件级扩展功能' },
+      { name: 'Go-CQHTTP', description: '兼容 Go-CQHTTP 的特定接口' }
+    ],
     paths: {} as Record<string, unknown>
   };
 
   for (const [actionName, schemas] of Object.entries(actionSchemas)) {
-    if (!schemas.payload) continue;
-    const path = `/${actionName}`;
+    // 忽略没有定义参数且没有 Summary 的占位接口
+    if (!schemas.payload && !schemas.summary) continue;
 
-    const cleanPayload = JSON.parse(JSON.stringify(schemas.payload || { type: 'object', properties: {} }));
-    const cleanReturn = JSON.parse(JSON.stringify(schemas.return || { type: 'object', properties: {} }));
+    const path = '/' + actionName;
+    const cleanPayload = schemas.payload ? JSON.parse(JSON.stringify(schemas.payload)) : { type: 'object', properties: {} };
+    const cleanReturn = schemas.return ? JSON.parse(JSON.stringify(schemas.return)) : { type: 'object', properties: {} };
 
-    const wrappedPayload = {
+    // HTTP 响应结构: {"status": "ok", "retcode": 0, "data": ...}
+    const httpResponseSchema = {
       type: 'object',
       properties: {
-        action: { type: 'string', example: actionName },
-        params: cleanPayload,
-        echo: { type: 'string', example: `${actionName}:1234567890` }
-      }
-    };
-
-    const wrappedReturn = {
-      type: 'object',
-      properties: {
-        status: { type: 'string', example: 'ok' },
-        retcode: { type: 'number', example: 0 },
-        data: cleanReturn,
-        message: { type: 'string', example: '' },
-        wording: { type: 'string', example: '' },
-        echo: { type: 'string', example: `${actionName}:1234567890` }
+        status: { type: 'string', enum: ['ok', 'async', 'failed'], description: '执行状态', example: 'ok' },
+        retcode: { type: 'number', description: '响应码 (0 为成功)', example: 0 },
+        data: { ...cleanReturn, description: '响应数据' },
+        message: { type: 'string', description: '错误消息', example: '' },
+        wording: { type: 'string', description: '提示消息', example: '' }
       },
-      required: ['status', 'retcode', 'data', 'message', 'wording']
+      required: ['status', 'retcode', 'data']
     };
 
-    const paths = openapi['paths'] as Record<string, any>;
     const responses: Record<string, unknown> = {
       '200': {
-        description: '成功',
+        description: '成功响应',
         content: {
           'application/json': {
-            schema: wrappedReturn
+            schema: httpResponseSchema,
+            example: {
+              status: 'ok',
+              retcode: 0,
+              data: schemas.returnExample || {},
+              message: '',
+              wording: ''
+            }
           }
         }
       }
     };
 
+    // 处理错误示例
     if (schemas.errorExamples) {
       schemas.errorExamples.forEach(error => {
-        responses[error.code.toString()] = {
+        const codeStr = error.code.toString();
+        responses[codeStr] = {
           description: error.description,
           content: {
             'application/json': {
@@ -137,20 +148,18 @@ export function generateOpenAPI () {
       });
     }
 
+    const paths = openapi['paths'] as Record<string, any>;
     paths[path] = {
       post: {
         summary: schemas.summary || actionName,
-        description: schemas.description || schemas.summary || actionName,
+        description: schemas.description || 'API Action: ' + actionName,
         tags: schemas.tags || ['Default'],
         requestBody: {
+          description: 'API 请求参数',
           content: {
             'application/json': {
-              schema: wrappedPayload,
-              example: {
-                action: actionName,
-                params: schemas.payloadExample || {},
-                echo: `${actionName}:1234567890`
-              }
+              schema: cleanPayload,
+              example: schemas.payloadExample || {}
             }
           }
         },
@@ -158,8 +167,42 @@ export function generateOpenAPI () {
       }
     };
   }
-  const outputPath = resolve(__dirname, 'openapi.json');
+
+  const outputDir = resolve(__dirname, 'dist');
+  if (!existsSync(outputDir)) {
+    mkdirSync(outputDir, { recursive: true });
+  }
+  
+  const outputPath = resolve(outputDir, 'openapi.json');
   writeFileSync(outputPath, JSON.stringify(openapi, null, 2));
-  console.log(`OpenAPI schema generated at: ${outputPath}`);
+  console.log('OpenAPI schema (HTTP Format) generated at: ' + outputPath);
+
+  // 生成审计报告
+  generateMissingReport();
 }
+
+function generateMissingReport() {
+  const missingReport: string[] = [];
+  for (const [actionName, schemas] of Object.entries(actionSchemas)) {
+    const missing: string[] = [];
+    if (!schemas.summary) missing.push('actionSummary');
+    if (!schemas.tags || schemas.tags.length === 0) missing.push('actionTags');
+    if (schemas.payloadExample === undefined && schemas.payload) missing.push('payloadExample');
+    if (schemas.returnExample === undefined) missing.push('returnExample');
+
+    if (missing.length > 0) {
+      missingReport.push('[' + actionName + '] 缺失属性: ' + missing.join(', '));
+    }
+  }
+
+  const reportPath = resolve(__dirname, 'dist', 'missing_props.log');
+  if (missingReport.length > 0) {
+    writeFileSync(reportPath, missingReport.join('\n'));
+    console.warn('\n检查到 ' + missingReport.length + ' 个接口存在元数据缺失，报告已保存至: ' + reportPath);
+  } else {
+    if (existsSync(reportPath)) writeFileSync(reportPath, '');
+    console.log('\n所有接口元数据已完整！');
+  }
+}
+
 generateOpenAPI();

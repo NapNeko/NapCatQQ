@@ -24,6 +24,22 @@ export default class GetGroupAddRequest extends OneBotAction<void, ReturnType> {
   override actionName = ActionName.GetGroupIgnoreAddRequest;
   override payloadSchema = Type.Void();
   override returnSchema = ReturnSchema;
+  override actionSummary = '获取群被忽略的加群请求';
+  override actionTags = ['群组接口'];
+  override payloadExample = {};
+  override returnExample = [
+    {
+      request_id: 12345,
+      invitor_uin: 123456789,
+      invitor_nick: '邀请者',
+      group_id: 123456789,
+      message: '加群请求',
+      group_name: '群名称',
+      checked: false,
+      actor: 0,
+      requester_nick: '请求者'
+    }
+  ];
 
   async _handle (): Promise<ReturnType> {
     const NTQQUserApi = this.core.apis.UserApi;

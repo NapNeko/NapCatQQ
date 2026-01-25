@@ -19,8 +19,15 @@ type ReturnType = Static<typeof ReturnSchema>;
 export class ClickInlineKeyboardButton extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.ClickInlineKeyboardButton;
   override payloadSchema = PayloadSchema;
-  override returnSchema = ReturnSchema;
-
+  override returnSchema = ReturnSchema; override actionSummary = '点击内联键盘按钮';
+  override actionTags = ['消息扩展'];
+  override payloadExample = {
+    message_id: 12345,
+    button_id: 'btn_1'
+  };
+  override returnExample = {
+    result: true
+  };
   async _handle (payload: PayloadType) {
     return await this.core.apis.MsgApi.clickInlineKeyboardButton({
       buttonId: payload.button_id,
