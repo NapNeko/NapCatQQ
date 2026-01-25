@@ -70,6 +70,9 @@ export class UploadFileStream extends OneBotAction<UploadFileStreamPayload, Stre
   override actionName = ActionName.UploadFileStream;
   override payloadSchema = UploadFileStreamPayloadSchema;
   override returnSchema = Type.Any({ description: '上传结果 (流式)' });
+  override actionSummary = '上传文件流';
+  override actionDescription = '以流式方式上传文件数据到机器人';
+  override actionTags = ['流式接口'];
   override useStream = true;
 
   private static streams = new Map<string, StreamState>();

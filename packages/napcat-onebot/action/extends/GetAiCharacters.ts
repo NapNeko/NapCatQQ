@@ -2,7 +2,7 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { GetPacketStatusDepends } from '@/napcat-onebot/action/packet/GetPacketStatus';
 import { Type, Static } from '@sinclair/typebox';
 
-import { ActionExamples } from '../examples';
+import { ExtendsActionsExamples } from './examples';
 
 const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
@@ -32,11 +32,11 @@ export class GetAiCharacters extends GetPacketStatusDepends<PayloadType, ReturnT
   override actionName = ActionName.GetAiCharacters;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
-  override actionSummary = '获取 AI 角色列表';
-  override actionDescription = '获取群聊中的 AI 角色列表';
+  override actionSummary = '获取AI角色列表';
+  override actionDescription = '获取群聊中的AI角色列表';
   override actionTags = ['扩展接口'];
-  override payloadExample = ActionExamples.GetAiCharacters.payload;
-  override returnExample = ActionExamples.GetAiCharacters.return;
+  override payloadExample = ExtendsActionsExamples.GetAiCharacters.payload;
+  override returnExample = ExtendsActionsExamples.GetAiCharacters.response;
 
   async _handle (payload: PayloadType) {
     const chatTypeNum = Number(payload.chat_type);

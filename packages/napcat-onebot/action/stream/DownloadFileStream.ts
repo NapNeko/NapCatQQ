@@ -17,6 +17,9 @@ export class DownloadFileStream extends BaseDownloadStream<DownloadFileStreamPay
   override actionName = ActionName.DownloadFileStream;
   override payloadSchema = DownloadFileStreamPayloadSchema;
   override returnSchema = Type.Any({ description: '下载结果 (流式)' });
+  override actionSummary = '下载文件流';
+  override actionDescription = '以流式方式从网络或本地下载文件';
+  override actionTags = ['流式接口'];
   override useStream = true;
 
   async _handle (payload: DownloadFileStreamPayload, _adaptername: string, _config: NetworkAdapterConfig, req: OneBotRequestToolkit): Promise<StreamPacket<DownloadResult>> {

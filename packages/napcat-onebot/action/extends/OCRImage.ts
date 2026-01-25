@@ -23,6 +23,7 @@ class OCRImageBase extends OneBotAction<PayloadType, ReturnType> {
   override actionDescription = '识别图片中的文字内容';
   override actionTags = ['扩展接口'];
   override payloadExample = ExtendsActionsExamples.OCRImage.payload;
+  override returnExample = ExtendsActionsExamples.OCRImage.response;
 
   async _handle (payload: PayloadType): Promise<ReturnType> {
     const { path, success } = await uriToLocalFile(this.core.NapCatTempPath, payload.image);

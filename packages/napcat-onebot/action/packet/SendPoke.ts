@@ -2,7 +2,7 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { GetPacketStatusDepends } from '@/napcat-onebot/action/packet/GetPacketStatus';
 import { Static, Type } from '@sinclair/typebox';
 
-import { ActionExamples } from '../examples';
+import { PacketActionsExamples } from './examples';
 
 export const SendPokePayloadSchema = Type.Object({
   group_id: Type.Optional(Type.Union([Type.String(), Type.Number()], { description: '群号' })),
@@ -14,9 +14,11 @@ export type SendPokePayload = Static<typeof SendPokePayloadSchema>;
 export class SendPokeBase extends GetPacketStatusDepends<SendPokePayload, void> {
   override payloadSchema = SendPokePayloadSchema;
   override returnSchema = Type.Null();
-  override actionDescription = '发送戳一戳';
+  override actionSummary = '发送戳一戳';
+  override actionDescription = '在群聊或私聊中发送戳一戳动作';
   override actionTags = ['核心接口'];
-  override payloadExample = ActionExamples.SendPoke.payload;
+  override payloadExample = PacketActionsExamples.SendPoke.payload;
+  override returnExample = PacketActionsExamples.SendPoke.response;
 
   async _handle (payload: SendPokePayload) {
     // 这里的 !! 可以传入空字符串 忽略这些数据有利用接口统一接口

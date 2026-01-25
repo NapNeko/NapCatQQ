@@ -2,7 +2,7 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { OneBotAction } from '../OneBotAction';
 import { Type, Static } from '@sinclair/typebox';
 
-import { ActionExamples } from '../examples';
+import { ExtendsActionsExamples } from './examples';
 
 const ReturnSchema = Type.Object({
   clientkey: Type.Optional(Type.String({ description: '客户端Key' })),
@@ -14,11 +14,11 @@ export class GetClientkey extends OneBotAction<void, ReturnType> {
   override actionName = ActionName.GetClientkey;
   override payloadSchema = Type.Void();
   override returnSchema = ReturnSchema;
-  override actionSummary = '获取 ClientKey';
-  override actionDescription = '获取当前登录帐号的 ClientKey';
+  override actionSummary = '获取ClientKey';
+  override actionDescription = '获取当前登录帐号的ClientKey';
   override actionTags = ['扩展接口'];
-  override payloadExample = ActionExamples.GetClientkey.payload;
-  override returnExample = ActionExamples.GetClientkey.return;
+  override payloadExample = ExtendsActionsExamples.GetClientkey.payload;
+  override returnExample = ExtendsActionsExamples.GetClientkey.response;
 
   async _handle () {
     return { clientkey: (await this.core.apis.UserApi.forceFetchClientKey()).clientKey };
