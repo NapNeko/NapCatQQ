@@ -320,7 +320,7 @@ const OneBotApiDebug = forwardRef<OneBotApiDebugRef, OneBotApiDebugProps>((props
                 )}
               </ChatInputModal>
               <Tooltip content="生成示例" closeDelay={0}>
-                <Button isIconOnly size='sm' variant='light' radius='sm' className='w-8 h-8' onPress={() => setRequestBody(generateDefaultJson(data.request))}>
+                <Button isIconOnly size='sm' variant='light' radius='sm' className='w-8 h-8' onPress={() => setRequestBody(JSON.stringify(generateDefaultFromTypeBox(data?.payload), null, 2))}>
                   <TbCode size={16} />
                 </Button>
               </Tooltip>
