@@ -184,6 +184,7 @@ export function createActionMap (obContext: NapCatOneBot11Adapter, core: NapCatC
     new SetGroupRemark(obContext, core),
     new GetGroupInfoEx(obContext, core),
     new FetchEmojiLike(obContext, core),
+    new FetchEmojiLikesAll(obContext, core),
     new GetFile(obContext, core),
     new SetQQProfile(obContext, core),
     new ShareGroupEx(obContext, core),
