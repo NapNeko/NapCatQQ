@@ -4,7 +4,7 @@ import { Static, Type } from '@sinclair/typebox';
 import { ChatType } from 'napcat-core/types';
 
 export const SendOnlineFolderPayloadSchema = Type.Object({
-  user_id: Type.Union([Type.Number(), Type.String()], { description: '用户 QQ' }),
+  user_id: Type.String({ description: '用户 QQ' }),
   folder_path: Type.String({ description: '本地文件夹路径' }),
   folder_name: Type.Optional(Type.String({ description: '文件夹名称 (可选)' })),
 });

@@ -1,5 +1,6 @@
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName, BaseCheckResult } from '@/napcat-onebot/action/router';
+import { Type } from '@sinclair/typebox';
 
 export abstract class GetPacketStatusDepends<PT, RT> extends OneBotAction<PT, RT> {
   protected override async check (payload: PT): Promise<BaseCheckResult> {

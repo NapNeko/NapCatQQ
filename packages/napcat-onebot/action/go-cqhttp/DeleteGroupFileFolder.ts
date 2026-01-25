@@ -1,10 +1,9 @@
 import { ActionName } from '@/napcat-onebot/action/router';
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { Static, Type } from '@sinclair/typebox';
-import { NTQQGroupApi } from 'napcat-core/apis';
 
 const PayloadSchema = Type.Object({
-  group_id: Type.Union([Type.Number(), Type.String()], { description: '群号' }),
+  group_id: Type.String({ description: '群号' }),
   folder_id: Type.Optional(Type.String({ description: '文件夹ID' })),
   folder: Type.Optional(Type.String({ description: '文件夹ID' })),
 });

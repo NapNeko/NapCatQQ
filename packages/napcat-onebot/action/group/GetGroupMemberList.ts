@@ -1,4 +1,3 @@
-import { OB11GroupMember } from '@/napcat-onebot/index';
 import { OB11Construct } from '@/napcat-onebot/helper/data';
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';

@@ -7,7 +7,7 @@ import { Static, Type } from '@sinclair/typebox';
 import { NetworkAdapterConfig } from '@/napcat-onebot/config/config';
 
 const PayloadSchema = Type.Object({
-  group_id: Type.Union([Type.Number(), Type.String()], { description: '群号' }),
+  group_id: Type.String({ description: '群号' }),
 });
 
 type PayloadType = Static<typeof PayloadSchema>;
@@ -57,6 +57,15 @@ export class GetGroupEssence extends OneBotAction<PayloadType, ReturnType> {
       }, msg.msg_seq.toString(), msg.msg_random.toString());
       if (msgOriginData) {
         const { id: message_id, msg: rawMessage } = msgOriginData;
+        const parsed = await this.obContext.apis.MsgApi.parseMessage(rawMessage, config.messagePostFormat);
+        let content: any[] = [];
+        if (parsed) {
+          if (Array.isArray(parsed.message)) {
+            content = parsed.message;
+          } else {
+            content = [{ type: 'text', data: { text: parsed.message } }];
+          }
+        }
         return {
           msg_seq: msg.msg_seq,
           msg_random: msg.msg_random,
@@ -66,7 +75,7 @@ export class GetGroupEssence extends OneBotAction<PayloadType, ReturnType> {
           operator_nick: msg.add_digest_nick,
           message_id,
           operator_time: msg.add_digest_time,
-          content: (await this.obContext.apis.MsgApi.parseMessage(rawMessage, config.messagePostFormat))?.message,
+          content,
         };
       }
       const msgTempData = JSON.stringify({
@@ -107,7 +116,7 @@ export class GetGroupEssence extends OneBotAction<PayloadType, ReturnType> {
             };
           }
           return undefined;
-        }).filter(e => e !== undefined),
+        }).filter((e): e is any => e !== undefined),
       };
     }));
   }

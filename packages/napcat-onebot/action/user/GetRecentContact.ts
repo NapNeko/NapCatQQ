@@ -39,25 +39,25 @@ export default class GetRecentContact extends OneBotAction<GetRecentContactPaylo
         return {
           lastestMsg,
           peerUin: t.peerUin,
-          remark: t.remark,
+          remark: String(t.remark ?? ''),
           msgTime: t.msgTime,
           chatType: t.chatType,
           msgId: t.msgId,
-          sendNickName: t.sendNickName,
-          sendMemberName: t.sendMemberName,
-          peerName: t.peerName,
+          sendNickName: String(t.sendNickName ?? ''),
+          sendMemberName: String(t.sendMemberName ?? ''),
+          peerName: String(t.peerName ?? ''),
         };
       }
       return {
         lastestMsg: undefined,
         peerUin: t.peerUin,
-        remark: t.remark,
+        remark: String(t.remark ?? ''),
         msgTime: t.msgTime,
         chatType: t.chatType,
         msgId: t.msgId,
-        sendNickName: t.sendNickName,
-        sendMemberName: t.sendMemberName,
-        peerName: t.peerName,
+        sendNickName: String(t.sendNickName ?? ''),
+        sendMemberName: String(t.sendMemberName ?? ''),
+        peerName: String(t.peerName ?? ''),
       };
     }));
     return results;

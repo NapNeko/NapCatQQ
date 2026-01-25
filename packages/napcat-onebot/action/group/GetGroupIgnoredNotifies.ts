@@ -1,7 +1,7 @@
 import { GroupNotifyMsgStatus } from 'napcat-core';
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
-import { Notify } from '@/napcat-onebot/types';
+import { Static, Type } from '@sinclair/typebox';
 
 const PayloadSchema = Type.Object({}, { description: '群忽略通知负载' });
 

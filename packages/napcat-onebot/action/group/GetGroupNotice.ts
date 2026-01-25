@@ -23,7 +23,7 @@ const ReturnSchema = Type.Array(Type.Object({
 
 type ReturnType = Static<typeof ReturnSchema>;
 
-type ApiGroupNotice = ReturnType[number] & WebApiGroupNoticeFeed;
+export type ApiGroupNotice = ReturnType[number] & WebApiGroupNoticeFeed;
 
 export class GetGroupNotice extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.GoCQHTTP_GetGroupNotice;

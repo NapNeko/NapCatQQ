@@ -1,7 +1,7 @@
 import { ActionName } from '@/napcat-onebot/action/router';
 import { GetPacketStatusDepends } from '@/napcat-onebot/action/packet/GetPacketStatus';
 import { MiniAppInfo, MiniAppInfoHelper } from 'napcat-core/packet/utils/helper/miniAppHelper';
-import { MiniAppData, MiniAppRawData, MiniAppReqCustomParams, MiniAppReqParams } from 'napcat-core/packet/entities/miniApp';
+import { MiniAppReqCustomParams, MiniAppReqParams } from 'napcat-core/packet/entities/miniApp';
 import { Static, Type } from '@sinclair/typebox';
 
 const PayloadSchema = Type.Union([
@@ -22,15 +22,15 @@ const PayloadSchema = Type.Union([
     iconUrl: Type.String({ description: '图标URL' }),
     webUrl: Type.Optional(Type.String({ description: '网页URL' })),
     appId: Type.String({ description: '小程序AppID' }),
-    scene: Type.Union([Type.Number(), Type.String()], { description: '场景ID' }),
-    templateType: Type.Union([Type.Number(), Type.String()], { description: '模板类型' }),
-    businessType: Type.Union([Type.Number(), Type.String()], { description: '业务类型' }),
-    verType: Type.Union([Type.Number(), Type.String()], { description: '版本类型' }),
-    shareType: Type.Union([Type.Number(), Type.String()], { description: '分享类型' }),
+    scene: Type.String({ description: '场景ID' }),
+    templateType: Type.String({ description: '模板类型' }),
+    businessType: Type.String({ description: '业务类型' }),
+    verType: Type.String({ description: '版本类型' }),
+    shareType: Type.String({ description: '分享类型' }),
     versionId: Type.String({ description: '版本ID' }),
     sdkId: Type.String({ description: 'SDK ID' }),
-    withShareTicket: Type.Union([Type.Number(), Type.String()], { description: '是否携带分享票据' }),
-    rawArkData: Type.Optional(Type.Union([Type.String()], { description: '是否返回原始Ark数据' })),
+    withShareTicket: Type.String({ description: '是否携带分享票据' }),
+    rawArkData: Type.Optional(Type.String({ description: '是否返回原始Ark数据' })),
   }),
 ], { description: '小程序Ark参数' });
 
@@ -49,15 +49,19 @@ export class GetMiniAppArk extends GetPacketStatusDepends<PayloadType, ReturnTyp
 
   async _handle (payload: PayloadType) {
     let reqParam: MiniAppReqParams;
-    const customParams = {
+    const customParams: MiniAppReqCustomParams = {
       title: payload.title,
       desc: payload.desc,
       picUrl: payload.picUrl,
       jumpUrl: payload.jumpUrl,
-      webUrl: payload.webUrl,
-    } as MiniAppReqCustomParams;
+      webUrl: payload.webUrl ?? '',
+    };
     if ('type' in payload) {
-      reqParam = MiniAppInfoHelper.generateReq(customParams, MiniAppInfo.get(payload.type)!.template);
+      const template = MiniAppInfo.get(payload.type)?.template;
+      if (!template) {
+        throw new Error('未知的模板类型');
+      }
+      reqParam = MiniAppInfoHelper.generateReq(customParams, template);
     } else {
       const { appId, scene, iconUrl, templateType, businessType, verType, shareType, versionId, withShareTicket } = payload;
       reqParam = MiniAppInfoHelper.generateReq(

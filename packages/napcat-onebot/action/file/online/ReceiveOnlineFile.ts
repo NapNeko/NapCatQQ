@@ -4,7 +4,7 @@ import { Static, Type } from '@sinclair/typebox';
 import { ChatType } from 'napcat-core/types';
 
 export const ReceiveOnlineFilePayloadSchema = Type.Object({
-  user_id: Type.Union([Type.Number(), Type.String()], { description: '用户 QQ' }),
+  user_id: Type.String({ description: '用户 QQ' }),
   msg_id: Type.String({ description: '消息 ID' }),
   element_id: Type.String({ description: '元素 ID' }),
 });

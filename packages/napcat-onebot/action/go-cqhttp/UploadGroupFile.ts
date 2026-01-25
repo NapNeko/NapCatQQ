@@ -7,7 +7,7 @@ import { SendMessageContext } from '@/napcat-onebot/api';
 import { Static, Type } from '@sinclair/typebox';
 
 export const GoCQHTTPUploadGroupFilePayloadSchema = Type.Object({
-  group_id: Type.Union([Type.Number(), Type.String()], { description: '群号' }),
+  group_id: Type.String({ description: '群号' }),
   file: Type.String({ description: '本地文件路径' }),
   name: Type.String({ description: '文件名' }),
   folder: Type.Optional(Type.String({ description: '父目录 ID' })),

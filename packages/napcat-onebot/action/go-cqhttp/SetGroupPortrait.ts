@@ -3,10 +3,9 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { checkFileExistV2, uriToLocalFile } from 'napcat-common/src/file';
 import { Static, Type } from '@sinclair/typebox';
 import fs from 'node:fs/promises';
-import { GeneralCallResult } from 'napcat-core';
 export const SetGroupPortraitPayloadSchema = Type.Object({
   file: Type.String({ description: '头像文件路径或 URL' }),
-  group_id: Type.Union([Type.Number(), Type.String()], { description: '群号' }),
+  group_id: Type.String({ description: '群号' }),
 });
 
 export type SetGroupPortraitPayload = Static<typeof SetGroupPortraitPayloadSchema>;

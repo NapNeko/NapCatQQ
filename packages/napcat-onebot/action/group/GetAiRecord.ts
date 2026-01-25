@@ -5,7 +5,7 @@ import { Static, Type } from '@sinclair/typebox';
 
 const PayloadSchema = Type.Object({
   character: Type.String({ description: '角色ID' }),
-  group_id: Type.Union([Type.Number(), Type.String()], { description: '群号' }),
+  group_id: Type.String({ description: '群号' }),
   text: Type.String({ description: '语音文本内容' }),
 });
 

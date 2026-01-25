@@ -2,7 +2,7 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Type, Static } from '@sinclair/typebox';
 const PayloadSchema = Type.Object({
-  group_id: Type.Union([Type.Number(), Type.String()], { description: '群号' }),
+  group_id: Type.String({ description: '群号' }),
 });
 
 type PayloadType = Static<typeof PayloadSchema>;

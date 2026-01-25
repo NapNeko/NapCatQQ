@@ -29,7 +29,7 @@ export default class GoCQHTTPDownloadFile extends OneBotAction<PayloadType, Retu
   async _handle (payload: PayloadType): Promise<ReturnType> {
     const isRandomName = !payload.name;
     const name = payload.name || randomUUID();
-    let result: Awaited<ReturnType<typeof uriToLocalFile>>;
+    let result: Awaited<globalThis.ReturnType<typeof uriToLocalFile>>;
 
     if (payload.base64) {
       result = await uriToLocalFile(this.core.NapCatTempPath, `base64://${payload.base64}`, name);

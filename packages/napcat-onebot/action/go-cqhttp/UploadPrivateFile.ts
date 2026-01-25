@@ -8,7 +8,7 @@ import { ContextMode, createContext } from '@/napcat-onebot/action/msg/SendMsg';
 import { Static, Type } from '@sinclair/typebox';
 
 export const GoCQHTTPUploadPrivateFilePayloadSchema = Type.Object({
-  user_id: Type.Union([Type.Number(), Type.String()], { description: '用户 QQ' }),
+  user_id: Type.String({ description: '用户 QQ' }),
   file: Type.String({ description: '本地文件路径' }),
   name: Type.String({ description: '文件名' }),
   upload_file: Type.Boolean({ default: true, description: '是否执行上传' }),
@@ -39,7 +39,7 @@ export default class GoCQHTTPUploadPrivateFile extends OneBotAction<GoCQHTTPUplo
     throw new Error('缺少参数 user_id');
   }
 
-  async _handle (payload: Payload): Promise<UploadPrivateFileResponse> {
+  async _handle (payload: GoCQHTTPUploadPrivateFilePayload): Promise<GoCQHTTPUploadPrivateFileResponse> {
     let file = payload.file;
     if (fs.existsSync(file)) {
       file = `file://${file}`;

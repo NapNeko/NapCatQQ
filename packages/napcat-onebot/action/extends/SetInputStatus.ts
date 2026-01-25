@@ -4,7 +4,7 @@ import { ChatType } from 'napcat-core';
 import { Static, Type } from '@sinclair/typebox';
 
 const PayloadSchema = Type.Object({
-  user_id: Type.Union([Type.Number(), Type.String()], { description: 'QQ号' }),
+  user_id: Type.String({ description: 'QQ号' }),
   event_type: Type.Number({ description: '事件类型' }),
 });
 

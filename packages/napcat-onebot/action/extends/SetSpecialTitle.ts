@@ -3,8 +3,8 @@ import { GetPacketStatusDepends } from '@/napcat-onebot/action/packet/GetPacketS
 import { Static, Type } from '@sinclair/typebox';
 
 const PayloadSchema = Type.Object({
-  group_id: Type.Union([Type.Number(), Type.String()], { description: '群号' }),
-  user_id: Type.Union([Type.Number(), Type.String()], { description: 'QQ号' }),
+  group_id: Type.String({ description: '群号' }),
+  user_id: Type.String({ description: 'QQ号' }),
   special_title: Type.String({ default: '', description: '专属头衔' }),
 });
 

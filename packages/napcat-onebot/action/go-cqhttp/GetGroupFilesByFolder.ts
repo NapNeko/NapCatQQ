@@ -4,7 +4,7 @@ import { OB11Construct } from '@/napcat-onebot/helper/data';
 import { Static, Type } from '@sinclair/typebox';
 
 const PayloadSchema = Type.Object({
-  group_id: Type.Union([Type.Number(), Type.String()], { description: '群号' }),
+  group_id: Type.String({ description: '群号' }),
   folder_id: Type.Optional(Type.String({ description: '文件夹ID' })),
   folder: Type.Optional(Type.String({ description: '文件夹ID' })),
   file_count: Type.Union([Type.Number(), Type.String()], { default: 50, description: '文件数量' }),

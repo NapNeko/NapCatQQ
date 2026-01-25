@@ -6,8 +6,8 @@ import { Static, Type } from '@sinclair/typebox';
 
 const PayloadSchema = Type.Object({
   message_id: Type.Union([Type.Number(), Type.String()], { description: '消息ID' }),
-  group_id: Type.Optional(Type.Union([Type.Number(), Type.String()], { description: '目标群号' })),
-  user_id: Type.Optional(Type.Union([Type.Number(), Type.String()], { description: '目标用户QQ' })),
+  group_id: Type.Optional(Type.String({ description: '目标群号' })),
+  user_id: Type.Optional(Type.String({ description: '目标用户QQ' })),
 });
 
 type PayloadType = Static<typeof PayloadSchema>;

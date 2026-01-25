@@ -4,7 +4,7 @@ import { AIVoiceChatType } from 'napcat-core/packet/entities/aiChat';
 import { Type, Static } from '@sinclair/typebox';
 
 const PayloadSchema = Type.Object({
-  group_id: Type.Union([Type.Number(), Type.String()], { description: '群号' }),
+  group_id: Type.String({ description: '群号' }),
   chat_type: Type.Union([Type.Number(), Type.String()], { default: 1, description: '聊天类型' }),
 });
 

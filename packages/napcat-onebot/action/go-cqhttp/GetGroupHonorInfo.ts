@@ -4,7 +4,7 @@ import { WebHonorType } from 'napcat-core/types';
 import { Static, Type } from '@sinclair/typebox';
 
 const PayloadSchema = Type.Object({
-  group_id: Type.Union([Type.Number(), Type.String()], { description: '群号' }),
+  group_id: Type.String({ description: '群号' }),
   type: Type.Optional(Type.Enum(WebHonorType, { description: '荣誉类型' })),
 });
 

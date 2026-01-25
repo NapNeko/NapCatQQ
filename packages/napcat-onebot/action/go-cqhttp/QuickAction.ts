@@ -4,7 +4,7 @@ import { QuickAction, QuickActionEvent } from '@/napcat-onebot/types';
 import { Static, Type } from '@sinclair/typebox';
 
 const SenderSchema = Type.Object({
-  user_id: Type.Number({ description: '用户ID' }),
+  user_id: Type.String({ description: '用户ID' }),
   nickname: Type.String({ description: '昵称' }),
   sex: Type.Optional(Type.String({ description: '性别' })),
   age: Type.Optional(Type.Number({ description: '年龄' })),
@@ -34,8 +34,8 @@ const QuickActionEventSchema = Type.Object({
   post_type: Type.String({ description: '上报类型' }),
   message_type: Type.Optional(Type.String({ description: '消息类型' })),
   sub_type: Type.Optional(Type.String({ description: '消息子类型' })),
-  user_id: Type.Union([Type.Number(), Type.String()], { description: '发送者 QQ 号' }),
-  group_id: Type.Optional(Type.Union([Type.Number(), Type.String()], { description: '群号' })),
+  user_id: Type.String({ description: '发送者 QQ 号' }),
+  group_id: Type.Optional(Type.String({ description: '群号' })),
   message_id: Type.Optional(Type.Number({ description: '消息 ID' })),
   message_seq: Type.Optional(Type.Number({ description: '消息序列号' })),
   real_id: Type.Optional(Type.Number({ description: '真实消息 ID' })),

@@ -8,7 +8,7 @@ const PayloadSchema = Type.Object({
 
 type PayloadType = Static<typeof PayloadSchema>;
 
-const ReturnSchema = Type.Optional(Type.Array(Type.Any()), { description: '翻译结果列表' });
+const ReturnSchema = Type.Union([Type.Array(Type.Any()), Type.Undefined()], { description: '翻译结果列表' });
 
 type ReturnType = Static<typeof ReturnSchema>;
 

@@ -1,4 +1,3 @@
-import { NTQQWebApi } from 'napcat-core/apis';
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';

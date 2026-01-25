@@ -1,11 +1,10 @@
-import { type NTQQCollectionApi } from 'napcat-core/apis/collection';
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Type, Static } from '@sinclair/typebox';
 
 const PayloadSchema = Type.Object({
-  category: Type.Union([Type.Number(), Type.String()], { description: '分类ID' }),
-  count: Type.Union([Type.Number(), Type.String()], { default: 1, description: '获取数量' }),
+  category: Type.String({ description: '分类ID' }),
+  count: Type.String({ default: '1', description: '获取数量' }),
 });
 
 type PayloadType = Static<typeof PayloadSchema>;

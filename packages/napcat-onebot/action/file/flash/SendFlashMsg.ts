@@ -5,8 +5,8 @@ import { ChatType, Peer } from 'napcat-core/types';
 
 export const SendFlashMsgPayloadSchema = Type.Object({
   fileset_id: Type.String({ description: '文件集 ID' }),
-  user_id: Type.Optional(Type.Union([Type.Number(), Type.String()], { description: '用户 QQ' })),
-  group_id: Type.Optional(Type.Union([Type.Number(), Type.String()], { description: '群号' })),
+  user_id: Type.Optional(Type.String({ description: '用户 QQ' })),
+  group_id: Type.Optional(Type.String({ description: '群号' })),
 });
 
 export type SendFlashMsgPayload = Static<typeof SendFlashMsgPayloadSchema>;

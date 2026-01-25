@@ -1,11 +1,10 @@
-import { GeneralCallResult } from 'napcat-core';
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
 const PayloadSchema = Type.Object({
-  user_id: Type.Optional(Type.Union([Type.Number(), Type.String()], { description: 'QQ号' })),
-  group_id: Type.Optional(Type.Union([Type.Number(), Type.String()], { description: '群号' })),
+  user_id: Type.Optional(Type.String({ description: 'QQ号' })),
+  group_id: Type.Optional(Type.String({ description: '群号' })),
   phone_number: Type.String({ default: '', description: '手机号' }),
 });
 
@@ -31,7 +30,7 @@ export class SharePeerBase extends OneBotAction<PayloadType, ReturnType> {
 }
 
 const PayloadSchemaGroupEx = Type.Object({
-  group_id: Type.Union([Type.Number(), Type.String()], { description: '群号' }),
+  group_id: Type.String({ description: '群号' }),
 });
 export class SharePeer extends SharePeerBase {
   override actionName = ActionName.SharePeer;

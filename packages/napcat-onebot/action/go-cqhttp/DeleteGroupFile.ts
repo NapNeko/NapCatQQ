@@ -2,10 +2,9 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { FileNapCatOneBotUUID } from 'napcat-common/src/file-uuid';
 import { Static, Type } from '@sinclair/typebox';
-import { NTQQGroupApi } from 'napcat-core/apis';
 
 const PayloadSchema = Type.Object({
-  group_id: Type.Union([Type.Number(), Type.String()], { description: '群号' }),
+  group_id: Type.String({ description: '群号' }),
   file_id: Type.String({ description: '文件ID' }),
 });
 

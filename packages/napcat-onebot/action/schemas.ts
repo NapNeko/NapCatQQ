@@ -49,3 +49,15 @@ export const OB11GroupMemberSchema = Type.Object({
   is_robot: Type.Optional(Type.Boolean({ description: '是否为机器人' })),
   qage: Type.Optional(Type.Number({ description: 'Q龄' })),
 }, { description: 'OneBot 11 群成员信息' });
+
+export const OB11NotifySchema = Type.Object({
+  request_id: Type.Number({ description: '请求ID' }),
+  invitor_uin: Type.Number({ description: '邀请者QQ' }),
+  invitor_nick: Type.String({ description: '邀请者昵称' }),
+  group_id: Type.Number({ description: '群号' }),
+  group_name: Type.String({ description: '群名称' }),
+  message: Type.String({ description: '附言' }),
+  checked: Type.Boolean({ description: '是否已处理' }),
+  actor: Type.Number({ description: '操作者QQ' }),
+  requester_nick: Type.String({ description: '申请者昵称' }),
+}, { description: 'OneBot 11 通知信息' });

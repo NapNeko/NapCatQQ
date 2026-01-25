@@ -11,7 +11,7 @@ const PayloadSchema = Type.Object({
 
 type PayloadType = Static<typeof PayloadSchema>;
 
-const ReturnSchema = Type.Optional(Type.String({ description: '响应十六进制数据' }), { description: '发包结果' });
+const ReturnSchema = Type.Union([Type.String({ description: '响应十六进制数据' }), Type.Undefined()], { description: '发包结果' });
 
 type ReturnType = Static<typeof ReturnSchema>;
 

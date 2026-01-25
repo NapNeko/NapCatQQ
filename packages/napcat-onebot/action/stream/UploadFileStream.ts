@@ -102,7 +102,7 @@ export class UploadFileStream extends OneBotAction<UploadFileStreamPayload, Stre
     return this.getStreamStatus(stream);
   }
 
-  private getOrCreateStream (payload: Payload): StreamState {
+  private getOrCreateStream (payload: UploadFileStreamPayload): StreamState {
     let stream = UploadFileStream.streams.get(payload.stream_id);
 
     if (!stream) {
@@ -115,7 +115,7 @@ export class UploadFileStream extends OneBotAction<UploadFileStreamPayload, Stre
     return stream;
   }
 
-  private createStream (payload: Payload): StreamState {
+  private createStream (payload: UploadFileStreamPayload): StreamState {
     const { stream_id, total_chunks, file_size, filename, expected_sha256 } = payload;
 
     const useMemory = this.shouldUseMemory(file_size);

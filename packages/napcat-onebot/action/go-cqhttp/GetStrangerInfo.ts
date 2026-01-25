@@ -1,12 +1,12 @@
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
-import { OB11User, OB11UserSex } from '@/napcat-onebot/index';
+import { OB11UserSex } from '@/napcat-onebot/index';
 import { OB11Construct } from '@/napcat-onebot/helper/data';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { calcQQLevel } from 'napcat-common/src/helper';
 import { Static, Type } from '@sinclair/typebox';
 
 const PayloadSchema = Type.Object({
-  user_id: Type.Union([Type.Number(), Type.String()], { description: '用户QQ' }),
+  user_id: Type.String({ description: '用户QQ' }),
   no_cache: Type.Union([Type.Boolean(), Type.String()], { default: false, description: '是否不使用缓存' }),
 });
 
@@ -58,11 +58,11 @@ export default class GoCQHTTPGetStrangerInfo extends OneBotAction<PayloadType, R
       sex: OB11Construct.sex(extendData.detail.simpleInfo.baseInfo.sex) ?? OB11UserSex.unknown,
       long_nick: extendData.detail.simpleInfo.baseInfo.longNick ?? info.longNick,
       reg_time: extendData.detail.commonExt?.regTime ?? info.regTime,
-      is_vip: extendData.detail.simpleInfo.vasInfo?.svipFlag,
-      is_years_vip: extendData.detail.simpleInfo.vasInfo?.yearVipFlag,
-      vip_level: extendData.detail.simpleInfo.vasInfo?.vipLevel,
-      remark: extendData.detail.simpleInfo.coreInfo.remark ?? info.remark,
-      status: extendData.detail.simpleInfo.status?.status ?? info.status,
+      is_vip: extendData.detail.simpleInfo.vasInfo?.svipFlag ?? false,
+      is_years_vip: extendData.detail.simpleInfo.vasInfo?.yearVipFlag ?? false,
+      vip_level: extendData.detail.simpleInfo.vasInfo?.vipLevel ?? 0,
+      remark: extendData.detail.simpleInfo.coreInfo.remark ?? info.remark ?? '',
+      status: extendData.detail.simpleInfo.status?.status ?? info.status ?? 0,
       login_days: 0, // 失效
     };
   }

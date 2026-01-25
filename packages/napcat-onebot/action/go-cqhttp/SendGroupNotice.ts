@@ -5,7 +5,7 @@ import { unlink } from 'node:fs/promises';
 import { Static, Type } from '@sinclair/typebox';
 
 export const SendGroupNoticePayloadSchema = Type.Object({
-  group_id: Type.Union([Type.Number(), Type.String()], { description: '群号' }),
+  group_id: Type.String({ description: '群号' }),
   content: Type.String({ description: '公告内容' }),
   image: Type.Optional(Type.String({ description: '公告图片路径或 URL' })),
   pinned: Type.Union([Type.Number(), Type.String()], { default: 0, description: '是否置顶 (0/1)' }),
@@ -60,6 +60,5 @@ export class SendGroupNotice extends OneBotAction<SendGroupNoticePayload, void> 
     if (!publishGroupBulletinResult || publishGroupBulletinResult.ec !== 0) {
       throw new Error(`设置群公告失败,错误信息:${publishGroupBulletinResult?.em}`);
     }
-    return null;
   }
 }
