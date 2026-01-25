@@ -1,23 +1,38 @@
-import { OB11Message } from '@/napcat-onebot/index';
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { MessageUnique } from 'napcat-common/src/message-unique';
 import { Static, Type } from '@sinclair/typebox';
 import { NetworkAdapterConfig } from '@/napcat-onebot/config/config';
 
-export type ReturnDataType = OB11Message;
-
-const SchemaData = Type.Object({
-  message_id: Type.Union([Type.Number(), Type.String()]),
+const PayloadSchema = Type.Object({
+  message_id: Type.Union([Type.Number(), Type.String()], { description: '消息ID' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-class GetMsg extends OneBotAction<Payload, OB11Message> {
+const ReturnSchema = Type.Object({
+  time: Type.Number({ description: '发送时间' }),
+  message_type: Type.String({ description: '消息类型' }),
+  message_id: Type.Number({ description: '消息ID' }),
+  real_id: Type.Number({ description: '真实ID' }),
+  message_seq: Type.Number({ description: '消息序号' }),
+  sender: Type.Any({ description: '发送者' }),
+  message: Type.Any({ description: '消息内容' }),
+  raw_message: Type.String({ description: '原始消息内容' }),
+  font: Type.Number({ description: '字体' }),
+  group_id: Type.Optional(Type.Union([Type.Number(), Type.String()], { description: '群号' })),
+  user_id: Type.Union([Type.Number(), Type.String()], { description: '发送者QQ号' }),
+  emoji_likes_list: Type.Optional(Type.Array(Type.Any(), { description: '表情回应列表' })),
+}, { description: 'OneBot 11 消息' });
+
+type ReturnType = Static<typeof ReturnSchema>;
+
+class GetMsg extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.GetMsg;
-  override payloadSchema = SchemaData;
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
 
-  async _handle (payload: Payload, _adapter: string, config: NetworkAdapterConfig) {
+  async _handle (payload: PayloadType, _adapter: string, config: NetworkAdapterConfig) {
     if (!payload.message_id) {
       throw Error('参数message_id不能为空');
     }
@@ -27,12 +42,7 @@ class GetMsg extends OneBotAction<Payload, OB11Message> {
       throw new Error('消息不存在');
     }
     const peer = { guildId: '', peerUid: msgIdWithPeer?.Peer.peerUid, chatType: msgIdWithPeer.Peer.chatType };
-    // const orimsg = this.obContext.recallMsgCache.get(msgIdWithPeer.MsgId);
-    // if (orimsg) {
-    //     msg = orimsg;
-    // } else {
     const msg = (await this.core.apis.MsgApi.getMsgsByMsgId(peer, [msgIdWithPeer?.MsgId || payload.message_id.toString()])).msgList[0];
-    // }
     if (!msg) throw Error('消息不存在');
     const retMsg = await this.obContext.apis.MsgApi.parseMessage(msg, config.messagePostFormat);
     if (!retMsg) throw Error('消息为空');
@@ -44,7 +54,6 @@ class GetMsg extends OneBotAction<Payload, OB11Message> {
         likes_cnt: emoji.likesCnt,
       });
     });
-    // 烘焙emoji_likes_list 仅此处烘焙
     try {
       retMsg.message_id = MessageUnique.createUniqueMsgId(peer, msg.msgId)!;
       retMsg.message_seq = retMsg.message_id;

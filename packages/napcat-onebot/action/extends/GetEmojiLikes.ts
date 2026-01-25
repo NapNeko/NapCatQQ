@@ -27,6 +27,7 @@ type ReturnType = Static<typeof ReturnSchema>;
 export class GetEmojiLikes extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.GetEmojiLikes;
   override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
 
   async _handle (payload: PayloadType) {
     let peer: Peer;

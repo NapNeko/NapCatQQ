@@ -6,15 +6,30 @@ import crypto from 'crypto';
 import { Static, Type } from '@sinclair/typebox';
 import { NetworkAdapterConfig } from '@/napcat-onebot/config/config';
 
-const SchemaData = Type.Object({
-  group_id: Type.Union([Type.Number(), Type.String()]),
+const PayloadSchema = Type.Object({
+  group_id: Type.Union([Type.Number(), Type.String()], { description: '群号' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-export class GetGroupEssence extends OneBotAction<Payload, unknown> {
+const ReturnSchema = Type.Array(Type.Object({
+  msg_seq: Type.Number({ description: '消息序号' }),
+  msg_random: Type.Number({ description: '消息随机数' }),
+  sender_id: Type.Number({ description: '发送者QQ' }),
+  sender_nick: Type.String({ description: '发送者昵称' }),
+  operator_id: Type.Number({ description: '操作者QQ' }),
+  operator_nick: Type.String({ description: '操作者昵称' }),
+  message_id: Type.Number({ description: '消息ID' }),
+  operator_time: Type.Number({ description: '操作时间' }),
+  content: Type.Array(Type.Any(), { description: '消息内容' }),
+}), { description: '精华消息列表' });
+
+type ReturnType = Static<typeof ReturnSchema>;
+
+export class GetGroupEssence extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.GoCQHTTP_GetEssenceMsg;
-  override payloadSchema = SchemaData;
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
 
   private async msgSeqToMsgId (peer: Peer, msgSeq: string, msgRandom: string) {
     const replyMsgList = (await this.core.apis.MsgApi.getMsgsBySeqAndCount(peer, msgSeq, 1, true, true)).msgList.find((msg) => msg.msgSeq === msgSeq && msg.msgRandom === msgRandom);
@@ -27,10 +42,10 @@ export class GetGroupEssence extends OneBotAction<Payload, unknown> {
     };
   }
 
-  async _handle (payload: Payload, _adapter: string, config: NetworkAdapterConfig) {
+  async _handle (payload: PayloadType, _adapter: string, config: NetworkAdapterConfig): Promise<ReturnType> {
     const msglist = (await this.core.apis.WebApi.getGroupEssenceMsgAll(payload.group_id.toString()))
       .flatMap((e) => e?.data?.msg_list)
-    // 在群精华回空的时候会出现[null]的情况~ https://github.com/NapNeko/NapCatQQ/issues/1334
+      // 在群精华回空的时候会出现[null]的情况~ https://github.com/NapNeko/NapCatQQ/issues/1334
       .filter(Boolean);
     if (!msglist) {
       throw new Error('获取失败');

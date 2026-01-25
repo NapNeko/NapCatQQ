@@ -2,19 +2,24 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = Type.Object({
-  status: Type.Union([Type.Number(), Type.String()]),
-  ext_status: Type.Union([Type.Number(), Type.String()]),
-  battery_status: Type.Union([Type.Number(), Type.String()]),
+const PayloadSchema = Type.Object({
+  status: Type.Union([Type.Number(), Type.String()], { description: '在线状态' }),
+  ext_status: Type.Union([Type.Number(), Type.String()], { description: '扩展状态' }),
+  battery_status: Type.Union([Type.Number(), Type.String()], { description: '电量状态' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-export class SetOnlineStatus extends OneBotAction<Payload, null> {
+const ReturnSchema = Type.Null({ description: '设置结果' });
+
+type ReturnType = Static<typeof ReturnSchema>;
+
+export class SetOnlineStatus extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.SetOnlineStatus;
-  override payloadSchema = SchemaData;
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
 
-  async _handle (payload: Payload) {
+  async _handle (payload: PayloadType) {
     const ret = await this.core.apis.UserApi.setSelfOnlineStatus(
       +payload.status,
       +payload.ext_status,

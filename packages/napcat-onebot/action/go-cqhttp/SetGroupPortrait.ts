@@ -4,18 +4,19 @@ import { checkFileExistV2, uriToLocalFile } from 'napcat-common/src/file';
 import { Static, Type } from '@sinclair/typebox';
 import fs from 'node:fs/promises';
 import { GeneralCallResult } from 'napcat-core';
-const SchemaData = Type.Object({
-  file: Type.String(),
-  group_id: Type.Union([Type.Number(), Type.String()]),
+export const SetGroupPortraitPayloadSchema = Type.Object({
+  file: Type.String({ description: '头像文件路径或 URL' }),
+  group_id: Type.Union([Type.Number(), Type.String()], { description: '群号' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+export type SetGroupPortraitPayload = Static<typeof SetGroupPortraitPayloadSchema>;
 
-export default class SetGroupPortrait extends OneBotAction<Payload, GeneralCallResult> {
+export default class SetGroupPortrait extends OneBotAction<SetGroupPortraitPayload, any> {
   override actionName = ActionName.SetGroupPortrait;
-  override payloadSchema = SchemaData;
+  override payloadSchema = SetGroupPortraitPayloadSchema;
+  override returnSchema = Type.Any({ description: '设置结果' });
 
-  async _handle (payload: Payload): Promise<GeneralCallResult> {
+  async _handle (payload: SetGroupPortraitPayload): Promise<any> {
     const { path, success } = (await uriToLocalFile(this.core.NapCatTempPath, payload.file));
     if (!success) {
       throw new Error(`头像${payload.file}设置失败,file字段可能格式不正确`);

@@ -2,52 +2,41 @@ import { WebApiGroupNoticeFeed } from 'napcat-core';
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
-interface GroupNotice {
-  sender_id: number;
-  publish_time: number;
-  notice_id: string;
-  message: {
-    text: string;
-    // 保持一段时间兼容性 防止以往版本出现问题 后续版本可考虑移除
-    image: Array<{
-      height: string;
-      width: string;
-      id: string;
-    }>,
-    images: Array<{
-      height: string;
-      width: string;
-      id: string;
-    }>;
-  };
-  settings?: {
-    is_show_edit_card: number,
-    remind_ts: number,
-    tip_window_type: number,
-    confirm_required: number;
-  };
-  read_num?: number;
-}
-
-const SchemaData = Type.Object({
-  group_id: Type.Union([Type.Number(), Type.String()]),
+const PayloadSchema = Type.Object({
+  group_id: Type.String({ description: '群号' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-type ApiGroupNotice = GroupNotice & WebApiGroupNoticeFeed;
+const ReturnSchema = Type.Array(Type.Object({
+  sender_id: Type.Number({ description: '发送者QQ' }),
+  publish_time: Type.Number({ description: '发布时间' }),
+  notice_id: Type.String({ description: '公告ID' }),
+  message: Type.Object({
+    text: Type.String({ description: '文本内容' }),
+    image: Type.Array(Type.Any(), { description: '图片列表' }),
+    images: Type.Array(Type.Any(), { description: '图片列表' }),
+  }, { description: '公告内容' }),
+  settings: Type.Optional(Type.Any({ description: '设置项' })),
+  read_num: Type.Optional(Type.Number({ description: '阅读数' })),
+}), { description: '群公告列表' });
 
-export class GetGroupNotice extends OneBotAction<Payload, GroupNotice[]> {
+type ReturnType = Static<typeof ReturnSchema>;
+
+type ApiGroupNotice = ReturnType[number] & WebApiGroupNoticeFeed;
+
+export class GetGroupNotice extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.GoCQHTTP_GetGroupNotice;
-  override payloadSchema = SchemaData;
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
 
-  async _handle (payload: Payload) {
+  async _handle (payload: PayloadType) {
     const group = payload.group_id.toString();
     const ret = await this.core.apis.WebApi.getGroupNotice(group);
     if (!ret) {
       throw new Error('获取公告失败');
     }
-    const retNotices: GroupNotice[] = new Array<ApiGroupNotice>();
+    const retNotices: ReturnType = [];
     for (const key in ret.feeds) {
       if (!ret.feeds[key]) {
         continue;
@@ -57,7 +46,7 @@ export class GetGroupNotice extends OneBotAction<Payload, GroupNotice[]> {
         return { id: pic.id, height: pic.h, width: pic.w };
       }) || [];
 
-      const retNotice: GroupNotice = {
+      const retNotice: ReturnType[number] = {
         notice_id: retApiNotice.fid,
         sender_id: retApiNotice.u,
         publish_time: retApiNotice.pubt,

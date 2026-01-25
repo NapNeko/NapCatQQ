@@ -2,17 +2,18 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = Type.Object({
-  fileset_id: Type.String(),
+export const GetFilesetInfoPayloadSchema = Type.Object({
+  fileset_id: Type.String({ description: '文件集 ID' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+export type GetFilesetInfoPayload = Static<typeof GetFilesetInfoPayloadSchema>;
 
-export class GetFilesetInfo extends OneBotAction<Payload, unknown> {
+export class GetFilesetInfo extends OneBotAction<GetFilesetInfoPayload, any> {
   override actionName = ActionName.GetFilesetInfo;
-  override payloadSchema = SchemaData;
+  override payloadSchema = GetFilesetInfoPayloadSchema;
+  override returnSchema = Type.Any({ description: '文件集信息' });
 
-  async _handle (payload: Payload) {
+  async _handle (payload: GetFilesetInfoPayload) {
     return await this.core.apis.FlashApi.getFileSetIndoBySetId(payload.fileset_id);
   }
 }

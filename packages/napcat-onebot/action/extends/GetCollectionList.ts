@@ -3,18 +3,23 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Type, Static } from '@sinclair/typebox';
 
-const SchemaData = Type.Object({
-  category: Type.Union([Type.Number(), Type.String()]),
-  count: Type.Union([Type.Union([Type.Number(), Type.String()])], { default: 1 }),
+const PayloadSchema = Type.Object({
+  category: Type.Union([Type.Number(), Type.String()], { description: '分类ID' }),
+  count: Type.Union([Type.Number(), Type.String()], { default: 1, description: '获取数量' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-export class GetCollectionList extends OneBotAction<Payload, Awaited<ReturnType<NTQQCollectionApi['getAllCollection']>>> {
+const ReturnSchema = Type.Any({ description: '收藏列表' });
+
+type ReturnType = Static<typeof ReturnSchema>;
+
+export class GetCollectionList extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.GetCollectionList;
-  override payloadSchema = SchemaData;
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
 
-  async _handle (payload: Payload) {
+  async _handle (payload: PayloadType) {
     return await this.core.apis.CollectionApi.getAllCollection(+payload.category, +payload.count);
   }
 }

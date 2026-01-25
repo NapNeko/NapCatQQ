@@ -7,24 +7,27 @@ import { SendMessageContext } from '@/napcat-onebot/api';
 import { ContextMode, createContext } from '@/napcat-onebot/action/msg/SendMsg';
 import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = Type.Object({
-  user_id: Type.Union([Type.Number(), Type.String()]),
-  file: Type.String(),
-  name: Type.String(),
-  upload_file: Type.Boolean({ default: true }),
+export const GoCQHTTPUploadPrivateFilePayloadSchema = Type.Object({
+  user_id: Type.Union([Type.Number(), Type.String()], { description: '用户 QQ' }),
+  file: Type.String({ description: '本地文件路径' }),
+  name: Type.String({ description: '文件名' }),
+  upload_file: Type.Boolean({ default: true, description: '是否执行上传' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+export type GoCQHTTPUploadPrivateFilePayload = Static<typeof GoCQHTTPUploadPrivateFilePayloadSchema>;
 
-interface UploadPrivateFileResponse {
-  file_id: string | null;
-}
+export const GoCQHTTPUploadPrivateFileReturnSchema = Type.Object({
+  file_id: Type.Union([Type.String(), Type.Null()], { description: '文件 ID' }),
+});
 
-export default class GoCQHTTPUploadPrivateFile extends OneBotAction<Payload, UploadPrivateFileResponse> {
+export type GoCQHTTPUploadPrivateFileResponse = Static<typeof GoCQHTTPUploadPrivateFileReturnSchema>;
+
+export default class GoCQHTTPUploadPrivateFile extends OneBotAction<GoCQHTTPUploadPrivateFilePayload, GoCQHTTPUploadPrivateFileResponse> {
   override actionName = ActionName.GOCQHTTP_UploadPrivateFile;
-  override payloadSchema = SchemaData;
+  override payloadSchema = GoCQHTTPUploadPrivateFilePayloadSchema;
+  override returnSchema = GoCQHTTPUploadPrivateFileReturnSchema;
 
-  async getPeer (payload: Payload): Promise<Peer> {
+  async getPeer (payload: GoCQHTTPUploadPrivateFilePayload): Promise<Peer> {
     if (payload.user_id) {
       const peerUid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
       if (!peerUid) {

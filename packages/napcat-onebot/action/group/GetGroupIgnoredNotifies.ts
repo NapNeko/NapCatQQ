@@ -3,18 +3,26 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Notify } from '@/napcat-onebot/types';
 
-interface RetData {
-  invited_requests: Notify[];
-  InvitedRequest: Notify[];
-  join_requests: Notify[];
-}
+const PayloadSchema = Type.Object({}, { description: '群忽略通知负载' });
 
-export class GetGroupIgnoredNotifies extends OneBotAction<void, RetData> {
+type PayloadType = Static<typeof PayloadSchema>;
+
+const ReturnSchema = Type.Object({
+  invited_requests: Type.Array(Type.Any(), { description: '邀请请求列表' }),
+  InvitedRequest: Type.Array(Type.Any(), { description: '邀请请求列表' }),
+  join_requests: Type.Array(Type.Any(), { description: '加入请求列表' }),
+}, { description: '群忽略通知结果' });
+
+type ReturnType = Static<typeof ReturnSchema>;
+
+export class GetGroupIgnoredNotifies extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.GetGroupIgnoredNotifies;
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
 
-  async _handle (): Promise<RetData> {
+  async _handle (): Promise<ReturnType> {
     const SingleScreenNotifies = await this.core.apis.GroupApi.getSingleScreenNotifies(false, 50);
-    const retData: RetData = { invited_requests: [], InvitedRequest: [], join_requests: [] };
+    const retData: ReturnType = { invited_requests: [], InvitedRequest: [], join_requests: [] };
 
     const notifyPromises = SingleScreenNotifies.map(async (SSNotify) => {
       const invitorUin = SSNotify.user1?.uid ? +await this.core.apis.UserApi.getUinByUidV2(SSNotify.user1.uid) : 0;

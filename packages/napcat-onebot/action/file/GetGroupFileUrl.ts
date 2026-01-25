@@ -3,22 +3,25 @@ import { FileNapCatOneBotUUID } from 'napcat-common/src/file-uuid';
 import { GetPacketStatusDepends } from '@/napcat-onebot/action/packet/GetPacketStatus';
 import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = Type.Object({
-  group_id: Type.Union([Type.Number(), Type.String()]),
-  file_id: Type.String(),
+const PayloadSchema = Type.Object({
+  group_id: Type.Union([Type.Number(), Type.String()], { description: '群号' }),
+  file_id: Type.String({ description: '文件ID' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-interface GetGroupFileUrlResponse {
-  url?: string;
-}
+const ReturnSchema = Type.Object({
+  url: Type.Optional(Type.String({ description: '文件下载链接' })),
+}, { description: '群文件URL信息' });
 
-export class GetGroupFileUrl extends GetPacketStatusDepends<Payload, GetGroupFileUrlResponse> {
+type ReturnType = Static<typeof ReturnSchema>;
+
+export class GetGroupFileUrl extends GetPacketStatusDepends<PayloadType, ReturnType> {
   override actionName = ActionName.GOCQHTTP_GetGroupFileUrl;
-  override payloadSchema = SchemaData;
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
 
-  async _handle (payload: Payload) {
+  async _handle (payload: PayloadType) {
     const contextMsgFile = FileNapCatOneBotUUID.decode(payload.file_id) || FileNapCatOneBotUUID.decodeModelId(payload.file_id);
     if (contextMsgFile?.fileUUID) {
       return {

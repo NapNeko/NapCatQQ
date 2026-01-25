@@ -2,9 +2,12 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { unlink, readdir } from 'fs/promises';
 import path, { join } from 'path';
+import { Type } from '@sinclair/typebox';
 
 export class CleanCache extends OneBotAction<void, void> {
   override actionName = ActionName.CleanCache;
+  override payloadSchema = Type.Object({});
+  override returnSchema = Type.Null();
 
   async _handle () {
     try {

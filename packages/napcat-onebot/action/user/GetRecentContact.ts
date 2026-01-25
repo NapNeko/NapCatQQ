@@ -3,20 +3,35 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { NetworkAdapterConfig } from '@/napcat-onebot/config/config';
 import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = Type.Object({
-  count: Type.Union([Type.Number(), Type.String()], { default: 10 }),
+export const GetRecentContactPayloadSchema = Type.Object({
+  count: Type.Union([Type.Number(), Type.String()], { default: 10, description: '获取的数量' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+export type GetRecentContactPayload = Static<typeof GetRecentContactPayloadSchema>;
 
-export default class GetRecentContact extends OneBotAction<Payload, unknown> {
+export const GetRecentContactReturnSchema = Type.Array(Type.Object({
+  lastestMsg: Type.Any({ description: '最后一条消息' }),
+  peerUin: Type.String({ description: '对象QQ' }),
+  remark: Type.String({ description: '备注' }),
+  msgTime: Type.String({ description: '消息时间' }),
+  chatType: Type.Number({ description: '聊天类型' }),
+  msgId: Type.String({ description: '消息ID' }),
+  sendNickName: Type.String({ description: '发送者昵称' }),
+  sendMemberName: Type.String({ description: '发送者群名片' }),
+  peerName: Type.String({ description: '对象名称' }),
+}), { description: '最近会话列表' });
+
+export type GetRecentContactReturn = Static<typeof GetRecentContactReturnSchema>;
+
+export default class GetRecentContact extends OneBotAction<GetRecentContactPayload, GetRecentContactReturn> {
   override actionName = ActionName.GetRecentContact;
-  override payloadSchema = SchemaData;
+  override payloadSchema = GetRecentContactPayloadSchema;
+  override returnSchema = GetRecentContactReturnSchema;
 
-  async _handle (payload: Payload, _adapter: string, config: NetworkAdapterConfig) {
+  async _handle (payload: GetRecentContactPayload, _adapter: string, config: NetworkAdapterConfig): Promise<GetRecentContactReturn> {
     const ret = await this.core.apis.UserApi.getRecentContactListSnapShot(+payload.count);
     // 烘焙消息
-    return await Promise.all(ret.info.changedList.map(async (t) => {
+    const results = await Promise.all(ret.info.changedList.map(async (t) => {
       const FastMsg = await this.core.apis.MsgApi.getMsgsByMsgId({ chatType: t.chatType, peerUid: t.peerUid }, [t.msgId]);
       if (FastMsg.msgList.length > 0 && FastMsg.msgList[0]) {
         // 扩展ret.info.changedList
@@ -34,6 +49,7 @@ export default class GetRecentContact extends OneBotAction<Payload, unknown> {
         };
       }
       return {
+        lastestMsg: undefined,
         peerUin: t.peerUin,
         remark: t.remark,
         msgTime: t.msgTime,
@@ -44,5 +60,6 @@ export default class GetRecentContact extends OneBotAction<Payload, unknown> {
         peerName: t.peerName,
       };
     }));
+    return results;
   }
 }

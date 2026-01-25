@@ -2,9 +2,12 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { join } from 'node:path';
 import { readdir, unlink } from 'node:fs/promises';
+import { Type } from '@sinclair/typebox';
 
 export class CleanStreamTempFile extends OneBotAction<void, void> {
   override actionName = ActionName.CleanStreamTempFile;
+  override payloadSchema = Type.Object({});
+  override returnSchema = Type.Null();
 
   async _handle (_payload: void): Promise<void> {
     try {

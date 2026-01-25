@@ -3,17 +3,22 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { MessageUnique } from 'napcat-common/src/message-unique';
 import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = Type.Object({
-  message_id: Type.Union([Type.Number(), Type.String()]),
+const PayloadSchema = Type.Object({
+  message_id: Type.Union([Type.Number(), Type.String()], { description: '消息ID' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-export default class SetEssenceMsg extends OneBotAction<Payload, unknown> {
+const ReturnSchema = Type.Any({ description: '操作结果' });
+
+type ReturnType = Static<typeof ReturnSchema>;
+
+export default class SetEssenceMsg extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.SetEssenceMsg;
-  override payloadSchema = SchemaData;
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
 
-  async _handle (payload: Payload) {
+  async _handle (payload: PayloadType) {
     const msg = MessageUnique.getMsgIdAndPeerByShortId(+payload.message_id);
     if (!msg) {
       throw new Error('msg not found');

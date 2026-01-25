@@ -6,17 +6,23 @@ import { Static, Type } from '@sinclair/typebox';
 import { ChatType, ElementType, MsgSourceType, NTMsgType, RawMessage } from 'napcat-core';
 import { isNumeric } from 'napcat-common/src/helper';
 
-const SchemaData = Type.Object({
-  message_id: Type.Optional(Type.String()),
-  id: Type.Optional(Type.String()),
+const PayloadSchema = Type.Object({
+  message_id: Type.Optional(Type.String({ description: '消息ID' })),
+  id: Type.Optional(Type.String({ description: '消息ID' })),
 });
 
-type Payload = Static<typeof SchemaData>;
-export class GoCQHTTPGetForwardMsgAction extends OneBotAction<Payload, {
-  messages: OB11Message[] | undefined;
-}> {
+type PayloadType = Static<typeof PayloadSchema>;
+
+const ReturnSchema = Type.Object({
+  messages: Type.Optional(Type.Array(Type.Any(), { description: '消息列表' })),
+}, { description: '合并转发消息' });
+
+type ReturnType = Static<typeof ReturnSchema>;
+
+export class GoCQHTTPGetForwardMsgAction extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.GoCQHTTP_GetForwardMsg;
-  override payloadSchema = SchemaData;
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
 
   private createTemplateNode (message: OB11Message): OB11MessageNode {
     return {
@@ -52,7 +58,7 @@ export class GoCQHTTPGetForwardMsgAction extends OneBotAction<Payload, {
     return retMsg;
   }
 
-  async _handle (payload: Payload) {
+  async _handle (payload: PayloadType) {
     // 1. 检查消息ID是否存在
     const msgId = payload.message_id || payload.id;
     if (!msgId) {

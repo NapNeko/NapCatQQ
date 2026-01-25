@@ -2,19 +2,24 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = Type.Object({
-  group_id: Type.String(),
-  album_id: Type.String(),
-  attach_info: Type.String({ default: '' }),
+const PayloadSchema = Type.Object({
+  group_id: Type.String({ description: '群号' }),
+  album_id: Type.String({ description: '相册ID' }),
+  attach_info: Type.String({ default: '', description: '附加信息（用于分页）' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-export class GetGroupAlbumMediaList extends OneBotAction<Payload, unknown> {
+const ReturnSchema = Type.Any({ description: '相册媒体列表' });
+
+type ReturnType = Static<typeof ReturnSchema>;
+
+export class GetGroupAlbumMediaList extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.GetGroupAlbumMediaList;
-  override payloadSchema = SchemaData;
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
 
-  async _handle (payload: Payload) {
+  async _handle (payload: PayloadType) {
     return await this.core.apis.WebApi.getAlbumMediaListByNTQQ(
       payload.group_id,
       payload.album_id,

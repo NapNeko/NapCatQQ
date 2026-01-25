@@ -2,19 +2,24 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = Type.Object({
-  group_id: Type.String(),
-  user_id: Type.Array(Type.String()),
-  reject_add_request: Type.Optional(Type.Union([Type.Boolean(), Type.String()])),
+const PayloadSchema = Type.Object({
+  group_id: Type.String({ description: '群号' }),
+  user_id: Type.Array(Type.String(), { description: 'QQ号列表' }),
+  reject_add_request: Type.Optional(Type.Union([Type.Boolean(), Type.String()], { description: '是否拒绝加群请求' })),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-export default class SetGroupKickMembers extends OneBotAction<Payload, null> {
+const ReturnSchema = Type.Null({ description: '返回结果' });
+
+type ReturnType = Static<typeof ReturnSchema>;
+
+export default class SetGroupKickMembers extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.SetGroupKickMembers;
-  override payloadSchema = SchemaData;
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
 
-  async _handle (payload: Payload): Promise<null> {
+  async _handle (payload: PayloadType): Promise<ReturnType> {
     const rejectReq = payload.reject_add_request?.toString() === 'true';
     const uids: string[] = await Promise.all(payload.user_id.map(async uin => await this.core.apis.UserApi.getUidByUinV2(uin)));
     await this.core.apis.GroupApi.kickMember(payload.group_id.toString(), uids.filter(uid => !!uid), rejectReq);

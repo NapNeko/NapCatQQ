@@ -4,16 +4,21 @@ import fs from 'node:fs/promises';
 import { checkFileExist, uriToLocalFile } from 'napcat-common/src/file';
 import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = Type.Object({
-  file: Type.String(),
+const PayloadSchema = Type.Object({
+  file: Type.String({ description: '图片路径、URL或Base64' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-export default class SetAvatar extends OneBotAction<Payload, null> {
+const ReturnSchema = Type.Null({ description: '设置结果' });
+
+type ReturnType = Static<typeof ReturnSchema>;
+
+export default class SetAvatar extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.SetQQAvatar;
-  override payloadSchema = SchemaData;
-  async _handle (payload: Payload): Promise<null> {
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
+  async _handle (payload: PayloadType): Promise<ReturnType> {
     const { path, success } = (await uriToLocalFile(this.core.NapCatTempPath, payload.file));
     if (!success) {
       throw new Error(`头像${payload.file}设置失败,file字段可能格式不正确`);

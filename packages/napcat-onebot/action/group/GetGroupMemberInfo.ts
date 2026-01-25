@@ -1,20 +1,25 @@
-import { OB11GroupMember } from '@/napcat-onebot/index';
 import { OB11Construct } from '@/napcat-onebot/helper/data';
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
+import { OB11GroupMemberSchema } from '../schemas';
 
-const SchemaData = Type.Object({
-  group_id: Type.Union([Type.Number(), Type.String()]),
-  user_id: Type.Union([Type.Number(), Type.String()]),
-  no_cache: Type.Optional(Type.Union([Type.Boolean(), Type.String()])),
+const PayloadSchema = Type.Object({
+  group_id: Type.String({ description: '群号' }),
+  user_id: Type.String({ description: 'QQ号' }),
+  no_cache: Type.Optional(Type.Union([Type.Boolean(), Type.String()], { description: '是否不使用缓存' })),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-class GetGroupMemberInfo extends OneBotAction<Payload, OB11GroupMember> {
+const ReturnSchema = OB11GroupMemberSchema;
+
+type ReturnType = Static<typeof ReturnSchema>;
+
+class GetGroupMemberInfo extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.GetGroupMemberInfo;
-  override payloadSchema = SchemaData;
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
 
   private parseBoolean (value: boolean | string): boolean {
     return typeof value === 'string' ? value === 'true' : value;
@@ -26,7 +31,7 @@ class GetGroupMemberInfo extends OneBotAction<Payload, OB11GroupMember> {
     return uid;
   }
 
-  private async getGroupMemberInfo (payload: Payload, uid: string, isNocache: boolean) {
+  private async getGroupMemberInfo (payload: PayloadType, uid: string, isNocache: boolean) {
     const groupMemberCache = this.core.apis.GroupApi.groupMemberCache.get(payload.group_id.toString());
     const groupMember = groupMemberCache?.get(uid);
 
@@ -40,7 +45,7 @@ class GetGroupMemberInfo extends OneBotAction<Payload, OB11GroupMember> {
     return info ? { ...groupMember, ...member, ...info } : member;
   }
 
-  async _handle (payload: Payload) {
+  async _handle (payload: PayloadType) {
     const isNocache = this.parseBoolean(payload.no_cache ?? true);
     const uid = await this.getUid(payload.user_id);
     const member = await this.getGroupMemberInfo(payload, uid, isNocache);

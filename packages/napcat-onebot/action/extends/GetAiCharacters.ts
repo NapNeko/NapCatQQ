@@ -3,27 +3,36 @@ import { GetPacketStatusDepends } from '@/napcat-onebot/action/packet/GetPacketS
 import { AIVoiceChatType } from 'napcat-core/packet/entities/aiChat';
 import { Type, Static } from '@sinclair/typebox';
 
-const SchemaData = Type.Object({
-  group_id: Type.Union([Type.Number(), Type.String()]),
-  chat_type: Type.Union([Type.Union([Type.Number(), Type.String()])], { default: 1 }),
+const PayloadSchema = Type.Object({
+  group_id: Type.Union([Type.Number(), Type.String()], { description: '群号' }),
+  chat_type: Type.Union([Type.Number(), Type.String()], { default: 1, description: '聊天类型' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-interface GetAiCharactersResponse {
-  type: string;
-  characters: {
-    character_id: string;
-    character_name: string;
-    preview_url: string;
-  }[];
-}
+const ReturnSchema = Type.Array(
+  Type.Object({
+    type: Type.String({ description: '角色类型' }),
+    characters: Type.Array(
+      Type.Object({
+        character_id: Type.String({ description: '角色ID' }),
+        character_name: Type.String({ description: '角色名称' }),
+        preview_url: Type.String({ description: '预览URL' }),
+      }),
+      { description: '角色列表' }
+    ),
+  }),
+  { description: 'AI角色列表' }
+);
 
-export class GetAiCharacters extends GetPacketStatusDepends<Payload, GetAiCharactersResponse[]> {
+type ReturnType = Static<typeof ReturnSchema>;
+
+export class GetAiCharacters extends GetPacketStatusDepends<PayloadType, ReturnType> {
   override actionName = ActionName.GetAiCharacters;
-  override payloadSchema = SchemaData;
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
 
-  async _handle (payload: Payload) {
+  async _handle (payload: PayloadType) {
     const rawList = await this.core.apis.PacketApi.pkt.operation.FetchAiVoiceList(+payload.group_id, +payload.chat_type as AIVoiceChatType);
     return rawList?.map((item) => ({
       type: item.category,

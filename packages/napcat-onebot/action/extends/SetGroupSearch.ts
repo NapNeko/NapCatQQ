@@ -2,18 +2,23 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = Type.Object({
-  group_id: Type.String(),
-  no_code_finger_open: Type.Optional(Type.Number()),
-  no_finger_open: Type.Optional(Type.Number()),
+const PayloadSchema = Type.Object({
+  group_id: Type.String({ description: '群号' }),
+  no_code_finger_open: Type.Optional(Type.Number({ description: '是否开启无码指纹' })),
+  no_finger_open: Type.Optional(Type.Number({ description: '是否开启无指纹' })),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-export default class SetGroupSearch extends OneBotAction<Payload, null> {
+const ReturnSchema = Type.Null({ description: '返回结果' });
+
+type ReturnType = Static<typeof ReturnSchema>;
+
+export default class SetGroupSearch extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.SetGroupSearch;
-  override payloadSchema = SchemaData;
-  async _handle (payload: Payload): Promise<null> {
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
+  async _handle (payload: PayloadType): Promise<ReturnType> {
     const ret = await this.core.apis.GroupApi.setGroupSearch(payload.group_id, {
       noCodeFingerOpenFlag: payload.no_code_finger_open,
       noFingerOpenFlag: payload.no_finger_open,

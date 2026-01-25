@@ -1,22 +1,26 @@
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
-interface Response {
-  cookies: string,
-  bkn: string
-}
 
-const SchemaData = Type.Object({
-  domain: Type.String(),
+export const GetCookiesPayloadSchema = Type.Object({
+  domain: Type.String({ description: '需要获取 cookies 的域名' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+export type GetCookiesPayload = Static<typeof GetCookiesPayloadSchema>;
 
-export class GetCookies extends OneBotAction<Payload, Response> {
+export const GetCookiesReturnSchema = Type.Object({
+  cookies: Type.String({ description: 'Cookies' }),
+  bkn: Type.String({ description: 'CSRF Token' }),
+});
+
+export type GetCookiesResponse = Static<typeof GetCookiesReturnSchema>;
+
+export class GetCookies extends OneBotAction<GetCookiesPayload, GetCookiesResponse> {
   override actionName = ActionName.GetCookies;
-  override payloadSchema = SchemaData;
+  override payloadSchema = GetCookiesPayloadSchema;
+  override returnSchema = GetCookiesReturnSchema;
 
-  async _handle (payload: Payload) {
+  async _handle (payload: GetCookiesPayload) {
     const cookiesObject = await this.core.apis.UserApi.getCookies(payload.domain);
     // 把获取到的cookiesObject转换成 k=v; 格式字符串拼接在一起
     const cookies = Object.entries(cookiesObject).map(([key, value]) => `${key}=${value}`).join('; ');

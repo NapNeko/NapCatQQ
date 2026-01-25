@@ -7,7 +7,7 @@ export abstract class GetPacketStatusDepends<PT, RT> extends OneBotAction<PT, RT
       return {
         valid: false,
         message: 'packetBackend不可用，请参照文档 https://napneko.github.io/config/advanced 和启动日志检查packetBackend状态或进行配置！' +
-                    '错误堆栈信息：' + this.core.apis.PacketApi.clientLogStack,
+          '错误堆栈信息：' + this.core.apis.PacketApi.clientLogStack,
       };
     }
     return await super.check(payload);
@@ -16,6 +16,8 @@ export abstract class GetPacketStatusDepends<PT, RT> extends OneBotAction<PT, RT
 
 export class GetPacketStatus extends GetPacketStatusDepends<void, void> {
   override actionName = ActionName.GetPacketStatus;
+  override payloadSchema = Type.Object({});
+  override returnSchema = Type.Null();
 
   async _handle () {
 

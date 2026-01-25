@@ -4,16 +4,20 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { MessageUnique } from 'napcat-common/src/message-unique';
 import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = Type.Object({
-  user_id: Type.Optional(Type.Union([Type.String(), Type.Number()])),
-  group_id: Type.Optional(Type.Union([Type.String(), Type.Number()])),
-  message_id: Type.Optional(Type.Union([Type.String(), Type.Number()])),
+const PayloadSchema = Type.Object({
+  user_id: Type.Optional(Type.Union([Type.String(), Type.Number()], { description: '用户QQ' })),
+  group_id: Type.Optional(Type.Union([Type.String(), Type.Number()], { description: '群号' })),
+  message_id: Type.Optional(Type.Union([Type.String(), Type.Number()], { description: '消息ID' })),
 });
 
-type PlayloadType = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-class MarkMsgAsRead extends OneBotAction<PlayloadType, null> {
-  async getPeer (payload: PlayloadType): Promise<Peer> {
+const ReturnSchema = Type.Null({ description: '操作结果' });
+
+type ReturnType = Static<typeof ReturnSchema>;
+
+class MarkMsgAsRead extends OneBotAction<PayloadType, ReturnType> {
+  async getPeer (payload: PayloadType): Promise<Peer> {
     if (payload.message_id) {
       const s_peer = MessageUnique.getMsgIdAndPeerByShortId(+payload.message_id)?.Peer;
       if (s_peer) {
@@ -38,7 +42,7 @@ class MarkMsgAsRead extends OneBotAction<PlayloadType, null> {
     return { chatType: ChatType.KCHATTYPEGROUP, peerUid: payload.group_id.toString() };
   }
 
-  async _handle (payload: PlayloadType): Promise<null> {
+  async _handle (payload: PayloadType): Promise<null> {
     const ret = await this.core.apis.MsgApi.setMsgRead(await this.getPeer(payload));
     if (ret.result !== 0) {
       throw new Error('设置已读失败,' + ret.errMsg);
@@ -49,16 +53,20 @@ class MarkMsgAsRead extends OneBotAction<PlayloadType, null> {
 
 // 以下为非标准实现
 export class MarkPrivateMsgAsRead extends MarkMsgAsRead {
-  override payloadSchema = SchemaData;
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
   override actionName = ActionName.MarkPrivateMsgAsRead;
 }
 
 export class MarkGroupMsgAsRead extends MarkMsgAsRead {
-  override payloadSchema = SchemaData;
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
   override actionName = ActionName.MarkGroupMsgAsRead;
 }
 
 export class GoCQHTTPMarkMsgAsRead extends MarkMsgAsRead {
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
   override actionName = ActionName.GoCQHTTP_MarkMsgAsRead;
 }
 

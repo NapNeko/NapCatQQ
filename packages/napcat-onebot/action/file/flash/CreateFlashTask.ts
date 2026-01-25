@@ -1,6 +1,6 @@
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
-import { Static, Type, Optional } from '@sinclair/typebox';
+import { Static, Type } from '@sinclair/typebox';
 import path from 'node:path';
 
 const richMediaList = [
@@ -8,22 +8,22 @@ const richMediaList = [
   '.png', '.gif', '.jpg', '.jpeg', '.webp', '.bmp',
 ];
 
-// 不全部使用json因为：一个文件解析Form-data会变字符串！！！  但是api文档就写List
-const SchemaData = Type.Object({
+export const CreateFlashTaskPayloadSchema = Type.Object({
   files: Type.Union([
     Type.Array(Type.String()),
     Type.String(),
-  ]),
-  name: Optional(Type.String()),
-  thumb_path: Optional(Type.String()),
+  ], { description: '文件列表或单个文件路径' }),
+  name: Type.Optional(Type.String({ description: '任务名称' })),
+  thumb_path: Type.Optional(Type.String({ description: '缩略图路径' })),
 });
-type Payload = Static<typeof SchemaData>;
+export type CreateFlashTaskPayload = Static<typeof CreateFlashTaskPayloadSchema>;
 
-export class CreateFlashTask extends OneBotAction<Payload, unknown> {
+export class CreateFlashTask extends OneBotAction<CreateFlashTaskPayload, any> {
   override actionName = ActionName.CreateFlashTask;
-  override payloadSchema = SchemaData;
+  override payloadSchema = CreateFlashTaskPayloadSchema;
+  override returnSchema = Type.Any({ description: '任务创建结果' });
 
-  async _handle (payload: Payload) {
+  async _handle (payload: CreateFlashTaskPayload) {
     const fileList = Array.isArray(payload.files) ? payload.files : [payload.files];
     let thumbPath: string = '';
 

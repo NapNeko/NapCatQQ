@@ -3,28 +3,31 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { WebHonorType } from 'napcat-core/types';
 import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = Type.Object({
-  group_id: Type.Union([Type.Number(), Type.String()]),
-  type: Type.Optional(Type.Enum(WebHonorType)),
+const PayloadSchema = Type.Object({
+  group_id: Type.Union([Type.Number(), Type.String()], { description: '群号' }),
+  type: Type.Optional(Type.Enum(WebHonorType, { description: '荣誉类型' })),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-interface HonorInfo {
-  group_id: number;
-  current_talkative: Record<string, unknown>;
-  talkative_list: unknown[];
-  performer_list: unknown[];
-  legend_list: unknown[];
-  emotion_list: unknown[];
-  strong_newbie_list: unknown[];
-}
+const ReturnSchema = Type.Object({
+  group_id: Type.Number({ description: '群号' }),
+  current_talkative: Type.Record(Type.String(), Type.Unknown(), { description: '当前龙王' }),
+  talkative_list: Type.Array(Type.Unknown(), { description: '龙王列表' }),
+  performer_list: Type.Array(Type.Unknown(), { description: '群聊之火列表' }),
+  legend_list: Type.Array(Type.Unknown(), { description: '群聊炽热列表' }),
+  emotion_list: Type.Array(Type.Unknown(), { description: '快乐源泉列表' }),
+  strong_newbie_list: Type.Array(Type.Unknown(), { description: '冒尖小春笋列表' }),
+}, { description: '群荣誉信息' });
 
-export class GetGroupHonorInfo extends OneBotAction<Payload, HonorInfo> {
+type ReturnType = Static<typeof ReturnSchema>;
+
+export class GetGroupHonorInfo extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.GetGroupHonorInfo;
-  override payloadSchema = SchemaData;
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
 
-  async _handle (payload: Payload) {
+  async _handle (payload: PayloadType): Promise<ReturnType> {
     if (!payload.type) {
       payload.type = WebHonorType.ALL;
     }

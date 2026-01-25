@@ -3,19 +3,20 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 import { ChatType, Peer } from 'napcat-core/types';
 
-const SchemaData = Type.Object({
-  fileset_id: Type.String(),
-  user_id: Type.Optional(Type.Union([Type.Number(), Type.String()])),
-  group_id: Type.Optional(Type.Union([Type.Number(), Type.String()])),
+export const SendFlashMsgPayloadSchema = Type.Object({
+  fileset_id: Type.String({ description: '文件集 ID' }),
+  user_id: Type.Optional(Type.Union([Type.Number(), Type.String()], { description: '用户 QQ' })),
+  group_id: Type.Optional(Type.Union([Type.Number(), Type.String()], { description: '群号' })),
 });
 
-type Payload = Static<typeof SchemaData>;
+export type SendFlashMsgPayload = Static<typeof SendFlashMsgPayloadSchema>;
 
-export class SendFlashMsg extends OneBotAction<Payload, unknown> {
+export class SendFlashMsg extends OneBotAction<SendFlashMsgPayload, any> {
   override actionName = ActionName.SendFlashMsg;
-  override payloadSchema = SchemaData;
+  override payloadSchema = SendFlashMsgPayloadSchema;
+  override returnSchema = Type.Any({ description: '发送结果' });
 
-  async _handle (payload: Payload) {
+  async _handle (payload: SendFlashMsgPayload) {
     let peer: Peer;
 
     if (payload.group_id) {

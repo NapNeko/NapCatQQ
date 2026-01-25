@@ -1,15 +1,22 @@
 import { ActionName } from '@/napcat-onebot/action/router';
 import { GetPacketStatusDepends } from '@/napcat-onebot/action/packet/GetPacketStatus';
+import { Type, Static } from '@sinclair/typebox';
 
-export class GetRkeyServer extends GetPacketStatusDepends<void, { private_rkey?: string; group_rkey?: string; expired_time?: number; name: string }> {
+export const GetRkeyServerReturnSchema = Type.Object({
+  private_rkey: Type.Optional(Type.String({ description: '私聊 RKey' })),
+  group_rkey: Type.Optional(Type.String({ description: '群聊 RKey' })),
+  expired_time: Type.Optional(Type.Number({ description: '过期时间' })),
+  name: Type.String({ description: '名称' }),
+});
+
+export type GetRkeyServerReturn = Static<typeof GetRkeyServerReturnSchema>;
+
+export class GetRkeyServer extends GetPacketStatusDepends<void, GetRkeyServerReturn> {
   override actionName = ActionName.GetRkeyServer;
+  override payloadSchema = Type.Object({});
+  override returnSchema = GetRkeyServerReturnSchema;
 
-  private rkeyCache: {
-    private_rkey?: string;
-    group_rkey?: string;
-    expired_time?: number;
-    name: string;
-  } | null = null;
+  private rkeyCache: GetRkeyServerReturn | null = null;
 
   private expiryTime: number | null = null;
 

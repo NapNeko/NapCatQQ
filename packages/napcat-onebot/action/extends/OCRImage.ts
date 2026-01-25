@@ -3,18 +3,22 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { checkFileExist, uriToLocalFile } from 'napcat-common/src/file';
 import fs from 'fs';
 import { Static, Type } from '@sinclair/typebox';
-import { GeneralCallResultStatus } from 'napcat-core';
 
-const SchemaData = Type.Object({
-  image: Type.String(),
+const PayloadSchema = Type.Object({
+  image: Type.String({ description: '图片路径、URL或Base64' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-class OCRImageBase extends OneBotAction<Payload, GeneralCallResultStatus> {
-  override payloadSchema = SchemaData;
+const ReturnSchema = Type.Any({ description: 'OCR结果' });
 
-  async _handle (payload: Payload) {
+type ReturnType = Static<typeof ReturnSchema>;
+
+class OCRImageBase extends OneBotAction<PayloadType, ReturnType> {
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
+
+  async _handle (payload: PayloadType): Promise<ReturnType> {
     const { path, success } = await uriToLocalFile(this.core.NapCatTempPath, payload.image);
     if (!success) {
       throw new Error(`OCR ${payload.image}失败, image字段可能格式不正确`);

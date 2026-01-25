@@ -1,16 +1,35 @@
 import { GroupNotifyMsgStatus } from 'napcat-core';
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
-import { Notify } from '@/napcat-onebot/types';
+import { Type, Static } from '@sinclair/typebox';
 
-export default class GetGroupAddRequest extends OneBotAction<null, Notify[] | null> {
+const ReturnSchema = Type.Array(
+  Type.Object({
+    request_id: Type.Number({ description: '请求ID' }),
+    invitor_uin: Type.Number({ description: '邀请者QQ' }),
+    invitor_nick: Type.Optional(Type.String({ description: '邀请者昵称' })),
+    group_id: Type.Number({ description: '群号' }),
+    message: Type.Optional(Type.String({ description: '验证信息' })),
+    group_name: Type.Optional(Type.String({ description: '群名称' })),
+    checked: Type.Boolean({ description: '是否已处理' }),
+    actor: Type.Number({ description: '处理者QQ' }),
+    requester_nick: Type.Optional(Type.String({ description: '请求者昵称' })),
+  }),
+  { description: '群通知列表' }
+);
+
+type ReturnType = Static<typeof ReturnSchema>;
+
+export default class GetGroupAddRequest extends OneBotAction<void, ReturnType> {
   override actionName = ActionName.GetGroupIgnoreAddRequest;
+  override payloadSchema = Type.Void();
+  override returnSchema = ReturnSchema;
 
-  async _handle (): Promise<Notify[] | null> {
+  async _handle (): Promise<ReturnType> {
     const NTQQUserApi = this.core.apis.UserApi;
     const NTQQGroupApi = this.core.apis.GroupApi;
     const ignoredNotifies = await NTQQGroupApi.getSingleScreenNotifies(true, 10);
-    const retData: Notify[] = [];
+    const retData: any[] = [];
 
     const notifyPromises = ignoredNotifies
       .filter(notify => notify.type === 7)

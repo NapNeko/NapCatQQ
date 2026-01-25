@@ -6,28 +6,31 @@ import { MessageUnique } from 'napcat-common/src/message-unique';
 import { Static, Type } from '@sinclair/typebox';
 import { NetworkAdapterConfig } from '@/napcat-onebot/config/config';
 
-interface Response {
-  messages: OB11Message[];
-}
-
-const SchemaData = Type.Object({
-  group_id: Type.String(),
-  message_seq: Type.Optional(Type.String()),
-  count: Type.Number({ default: 20 }),
-  reverse_order: Type.Boolean({ default: false }),
-  disable_get_url: Type.Boolean({ default: false }),
-  parse_mult_msg: Type.Boolean({ default: true }),
-  quick_reply: Type.Boolean({ default: false }),
-  reverseOrder: Type.Boolean({ default: false }),// @deprecated 兼容旧版本
+const PayloadSchema = Type.Object({
+  group_id: Type.String({ description: '群号' }),
+  message_seq: Type.Optional(Type.String({ description: '起始消息序号' })),
+  count: Type.Number({ default: 20, description: '获取消息数量' }),
+  reverse_order: Type.Boolean({ default: false, description: '是否反向排序' }),
+  disable_get_url: Type.Boolean({ default: false, description: '是否禁用获取URL' }),
+  parse_mult_msg: Type.Boolean({ default: true, description: '是否解析合并消息' }),
+  quick_reply: Type.Boolean({ default: false, description: '是否快速回复' }),
+  reverseOrder: Type.Boolean({ default: false, description: '是否反向排序(旧版本兼容)' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-export default class GoCQHTTPGetGroupMsgHistory extends OneBotAction<Payload, Response> {
+const ReturnSchema = Type.Object({
+  messages: Type.Array(Type.Any(), { description: '消息列表' }),
+}, { description: '群历史消息' });
+
+type ReturnType = Static<typeof ReturnSchema>;
+
+export default class GoCQHTTPGetGroupMsgHistory extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.GoCQHTTP_GetGroupMsgHistory;
-  override payloadSchema = SchemaData;
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
 
-  async _handle (payload: Payload, _adapter: string, config: NetworkAdapterConfig): Promise<Response> {
+  async _handle (payload: PayloadType, _adapter: string, config: NetworkAdapterConfig): Promise<ReturnType> {
     const peer: Peer = { chatType: ChatType.KCHATTYPEGROUP, peerUid: payload.group_id.toString() };
     const hasMessageSeq = !payload.message_seq ? !!payload.message_seq : !(payload.message_seq?.toString() === '' || payload.message_seq?.toString() === '0');
     // 拉取消息
@@ -44,6 +47,6 @@ export default class GoCQHTTPGetGroupMsgHistory extends OneBotAction<Payload, Re
     const ob11MsgList = (await Promise.all(
       msgList.map(msg => this.obContext.apis.MsgApi.parseMessage(msg, config.messagePostFormat, payload.parse_mult_msg, payload.disable_get_url, payload.quick_reply)))
     ).filter(msg => msg !== undefined);
-    return { messages: ob11MsgList };
+    return { messages: ob11MsgList as OB11Message[] };
   }
 }

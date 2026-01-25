@@ -2,16 +2,21 @@ import { GetPacketStatusDepends } from '@/napcat-onebot/action/packet/GetPacketS
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = Type.Object({
-  group_id: Type.Union([Type.Number(), Type.String()]),
+const PayloadSchema = Type.Object({
+  group_id: Type.Union([Type.Number(), Type.String()], { description: '群号' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-class SetGroupSignBase extends GetPacketStatusDepends<Payload, void> {
-  override payloadSchema = SchemaData;
+const ReturnSchema = Type.Void({ description: '打卡结果' });
 
-  async _handle (payload: Payload) {
+type ReturnType = Static<typeof ReturnSchema>;
+
+class SetGroupSignBase extends GetPacketStatusDepends<PayloadType, ReturnType> {
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
+
+  async _handle (payload: PayloadType) {
     return await this.core.apis.PacketApi.pkt.operation.GroupSign(+payload.group_id);
   }
 }

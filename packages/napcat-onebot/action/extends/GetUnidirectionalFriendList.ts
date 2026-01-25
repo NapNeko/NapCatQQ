@@ -2,26 +2,25 @@ import { PacketBuf } from 'napcat-core/packet/transformer/base';
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { ProtoBuf, ProtoBufBase, PBUint32, PBString } from 'napcat.protobuf';
+import { Type, Static } from '@sinclair/typebox';
 
-interface Friend {
-  uin: number;
-  uid: string;
-  nick_name: string;
-  age: number;
-  source: string;
-}
+const ReturnSchema = Type.Array(
+  Type.Object({
+    uin: Type.Number({ description: 'QQ号' }),
+    uid: Type.String({ description: '用户UID' }),
+    nick_name: Type.String({ description: '昵称' }),
+    age: Type.Number({ description: '年龄' }),
+    source: Type.String({ description: '来源' }),
+  }),
+  { description: '单向好友列表' }
+);
 
-interface Block {
-  str_uid: string;
-  bytes_source: string;
-  uint32_sex: number;
-  uint32_age: number;
-  bytes_nick: string;
-  uint64_uin: number;
-}
+type ReturnType = Static<typeof ReturnSchema>;
 
-export class GetUnidirectionalFriendList extends OneBotAction<void, Friend[]> {
+export class GetUnidirectionalFriendList extends OneBotAction<void, ReturnType> {
   override actionName = ActionName.GetUnidirectionalFriendList;
+  override payloadSchema = Type.Void();
+  override returnSchema = ReturnSchema;
 
   async pack_data (data: string): Promise<Uint8Array> {
     return ProtoBuf(class extends ProtoBufBase {
@@ -30,7 +29,7 @@ export class GetUnidirectionalFriendList extends OneBotAction<void, Friend[]> {
     }).encode();
   }
 
-  async _handle (): Promise<Friend[]> {
+  async _handle (): Promise<ReturnType> {
     const self_id = this.core.selfInfo.uin;
     const req_json = {
       uint64_uin: self_id,
@@ -43,7 +42,7 @@ export class GetUnidirectionalFriendList extends OneBotAction<void, Friend[]> {
     const rsq = { cmd: 'MQUpdateSvc_com_qq_ti.web.OidbSvc.0xe17_0', data: data as PacketBuf };
     const rsp_data = await this.core.apis.PacketApi.pkt.operation.sendPacket(rsq, true);
     const block_json = ProtoBuf(class extends ProtoBufBase { data = PBString(4); }).decode(rsp_data);
-    const block_list: Block[] = JSON.parse(block_json.data).rpt_block_list;
+    const block_list: any[] = JSON.parse(block_json.data).rpt_block_list;
 
     return block_list.map((block) => ({
       uin: block.uint64_uin,

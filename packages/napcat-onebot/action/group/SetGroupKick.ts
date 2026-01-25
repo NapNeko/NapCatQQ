@@ -2,19 +2,24 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = Type.Object({
-  group_id: Type.Union([Type.Number(), Type.String()]),
-  user_id: Type.Union([Type.Number(), Type.String()]),
-  reject_add_request: Type.Optional(Type.Union([Type.Boolean(), Type.String()])),
+const PayloadSchema = Type.Object({
+  group_id: Type.String({ description: '群号' }),
+  user_id: Type.String({ description: '用户QQ' }),
+  reject_add_request: Type.Optional(Type.Union([Type.Boolean(), Type.String()], { description: '是否拒绝加群请求' })),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-export default class SetGroupKick extends OneBotAction<Payload, null> {
+const ReturnSchema = Type.Null({ description: '操作结果' });
+
+type ReturnType = Static<typeof ReturnSchema>;
+
+export default class SetGroupKick extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.SetGroupKick;
-  override payloadSchema = SchemaData;
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
 
-  async _handle (payload: Payload): Promise<null> {
+  async _handle (payload: PayloadType): Promise<null> {
     const rejectReq = payload.reject_add_request?.toString() === 'true';
     const uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
     if (!uid) throw new Error('get Uid Error');

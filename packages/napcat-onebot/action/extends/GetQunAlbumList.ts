@@ -2,17 +2,22 @@ import { NTQQWebApi } from 'napcat-core/apis';
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
-const SchemaData = Type.Object({
-  group_id: Type.String(),
+const PayloadSchema = Type.Object({
+  group_id: Type.String({ description: '群号' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-export class GetQunAlbumList extends OneBotAction<Payload, Awaited<ReturnType<NTQQWebApi['getAlbumListByNTQQ']>>['response']['album_list']> {
+const ReturnSchema = Type.Array(Type.Any(), { description: '群相册列表' });
+
+type ReturnType = Static<typeof ReturnSchema>;
+
+export class GetQunAlbumList extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.GetQunAlbumList;
-  override payloadSchema = SchemaData;
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
 
-  async _handle (payload: Payload) {
+  async _handle (payload: PayloadType) {
     return (await this.core.apis.WebApi.getAlbumListByNTQQ(payload.group_id)).response.album_list;
   }
 }

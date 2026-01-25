@@ -2,18 +2,23 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Type, Static } from '@sinclair/typebox';
 
-const SchemaData = Type.Object({
-  rawData: Type.String(),
-  brief: Type.String(),
+const PayloadSchema = Type.Object({
+  rawData: Type.String({ description: '原始数据' }),
+  brief: Type.String({ description: '简要描述' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-export class CreateCollection extends OneBotAction<Payload, unknown> {
+const ReturnSchema = Type.Any({ description: '创建结果' });
+
+type ReturnType = Static<typeof ReturnSchema>;
+
+export class CreateCollection extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.CreateCollection;
-  override payloadSchema = SchemaData;
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
 
-  async _handle (payload: Payload) {
+  async _handle (payload: PayloadType) {
     return await this.core.apis.CollectionApi.createCollection(
       this.core.selfInfo.uin,
       this.core.selfInfo.uid,

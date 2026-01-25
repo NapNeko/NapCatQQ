@@ -3,17 +3,22 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { ChatType } from 'napcat-core';
 import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = Type.Object({
-  user_id: Type.Union([Type.Number(), Type.String()]),
-  event_type: Type.Number(),
+const PayloadSchema = Type.Object({
+  user_id: Type.Union([Type.Number(), Type.String()], { description: 'QQ号' }),
+  event_type: Type.Number({ description: '事件类型' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-export class SetInputStatus extends OneBotAction<Payload, unknown> {
+const ReturnSchema = Type.Any({ description: '设置结果' });
+
+type ReturnType = Static<typeof ReturnSchema>;
+
+export class SetInputStatus extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.SetInputStatus;
-  override payloadSchema = SchemaData;
-  async _handle (payload: Payload) {
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
+  async _handle (payload: PayloadType) {
     const uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
     if (!uid) throw new Error('uid is empty');
     const peer = {

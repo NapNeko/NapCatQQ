@@ -4,23 +4,24 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { unlink } from 'node:fs/promises';
 import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = Type.Object({
-  group_id: Type.Union([Type.Number(), Type.String()]),
-  content: Type.String(),
-  image: Type.Optional(Type.String()),
-  pinned: Type.Union([Type.Number(), Type.String()], { default: 0 }),
-  type: Type.Union([Type.Number(), Type.String()], { default: 1 }),
-  confirm_required: Type.Union([Type.Number(), Type.String()], { default: 1 }),
-  is_show_edit_card: Type.Union([Type.Number(), Type.String()], { default: 0 }),
-  tip_window_type: Type.Union([Type.Number(), Type.String()], { default: 0 }),
+export const SendGroupNoticePayloadSchema = Type.Object({
+  group_id: Type.Union([Type.Number(), Type.String()], { description: '群号' }),
+  content: Type.String({ description: '公告内容' }),
+  image: Type.Optional(Type.String({ description: '公告图片路径或 URL' })),
+  pinned: Type.Union([Type.Number(), Type.String()], { default: 0, description: '是否置顶 (0/1)' }),
+  type: Type.Union([Type.Number(), Type.String()], { default: 1, description: '类型 (默认为 1)' }),
+  confirm_required: Type.Union([Type.Number(), Type.String()], { default: 1, description: '是否需要确认 (0/1)' }),
+  is_show_edit_card: Type.Union([Type.Number(), Type.String()], { default: 0, description: '是否显示修改群名片引导 (0/1)' }),
+  tip_window_type: Type.Union([Type.Number(), Type.String()], { default: 0, description: '弹窗类型 (默认为 0)' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+export type SendGroupNoticePayload = Static<typeof SendGroupNoticePayloadSchema>;
 
-export class SendGroupNotice extends OneBotAction<Payload, null> {
+export class SendGroupNotice extends OneBotAction<SendGroupNoticePayload, void> {
   override actionName = ActionName.GoCQHTTP_SendGroupNotice;
-  override payloadSchema = SchemaData;
-  async _handle (payload: Payload) {
+  override payloadSchema = SendGroupNoticePayloadSchema;
+  override returnSchema = Type.Null();
+  async _handle (payload: SendGroupNoticePayload) {
     let UploadImage: { id: string, width: number, height: number; } | undefined;
     if (payload.image) {
       // 公告图逻辑

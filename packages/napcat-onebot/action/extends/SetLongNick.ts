@@ -2,17 +2,22 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = Type.Object({
-  longNick: Type.String(),
+const PayloadSchema = Type.Object({
+  longNick: Type.String({ description: '签名内容' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-export class SetLongNick extends OneBotAction<Payload, unknown> {
+const ReturnSchema = Type.Any({ description: '设置结果' });
+
+type ReturnType = Static<typeof ReturnSchema>;
+
+export class SetLongNick extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.SetLongNick;
-  override payloadSchema = SchemaData;
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
 
-  async _handle (payload: Payload) {
+  async _handle (payload: PayloadType) {
     return await this.core.apis.UserApi.setLongNick(payload.longNick);
   }
 }

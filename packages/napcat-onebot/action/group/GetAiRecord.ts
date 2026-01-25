@@ -3,19 +3,24 @@ import { GetPacketStatusDepends } from '@/napcat-onebot/action/packet/GetPacketS
 import { AIVoiceChatType } from 'napcat-core/packet/entities/aiChat';
 import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = Type.Object({
-  character: Type.String(),
-  group_id: Type.Union([Type.Number(), Type.String()]),
-  text: Type.String(),
+const PayloadSchema = Type.Object({
+  character: Type.String({ description: '角色ID' }),
+  group_id: Type.Union([Type.Number(), Type.String()], { description: '群号' }),
+  text: Type.String({ description: '语音文本内容' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-export class GetAiRecord extends GetPacketStatusDepends<Payload, string> {
+const ReturnSchema = Type.String({ description: '语音URL' });
+
+type ReturnType = Static<typeof ReturnSchema>;
+
+export class GetAiRecord extends GetPacketStatusDepends<PayloadType, ReturnType> {
   override actionName = ActionName.GetAiRecord;
-  override payloadSchema = SchemaData;
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
 
-  async _handle (payload: Payload) {
+  async _handle (payload: PayloadType) {
     const rawRsp = await this.core.apis.PacketApi.pkt.operation.GetAiVoice(+payload.group_id, payload.character, payload.text, AIVoiceChatType.Sound);
     if (!rawRsp.msgInfoBody[0]) {
       throw new Error('No voice data');

@@ -4,18 +4,19 @@ import { Static, Type } from '@sinclair/typebox';
 import { NetworkAdapterConfig } from '@/napcat-onebot/config/config';
 import { StreamPacket, StreamStatus } from './StreamBasic';
 
-const SchemaData = Type.Object({
-  error: Type.Optional(Type.Boolean({ default: false })),
+export const TestDownloadStreamPayloadSchema = Type.Object({
+  error: Type.Optional(Type.Boolean({ default: false, description: '是否触发测试错误' })),
 });
 
-type Payload = Static<typeof SchemaData>;
+export type TestDownloadStreamPayload = Static<typeof TestDownloadStreamPayloadSchema>;
 
-export class TestDownloadStream extends OneBotAction<Payload, StreamPacket<{ data: string }>> {
+export class TestDownloadStream extends OneBotAction<TestDownloadStreamPayload, StreamPacket<{ data: string; }>> {
   override actionName = ActionName.TestDownloadStream;
-  override payloadSchema = SchemaData;
+  override payloadSchema = TestDownloadStreamPayloadSchema;
+  override returnSchema = Type.Any({ description: '测试流数据' });
   override useStream = true;
 
-  async _handle (_payload: Payload, _adaptername: string, _config: NetworkAdapterConfig, req: OneBotRequestToolkit) {
+  async _handle (_payload: TestDownloadStreamPayload, _adaptername: string, _config: NetworkAdapterConfig, req: OneBotRequestToolkit) {
     for (let i = 0; i < 10; i++) {
       await req.send({ type: StreamStatus.Stream, data: `Index-> ${i + 1}`, data_type: 'data_chunk' });
       await new Promise(resolve => setTimeout(resolve, 100));

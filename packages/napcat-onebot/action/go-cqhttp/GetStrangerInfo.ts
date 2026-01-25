@@ -5,17 +5,38 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { calcQQLevel } from 'napcat-common/src/helper';
 import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = Type.Object({
-  user_id: Type.Union([Type.Number(), Type.String()]),
-  no_cache: Type.Union([Type.Boolean(), Type.String()], { default: false }),
+const PayloadSchema = Type.Object({
+  user_id: Type.Union([Type.Number(), Type.String()], { description: '用户QQ' }),
+  no_cache: Type.Union([Type.Boolean(), Type.String()], { default: false, description: '是否不使用缓存' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-export default class GoCQHTTPGetStrangerInfo extends OneBotAction<Payload, OB11User & { uid: string }> {
+const ReturnSchema = Type.Object({
+  user_id: Type.Number({ description: '用户QQ' }),
+  uid: Type.String({ description: 'UID' }),
+  nickname: Type.String({ description: '昵称' }),
+  age: Type.Number({ description: '年龄' }),
+  qid: Type.String({ description: 'QID' }),
+  qqLevel: Type.Number({ description: 'QQ等级' }),
+  sex: Type.String({ description: '性别' }),
+  long_nick: Type.String({ description: '个性签名' }),
+  reg_time: Type.Number({ description: '注册时间' }),
+  is_vip: Type.Boolean({ description: '是否VIP' }),
+  is_years_vip: Type.Boolean({ description: '是否年费VIP' }),
+  vip_level: Type.Number({ description: 'VIP等级' }),
+  remark: Type.String({ description: '备注' }),
+  status: Type.Number({ description: '状态' }),
+  login_days: Type.Number({ description: '登录天数' }),
+}, { description: '陌生人信息' });
+
+type ReturnType = Static<typeof ReturnSchema>;
+
+export default class GoCQHTTPGetStrangerInfo extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.GoCQHTTP_GetStrangerInfo;
-  override payloadSchema = SchemaData;
-  async _handle (payload: Payload) {
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
+  async _handle (payload: PayloadType): Promise<ReturnType> {
     const user_id = payload.user_id.toString();
     const isNocache = typeof payload.no_cache === 'string' ? payload.no_cache === 'true' : !!payload.no_cache;
     const extendData = await this.core.apis.UserApi.getUserDetailInfoByUin(user_id);

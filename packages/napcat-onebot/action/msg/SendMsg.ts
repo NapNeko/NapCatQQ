@@ -4,7 +4,6 @@ import {
   OB11MessageMixType,
   OB11MessageNode,
   OB11PostContext,
-  OB11PostSendMsg,
 } from '@/napcat-onebot/types';
 import { ActionName, BaseCheckResult } from '@/napcat-onebot/action/router';
 import { decodeCQCode } from '@/napcat-onebot/helper/cqcode';
@@ -15,12 +14,32 @@ import { ForwardMsgBuilder } from '@/napcat-core/helper/forward-msg-builder';
 import { stringifyWithBigInt } from 'napcat-common/src/helper';
 import { PacketMsg } from 'napcat-core/packet/message/message';
 import { rawMsgWithSendMsg } from 'napcat-core/packet/message/converter';
+import { Static, Type } from '@sinclair/typebox';
 
-export interface ReturnDataType {
-  message_id: number;
-  res_id?: string;
-  forward_id?: string;
-}
+export const SendMsgPayloadSchema = Type.Object({
+  message_type: Type.Optional(Type.Union([Type.Literal('private'), Type.Literal('group')], { description: '消息类型 (private/group)' })),
+  user_id: Type.Optional(Type.String({ description: '用户QQ' })),
+  group_id: Type.Optional(Type.String({ description: '群号' })),
+  message: Type.Unknown({ description: '消息内容' }),
+  auto_escape: Type.Optional(Type.Union([Type.Boolean(), Type.String()], { description: '是否作为纯文本发送' })),
+  // 以下为扩展字段
+  source: Type.Optional(Type.String({ description: '合并转发来源' })),
+  news: Type.Optional(Type.Array(Type.Object({ text: Type.String() }), { description: '合并转发新闻' })),
+  summary: Type.Optional(Type.String({ description: '合并转发摘要' })),
+  prompt: Type.Optional(Type.String({ description: '合并转发提示' })),
+});
+
+export type SendMsgPayload = Static<typeof SendMsgPayloadSchema> & {
+  message: OB11MessageMixType;
+};
+
+export const SendMsgReturnSchema = Type.Object({
+  message_id: Type.Number({ description: '消息ID' }),
+  res_id: Type.Optional(Type.String({ description: '转发消息的 res_id' })),
+  forward_id: Type.Optional(Type.String({ description: '转发消息的 forward_id' })),
+});
+
+export type ReturnDataType = Static<typeof SendMsgReturnSchema>;
 
 export enum ContextMode {
   Normal = 0,
@@ -99,17 +118,21 @@ export async function createContext (core: NapCatCore, payload: OB11PostContext 
   throw new Error('请指定正确的 group_id 或 user_id');
 }
 
-function getSpecialMsgNum (payload: OB11PostSendMsg, msgType: OB11MessageDataType): number {
-  if (Array.isArray(payload.message)) {
-    return payload.message.filter(msg => msg.type === msgType).length;
-  }
-  return 0;
+function getSpecialMsgNum (messages: OB11MessageData[], msgType: OB11MessageDataType): number {
+  return messages.filter(msg => msg.type === msgType).length;
 }
 
-export class SendMsgBase extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
-  protected override async check (payload: OB11PostSendMsg): Promise<BaseCheckResult> {
+function isNode (msg: OB11MessageData): msg is OB11MessageNode {
+  return msg.type === OB11MessageDataType.node;
+}
+
+export class SendMsgBase extends OneBotAction<SendMsgPayload, ReturnDataType> {
+  override payloadSchema = SendMsgPayloadSchema;
+  override returnSchema = SendMsgReturnSchema;
+
+  protected override async check (payload: SendMsgPayload): Promise<BaseCheckResult> {
     const messages = normalize(payload.message);
-    const nodeElementLength = getSpecialMsgNum(payload, OB11MessageDataType.node);
+    const nodeElementLength = getSpecialMsgNum(messages, OB11MessageDataType.node);
     if (nodeElementLength > 0 && nodeElementLength !== messages.length) {
       return {
         valid: false,
@@ -119,27 +142,32 @@ export class SendMsgBase extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
     return { valid: true };
   }
 
-  async _handle (payload: OB11PostSendMsg): Promise<ReturnDataType> {
+  async _handle (payload: SendMsgPayload): Promise<ReturnDataType> {
     return this.base_handle(payload);
   }
 
-  async base_handle (payload: OB11PostSendMsg, contextMode: ContextMode = ContextMode.Normal): Promise<ReturnDataType> {
+  async base_handle (payload: SendMsgPayload, contextMode: ContextMode = ContextMode.Normal): Promise<ReturnDataType> {
     if (payload.message_type === 'group') contextMode = ContextMode.Group;
     if (payload.message_type === 'private') contextMode = ContextMode.Private;
-    const peer = await createContext(this.core, payload, contextMode);
+    const peer = await createContext(this.core, {
+      message_type: payload.message_type,
+      user_id: payload.user_id?.toString(),
+      group_id: payload.group_id?.toString(),
+    }, contextMode);
 
     const messages = normalize(
       payload.message,
       typeof payload.auto_escape === 'string' ? payload.auto_escape === 'true' : !!payload.auto_escape
     );
 
-    if (getSpecialMsgNum(payload, OB11MessageDataType.node)) {
+    const nodeMessages = messages.filter(isNode);
+    if (nodeMessages.length > 0) {
       const packetMode = this.core.apis.PacketApi.packetStatus;
       let returnMsgAndResId: { message: RawMessage | null, res_id?: string; } | null;
       try {
         returnMsgAndResId = packetMode
-          ? await this.handleForwardedNodesPacket(peer, messages as OB11MessageNode[], payload.source, payload.news, payload.summary, payload.prompt)
-          : await this.handleForwardedNodes(peer, messages as OB11MessageNode[]);
+          ? await this.handleForwardedNodesPacket(peer, nodeMessages, payload.source, payload.news, payload.summary, payload.prompt)
+          : await this.handleForwardedNodes(peer, nodeMessages);
       } catch (e: unknown) {
         throw Error(packetMode ? `发送伪造合并转发消息失败: ${(e as Error)?.stack}` : `发送合并转发消息失败: ${(e as Error)?.stack}`);
       }
@@ -164,7 +192,7 @@ export class SendMsgBase extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
       //   const music: OB11MessageCustomMusic = messages[0] as OB11MessageCustomMusic;
       //   if (music) {
       //   }
-      // }
+      // }\r
     }
     // log("send msg:", peer, sendElements)
 
@@ -195,8 +223,9 @@ export class SendMsgBase extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
         const OB11Data = normalize(node.type === OB11MessageDataType.node ? node.data.content : node);
         let sendElements: SendMessageElement[];
 
-        if (getSpecialMsgNum({ message: OB11Data }, OB11MessageDataType.node)) {
-          const uploadReturnData = await this.uploadForwardedNodesPacket(msgPeer, OB11Data as OB11MessageNode[], node.data.source, node.data.news, node.data.summary, node.data.prompt, {
+        const subNodeMessages = OB11Data.filter(isNode);
+        if (subNodeMessages.length > 0) {
+          const uploadReturnData = await this.uploadForwardedNodesPacket(msgPeer, subNodeMessages, node.data.source, node.data.news, node.data.summary, node.data.prompt, {
             user_id: (node.data.user_id ?? node.data.uin)?.toString() ?? parentMeta?.user_id ?? this.core.selfInfo.uin,
             nickname: (node.data.nickname || node.data.name) ?? parentMeta?.nickname ?? 'QQ用户',
           }, dp + 1);
@@ -296,13 +325,13 @@ export class SendMsgBase extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
         try {
           const OB11Data = normalize(messageNode.data.content);
           // 筛选node消息
-          const isNodeMsg = OB11Data.filter(e => e.type === OB11MessageDataType.node).length;// 找到子转发消息
-          if (isNodeMsg !== 0) {
-            if (isNodeMsg !== OB11Data.length) {
+          const subNodeMessages = OB11Data.filter(isNode);
+          if (subNodeMessages.length !== 0) {
+            if (subNodeMessages.length !== OB11Data.length) {
               this.core.context.logger.logError('子消息中包含非node消息 跳过不合法部分');
               continue;
             }
-            const nodeMsg = await this.handleForwardedNodes(selfPeer, OB11Data.filter(e => e.type === OB11MessageDataType.node));
+            const nodeMsg = await this.handleForwardedNodes(selfPeer, subNodeMessages);
             if (nodeMsg) {
               nodeMsgIds.push(nodeMsg.message!.msgId);
               MessageUnique.createUniqueMsgId(selfPeer, nodeMsg.message!.msgId);

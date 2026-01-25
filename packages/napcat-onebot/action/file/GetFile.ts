@@ -5,23 +5,26 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { OB11MessageImage, OB11MessageVideo } from '@/napcat-onebot/types';
 import { Static, Type } from '@sinclair/typebox';
 
-export interface GetFileResponse {
-  file?: string;  // path
-  url?: string;
-  file_size?: string;
-  file_name?: string;
-  base64?: string;
-}
-
-const GetFileBase_PayloadSchema = Type.Object({
-  file: Type.Optional(Type.String()),
-  file_id: Type.Optional(Type.String()),
+export const GetFilePayloadSchema = Type.Object({
+  file: Type.Optional(Type.String({ description: '文件路径、URL或Base64' })),
+  file_id: Type.Optional(Type.String({ description: '文件ID' })),
 });
 
-export type GetFilePayload = Static<typeof GetFileBase_PayloadSchema>;
+export type GetFilePayload = Static<typeof GetFilePayloadSchema>;
+
+export const GetFileReturnSchema = Type.Object({
+  file: Type.Optional(Type.String({ description: '本地路径' })),
+  url: Type.Optional(Type.String({ description: '下载URL' })),
+  file_size: Type.Optional(Type.String({ description: '文件大小' })),
+  file_name: Type.Optional(Type.String({ description: '文件名' })),
+  base64: Type.Optional(Type.String({ description: 'Base64编码' })),
+}, { description: '文件信息' });
+
+export type GetFileResponse = Static<typeof GetFileReturnSchema>;
 
 export class GetFileBase extends OneBotAction<GetFilePayload, GetFileResponse> {
-  override payloadSchema = GetFileBase_PayloadSchema;
+  override payloadSchema = GetFilePayloadSchema;
+  override returnSchema = GetFileReturnSchema;
 
   async _handle (payload: GetFilePayload): Promise<GetFileResponse> {
     payload.file ||= payload.file_id || '';
@@ -40,12 +43,12 @@ export class GetFileBase extends OneBotAction<GetFilePayload, GetFileResponse> {
       let url = '';
       if (mixElement?.picElement && rawMessage) {
         const tempData =
-                    await this.obContext.apis.MsgApi.rawToOb11Converters.picElement?.(mixElement?.picElement, rawMessage, mixElement, { parseMultMsg: false, disableGetUrl: false, quick_reply: true }) as OB11MessageImage | undefined;
+          await this.obContext.apis.MsgApi.rawToOb11Converters.picElement?.(mixElement?.picElement, rawMessage, mixElement, { parseMultMsg: false, disableGetUrl: false, quick_reply: true }) as OB11MessageImage | undefined;
         url = tempData?.data.url ?? '';
       }
       if (mixElement?.videoElement && rawMessage) {
         const tempData =
-                    await this.obContext.apis.MsgApi.rawToOb11Converters.videoElement?.(mixElement?.videoElement, rawMessage, mixElement, { parseMultMsg: false, disableGetUrl: false, quick_reply: true }) as OB11MessageVideo | undefined;
+          await this.obContext.apis.MsgApi.rawToOb11Converters.videoElement?.(mixElement?.videoElement, rawMessage, mixElement, { parseMultMsg: false, disableGetUrl: false, quick_reply: true }) as OB11MessageVideo | undefined;
         url = tempData?.data.url ?? '';
       }
       const res: GetFileResponse = {

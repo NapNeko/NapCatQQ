@@ -6,26 +6,29 @@ import { uriToLocalFile } from 'napcat-common/src/file';
 import { SendMessageContext } from '@/napcat-onebot/api';
 import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = Type.Object({
-  group_id: Type.Union([Type.Number(), Type.String()]),
-  file: Type.String(),
-  name: Type.String(),
-  folder: Type.Optional(Type.String()),
-  folder_id: Type.Optional(Type.String()), // 临时扩展
-  upload_file: Type.Boolean({ default: true }),
+export const GoCQHTTPUploadGroupFilePayloadSchema = Type.Object({
+  group_id: Type.Union([Type.Number(), Type.String()], { description: '群号' }),
+  file: Type.String({ description: '本地文件路径' }),
+  name: Type.String({ description: '文件名' }),
+  folder: Type.Optional(Type.String({ description: '父目录 ID' })),
+  folder_id: Type.Optional(Type.String({ description: '父目录 ID (兼容性字段)' })), // 临时扩展
+  upload_file: Type.Boolean({ default: true, description: '是否执行上传' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+export type GoCQHTTPUploadGroupFilePayload = Static<typeof GoCQHTTPUploadGroupFilePayloadSchema>;
 
-interface UploadGroupFileResponse {
-  file_id: string | null;
-}
+export const GoCQHTTPUploadGroupFileReturnSchema = Type.Object({
+  file_id: Type.Union([Type.String(), Type.Null()], { description: '文件 ID' }),
+});
 
-export default class GoCQHTTPUploadGroupFile extends OneBotAction<Payload, UploadGroupFileResponse> {
+export type GoCQHTTPUploadGroupFileResponse = Static<typeof GoCQHTTPUploadGroupFileReturnSchema>;
+
+export default class GoCQHTTPUploadGroupFile extends OneBotAction<GoCQHTTPUploadGroupFilePayload, GoCQHTTPUploadGroupFileResponse> {
   override actionName = ActionName.GoCQHTTP_UploadGroupFile;
-  override payloadSchema = SchemaData;
+  override payloadSchema = GoCQHTTPUploadGroupFilePayloadSchema;
+  override returnSchema = GoCQHTTPUploadGroupFileReturnSchema;
 
-  async _handle (payload: Payload): Promise<UploadGroupFileResponse> {
+  async _handle (payload: GoCQHTTPUploadGroupFilePayload): Promise<GoCQHTTPUploadGroupFileResponse> {
     let file = payload.file;
     if (fs.existsSync(file)) {
       file = `file://${file}`;
