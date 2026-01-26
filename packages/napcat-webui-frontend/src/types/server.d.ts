@@ -188,5 +188,8 @@ interface WebUIConfig {
   port: number;
   loginRate: number;
   disableWebUI: boolean;
-  disableNonLANAccess: boolean;
+  accessControlMode: 'none' | 'whitelist' | 'blacklist';
+  ipWhitelist: string[];
+  ipBlacklist: string[];
+  enableXForwardedFor: boolean;
 }

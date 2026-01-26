@@ -3,9 +3,8 @@ import {
   GetWebUIConfigHandler,
   GetDisableWebUIHandler,
   UpdateDisableWebUIHandler,
-  GetDisableNonLANAccessHandler,
-  UpdateDisableNonLANAccessHandler,
   UpdateWebUIConfigHandler,
+  GetClientIPHandler,
 } from '@/napcat-webui-backend/src/api/WebUIConfig';
 
 const router: Router = Router();
@@ -22,10 +21,7 @@ router.get('/GetDisableWebUI', GetDisableWebUIHandler);
 // 更新是否禁用WebUI
 router.post('/UpdateDisableWebUI', UpdateDisableWebUIHandler);
 
-// 获取是否禁用非局域网访问
-router.get('/GetDisableNonLANAccess', GetDisableNonLANAccessHandler);
-
-// 更新是否禁用非局域网访问
-router.post('/UpdateDisableNonLANAccess', UpdateDisableNonLANAccessHandler);
+// 获取当前客户端IP
+router.get('/GetClientIP', GetClientIPHandler);
 
 export { router as WebUIConfigRouter };

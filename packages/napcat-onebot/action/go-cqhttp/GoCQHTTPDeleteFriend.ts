@@ -39,6 +39,6 @@ export class GoCQHTTPDeleteFriend extends OneBotAction<GoCQHTTPDeleteFriendPaylo
         message: '不是好友',
       };
     }
-    return await this.core.apis.FriendApi.delBuudy(uid, payload.temp_block, payload.temp_both_del);
+    return await this.core.apis.FriendApi.delBuddy(uid, payload.temp_block, payload.temp_both_del);
   }
 }
