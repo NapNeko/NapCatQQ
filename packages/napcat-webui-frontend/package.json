@@ -88,7 +88,7 @@
     "remark-gfm": "^4.0.0",
     "tailwind-variants": "^0.3.0",
     "tailwindcss": "^3.4.17",
-    "zod": "^3.24.1"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@react-types/shared": "^3.26.0",
