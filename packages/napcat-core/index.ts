@@ -39,6 +39,12 @@ export * from './wrapper';
 export * from './types/index';
 export * from './services/index';
 export * from './listeners/index';
+export * from './apis/index';
+export * from './helper/log';
+export * from './helper/qq-basic-info';
+export * from './helper/event';
+export * from './helper/config';
+export * from './helper/proxy-handler';
 
 export enum NapCatCoreWorkingEnv {
   Unknown = 0,

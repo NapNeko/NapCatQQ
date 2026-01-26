@@ -1,0 +1,15 @@
+{
+  "name": "napcat-types",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "dependencies": {
+    "napcat-core": "workspace:*",
+    "napcat-onebot": "workspace:*"
+  },
+  "devDependencies": {
+    "tsc-alias": "^1.8.16"
+  }
+}
