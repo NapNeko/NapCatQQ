@@ -273,19 +273,10 @@ export default class WebUIManager {
     return data.data;
   }
 
-  // 获取是否禁用非局域网访问
-  public static async getDisableNonLANAccess () {
-    const { data } = await serverRequest.get<ServerResponse<boolean>>(
-      '/WebUIConfig/GetDisableNonLANAccess'
-    );
-    return data.data;
-  }
-
-  // 更新是否禁用非局域网访问
-  public static async updateDisableNonLANAccess (disable: boolean) {
-    const { data } = await serverRequest.post<ServerResponse<boolean>>(
-      '/WebUIConfig/UpdateDisableNonLANAccess',
-      { disable }
+  // 获取当前客户端IP
+  public static async getClientIP () {
+    const { data } = await serverRequest.get<ServerResponse<{ ip: string; }>>(
+      '/WebUIConfig/GetClientIP'
     );
     return data.data;
   }

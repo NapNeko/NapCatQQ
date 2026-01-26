@@ -1,7 +1,11 @@
 {
-    "host": "0.0.0.0",
-    "port": 6099,
-    "prefix": "",
-    "token": "random",
-    "loginRate": 3
+  "host": "0.0.0.0",
+  "port": 6099,
+  "prefix": "",
+  "token": "random",
+  "loginRate": 3,
+  "accessControlMode": "none",
+  "ipWhitelist": [],
+  "ipBlacklist": [],
+  "enableXForwardedFor": false
 }
