@@ -31,17 +31,3 @@ export class FetchCustomFace extends OneBotAction<PayloadType, ReturnType> {
   }
 }
 
-const statusText = `
-## 状态列表
-
-### 对方正在说话...
-\`\`\`json5;
-{ "event_type": 0; }
-\`\`\`
-
-### 对方正在输入...
-\`\`\`json5;
-{ "event_type": 1; }
-\`\`\`
-
-`;
