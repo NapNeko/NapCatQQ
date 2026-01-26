@@ -30,3 +30,18 @@ export class FetchCustomFace extends OneBotAction<PayloadType, ReturnType> {
     return ret.emojiInfoList.map(e => e.url);
   }
 }
+
+const statusText = `
+## 状态列表
+
+### 对方正在说话...
+\`\`\`json5;
+{ "event_type": 0; }
+\`\`\`
+
+### 对方正在输入...
+\`\`\`json5;
+{ "event_type": 1; }
+\`\`\`
+
+`;

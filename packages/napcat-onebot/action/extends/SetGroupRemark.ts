@@ -24,7 +24,7 @@ export default class SetGroupRemark extends OneBotAction<PayloadType, ReturnType
     group_id: '123456',
     remark: '测试群备注'
   };
-  override returnExample = {};
+  override returnExample = null;
 
   async _handle (payload: PayloadType): Promise<ReturnType> {
     const ret = await this.core.apis.GroupApi.setGroupRemark(payload.group_id, payload.remark);

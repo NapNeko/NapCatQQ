@@ -8,7 +8,7 @@ export const PacketActionsExamples = {
     response: {},
   },
   SetGroupTodo: {
-    payload: { group_id: '123456', content: '待办内容' },
+    payload: { group_id: '123456', message_id: '123456789' },
     response: {},
   },
 };

@@ -19,9 +19,7 @@ export class GetGroupInfoEx extends OneBotAction<PayloadType, ReturnType> {
     group_id: 123456
   };
   override returnExample = {
-    group_id: 123456,
-    group_name: '测试群',
-    member_count: 100
+
   };
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;

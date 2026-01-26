@@ -23,12 +23,13 @@ export class UploadImageToQunAlbum extends OneBotAction<PayloadType, ReturnType>
   override actionSummary = '上传图片到群相册';
   override actionTags = ['群组扩展'];
   override payloadExample = {
-    group_code: 123456,
+    group_id: '123456',
     album_id: 'album_id_1',
+    album_name: '相册1',
     file: '/path/to/image.jpg'
   };
   override returnExample = {
-    result: true
+    result: null
   };
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;

@@ -17,7 +17,10 @@ export class GetRkeyServer extends GetPacketStatusDepends<void, GetRkeyServerRet
   override actionTags = ['系统扩展'];
   override payloadExample = {};
   override returnExample = {
-    server: 'http://rkey-server.com'
+    private_rkey: '&rkey=123456789',
+    group_rkey: '&rkey=123456789',
+    expired_time: 1694560000,
+    name: 'NapCat 4',
   };
   override payloadSchema = Type.Object({});
   override returnSchema = GetRkeyServerReturnSchema;

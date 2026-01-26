@@ -19,11 +19,10 @@ export default class SetGroupSearch extends OneBotAction<PayloadType, ReturnType
   override actionSummary = '设置群搜索选项';
   override actionTags = ['群组扩展'];
   override payloadExample = {
-    group_id: 123456,
-    is_searchable: true
+    group_id: '123456'
   };
   override returnExample = {
-    result: true
+    result: null
   };
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;

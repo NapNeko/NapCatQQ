@@ -6,7 +6,7 @@ import { PacketActionsExamples } from './examples';
 
 export const SendPokePayloadSchema = Type.Object({
   group_id: Type.Optional(Type.String({ description: '群号' })),
-  user_id: Type.Optional(Type.String({ description: '用户QQ' })),
+  user_id: Type.String({ description: '用户QQ' }),
   target_id: Type.Optional(Type.String({ description: '目标QQ' })),
 });
 

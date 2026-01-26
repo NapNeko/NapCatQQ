@@ -20,11 +20,11 @@ export default class SetGroupAddOption extends OneBotAction<PayloadType, ReturnT
   override actionSummary = '设置群加群选项';
   override actionTags = ['群组扩展'];
   override payloadExample = {
-    group_id: 123456,
-    option: 1
+    group_id: '123456',
+    add_type: 1,
   };
   override returnExample = {
-    result: true
+    result: null
   };
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
