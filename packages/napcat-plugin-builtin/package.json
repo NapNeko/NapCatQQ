@@ -6,7 +6,7 @@
   "description": "NapCat 内置插件",
   "author": "NapNeko",
   "dependencies": {
-    "napcat-onebot": "workspace:*"
+    "napcat-types": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.0.1"

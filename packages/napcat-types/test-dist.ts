@@ -1,12 +1,12 @@
-import { 
-    ChatType, 
-    ElementType, 
-    NapCatCore, 
-    NTQQMsgApi, 
-    NapCatOneBot11Adapter, 
-    OB11Message,
-    OB11BaseMessageEvent,
-    OB11BaseMetaEvent
+import {
+  ChatType,
+  ElementType,
+  NapCatCore,
+  NTQQMsgApi,
+  NapCatOneBot11Adapter,
+  OB11Message,
+  OB11BaseMessageEvent,
+  OB11BaseMetaEvent,
 } from './dist/napcat-types/index';
 
 console.log('--- NapCat Comprehensive Type Test ---');
@@ -29,10 +29,10 @@ console.log('OneBot types and events access check: OK');
 
 // 4. 验证导出完整性
 if (ChatType.KCHATTYPEGROUP === 2 && ElementType.TEXT === 1) {
-    console.log('\n✅ ALL TESTS PASSED: Types, Enums and Events are correctly exported and accessible.');
+  console.log('\n✅ ALL TESTS PASSED: Types, Enums and Events are correctly exported and accessible.');
 } else {
-    console.error('\n❌ TESTS FAILED: Enum value mismatch.');
-    throw new Error('Test Failed');
+  console.error('\n❌ TESTS FAILED: Enum value mismatch.');
+  throw new Error('Test Failed');
 }
 
 

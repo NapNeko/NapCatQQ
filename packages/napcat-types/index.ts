@@ -4,3 +4,6 @@ export * from '../napcat-core/index';
 
 // 聚合导出 OneBot 的所有内容
 export * from '../napcat-onebot/index';
+
+// Ensure the shims file exists next to the emitted JS as well.
+export type { };

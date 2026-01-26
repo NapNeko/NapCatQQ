@@ -7,6 +7,8 @@
     "declaration": true,
     "emitDeclarationOnly": true,
     "skipLibCheck": true,
+    "stripInternal": true,
+    "noEmitOnError": false,
     "paths": {
       "napcat-core": [
         "../napcat-core/index.ts"
@@ -33,10 +35,12 @@
   },
   "include": [
     "./index.ts",
-    "./external-shims.d.ts",
     "../napcat-core/**/*.ts",
     "../napcat-onebot/**/*.ts",
     "../napcat-common/**/*.ts"
+  ],
+  "files": [
+    "./external-shims.d.ts"
   ],
   "exclude": [
     "node_modules",
