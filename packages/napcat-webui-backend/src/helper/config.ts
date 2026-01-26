@@ -20,8 +20,18 @@ const WebUiConfigSchema = Type.Object({
   theme: themeType,
   // 是否关闭WebUI
   disableWebUI: Type.Boolean({ default: false }),
-  // 是否关闭非局域网访问
-  disableNonLANAccess: Type.Boolean({ default: false }),
+  // 网络访问控制模式: 'none' | 'whitelist' | 'blacklist'
+  accessControlMode: Type.Union([
+    Type.Literal('none'),
+    Type.Literal('whitelist'),
+    Type.Literal('blacklist'),
+  ], { default: 'none' }),
+  // IP白名单列表
+  ipWhitelist: Type.Array(Type.String(), { default: [] }),
+  // IP黑名单列表
+  ipBlacklist: Type.Array(Type.String(), { default: [] }),
+  // 是否启用 X-Forwarded-For 获取真实IP
+  enableXForwardedFor: Type.Boolean({ default: false }),
 });
 
 export type WebUiConfigType = Static<typeof WebUiConfigSchema>;
@@ -245,14 +255,47 @@ export class WebUiConfigWrapper {
     await this.UpdateWebUIConfig({ disableWebUI: disable });
   }
 
-  // 获取是否禁用非局域网访问
-  async GetDisableNonLANAccess (): Promise<boolean> {
+  // 获取访问控制模式
+  async GetAccessControlMode (): Promise<'none' | 'whitelist' | 'blacklist'> {
     const config = await this.GetWebUIConfig();
-    return config.disableNonLANAccess;
+    return config.accessControlMode;
   }
 
-  // 更新是否禁用非局域网访问
-  async UpdateDisableNonLANAccess (disable: boolean): Promise<void> {
-    await this.UpdateWebUIConfig({ disableNonLANAccess: disable });
+  // 更新访问控制模式
+  async UpdateAccessControlMode (mode: 'none' | 'whitelist' | 'blacklist'): Promise<void> {
+    await this.UpdateWebUIConfig({ accessControlMode: mode });
+  }
+
+  // 获取IP白名单
+  async GetIpWhitelist (): Promise<string[]> {
+    const config = await this.GetWebUIConfig();
+    return config.ipWhitelist;
+  }
+
+  // 更新IP白名单
+  async UpdateIpWhitelist (whitelist: string[]): Promise<void> {
+    await this.UpdateWebUIConfig({ ipWhitelist: whitelist });
+  }
+
+  // 获取IP黑名单
+  async GetIpBlacklist (): Promise<string[]> {
+    const config = await this.GetWebUIConfig();
+    return config.ipBlacklist;
+  }
+
+  // 更新IP黑名单
+  async UpdateIpBlacklist (blacklist: string[]): Promise<void> {
+    await this.UpdateWebUIConfig({ ipBlacklist: blacklist });
+  }
+
+  // 获取是否启用 X-Forwarded-For
+  async GetEnableXForwardedFor (): Promise<boolean> {
+    const config = await this.GetWebUIConfig();
+    return config.enableXForwardedFor || false;
+  }
+
+  // 更新是否启用 X-Forwarded-For
+  async UpdateEnableXForwardedFor (enable: boolean): Promise<void> {
+    await this.UpdateWebUIConfig({ enableXForwardedFor: enable });
   }
 }

@@ -20,6 +20,10 @@ export interface WebUiConfigType {
   port: number;
   token: string;
   loginRate: number;
+  accessControlMode?: 'none' | 'whitelist' | 'blacklist';
+  ipWhitelist?: string[];
+  ipBlacklist?: string[];
+  enableXForwardedFor?: boolean;
 }
 export interface WebUiCredentialInnerJson {
   CreatedTime: number;
