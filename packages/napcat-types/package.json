@@ -10,7 +10,7 @@
   "scripts": {
     "build": "tsc --project tsconfig.json && tsc-alias --project tsconfig.json --outDir dist && node ./scripts/copy-dist.mjs",
     "test": "pnpm -s exec tsc --project tsconfig.json --noEmit",
-    "publish": "pnpm publish --filter napcat-types"
+    "publish": "cd dist && npm publish"
   },
   "dependencies": {
     "@types/node": "^22.10.7",
