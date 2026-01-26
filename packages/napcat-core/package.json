@@ -23,7 +23,7 @@
         "@protobuf-ts/runtime": "^2.11.1",
         "ajv": "^8.13.0",
         "@sinclair/typebox": "^0.34.38",
-        "file-type": "^21.0.0",
+        "file-type": "^21.3.0",
         "compressing": "^1.10.1",
         "napcat-image-size": "workspace:*",
         "napcat-common": "workspace:*",
