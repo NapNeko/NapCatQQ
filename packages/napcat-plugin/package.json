@@ -5,7 +5,7 @@
   "main": "index.mjs",
   "description": "一个高级的 NapCat 插件示例",
   "dependencies": {
-    "napcat-onebot": "workspace:*"
+    "napcat-types": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.0.1"
