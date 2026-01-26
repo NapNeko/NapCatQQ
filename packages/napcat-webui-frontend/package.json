@@ -118,7 +118,7 @@
     "vite": "^6.0.5",
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-image-optimizer": "^2.0.3",
-    "vite-plugin-static-copy": "^2.2.0",
+    "vite-plugin-static-copy": "^3.1.6",
     "vite-tsconfig-paths": "^5.1.4"
   },
   "overrides": {
