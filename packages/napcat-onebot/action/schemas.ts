@@ -61,3 +61,38 @@ export const OB11NotifySchema = Type.Object({
   actor: Type.Number({ description: '操作者QQ' }),
   requester_nick: Type.String({ description: '申请者昵称' }),
 }, { description: 'OneBot 11 通知信息' });
+
+export const lastestMessageSchema = Type.Object({
+  self_id: Type.Number({ description: '发送者QQ号' }),
+  user_id: Type.Number({ description: '接收者QQ号' }),
+  time: Type.Number({ description: '时间戳' }),
+  real_seq: Type.String({ description: '消息序号' }),
+  message_type: Type.String({ description: '消息类型' }),
+  sender: Type.Object({
+    user_id: Type.Number({ description: '用户QQ号' }),
+    nickname: Type.String({ description: '用户昵称' }),
+    card: Type.Optional(Type.String({ description: '用户名片' })),
+    role: Type.Optional(Type.String({ description: '用户角色' })),
+  }),
+  raw_message: Type.String({ description: '原始消息' }),
+  font: Type.Number({ description: '字体大小' }),
+  sub_type: Type.String({ description: '子类型' }),
+  message: Type.Unknown({ description: '消息内容' }),
+  message_format: Type.String({ description: '消息格式' }),
+  post_type: Type.String({ description: '发布类型' }),
+  group_id: Type.Number({ description: '群号' }),
+  group_name: Type.String({ description: '群名称' }),
+}, { description: '最后一条消息' });
+
+export const OB11MessageSchema = Type.Intersect([
+  lastestMessageSchema,
+  Type.Object({
+    message_id: Type.Number({ description: '消息ID' }),
+    message_seq: Type.Number({ description: '消息序列号' }),
+    emoji_likes_list: Type.Array(Type.Object({
+      emoji_id: Type.String({ description: '表情符号ID' }),
+      emoji_type: Type.String({ description: '表情符号类型' }),
+      likes_cnt: Type.String({ description: '点赞数' }),
+    })),
+  }, { description: 'OneBot 11 消息信息' })
+]);

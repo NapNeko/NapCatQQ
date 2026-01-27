@@ -39,7 +39,7 @@ export default class GetRecentContact extends OneBotAction<GetRecentContactPaylo
       peerName: '测试',
       msgTime: '1734567890',
       msgId: '12345',
-      lastestMsg: []
+      lastestMsg: {}
     }
   ];
 
