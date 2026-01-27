@@ -10,7 +10,7 @@ const nodeModules = [...builtinModules, builtinModules.map((m) => `node:${m}`)].
 function copyToShellPlugin () {
   return {
     name: 'copy-to-shell',
-    closeBundle () {
+    writeBundle () {
       try {
         const sourceDir = resolve(__dirname, 'dist');
         const targetDir = resolve(__dirname, '../napcat-shell/dist/plugins/builtin');
@@ -70,7 +70,11 @@ export default defineConfig({
       fileName: () => 'index.mjs',
     },
     rollupOptions: {
-      external: [...nodeModules],
+      external: (id) => {
+        if (nodeModules.includes(id)) return true;
+        if (id.startsWith('napcat-')) return true;
+        return false;
+      },
     },
   },
   plugins: [nodeResolve(), copyToShellPlugin()],
