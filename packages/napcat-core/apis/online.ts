@@ -114,8 +114,9 @@ export class NTQQOnlineApi {
       fileElement: {
         fileName: actualFolderName,
         filePath: folderPath,
+        fileSize: "",
       },
-    } as any;
+    };
 
     const msgService = this.context.session.getMsgService();
     const startTime = Math.floor(Date.now() / 1000) - 2;
@@ -173,7 +174,7 @@ export class NTQQOnlineApi {
    * 获取好友的在线文件消息
    * @param peer
    */
-  async getOnlineFileMsg (peer: Peer) : Promise<any> {
+  async getOnlineFileMsg (peer: Peer): Promise<any> {
     const msgService = this.context.session.getMsgService();
     return await msgService.getOnlineFileMsgs(peer);
   }
@@ -183,7 +184,7 @@ export class NTQQOnlineApi {
    * @param peer
    * @param msgId
    */
-  async cancelMyOnlineFileMsg (peer: Peer, msgId: string) : Promise<void> {
+  async cancelMyOnlineFileMsg (peer: Peer, msgId: string): Promise<void> {
     const msgService = this.context.session.getMsgService();
     await msgService.cancelSendMsg(peer, msgId);
   }
@@ -194,7 +195,7 @@ export class NTQQOnlineApi {
    * @param msgId
    * @param elementId
    */
-  async refuseOnlineFileMsg (peer: Peer, msgId: string, elementId: string) : Promise<void> {
+  async refuseOnlineFileMsg (peer: Peer, msgId: string, elementId: string): Promise<void> {
     const msgService = this.context.session.getMsgService();
     const arrToSend = {
       msgId,
@@ -215,7 +216,7 @@ export class NTQQOnlineApi {
    * @param elementId
    * @constructor
    */
-  async receiveOnlineFileOrFolder (peer: Peer, msgId: string, elementId: string) : Promise<any> {
+  async receiveOnlineFileOrFolder (peer: Peer, msgId: string, elementId: string): Promise<any> {
     const msgService = this.context.session.getMsgService();
     const arrToSend = {
       msgId,
@@ -233,7 +234,7 @@ export class NTQQOnlineApi {
    * @param peer
    * @param msgId
    */
-  async switchFileToOffline (peer: Peer, msgId: string) : Promise<void> {
+  async switchFileToOffline (peer: Peer, msgId: string): Promise<void> {
     const msgService = this.context.session.getMsgService();
     await msgService.switchToOfflineSendMsg(peer, msgId);
   }

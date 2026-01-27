@@ -261,6 +261,9 @@ importers:
       '@sinclair/typebox':
         specifier: ^0.34.38
         version: 0.34.41
+      napcat-common:
+        specifier: workspace:*
+        version: link:../napcat-common
       napcat-onebot:
         specifier: workspace:*
         version: link:../napcat-onebot

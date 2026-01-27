@@ -9,7 +9,8 @@
   },
   "dependencies": {
     "@sinclair/typebox": "^0.34.38",
-    "napcat-onebot": "workspace:*"
+    "napcat-onebot": "workspace:*",
+    "napcat-common": "workspace:*"
   },
   "devDependencies": {
     "tsx": "^4.7.1",
