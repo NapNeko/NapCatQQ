@@ -16,21 +16,21 @@ const CONFIG = {
   MEMORY_LIMIT: 100 * 1024 * 1024,     // 100MB内存总限制
 } as const;
 
-const SchemaData = Type.Object({
-  stream_id: Type.String(),
-  chunk_data: Type.Optional(Type.String()),
-  chunk_index: Type.Optional(Type.Number()),
-  total_chunks: Type.Optional(Type.Number()),
-  file_size: Type.Optional(Type.Number()),
-  expected_sha256: Type.Optional(Type.String()),
-  is_complete: Type.Optional(Type.Boolean()),
-  filename: Type.Optional(Type.String()),
-  reset: Type.Optional(Type.Boolean()),
-  verify_only: Type.Optional(Type.Boolean()),
-  file_retention: Type.Number({ default: 5 * 60 * 1000 }), // 默认5分钟 回收 不设置或0为不回收
+export const UploadFileStreamPayloadSchema = Type.Object({
+  stream_id: Type.String({ description: '流 ID' }),
+  chunk_data: Type.Optional(Type.String({ description: '分块数据 (Base64)' })),
+  chunk_index: Type.Optional(Type.Number({ description: '分块索引' })),
+  total_chunks: Type.Optional(Type.Number({ description: '总分块数' })),
+  file_size: Type.Optional(Type.Number({ description: '文件总大小' })),
+  expected_sha256: Type.Optional(Type.String({ description: '期望的 SHA256' })),
+  is_complete: Type.Optional(Type.Boolean({ description: '是否完成' })),
+  filename: Type.Optional(Type.String({ description: '文件名' })),
+  reset: Type.Optional(Type.Boolean({ description: '是否重置' })),
+  verify_only: Type.Optional(Type.Boolean({ description: '是否仅验证' })),
+  file_retention: Type.Number({ default: 5 * 60 * 1000, description: '文件保留时间 (毫秒)' }), // 默认5分钟 回收 不设置或0为不回收
 });
 
-type Payload = Static<typeof SchemaData>;
+export type UploadFileStreamPayload = Static<typeof UploadFileStreamPayloadSchema>;
 
 // 简化流状态接口
 interface StreamState {
@@ -66,15 +66,33 @@ interface StreamResult {
   sha256?: string;
 }
 
-export class UploadFileStream extends OneBotAction<Payload, StreamPacket<StreamResult>> {
+export class UploadFileStream extends OneBotAction<UploadFileStreamPayload, StreamPacket<StreamResult>> {
   override actionName = ActionName.UploadFileStream;
-  override payloadSchema = SchemaData;
+  override payloadSchema = UploadFileStreamPayloadSchema;
+  override returnSchema = Type.Any({ description: '上传结果 (流式)' });
+  override actionSummary = '上传文件流';
+  override actionDescription = '以流式方式上传文件数据到机器人';
+  override actionTags = ['流式接口'];
+  override payloadExample = {
+    stream_id: 'uuid-1234-5678',
+    chunk_data: 'SGVsbG8gV29ybGQ=',
+    chunk_index: 0,
+    total_chunks: 1,
+    file_size: 11
+  };
+  override returnExample = {
+    type: 'stream',
+    stream_id: 'uuid-1234-5678',
+    status: 'chunk_received',
+    received_chunks: 1,
+    total_chunks: 1
+  };
   override useStream = true;
 
   private static streams = new Map<string, StreamState>();
   private static memoryUsage = 0;
 
-  async _handle (payload: Payload, _adaptername: string, _config: NetworkAdapterConfig): Promise<StreamPacket<StreamResult>> {
+  async _handle (payload: UploadFileStreamPayload, _adaptername: string, _config: NetworkAdapterConfig): Promise<StreamPacket<StreamResult>> {
     const { stream_id, reset, verify_only } = payload;
 
     if (reset) {
@@ -101,7 +119,7 @@ export class UploadFileStream extends OneBotAction<Payload, StreamPacket<StreamR
     return this.getStreamStatus(stream);
   }
 
-  private getOrCreateStream (payload: Payload): StreamState {
+  private getOrCreateStream (payload: UploadFileStreamPayload): StreamState {
     let stream = UploadFileStream.streams.get(payload.stream_id);
 
     if (!stream) {
@@ -114,7 +132,7 @@ export class UploadFileStream extends OneBotAction<Payload, StreamPacket<StreamR
     return stream;
   }
 
-  private createStream (payload: Payload): StreamState {
+  private createStream (payload: UploadFileStreamPayload): StreamState {
     const { stream_id, total_chunks, file_size, filename, expected_sha256 } = payload;
 
     const useMemory = this.shouldUseMemory(file_size);

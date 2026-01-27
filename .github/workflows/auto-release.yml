@@ -5,6 +5,63 @@ on:
     types: [published]
 
 jobs:
+  publish-schema:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      
+      - name: Get Version
+        id: get_version
+        run: |
+          latest_tag=$(git describe --tags $(git rev-list --tags --max-count=1))
+          version=${latest_tag#v}
+          echo "version=${version}" >> $GITHUB_ENV
+          echo "latest_tag=${latest_tag}" >> $GITHUB_ENV
+          echo "Debug: Version is ${version}"
+      
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Build napcat-schema
+        run: |
+          cd packages/napcat-schema
+          pnpm run build:openapi
+      
+      - name: Checkout NapCatDocs
+        uses: actions/checkout@v4
+        with:
+          repository: NapNeko/NapCatDocs
+          token: ${{ secrets.NAPCAT_BUILD }}
+          path: napcat-docs
+      
+      - name: Copy OpenAPI Schema
+        run: |
+          mkdir -p napcat-docs/src/api/${{ env.version }}
+          cp packages/napcat-schema/openapi.json napcat-docs/src/api/${{ env.version }}/openapi.json
+          echo "OpenAPI schema copied to napcat-docs/src/api/${{ env.version }}/openapi.json"
+      
+      - name: Commit and Push
+        run: |
+          cd napcat-docs
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add src/api/${{ env.version }}/openapi.json
+          git commit -m "chore: update OpenAPI schema for version ${{ env.version }}" || echo "No changes to commit"
+          git push
+  
   shell-docker:
     runs-on: ubuntu-latest
     steps:

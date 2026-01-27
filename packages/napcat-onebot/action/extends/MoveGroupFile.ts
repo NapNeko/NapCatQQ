@@ -3,24 +3,38 @@ import { FileNapCatOneBotUUID } from 'napcat-common/src/file-uuid';
 import { GetPacketStatusDepends } from '@/napcat-onebot/action/packet/GetPacketStatus';
 import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = Type.Object({
-  group_id: Type.Union([Type.Number(), Type.String()]),
-  file_id: Type.String(),
-  current_parent_directory: Type.String(),
-  target_parent_directory: Type.String(),
+const PayloadSchema = Type.Object({
+  group_id: Type.String({ description: '群号' }),
+  file_id: Type.String({ description: '文件ID' }),
+  current_parent_directory: Type.String({ description: '当前父目录' }),
+  target_parent_directory: Type.String({ description: '目标父目录' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-interface MoveGroupFileResponse {
-  ok: boolean;
-}
+const ReturnSchema = Type.Object({
+  ok: Type.Boolean({ description: '是否成功' }),
+}, { description: '移动文件结果' });
 
-export class MoveGroupFile extends GetPacketStatusDepends<Payload, MoveGroupFileResponse> {
+type ReturnType = Static<typeof ReturnSchema>;
+
+export class MoveGroupFile extends GetPacketStatusDepends<PayloadType, ReturnType> {
   override actionName = ActionName.MoveGroupFile;
-  override payloadSchema = SchemaData;
+  override actionSummary = '移动群文件';
+  override actionTags = ['文件扩展'];
+  override payloadExample = {
+    group_id: '123456',
+    file_id: '/file_id',
+    current_parent_directory: '/current_folder_id',
+    target_parent_directory: '/target_folder_id',
+  };
+  override returnExample = {
+    ok: true
+  };
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
 
-  async _handle (payload: Payload) {
+  async _handle (payload: PayloadType) {
     const contextMsgFile = FileNapCatOneBotUUID.decode(payload.file_id) || FileNapCatOneBotUUID.decodeModelId(payload.file_id);
     if (contextMsgFile?.fileUUID) {
       await this.core.apis.PacketApi.pkt.operation.MoveGroupFile(+payload.group_id, contextMsgFile.fileUUID, payload.current_parent_directory, payload.target_parent_directory);

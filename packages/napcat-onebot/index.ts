@@ -701,4 +701,7 @@ export class NapCatOneBot11Adapter {
   }
 }
 
-export * from './types';
+export * from './types/index';
+export * from './api/index';
+export * from './event/index';
+export * from './config/index';

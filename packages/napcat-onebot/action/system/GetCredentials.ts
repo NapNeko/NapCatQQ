@@ -2,22 +2,35 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
-interface Response {
-  cookies: string,
-  token: number
-}
-
-const SchemaData = Type.Object({
-  domain: Type.String(),
+export const GetCredentialsPayloadSchema = Type.Object({
+  domain: Type.String({ description: '需要获取 cookies 的域名' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+export type GetCredentialsPayload = Static<typeof GetCredentialsPayloadSchema>;
 
-export class GetCredentials extends OneBotAction<Payload, Response> {
+export const GetCredentialsReturnSchema = Type.Object({
+  cookies: Type.String({ description: 'Cookies' }),
+  token: Type.Number({ description: 'CSRF Token' }),
+});
+
+export type GetCredentialsResponse = Static<typeof GetCredentialsReturnSchema>;
+
+export class GetCredentials extends OneBotAction<GetCredentialsPayload, GetCredentialsResponse> {
   override actionName = ActionName.GetCredentials;
-  override payloadSchema = SchemaData;
+  override payloadSchema = GetCredentialsPayloadSchema;
+  override returnSchema = GetCredentialsReturnSchema;
+  override actionSummary = '获取登录凭证';
+  override actionDescription = '获取登录凭证';
+  override actionTags = ['系统接口'];
+  override payloadExample = {
+    domain: 'qun.qq.com'
+  };
+  override returnExample = {
+    cookies: 'uin=o123456789; skey=@abc12345;',
+    token: 123456789
+  };
 
-  async _handle (payload: Payload) {
+  async _handle (payload: GetCredentialsPayload) {
     const cookiesObject = await this.core.apis.UserApi.getCookies(payload.domain);
     // 把获取到的cookiesObject转换成 k=v; 格式字符串拼接在一起
     const cookies = Object.entries(cookiesObject).map(([key, value]) => `${key}=${value}`).join('; ');

@@ -6,19 +6,20 @@ import { IoClose } from 'react-icons/io5';
 import { TbSearch } from 'react-icons/tb';
 
 import key from '@/const/key';
-import oneBotHttpApi from '@/const/ob_api';
-import type { OneBotHttpApiPath } from '@/const/ob_api';
+import { fetchOneBotHttpApi, OneBotHttpApiPath } from '@/const/ob_api';
+import type { OneBotHttpApi } from '@/const/ob_api';
 
 import OneBotApiDebug from '@/components/onebot/api/debug';
 import CommandPalette from '@/components/command_palette';
 import type { CommandPaletteCommand, CommandPaletteExecuteMode } from '@/components/command_palette';
 
-import { generateDefaultJson } from '@/utils/zod';
+import { generateDefaultFromTypeBox } from '@/utils/typebox';
 import type { OneBotApiDebugRef } from '@/components/onebot/api/debug';
 
 export default function HttpDebug () {
   const [activeApi, setActiveApi] = useState<OneBotHttpApiPath | null>(null);
   const [openApis, setOpenApis] = useState<OneBotHttpApiPath[]>([]);
+  const [oneBotHttpApi, setOneBotHttpApi] = useState<OneBotHttpApi>({});
   const [backgroundImage] = useLocalStorage<string>(key.backgroundImage, '');
   const hasBackground = !!backgroundImage;
 
@@ -40,30 +41,34 @@ export default function HttpDebug () {
     return () => window.removeEventListener('keydown', handler);
   }, []);
 
-  // Initialize Debug Adapter
+  // Initialize Debug Adapter and fetch schemas
   useEffect(() => {
     let currentAdapterName = '';
 
-    const initAdapter = async () => {
+    const init = async () => {
       try {
-        const response = await fetch('/api/Debug/create', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        const data = await response.json();
-        if (data.code === 0) {
-          currentAdapterName = data.data.adapterName;
-          setAdapterName(currentAdapterName);
-        }
+        const [apiData] = await Promise.all([
+          fetchOneBotHttpApi(),
+          fetch('/api/Debug/create', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+          }).then(res => res.json()).then(data => {
+            if (data.code === 0) {
+              currentAdapterName = data.data.adapterName;
+              setAdapterName(currentAdapterName);
+            }
+          })
+        ]);
+        setOneBotHttpApi(apiData);
       } catch (error) {
-        console.error('Failed to create debug adapter:', error);
+        console.error('Failed to initialize debug:', error);
       }
     };
 
-    initAdapter();
+    init();
 
     return () => {
       // 不再主动关闭 adapter，由后端自动管理活跃状态
@@ -92,21 +97,24 @@ export default function HttpDebug () {
     return Object.keys(oneBotHttpApi).map((p) => {
       const path = p as OneBotHttpApiPath;
       const item = oneBotHttpApi[path];
+      const displayPath = '/' + path;
       // 简单分组：按描述里已有分类不可靠，这里只用 path 前缀推断
-      const group = path.startsWith('/get_') ? 'GET' : (path.startsWith('/set_') ? 'SET' : 'API');
+      const group = path.startsWith('get_') ? 'GET' : (path.startsWith('set_') ? 'SET' : 'API');
       return {
         id: path,
-        title: item?.description || path,
-        subtitle: item?.request ? '回车发送 · Shift+Enter 仅打开' : undefined,
+        title: item?.description || displayPath,
+        subtitle: item?.payload ? '回车发送 · Shift+Enter 仅打开' : undefined,
         group,
       };
     });
-  }, []);
+  }, [oneBotHttpApi]);
 
   const executeCommand = (commandId: string, mode: CommandPaletteExecuteMode) => {
     const api = commandId as OneBotHttpApiPath;
     const item = oneBotHttpApi[api];
-    const body = item?.request ? generateDefaultJson(item.request) : '{}';
+    const body = item?.payloadExample
+      ? JSON.stringify(item.payloadExample, null, 2)
+      : (item?.payload ? JSON.stringify(generateDefaultFromTypeBox(item.payload), null, 2) : '{}');
 
     handleSelectApi(api);
     // 确保请求参数可见

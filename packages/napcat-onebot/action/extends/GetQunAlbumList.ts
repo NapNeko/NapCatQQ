@@ -1,18 +1,37 @@
-import { NTQQWebApi } from 'napcat-core/apis';
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
-const SchemaData = Type.Object({
-  group_id: Type.String(),
+import { NTQQWebApi } from 'napcat-core/apis';
+
+const PayloadSchema = Type.Object({
+  group_id: Type.String({ description: '群号' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-export class GetQunAlbumList extends OneBotAction<Payload, Awaited<ReturnType<NTQQWebApi['getAlbumListByNTQQ']>>['response']['album_list']> {
+const ReturnSchema = Type.Array(Type.Any(), { description: '群相册列表' });
+
+type GetQunAlbumListReturn = Awaited<globalThis.ReturnType<NTQQWebApi['getAlbumListByNTQQ']>>['response']['album_list'];
+
+export class GetQunAlbumList extends OneBotAction<PayloadType, GetQunAlbumListReturn> {
   override actionName = ActionName.GetQunAlbumList;
-  override payloadSchema = SchemaData;
+  override actionSummary = '获取群相册列表';
+  override actionTags = ['群组扩展'];
+  override payloadExample = {
+    group_id: '123456',
+  };
+  override returnExample = [
+    {
+      album_id: 'album_1',
+      album_name: '测试相册',
+      cover_url: 'http://example.com/cover.jpg',
+      create_time: 1734567890
+    }
+  ];
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
 
-  async _handle (payload: Payload) {
+  async _handle (payload: PayloadType): Promise<GetQunAlbumListReturn> {
     return (await this.core.apis.WebApi.getAlbumListByNTQQ(payload.group_id)).response.album_list;
   }
 }

@@ -1,23 +1,34 @@
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
+import { GoCQHTTPActionsExamples } from '../example/GoCQHTTPActionsExamples';
 
-const SchemaData = Type.Object({
-  group_id: Type.Union([Type.Number(), Type.String()]),
+const PayloadSchema = Type.Object({
+  group_id: Type.String({ description: '群号' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-export class GetGroupFileSystemInfo extends OneBotAction<Payload, {
-  file_count: number,
-  limit_count: number, // unimplemented
-  used_space: number, // TODO:unimplemented, but can be implemented later
-  total_space: number, // unimplemented, 10 GB by default
-}> {
+const ReturnSchema = Type.Object({
+  file_count: Type.Number({ description: '文件总数' }),
+  limit_count: Type.Number({ description: '文件上限' }),
+  used_space: Type.Number({ description: '已使用空间' }),
+  total_space: Type.Number({ description: '总空间' }),
+}, { description: '群文件系统信息' });
+
+type ReturnType = Static<typeof ReturnSchema>;
+
+export class GetGroupFileSystemInfo extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.GoCQHTTP_GetGroupFileSystemInfo;
-  override payloadSchema = SchemaData;
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
+  override actionSummary = '获取群文件系统信息';
+  override actionDescription = '获取群聊文件系统的空间及状态信息';
+  override actionTags = ['Go-CQHTTP'];
+  override payloadExample = GoCQHTTPActionsExamples.GetGroupFileSystemInfo.payload;
+  override returnExample = GoCQHTTPActionsExamples.GetGroupFileSystemInfo.response;
 
-  async _handle (payload: Payload) {
+  async _handle (payload: PayloadType) {
     const groupFileCount = (await this.core.apis.GroupApi.getGroupFileCount([payload.group_id.toString()])).groupFileCounts[0];
     if (!groupFileCount) {
       throw new Error('Group not found');

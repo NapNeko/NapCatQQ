@@ -3,20 +3,32 @@ import { GroupNotify, NTGroupRequestOperateTypes } from 'napcat-core/types';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = Type.Object({
-  flag: Type.Union([Type.String(), Type.Number()]),
-  approve: Type.Optional(Type.Union([Type.Boolean(), Type.String()])),
-  reason: Type.Optional(Type.Union([Type.String({ default: ' ' }), Type.Null()])),
-  count: Type.Optional(Type.Number({ default: 100 })),
+import { GroupActionsExamples } from '../example/GroupActionsExamples';
+
+const PayloadSchema = Type.Object({
+  flag: Type.String({ description: '请求flag' }),
+  approve: Type.Optional(Type.Union([Type.Boolean(), Type.String()], { description: '是否同意' })),
+  reason: Type.Optional(Type.Union([Type.String({ default: ' ' }), Type.Null()], { description: '拒绝理由' })),
+  count: Type.Optional(Type.Number({ default: 100, description: '搜索通知数量' })),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-export default class SetGroupAddRequest extends OneBotAction<Payload, null> {
+const ReturnSchema = Type.Null({ description: '操作结果' });
+
+type ReturnType = Static<typeof ReturnSchema>;
+
+export default class SetGroupAddRequest extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.SetGroupAddRequest;
-  override payloadSchema = SchemaData;
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
+  override actionSummary = '处理加群请求';
+  override actionDescription = '同意或拒绝加群请求或邀请';
+  override actionTags = ['群组接口'];
+  override payloadExample = GroupActionsExamples.SetGroupAddRequest.payload;
+  override returnExample = GroupActionsExamples.SetGroupAddRequest.response;
 
-  async _handle (payload: Payload): Promise<null> {
+  async _handle (payload: PayloadType): Promise<null> {
     const flag = payload.flag.toString();
     const approve = payload.approve?.toString() !== 'false';
     const reason = payload.reason ?? ' ';

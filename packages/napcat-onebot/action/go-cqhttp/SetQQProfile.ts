@@ -1,20 +1,26 @@
-import { NTQQUserApi } from 'napcat-core/apis';
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
+import { GoCQHTTPActionsExamples } from '../example/GoCQHTTPActionsExamples';
 
-const SchemaData = Type.Object({
-  nickname: Type.String(),
-  personal_note: Type.Optional(Type.String()),
-  sex: Type.Optional(Type.Union([Type.Number(), Type.String()])), // 传Sex值？建议传0
+export const SetQQProfilePayloadSchema = Type.Object({
+  nickname: Type.String({ description: '昵称' }),
+  personal_note: Type.Optional(Type.String({ description: '个性签名' })),
+  sex: Type.Optional(Type.Union([Type.Number(), Type.String()], { description: '性别 (0: 未知, 1: 男, 2: 女)' })), // 传Sex值？建议传0
 });
 
-type Payload = Static<typeof SchemaData>;
-export class SetQQProfile extends OneBotAction<Payload, Awaited<ReturnType<NTQQUserApi['modifySelfProfile']>> | null> {
+export type SetQQProfilePayload = Static<typeof SetQQProfilePayloadSchema>;
+export class SetQQProfile extends OneBotAction<SetQQProfilePayload, any> {
   override actionName = ActionName.SetQQProfile;
-  override payloadSchema = SchemaData;
+  override payloadSchema = SetQQProfilePayloadSchema;
+  override returnSchema = Type.Any({ description: '设置结果' });
+  override actionSummary = '设置QQ资料';
+  override actionDescription = '修改当前账号的昵称、个性签名等资料';
+  override actionTags = ['Go-CQHTTP'];
+  override payloadExample = GoCQHTTPActionsExamples.SetQQProfile.payload;
+  override returnExample = GoCQHTTPActionsExamples.SetQQProfile.response;
 
-  async _handle (payload: Payload) {
+  async _handle (payload: SetQQProfilePayload) {
     const self = this.core.selfInfo;
     const OldProfile = await this.core.apis.UserApi.getUserDetailInfo(self.uid);
     return await this.core.apis.UserApi.modifySelfProfile({

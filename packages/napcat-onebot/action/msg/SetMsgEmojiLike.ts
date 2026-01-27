@@ -3,19 +3,34 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { MessageUnique } from 'napcat-common/src/message-unique';
 import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = Type.Object({
-  message_id: Type.Union([Type.Number(), Type.String()]),
-  emoji_id: Type.Union([Type.Number(), Type.String()]),
-  set: Type.Optional(Type.Union([Type.Boolean(), Type.String()])),
+const PayloadSchema = Type.Object({
+  message_id: Type.Union([Type.Number(), Type.String()], { description: '消息ID' }),
+  emoji_id: Type.Union([Type.Number(), Type.String()], { description: '表情ID' }),
+  set: Type.Optional(Type.Union([Type.Boolean(), Type.String()], { description: '是否设置' })),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-export class SetMsgEmojiLike extends OneBotAction<Payload, unknown> {
+const ReturnSchema = Type.Any({ description: '操作结果' });
+
+type ReturnType = Static<typeof ReturnSchema>;
+
+export class SetMsgEmojiLike extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.SetMsgEmojiLike;
-  override payloadSchema = SchemaData;
+  override actionSummary = '设置消息表情点赞';
+  override actionTags = ['消息扩展'];
+  override payloadExample = {
+    message_id: 12345,
+    emoji_id: '123',
+    set: true
+  };
+  override returnExample = {
+    result: true
+  };
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
 
-  async _handle (payload: Payload) {
+  async _handle (payload: PayloadType) {
     const msg = MessageUnique.getMsgIdAndPeerByShortId(+payload.message_id);
     if (!msg) {
       throw new Error('msg not found');

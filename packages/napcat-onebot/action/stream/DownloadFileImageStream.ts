@@ -7,20 +7,29 @@ import fs from 'fs';
 import { imageSizeFallBack } from 'napcat-image-size';
 import { BaseDownloadStream, DownloadResult } from './BaseDownloadStream';
 
-const SchemaData = Type.Object({
-  file: Type.Optional(Type.String()),
-  file_id: Type.Optional(Type.String()),
-  chunk_size: Type.Optional(Type.Number({ default: 64 * 1024 })), // 默认64KB分块
+export const DownloadFileImageStreamPayloadSchema = Type.Object({
+  file: Type.Optional(Type.String({ description: '文件路径或 URL' })),
+  file_id: Type.Optional(Type.String({ description: '文件 ID' })),
+  chunk_size: Type.Optional(Type.Number({ default: 64 * 1024, description: '分块大小 (字节)' })), // 默认64KB分块
 });
 
-type Payload = Static<typeof SchemaData>;
+export type DownloadFileImageStreamPayload = Static<typeof DownloadFileImageStreamPayloadSchema>;
 
-export class DownloadFileImageStream extends BaseDownloadStream<Payload, DownloadResult> {
+export class DownloadFileImageStream extends BaseDownloadStream<DownloadFileImageStreamPayload, DownloadResult> {
   override actionName = ActionName.DownloadFileImageStream;
-  override payloadSchema = SchemaData;
+  override actionSummary = '下载图片文件流';
+  override actionTags = ['流式传输扩展'];
+  override payloadExample = {
+    file: 'image_file_id'
+  };
+  override returnExample = {
+    file: 'temp_image_path'
+  };
+  override payloadSchema = DownloadFileImageStreamPayloadSchema;
+  override returnSchema = Type.Any({ description: '下载结果 (流式)' });
   override useStream = true;
 
-  async _handle (payload: Payload, _adaptername: string, _config: NetworkAdapterConfig, req: OneBotRequestToolkit): Promise<StreamPacket<DownloadResult>> {
+  async _handle (payload: DownloadFileImageStreamPayload, _adaptername: string, _config: NetworkAdapterConfig, req: OneBotRequestToolkit): Promise<StreamPacket<DownloadResult>> {
     try {
       payload.file ||= payload.file_id || '';
       const chunkSize = payload.chunk_size || 64 * 1024;

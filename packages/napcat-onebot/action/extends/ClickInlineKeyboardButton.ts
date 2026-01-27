@@ -2,21 +2,36 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { OneBotAction } from '../OneBotAction';
 import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = Type.Object({
-  group_id: Type.Union([Type.Number(), Type.String()]),
-  bot_appid: Type.String(),
-  button_id: Type.String({ default: '' }),
-  callback_data: Type.String({ default: '' }),
-  msg_seq: Type.String({ default: '10086' }),
+const PayloadSchema = Type.Object({
+  group_id: Type.String({ description: '群号' }),
+  bot_appid: Type.String({ description: '机器人AppID' }),
+  button_id: Type.String({ default: '', description: '按钮ID' }),
+  callback_data: Type.String({ default: '', description: '回调数据' }),
+  msg_seq: Type.String({ default: '10086', description: '消息序列号' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-export class ClickInlineKeyboardButton extends OneBotAction<Payload, unknown> {
+const ReturnSchema = Type.Any({ description: '点击结果' });
+
+type ReturnType = Static<typeof ReturnSchema>;
+
+export class ClickInlineKeyboardButton extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.ClickInlineKeyboardButton;
-  override payloadSchema = SchemaData;
-
-  async _handle (payload: Payload) {
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
+  override actionSummary = '点击内联键盘按钮';
+  override actionTags = ['消息扩展'];
+  override payloadExample = {
+    group_id: '123456',
+    bot_appid: '1234567890',
+    button_id: 'btn_1',
+    callback_data: '',
+    msg_seq: '10086'
+  };
+  override returnExample = {
+  };
+  async _handle (payload: PayloadType) {
     return await this.core.apis.MsgApi.clickInlineKeyboardButton({
       buttonId: payload.button_id,
       peerId: payload.group_id.toString(),

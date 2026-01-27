@@ -3,18 +3,29 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { checkFileExist, uriToLocalFile } from 'napcat-common/src/file';
 import fs from 'fs';
 import { Static, Type } from '@sinclair/typebox';
-import { GeneralCallResultStatus } from 'napcat-core';
 
-const SchemaData = Type.Object({
-  image: Type.String(),
+import { ExtendsActionsExamples } from '../example/ExtendsActionsExamples';
+
+const PayloadSchema = Type.Object({
+  image: Type.String({ description: '图片路径、URL或Base64' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-class OCRImageBase extends OneBotAction<Payload, GeneralCallResultStatus> {
-  override payloadSchema = SchemaData;
+const ReturnSchema = Type.Any({ description: 'OCR结果' });
 
-  async _handle (payload: Payload) {
+type ReturnType = Static<typeof ReturnSchema>;
+
+class OCRImageBase extends OneBotAction<PayloadType, ReturnType> {
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
+  override actionSummary = '图片 OCR 识别';
+  override actionDescription = '识别图片中的文字内容(仅Windows端支持)';
+  override actionTags = ['扩展接口'];
+  override payloadExample = ExtendsActionsExamples.OCRImage.payload;
+  override returnExample = ExtendsActionsExamples.OCRImage.response;
+
+  async _handle (payload: PayloadType): Promise<ReturnType> {
     const { path, success } = await uriToLocalFile(this.core.NapCatTempPath, payload.image);
     if (!success) {
       throw new Error(`OCR ${payload.image}失败, image字段可能格式不正确`);
@@ -37,8 +48,10 @@ class OCRImageBase extends OneBotAction<Payload, GeneralCallResultStatus> {
 
 export class OCRImage extends OCRImageBase {
   override actionName = ActionName.OCRImage;
+  override actionSummary = '图片 OCR 识别';
 }
 
 export class IOCRImage extends OCRImageBase {
   override actionName = ActionName.IOCRImage;
+  override actionSummary = '图片 OCR 识别 (内部)';
 }

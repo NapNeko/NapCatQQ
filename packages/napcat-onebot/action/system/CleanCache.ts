@@ -2,9 +2,17 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { unlink, readdir } from 'fs/promises';
 import path, { join } from 'path';
+import { Type } from '@sinclair/typebox';
 
 export class CleanCache extends OneBotAction<void, void> {
   override actionName = ActionName.CleanCache;
+  override payloadSchema = Type.Object({});
+  override returnSchema = Type.Null();
+  override actionSummary = '清理缓存';
+  override actionDescription = '清理缓存';
+  override actionTags = ['系统接口'];
+  override payloadExample = {};
+  override returnExample = null;
 
   async _handle () {
     try {

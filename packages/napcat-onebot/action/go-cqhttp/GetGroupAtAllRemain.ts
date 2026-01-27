@@ -1,22 +1,33 @@
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
+import { GoCQHTTPActionsExamples } from '../example/GoCQHTTPActionsExamples';
 
-const SchemaData = Type.Object({
-  group_id: Type.Union([Type.Number(), Type.String()]),
+const PayloadSchema = Type.Object({
+  group_id: Type.String({ description: '群号' }),
 });
 
-type Payload = Static<typeof SchemaData>;
-interface ResponseType {
-  can_at_all: boolean;
-  remain_at_all_count_for_group: number;
-  remain_at_all_count_for_uin: number;
-}
-export class GoCQHTTPGetGroupAtAllRemain extends OneBotAction<Payload, ResponseType> {
-  override actionName = ActionName.GoCQHTTP_GetGroupAtAllRemain;
-  override payloadSchema = SchemaData;
+type PayloadType = Static<typeof PayloadSchema>;
 
-  async _handle (payload: Payload) {
+const ReturnSchema = Type.Object({
+  can_at_all: Type.Boolean({ description: '是否可以艾特全体' }),
+  remain_at_all_count_for_group: Type.Number({ description: '群艾特全体剩余次数' }),
+  remain_at_all_count_for_uin: Type.Number({ description: '个人艾特全体剩余次数' }),
+}, { description: '群艾特全体剩余次数' });
+
+type ReturnType = Static<typeof ReturnSchema>;
+
+export class GoCQHTTPGetGroupAtAllRemain extends OneBotAction<PayloadType, ReturnType> {
+  override actionName = ActionName.GoCQHTTP_GetGroupAtAllRemain;
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
+  override actionSummary = '获取群艾特全体剩余次数';
+  override actionDescription = '获取指定群聊中艾特全体成员的剩余次数';
+  override actionTags = ['Go-CQHTTP'];
+  override payloadExample = GoCQHTTPActionsExamples.GetGroupAtAllRemain.payload;
+  override returnExample = GoCQHTTPActionsExamples.GetGroupAtAllRemain.response;
+
+  async _handle (payload: PayloadType) {
     const ret = await this.core.apis.GroupApi.getGroupRemainAtTimes(payload.group_id.toString());
     const data = {
       can_at_all: ret.atInfo.canAtAll,
