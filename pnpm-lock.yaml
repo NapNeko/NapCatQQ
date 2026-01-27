@@ -315,6 +315,9 @@ importers:
 
   packages/napcat-types:
     dependencies:
+      '@sinclair/typebox':
+        specifier: ^0.34.38
+        version: 0.34.41
       '@types/cors':
         specifier: ^2.8.17
         version: 2.8.19
