@@ -5,7 +5,7 @@
   "type": "module",
   "main": "index.ts",
   "scripts": {
-    "build:openapi": "vite build & node ./dist/schemas.mjs"
+    "build:openapi": "vite build && node ./dist/schemas.mjs"
   },
   "dependencies": {
     "@sinclair/typebox": "^0.34.38",
