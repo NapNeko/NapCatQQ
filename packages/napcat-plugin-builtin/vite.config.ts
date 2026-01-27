@@ -5,7 +5,8 @@ import { builtinModules } from 'module';
 import fs from 'fs';
 
 const nodeModules = [...builtinModules, builtinModules.map((m) => `node:${m}`)].flat();
-
+// 依赖排除
+const external = [];
 // 构建后拷贝插件
 function copyToShellPlugin () {
   return {
@@ -68,7 +69,10 @@ export default defineConfig({
       entry: 'index.ts',
       formats: ['es'],
       fileName: () => 'index.mjs',
-    }
+    },
+    rollupOptions: {
+      external: [...nodeModules, ...external],
+    },
   },
   plugins: [nodeResolve(), copyToShellPlugin()],
 });
