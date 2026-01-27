@@ -50,7 +50,7 @@ jobs:
       - name: Copy OpenAPI Schema
         run: |
           mkdir -p napcat-docs/src/api/${{ env.version }}
-          cp packages/napcat-schema/openapi.json napcat-docs/src/api/${{ env.version }}/openapi.json
+          cp packages/napcat-schema/dist/openapi.json napcat-docs/src/api/${{ env.version }}/openapi.json
           echo "OpenAPI schema copied to napcat-docs/src/api/${{ env.version }}/openapi.json"
       
       - name: Commit and Push
