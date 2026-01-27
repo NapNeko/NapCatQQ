@@ -75,38 +75,6 @@ declare module 'async-mutex' {
   export default _async_mutex_default;
 }
 
-declare module '@sinclair/typebox' {
-  export const Type: {
-    Object: (...args: any[]) => any;
-    String: (...args: any[]) => any;
-    Number: (...args: any[]) => any;
-    Boolean: (...args: any[]) => any;
-    Array: (...args: any[]) => any;
-    Union: (...args: any[]) => any;
-    Literal: (...args: any[]) => any;
-    Optional: (...args: any[]) => any;
-    Record: (...args: any[]) => any;
-    Any: (...args: any[]) => any;
-  } & any;
-
-  // Make Static<> actually resolve to a structural type so optional properties work.
-  export type Static<T> = T extends { static: infer S; } ? S : any;
-
-  export interface TSchema { static?: any; }
-  export interface TObject<T = any> extends TSchema { }
-  export interface TOptional<T = any> extends TSchema { }
-  export interface TNumber extends TSchema { }
-  export interface TString extends TSchema { }
-  export interface TBoolean extends TSchema { }
-  export interface TArray<T = any> extends TSchema { }
-  export interface TUnion<T = any> extends TSchema { }
-  export interface TLiteral<T = any> extends TSchema { }
-  export interface TAny extends TSchema { }
-  export interface TNull extends TSchema { }
-  export interface TUndefined extends TSchema { }
-  export interface TVoid extends TSchema { }
-}
-
 declare module 'napcat-protobuf' {
   export class NapProtoMsg<T = any> {
     constructor (schema: any);
