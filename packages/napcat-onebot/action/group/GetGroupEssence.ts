@@ -7,7 +7,7 @@ import { Static, Type } from '@sinclair/typebox';
 import { NetworkAdapterConfig } from '@/napcat-onebot/config/config';
 import { OB11MessageData, OB11MessageDataType } from '@/napcat-onebot/types';
 
-import { GroupActionsExamples } from './examples';
+import { GroupActionsExamples } from '../example/GroupActionsExamples';
 
 const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),

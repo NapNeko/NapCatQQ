@@ -6,7 +6,7 @@ import { MessageUnique } from 'napcat-common/src/message-unique';
 
 import { Static, Type } from '@sinclair/typebox';
 import { NetworkAdapterConfig } from '@/napcat-onebot/config/config';
-import { GoCQHTTPActionsExamples } from './examples';
+import { GoCQHTTPActionsExamples } from '../example/GoCQHTTPActionsExamples';
 
 const PayloadSchema = Type.Object({
   user_id: Type.String({ description: '用户QQ' }),

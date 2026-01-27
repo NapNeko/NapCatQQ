@@ -2,7 +2,7 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { QuickAction, QuickActionEvent } from '@/napcat-onebot/types';
 import { Static, Type } from '@sinclair/typebox';
-import { GoCQHTTPActionsExamples } from './examples';
+import { GoCQHTTPActionsExamples } from '../example/GoCQHTTPActionsExamples';
 
 const SenderSchema = Type.Object({
   user_id: Type.String({ description: '用户ID' }),

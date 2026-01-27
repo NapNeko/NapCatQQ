@@ -4,8 +4,7 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { OB11UserSchema } from '../schemas';
 import { Type } from '@sinclair/typebox';
-
-import { ActionExamples } from '../examples';
+import { SystemActionsExamples } from '@/napcat-onebot/action/example/SystemActionsExamples';
 
 class GetLoginInfo extends OneBotAction<void, OB11User> {
   override actionName = ActionName.GetLoginInfo;
@@ -14,8 +13,8 @@ class GetLoginInfo extends OneBotAction<void, OB11User> {
   override actionSummary = '获取登录号信息';
   override actionDescription = '获取当前登录帐号的信息';
   override actionTags = ['系统接口'];
-  override payloadExample = ActionExamples.GetLoginInfo.payload;
-  override returnExample = ActionExamples.GetLoginInfo.return;
+  override payloadExample = SystemActionsExamples.GetLoginInfo.payload;
+  override returnExample = SystemActionsExamples.GetLoginInfo.response;
 
   async _handle () {
     return OB11Construct.selfInfo(this.core.selfInfo);

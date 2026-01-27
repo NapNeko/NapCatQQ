@@ -2,7 +2,7 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
-import { ExtendsActionsExamples } from './examples';
+import { ExtendsActionsExamples } from '../example/ExtendsActionsExamples';
 
 const PayloadSchema = Type.Object({
   words: Type.Array(Type.String(), { description: '待翻译单词列表' }),

@@ -3,7 +3,7 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { MessageUnique } from 'napcat-common/src/message-unique';
 import { Static, Type } from '@sinclair/typebox';
 
-import { GroupActionsExamples } from './examples';
+import { GroupActionsExamples } from '../example/GroupActionsExamples';
 
 const PayloadSchema = Type.Object({
   message_id: Type.Optional(Type.Union([Type.Number(), Type.String()], { description: '消息ID' })),

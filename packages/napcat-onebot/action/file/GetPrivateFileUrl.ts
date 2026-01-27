@@ -3,7 +3,7 @@ import { FileNapCatOneBotUUID } from 'napcat-common/src/file-uuid';
 import { GetPacketStatusDepends } from '@/napcat-onebot/action/packet/GetPacketStatus';
 import { Static, Type } from '@sinclair/typebox';
 
-import { FileActionsExamples } from './examples';
+import { FileActionsExamples } from '../example/FileActionsExamples';
 
 const PayloadSchema = Type.Object({
   file_id: Type.String({ description: '文件ID' }),

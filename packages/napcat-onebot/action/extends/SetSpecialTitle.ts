@@ -2,7 +2,7 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { GetPacketStatusDepends } from '@/napcat-onebot/action/packet/GetPacketStatus';
 import { Static, Type } from '@sinclair/typebox';
 
-import { ExtendsActionsExamples } from './examples';
+import { ExtendsActionsExamples } from '../example/ExtendsActionsExamples';
 
 const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),

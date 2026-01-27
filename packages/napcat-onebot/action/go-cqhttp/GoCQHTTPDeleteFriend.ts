@@ -1,7 +1,7 @@
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
-import { GoCQHTTPActionsExamples } from './examples';
+import { GoCQHTTPActionsExamples } from '../example/GoCQHTTPActionsExamples';
 
 export const GoCQHTTPDeleteFriendPayloadSchema = Type.Object({
   friend_id: Type.Optional(Type.Union([Type.String(), Type.Number()], { description: '好友 QQ 号' })),

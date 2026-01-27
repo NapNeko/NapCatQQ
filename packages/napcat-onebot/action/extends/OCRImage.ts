@@ -4,7 +4,7 @@ import { checkFileExist, uriToLocalFile } from 'napcat-common/src/file';
 import fs from 'fs';
 import { Static, Type } from '@sinclair/typebox';
 
-import { ExtendsActionsExamples } from './examples';
+import { ExtendsActionsExamples } from '../example/ExtendsActionsExamples';
 
 const PayloadSchema = Type.Object({
   image: Type.String({ description: '图片路径、URL或Base64' }),

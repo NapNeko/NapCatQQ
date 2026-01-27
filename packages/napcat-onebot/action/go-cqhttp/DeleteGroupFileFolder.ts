@@ -1,7 +1,7 @@
 import { ActionName } from '@/napcat-onebot/action/router';
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { Static, Type } from '@sinclair/typebox';
-import { GoCQHTTPActionsExamples } from './examples';
+import { GoCQHTTPActionsExamples } from '../example/GoCQHTTPActionsExamples';
 
 const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),

@@ -3,8 +3,7 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 import { OB11GroupSchema } from '../schemas';
-
-import { ActionExamples } from '../examples';
+import { GroupActionsExamples } from '@/napcat-onebot/action/example/GroupActionsExamples';
 
 const PayloadSchema = Type.Object({
   no_cache: Type.Optional(Type.Union([Type.Boolean(), Type.String()], { description: '是否不使用缓存' })),
@@ -23,8 +22,8 @@ class GetGroupList extends OneBotAction<PayloadType, ReturnType> {
   override actionSummary = '获取群列表';
   override actionDescription = '获取当前帐号的群聊列表';
   override actionTags = ['群组接口'];
-  override payloadExample = ActionExamples.GetGroupList.payload;
-  override returnExample = ActionExamples.GetGroupList.return;
+  override payloadExample = GroupActionsExamples.GetGroupList.payload;
+  override returnExample = GroupActionsExamples.GetGroupList.response;
 
   async _handle (payload: PayloadType) {
     return OB11Construct.groups(

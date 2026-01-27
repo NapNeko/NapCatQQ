@@ -5,7 +5,7 @@ import fs from 'fs';
 import { uriToLocalFile } from 'napcat-common/src/file';
 import { SendMessageContext } from '@/napcat-onebot/api';
 import { Static, Type } from '@sinclair/typebox';
-import { GoCQHTTPActionsExamples } from './examples';
+import { GoCQHTTPActionsExamples } from '../example/GoCQHTTPActionsExamples';
 
 export const GoCQHTTPUploadGroupFilePayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),

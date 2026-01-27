@@ -4,7 +4,7 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 import { OB11GroupSchema } from '../schemas';
 
-import { GroupActionsExamples } from './examples';
+import { GroupActionsExamples } from '../example/GroupActionsExamples';
 
 const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),

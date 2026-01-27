@@ -15,8 +15,7 @@ import { stringifyWithBigInt } from 'napcat-common/src/helper';
 import { PacketMsg } from 'napcat-core/packet/message/message';
 import { rawMsgWithSendMsg } from 'napcat-core/packet/message/converter';
 import { Static, Type } from '@sinclair/typebox';
-
-import { ActionExamples } from '../examples';
+import { MsgActionsExamples } from '@/napcat-onebot/action/msg/examples';
 
 export const SendMsgPayloadSchema = Type.Object({
   message_type: Type.Optional(Type.Union([Type.Literal('private'), Type.Literal('group')], { description: '消息类型 (private/group)' })),
@@ -448,6 +447,6 @@ export default class SendMsg extends SendMsgBase {
   override actionSummary = '发送消息';
   override actionDescription = '发送私聊或群聊消息';
   override actionTags = ['消息接口'];
-  override payloadExample = ActionExamples.SendMsg.payload;
-  override returnExample = ActionExamples.SendMsg.return;
+  override payloadExample = MsgActionsExamples.SendMsg.payload;
+  override returnExample = MsgActionsExamples.SendMsg.response;
 }

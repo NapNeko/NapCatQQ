@@ -2,7 +2,6 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
-import { ActionExamples } from '../examples';
 
 export const SetFriendRemarkPayloadSchema = Type.Object({
   user_id: Type.String({ description: '对方 QQ 号' }),
@@ -24,7 +23,6 @@ export default class SetFriendRemark extends OneBotAction<SetFriendRemarkPayload
   };
   override returnExample = null;
   override errorExamples = [
-    ...ActionExamples.Common.errors,
     { code: 1400, description: '备注设置失败（好友不存在或非法输入）' }
   ];
 

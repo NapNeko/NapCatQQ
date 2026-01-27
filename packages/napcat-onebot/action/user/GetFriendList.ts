@@ -3,8 +3,7 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 import { OB11UserSchema } from '../schemas';
-
-import { ActionExamples } from '../examples';
+import { UserActionsExamples } from '@/napcat-onebot/action/example/UserActionsExamples';
 
 const PayloadSchema = Type.Object({
   no_cache: Type.Optional(Type.Union([Type.Boolean(), Type.String()], { description: '是否不使用缓存' })),
@@ -23,8 +22,8 @@ export default class GetFriendList extends OneBotAction<PayloadType, ReturnType>
   override actionSummary = '获取好友列表';
   override actionDescription = '获取当前帐号的好友列表';
   override actionTags = ['用户接口'];
-  override payloadExample = ActionExamples.GetFriendList.payload;
-  override returnExample = ActionExamples.GetFriendList.return;
+  override payloadExample = UserActionsExamples.GetFriendList.payload;
+  override returnExample = UserActionsExamples.GetFriendList.response;
 
   async _handle (_payload: PayloadType) {
     const buddyMap = await this.core.apis.FriendApi.getBuddyV2SimpleInfoMap();

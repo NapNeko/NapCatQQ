@@ -3,7 +3,7 @@ import { NTGroupMemberRole } from 'napcat-core/types';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
-import { GroupActionsExamples } from './examples';
+import { GroupActionsExamples } from '../example/GroupActionsExamples';
 
 const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),

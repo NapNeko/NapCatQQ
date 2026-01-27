@@ -1,7 +1,7 @@
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
-import { GoCQHTTPActionsExamples } from './examples';
+import { GoCQHTTPActionsExamples } from '../example/GoCQHTTPActionsExamples';
 
 export const GoCQHTTPCheckUrlSafelyPayloadSchema = Type.Object({
   url: Type.String({ description: '要检查的 URL' }),

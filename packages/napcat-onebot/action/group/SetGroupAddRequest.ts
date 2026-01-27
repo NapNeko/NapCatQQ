@@ -3,7 +3,7 @@ import { GroupNotify, NTGroupRequestOperateTypes } from 'napcat-core/types';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
-import { GroupActionsExamples } from './examples';
+import { GroupActionsExamples } from '../example/GroupActionsExamples';
 
 const PayloadSchema = Type.Object({
   flag: Type.String({ description: '请求flag' }),

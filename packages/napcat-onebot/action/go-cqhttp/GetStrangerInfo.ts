@@ -4,7 +4,7 @@ import { OB11Construct } from '@/napcat-onebot/helper/data';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { calcQQLevel } from 'napcat-common/src/helper';
 import { Static, Type } from '@sinclair/typebox';
-import { GoCQHTTPActionsExamples } from './examples';
+import { GoCQHTTPActionsExamples } from '../example/GoCQHTTPActionsExamples';
 
 const PayloadSchema = Type.Object({
   user_id: Type.String({ description: '用户QQ' }),

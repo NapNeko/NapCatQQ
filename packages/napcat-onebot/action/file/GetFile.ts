@@ -5,7 +5,7 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { OB11MessageImage, OB11MessageVideo } from '@/napcat-onebot/types';
 import { Static, Type } from '@sinclair/typebox';
 
-import { FileActionsExamples } from './examples';
+import { FileActionsExamples } from '../example/FileActionsExamples';
 
 export const GetFilePayloadSchema = Type.Object({
   file: Type.Optional(Type.String({ description: '文件路径、URL或Base64' })),

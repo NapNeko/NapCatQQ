@@ -1,7 +1,7 @@
 import { ContextMode, ReturnDataType, SendMsgBase, SendMsgPayload } from '@/napcat-onebot/action/msg/SendMsg';
 import { ActionName, BaseCheckResult } from '@/napcat-onebot/action/router';
 
-import { GroupActionsExamples } from './examples';
+import { GroupActionsExamples } from '../example/GroupActionsExamples';
 
 // 未检测参数
 class SendGroupMsg extends SendMsgBase {

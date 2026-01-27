@@ -1,7 +1,7 @@
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
-import { NewActionsExamples } from './examples';
+import { NewActionsExamples } from '../example/NewActionsExamples';
 
 export const GetDoubtFriendsAddRequestPayloadSchema = Type.Object({
   count: Type.Number({ default: 50, description: '获取数量' }),

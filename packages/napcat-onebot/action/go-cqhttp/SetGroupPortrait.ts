@@ -3,7 +3,7 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { checkFileExistV2, uriToLocalFile } from 'napcat-common/src/file';
 import { Static, Type } from '@sinclair/typebox';
 import fs from 'node:fs/promises';
-import { GoCQHTTPActionsExamples } from './examples';
+import { GoCQHTTPActionsExamples } from '../example/GoCQHTTPActionsExamples';
 
 export const SetGroupPortraitPayloadSchema = Type.Object({
   file: Type.String({ description: '头像文件路径或 URL' }),

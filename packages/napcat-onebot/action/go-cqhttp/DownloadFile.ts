@@ -5,7 +5,7 @@ import { join as joinPath } from 'node:path';
 import { calculateFileMD5, uriToLocalFile } from 'napcat-common/src/file';
 import { randomUUID } from 'crypto';
 import { Static, Type } from '@sinclair/typebox';
-import { GoCQHTTPActionsExamples } from './examples';
+import { GoCQHTTPActionsExamples } from '../example/GoCQHTTPActionsExamples';
 
 const PayloadSchema = Type.Object({
   url: Type.Optional(Type.String({ description: '下载链接' })),

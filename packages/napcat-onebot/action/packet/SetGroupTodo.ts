@@ -4,7 +4,7 @@ import { GetPacketStatusDepends } from '@/napcat-onebot/action/packet/GetPacketS
 import { Static, Type } from '@sinclair/typebox';
 import { ActionName } from '../router';
 
-import { PacketActionsExamples } from './examples';
+import { PacketActionsExamples } from '../example/PacketActionsExamples';
 
 export const SetGroupTodoPayloadSchema = Type.Object({
   group_id: Type.Union([Type.String(), Type.Number()], { description: '群号' }),

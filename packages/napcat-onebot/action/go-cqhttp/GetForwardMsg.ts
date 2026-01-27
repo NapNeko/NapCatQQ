@@ -5,7 +5,7 @@ import { MessageUnique } from 'napcat-common/src/message-unique';
 import { Static, Type } from '@sinclair/typebox';
 import { ChatType, ElementType, MsgSourceType, NTMsgType, RawMessage } from 'napcat-core';
 import { isNumeric } from 'napcat-common/src/helper';
-import { GoCQHTTPActionsExamples } from './examples';
+import { GoCQHTTPActionsExamples } from '../example/GoCQHTTPActionsExamples';
 
 const PayloadSchema = Type.Object({
   message_id: Type.Optional(Type.String({ description: '消息ID' })),

@@ -2,7 +2,7 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { OneBotAction } from '../OneBotAction';
 import { Type, Static } from '@sinclair/typebox';
 
-import { ExtendsActionsExamples } from './examples';
+import { ExtendsActionsExamples } from '../example/ExtendsActionsExamples';
 
 const ReturnSchema = Type.Object({
   clientkey: Type.Optional(Type.String({ description: '客户端Key' })),

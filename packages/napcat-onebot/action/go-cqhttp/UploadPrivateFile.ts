@@ -6,7 +6,7 @@ import { uriToLocalFile } from 'napcat-common/src/file';
 import { SendMessageContext } from '@/napcat-onebot/api';
 import { ContextMode, createContext } from '@/napcat-onebot/action/msg/SendMsg';
 import { Static, Type } from '@sinclair/typebox';
-import { GoCQHTTPActionsExamples } from './examples';
+import { GoCQHTTPActionsExamples } from '../example/GoCQHTTPActionsExamples';
 
 export const GoCQHTTPUploadPrivateFilePayloadSchema = Type.Object({
   user_id: Type.String({ description: '用户 QQ' }),
