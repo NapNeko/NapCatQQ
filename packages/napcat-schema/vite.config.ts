@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import path, { resolve } from 'path';
 import { builtinModules } from 'module';
 import nodeResolve from '@rollup/plugin-node-resolve';
-
+import napcatVersion from 'napcat-vite/vite-plugin-version';
 // 依赖排除
 const external = [
   'ws',
@@ -25,6 +25,7 @@ export default defineConfig({
   },
   plugins: [
     nodeResolve(),
+    napcatVersion()
   ],
   build: {
     target: 'esnext',

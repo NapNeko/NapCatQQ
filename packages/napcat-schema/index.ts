@@ -5,6 +5,7 @@ import { resolve, dirname } from 'node:path';
 import { TSchema } from '@sinclair/typebox';
 import { fileURLToPath } from 'node:url';
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
+import { napCatVersion } from 'napcat-common/src/version';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -69,7 +70,7 @@ export function generateOpenAPI () {
     info: {
       title: 'NapCat OneBot 11 HTTP API',
       description: 'NapCatOneBot11 HTTP POST 接口文档',
-      version: '1.0.0'
+      version: napCatVersion
     },
     tags: [
       { name: '消息接口', description: '发送、删除、获取消息相关接口' },

@@ -19,7 +19,8 @@ type ReturnType = Static<typeof ReturnSchema>;
 export class ClickInlineKeyboardButton extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.ClickInlineKeyboardButton;
   override payloadSchema = PayloadSchema;
-  override returnSchema = ReturnSchema; override actionSummary = '点击内联键盘按钮';
+  override returnSchema = ReturnSchema;
+  override actionSummary = '点击内联键盘按钮';
   override actionTags = ['消息扩展'];
   override payloadExample = {
     group_id: '123456',
