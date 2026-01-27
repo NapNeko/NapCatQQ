@@ -1,21 +1,28 @@
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
+import { GoCQHTTPActionsExamples } from '../example/GoCQHTTPActionsExamples';
 
-const SchemaData = Type.Object({
-  friend_id: Type.Optional(Type.Union([Type.String(), Type.Number()])),
-  user_id: Type.Optional(Type.Union([Type.String(), Type.Number()])),
-  temp_block: Type.Optional(Type.Boolean()),
-  temp_both_del: Type.Optional(Type.Boolean()),
+export const GoCQHTTPDeleteFriendPayloadSchema = Type.Object({
+  friend_id: Type.Optional(Type.Union([Type.String(), Type.Number()], { description: '好友 QQ 号' })),
+  user_id: Type.Optional(Type.Union([Type.String(), Type.Number()], { description: '用户 QQ 号' })),
+  temp_block: Type.Optional(Type.Boolean({ description: '是否加入黑名单' })),
+  temp_both_del: Type.Optional(Type.Boolean({ description: '是否双向删除' })),
 });
 
-type Payload = Static<typeof SchemaData>;
+export type GoCQHTTPDeleteFriendPayload = Static<typeof GoCQHTTPDeleteFriendPayloadSchema>;
 
-export class GoCQHTTPDeleteFriend extends OneBotAction<Payload, unknown> {
+export class GoCQHTTPDeleteFriend extends OneBotAction<GoCQHTTPDeleteFriendPayload, any> {
   override actionName = ActionName.GoCQHTTP_DeleteFriend;
-  override payloadSchema = SchemaData;
+  override payloadSchema = GoCQHTTPDeleteFriendPayloadSchema;
+  override returnSchema = Type.Any();
+  override actionSummary = '删除好友';
+  override actionDescription = '从好友列表中删除指定用户';
+  override actionTags = ['Go-CQHTTP'];
+  override payloadExample = GoCQHTTPActionsExamples.GoCQHTTPDeleteFriend.payload;
+  override returnExample = GoCQHTTPActionsExamples.GoCQHTTPDeleteFriend.response;
 
-  async _handle (payload: Payload) {
+  async _handle (payload: GoCQHTTPDeleteFriendPayload) {
     const uin = payload.friend_id ?? payload.user_id ?? '';
     const uid = await this.core.apis.UserApi.getUidByUinV2(uin.toString());
 

@@ -3,21 +3,35 @@ import { GetPacketStatusDepends } from '@/napcat-onebot/action/packet/GetPacketS
 import { AIVoiceChatType } from 'napcat-core/packet/entities/aiChat';
 import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = Type.Object({
-  character: Type.String(),
-  group_id: Type.Union([Type.Number(), Type.String()]),
-  text: Type.String(),
+const PayloadSchema = Type.Object({
+  character: Type.String({ description: '角色ID' }),
+  group_id: Type.String({ description: '群号' }),
+  text: Type.String({ description: '语音文本内容' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-export class SendGroupAiRecord extends GetPacketStatusDepends<Payload, {
-  message_id: number
-}> {
+const ReturnSchema = Type.Object({
+  message_id: Type.Number({ description: '消息ID' }),
+}, { description: '发送结果' });
+
+type ReturnType = Static<typeof ReturnSchema>;
+
+export class SendGroupAiRecord extends GetPacketStatusDepends<PayloadType, ReturnType> {
   override actionName = ActionName.SendGroupAiRecord;
-  override payloadSchema = SchemaData;
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
+  override actionSummary = '发送群 AI 语音';
+  override actionDescription = '发送 AI 生成的语音到指定群聊';
+  override actionTags = ['AI 扩展'];
+  override payloadExample = {
+    character: 'ai_char_1',
+    group_id: '123456',
+    text: '你好'
+  };
+  override returnExample = {};
 
-  async _handle (payload: Payload) {
+  async _handle (payload: PayloadType) {
     await this.core.apis.PacketApi.pkt.operation.GetAiVoice(+payload.group_id, payload.character, payload.text, AIVoiceChatType.Sound);
     return {
       message_id: 0,  // can't get message_id from GetAiVoice

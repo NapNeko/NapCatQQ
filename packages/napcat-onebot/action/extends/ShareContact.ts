@@ -1,24 +1,35 @@
-import { GeneralCallResult } from 'napcat-core';
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = Type.Object({
-  user_id: Type.Optional(Type.Union([Type.Number(), Type.String()])),
-  group_id: Type.Optional(Type.Union([Type.Number(), Type.String()])),
-  phone_number: Type.String({ default: '' }),
+const PayloadSchema = Type.Object({
+  user_id: Type.Optional(Type.String({ description: 'QQ号' })),
+  group_id: Type.Optional(Type.String({ description: '群号' })),
+  phone_number: Type.String({ default: '', description: '手机号' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-export class SharePeerBase extends OneBotAction<Payload, GeneralCallResult & {
-  arkMsg?: string;
-  arkJson?: string;
-}> {
+const ReturnSchema = Type.Any({ description: '分享结果' });
 
-  override payloadSchema = SchemaData;
+type ReturnType = Static<typeof ReturnSchema>;
 
-  async _handle (payload: Payload) {
+export class SharePeerBase extends OneBotAction<PayloadType, ReturnType> {
+
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
+  override actionSummary = '分享用户 (Ark)';
+  override actionDescription = '获取用户推荐的 Ark 内容';
+  override actionTags = ['消息扩展'];
+  override payloadExample = {
+    user_id: '123456',
+    phone_number: ''
+  };
+  override returnExample = {
+    ark: '...'
+  };
+
+  async _handle (payload: PayloadType) {
     if (payload.group_id) {
       return await this.core.apis.GroupApi.getGroupRecommendContactArkJson(payload.group_id.toString());
     } else if (payload.user_id) {
@@ -28,18 +39,30 @@ export class SharePeerBase extends OneBotAction<Payload, GeneralCallResult & {
   }
 }
 
-const SchemaDataGroupEx = Type.Object({
-  group_id: Type.Union([Type.Number(), Type.String()]),
+const PayloadSchemaGroupEx = Type.Object({
+  group_id: Type.String({ description: '群号' }),
 });
 export class SharePeer extends SharePeerBase {
   override actionName = ActionName.SharePeer;
 }
-type PayloadGroupEx = Static<typeof SchemaDataGroupEx>;
+type PayloadTypeGroupEx = Static<typeof PayloadSchemaGroupEx>;
 
-export class ShareGroupExBase extends OneBotAction<PayloadGroupEx, string> {
-  override payloadSchema = SchemaDataGroupEx;
+const ReturnSchemaGroupEx = Type.String({ description: 'Ark Json内容' });
 
-  async _handle (payload: PayloadGroupEx) {
+type ReturnTypeGroupEx = Static<typeof ReturnSchemaGroupEx>;
+
+export class ShareGroupExBase extends OneBotAction<PayloadTypeGroupEx, ReturnTypeGroupEx> {
+  override payloadSchema = PayloadSchemaGroupEx;
+  override returnSchema = ReturnSchemaGroupEx;
+  override actionSummary = '分享群 (Ark)';
+  override actionDescription = '获取群分享的 Ark 内容';
+  override actionTags = ['消息扩展'];
+  override payloadExample = {
+    group_id: '123456'
+  };
+  override returnExample = '{"app": "com.tencent.structmsg", ...}';
+
+  async _handle (payload: PayloadTypeGroupEx) {
     return await this.core.apis.GroupApi.getArkJsonGroupShare(payload.group_id.toString());
   }
 }

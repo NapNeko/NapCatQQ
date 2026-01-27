@@ -5,28 +5,37 @@ import { join as joinPath } from 'node:path';
 import { calculateFileMD5, uriToLocalFile } from 'napcat-common/src/file';
 import { randomUUID } from 'crypto';
 import { Static, Type } from '@sinclair/typebox';
+import { GoCQHTTPActionsExamples } from '../example/GoCQHTTPActionsExamples';
 
-interface FileResponse {
-  file: string;
-}
-
-const SchemaData = Type.Object({
-  url: Type.Optional(Type.String()),
-  base64: Type.Optional(Type.String()),
-  name: Type.Optional(Type.String()),
-  headers: Type.Optional(Type.Union([Type.String(), Type.Array(Type.String())])),
+const PayloadSchema = Type.Object({
+  url: Type.Optional(Type.String({ description: '下载链接' })),
+  base64: Type.Optional(Type.String({ description: 'base64数据' })),
+  name: Type.Optional(Type.String({ description: '文件名' })),
+  headers: Type.Optional(Type.Union([Type.String(), Type.Array(Type.String())], { description: '请求头' })),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-export default class GoCQHTTPDownloadFile extends OneBotAction<Payload, FileResponse> {
+const ReturnSchema = Type.Object({
+  file: Type.String({ description: '文件路径' }),
+}, { description: '下载结果' });
+
+type ReturnType = Static<typeof ReturnSchema>;
+
+export default class GoCQHTTPDownloadFile extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.GoCQHTTP_DownloadFile;
-  override payloadSchema = SchemaData;
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
+  override actionSummary = '下载文件';
+  override actionDescription = '下载网络文件到本地临时目录';
+  override actionTags = ['Go-CQHTTP'];
+  override payloadExample = GoCQHTTPActionsExamples.DownloadFile.payload;
+  override returnExample = GoCQHTTPActionsExamples.DownloadFile.response;
 
-  async _handle (payload: Payload): Promise<FileResponse> {
+  async _handle (payload: PayloadType): Promise<ReturnType> {
     const isRandomName = !payload.name;
     const name = payload.name || randomUUID();
-    let result: Awaited<ReturnType<typeof uriToLocalFile>>;
+    let result: Awaited<globalThis.ReturnType<typeof uriToLocalFile>>;
 
     if (payload.base64) {
       result = await uriToLocalFile(this.core.NapCatTempPath, `base64://${payload.base64}`, name);

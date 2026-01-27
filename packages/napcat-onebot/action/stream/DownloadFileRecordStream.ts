@@ -9,21 +9,30 @@ import { BaseDownloadStream, DownloadResult } from './BaseDownloadStream';
 
 const out_format = ['mp3', 'amr', 'wma', 'm4a', 'spx', 'ogg', 'wav', 'flac'];
 
-const SchemaData = Type.Object({
-  file: Type.Optional(Type.String()),
-  file_id: Type.Optional(Type.String()),
-  chunk_size: Type.Optional(Type.Number({ default: 64 * 1024 })), // 默认64KB分块
-  out_format: Type.Optional(Type.String()),
+export const DownloadFileRecordStreamPayloadSchema = Type.Object({
+  file: Type.Optional(Type.String({ description: '文件路径或 URL' })),
+  file_id: Type.Optional(Type.String({ description: '文件 ID' })),
+  chunk_size: Type.Optional(Type.Number({ default: 64 * 1024, description: '分块大小 (字节)' })), // 默认64KB分块
+  out_format: Type.Optional(Type.String({ description: '输出格式' })),
 });
 
-type Payload = Static<typeof SchemaData>;
+export type DownloadFileRecordStreamPayload = Static<typeof DownloadFileRecordStreamPayloadSchema>;
 
-export class DownloadFileRecordStream extends BaseDownloadStream<Payload, DownloadResult> {
+export class DownloadFileRecordStream extends BaseDownloadStream<DownloadFileRecordStreamPayload, DownloadResult> {
   override actionName = ActionName.DownloadFileRecordStream;
-  override payloadSchema = SchemaData;
+  override actionSummary = '下载语音文件流';
+  override actionTags = ['流式传输扩展'];
+  override payloadExample = {
+    file: 'record_file_id'
+  };
+  override returnExample = {
+    file: 'temp_record_path'
+  };
+  override payloadSchema = DownloadFileRecordStreamPayloadSchema;
+  override returnSchema = Type.Any({ description: '下载结果 (流式)' });
   override useStream = true;
 
-  async _handle (payload: Payload, _adaptername: string, _config: NetworkAdapterConfig, req: OneBotRequestToolkit): Promise<StreamPacket<DownloadResult>> {
+  async _handle (payload: DownloadFileRecordStreamPayload, _adaptername: string, _config: NetworkAdapterConfig, req: OneBotRequestToolkit): Promise<StreamPacket<DownloadResult>> {
     try {
       payload.file ||= payload.file_id || '';
       const chunkSize = payload.chunk_size || 64 * 1024;

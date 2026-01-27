@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, RequestHandler } from 'express';
 import rateLimit from 'express-rate-limit';
 import {
   ListFilesHandler,
@@ -28,7 +28,7 @@ const apiLimiter = rateLimit({
   },
 });
 
-router.use(apiLimiter);
+router.use(apiLimiter as unknown as RequestHandler);
 
 router.get('/list', ListFilesHandler);
 router.post('/mkdir', CreateDirHandler);

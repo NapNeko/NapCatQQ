@@ -2,17 +2,29 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = Type.Object({
-  fileset_id: Type.String(),
+export const GetFlashFileListPayloadSchema = Type.Object({
+  fileset_id: Type.String({ description: '文件集 ID' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+export type GetFlashFileListPayload = Static<typeof GetFlashFileListPayloadSchema>;
 
-export class GetFlashFileList extends OneBotAction<Payload, unknown> {
+export class GetFlashFileList extends OneBotAction<GetFlashFileListPayload, any> {
   override actionName = ActionName.GetFlashFileList;
-  override payloadSchema = SchemaData;
+  override payloadSchema = GetFlashFileListPayloadSchema;
+  override returnSchema = Type.Any({ description: '文件列表' });
+  override actionSummary = '获取闪照文件列表';
+  override actionTags = ['文件扩展'];
+  override payloadExample = {
+    fileset_id: 'set_123'
+  };
+  override returnExample = [
+    {
+      file_name: 'test.jpg',
+      size: 1024
+    }
+  ];
 
-  async _handle (payload: Payload) {
+  async _handle (payload: GetFlashFileListPayload) {
     return await this.core.apis.FlashApi.getFileListBySetId(payload.fileset_id);
   }
 }

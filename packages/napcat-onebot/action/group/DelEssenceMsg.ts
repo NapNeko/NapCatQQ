@@ -3,19 +3,32 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { MessageUnique } from 'napcat-common/src/message-unique';
 import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = Type.Object({
-  message_id: Type.Optional(Type.Union([Type.Number(), Type.String()])),
-  msg_seq: Type.Optional(Type.String()),
-  msg_random: Type.Optional(Type.String()),
-  group_id: Type.Optional(Type.String()),
+import { GroupActionsExamples } from '../example/GroupActionsExamples';
+
+const PayloadSchema = Type.Object({
+  message_id: Type.Optional(Type.Union([Type.Number(), Type.String()], { description: '消息ID' })),
+  msg_seq: Type.Optional(Type.String({ description: '消息序号' })),
+  msg_random: Type.Optional(Type.String({ description: '消息随机数' })),
+  group_id: Type.Optional(Type.String({ description: '群号' })),
 });
 
-type Payload = Static<typeof SchemaData>;
-export default class DelEssenceMsg extends OneBotAction<Payload, unknown> {
-  override actionName = ActionName.DelEssenceMsg;
-  override payloadSchema = SchemaData;
+type PayloadType = Static<typeof PayloadSchema>;
 
-  async _handle (payload: Payload): Promise<unknown> {
+const ReturnSchema = Type.Any({ description: '操作结果' });
+
+type ReturnType = Static<typeof ReturnSchema>;
+
+export default class DelEssenceMsg extends OneBotAction<PayloadType, ReturnType> {
+  override actionName = ActionName.DelEssenceMsg;
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
+  override actionSummary = '移出精华消息';
+  override actionDescription = '将一条消息从群精华消息列表中移出';
+  override actionTags = ['群组接口'];
+  override payloadExample = GroupActionsExamples.DelEssenceMsg.payload;
+  override returnExample = GroupActionsExamples.DelEssenceMsg.response;
+
+  async _handle (payload: PayloadType): Promise<ReturnType> {
     // 如果直接提供了 msg_seq, msg_random, group_id,优先使用
     if (payload.msg_seq && payload.msg_random && payload.group_id) {
       return await this.core.apis.GroupApi.removeGroupEssenceBySeq(
@@ -34,7 +47,7 @@ export default class DelEssenceMsg extends OneBotAction<Payload, unknown> {
     if (!msg) {
       const data = this.core.apis.GroupApi.essenceLRU.getValue(+payload.message_id);
       if (!data) throw new Error('消息不存在');
-      const { msg_seq, msg_random, group_id } = JSON.parse(data) as { msg_seq: string, msg_random: string, group_id: string };
+      const { msg_seq, msg_random, group_id } = JSON.parse(data) as { msg_seq: string, msg_random: string, group_id: string; };
       return await this.core.apis.GroupApi.removeGroupEssenceBySeq(group_id, msg_seq, msg_random);
     }
     return await this.core.apis.GroupApi.removeGroupEssence(

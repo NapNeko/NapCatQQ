@@ -1,0 +1,49 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "..",
+    "baseUrl": ".",
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "skipLibCheck": true,
+    "stripInternal": true,
+    "noEmitOnError": false,
+    "paths": {
+      "napcat-core": [
+        "../napcat-core/index.ts"
+      ],
+      "napcat-onebot": [
+        "../napcat-onebot/index.ts"
+      ],
+      "@/napcat-core/*": [
+        "../napcat-core/*"
+      ],
+      "@/napcat-onebot/*": [
+        "../napcat-onebot/*"
+      ],
+      "@/napcat-common/*": [
+        "../napcat-common/*"
+      ],
+      "@/napcat-webui-backend/*": [
+        "../napcat-webui-backend/*"
+      ],
+      "@/*": [
+        "../*"
+      ]
+    }
+  },
+  "include": [
+    "./index.ts",
+    "../napcat-core/**/*.ts",
+    "../napcat-onebot/**/*.ts",
+    "../napcat-common/**/*.ts"
+  ],
+  "files": [
+    "./external-shims.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

@@ -11,3 +11,7 @@ export * from './constant';
 export * from './graytip';
 export * from './emoji';
 export * from './service';
+export * from './adapter';
+export * from './contact';
+export * from './file';
+export * from './flashfile';

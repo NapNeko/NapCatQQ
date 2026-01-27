@@ -5,9 +5,18 @@ import { NapCatOneBot11Adapter, OB11Return } from '@/napcat-onebot/index';
 import { NetworkAdapterConfig } from '../config/config';
 import { TSchema } from '@sinclair/typebox';
 import { StreamPacket, StreamPacketBasic, StreamStatus } from './stream/StreamBasic';
+export const ActionExamples = {
+  Common: {
+    errors: [
+      { code: 1400, description: '请求参数错误或业务逻辑执行失败' },
+      { code: 1401, description: '权限不足' },
+      { code: 1404, description: '资源不存在' }
+    ]
+  }
+};
 
 export class OB11Response {
-  private static createResponse<T>(data: T, status: string, retcode: number, message: string = '', echo: unknown = null, useStream: boolean = false): OB11Return<T> {
+  private static createResponse<T> (data: T, status: string, retcode: number, message: string = '', echo: unknown = null, useStream: boolean = false): OB11Return<T> {
     return {
       status,
       retcode,
@@ -19,11 +28,11 @@ export class OB11Response {
     };
   }
 
-  static res<T>(data: T, status: string, retcode: number, message: string = '', echo: unknown = null, useStream: boolean = false): OB11Return<T> {
+  static res<T> (data: T, status: string, retcode: number, message: string = '', echo: unknown = null, useStream: boolean = false): OB11Return<T> {
     return this.createResponse(data, status, retcode, message, echo, useStream);
   }
 
-  static ok<T>(data: T, echo: unknown = null, useStream: boolean = false): OB11Return<T> {
+  static ok<T> (data: T, echo: unknown = null, useStream: boolean = false): OB11Return<T> {
     return this.createResponse(data, 'ok', 0, '', echo, useStream);
   }
 
@@ -32,15 +41,22 @@ export class OB11Response {
   }
 }
 export abstract class OneBotRequestToolkit {
-  abstract send<T>(packet: StreamPacket<T>): Promise<void>;
+  abstract send<T> (packet: StreamPacket<T>): Promise<void>;
 }
 export abstract class OneBotAction<PayloadType, ReturnDataType> {
   actionName: typeof ActionName[keyof typeof ActionName] = ActionName.Unknown;
   core: NapCatCore;
   private validate?: ValidateFunction<unknown> = undefined;
   payloadSchema?: TSchema = undefined;
+  returnSchema?: TSchema = undefined;
+  payloadExample?: unknown = undefined;
+  returnExample?: unknown = undefined;
+  actionSummary: string = '';
+  actionDescription: string = '';
+  actionTags: string[] = [];
   obContext: NapCatOneBot11Adapter;
   useStream: boolean = false;
+  errorExamples: Array<{ code: number, description: string; }> = ActionExamples.Common.errors;
 
   constructor (obContext: NapCatOneBot11Adapter, core: NapCatCore) {
     this.obContext = obContext;

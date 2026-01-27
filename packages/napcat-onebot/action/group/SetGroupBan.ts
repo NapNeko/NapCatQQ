@@ -2,18 +2,31 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = Type.Object({
-  group_id: Type.Union([Type.Number(), Type.String()]),
-  user_id: Type.Union([Type.Number(), Type.String()]),
-  duration: Type.Union([Type.Number(), Type.String()], { default: 0 }),
+import { GroupActionsExamples } from '../example/GroupActionsExamples';
+
+const PayloadSchema = Type.Object({
+  group_id: Type.String({ description: '群号' }),
+  user_id: Type.String({ description: '用户QQ' }),
+  duration: Type.Union([Type.Number(), Type.String()], { default: 0, description: '禁言时长(秒)' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-export default class SetGroupBan extends OneBotAction<Payload, null> {
+const ReturnSchema = Type.Null({ description: '操作结果' });
+
+type ReturnType = Static<typeof ReturnSchema>;
+
+export default class SetGroupBan extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.SetGroupBan;
-  override payloadSchema = SchemaData;
-  async _handle (payload: Payload): Promise<null> {
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
+  override actionSummary = '群组禁言';
+  override actionDescription = '禁言群聊中的指定成员';
+  override actionTags = ['群组接口'];
+  override payloadExample = GroupActionsExamples.SetGroupBan.payload;
+  override returnExample = GroupActionsExamples.SetGroupBan.response;
+
+  async _handle (payload: PayloadType): Promise<null> {
     const uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
     if (!uid) throw new Error('uid error');
     const member_role = (await this.core.apis.GroupApi.getGroupMemberEx(payload.group_id.toString(), uid, true))?.role;

@@ -3,19 +3,28 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 import { ChatType } from 'napcat-core/types';
 
-const SchemaData = Type.Object({
-  user_id: Type.Union([Type.Number(), Type.String()]),
-  msg_id: Type.String(),
-  element_id: Type.String(),
+export const ReceiveOnlineFilePayloadSchema = Type.Object({
+  user_id: Type.String({ description: '用户 QQ' }),
+  msg_id: Type.String({ description: '消息 ID' }),
+  element_id: Type.String({ description: '元素 ID' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+export type ReceiveOnlineFilePayload = Static<typeof ReceiveOnlineFilePayloadSchema>;
 
-export class ReceiveOnlineFile extends OneBotAction<Payload, unknown> {
+export class ReceiveOnlineFile extends OneBotAction<ReceiveOnlineFilePayload, any> {
   override actionName = ActionName.ReceiveOnlineFile;
-  override payloadSchema = SchemaData;
+  override payloadSchema = ReceiveOnlineFilePayloadSchema;
+  override returnSchema = Type.Any({ description: '接收结果' });
+  override actionSummary = '接收在线文件';
+  override actionTags = ['文件扩展'];
+  override payloadExample = {
+    user_id: '123456789',
+    msg_id: '123',
+    save_path: 'C:\\save'
+  };
+  override returnExample = null;
 
-  async _handle (payload: Payload) {
+  async _handle (payload: ReceiveOnlineFilePayload) {
     // 默认下载路径
     const uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
     if (!uid) throw new Error('User not found');

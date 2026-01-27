@@ -1,22 +1,32 @@
-import { OB11GroupMember } from '@/napcat-onebot/index';
 import { OB11Construct } from '@/napcat-onebot/helper/data';
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 import { GroupMember } from 'napcat-core';
+import { GroupActionsExamples } from '../example/GroupActionsExamples';
 
-const SchemaData = Type.Object({
-  group_id: Type.Union([Type.Number(), Type.String()]),
-  no_cache: Type.Optional(Type.Union([Type.Boolean(), Type.String()])),
+const PayloadSchema = Type.Object({
+  group_id: Type.String({ description: '群号' }),
+  no_cache: Type.Optional(Type.Union([Type.Boolean(), Type.String()], { description: '是否不使用缓存' })),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-export class GetGroupMemberList extends OneBotAction<Payload, OB11GroupMember[]> {
+const ReturnSchema = Type.Array(Type.Any(), { description: '群成员列表' });
+
+type ReturnType = Static<typeof ReturnSchema>;
+
+export class GetGroupMemberList extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.GetGroupMemberList;
-  override payloadSchema = SchemaData;
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
+  override actionSummary = '获取群成员列表';
+  override actionDescription = '获取群聊中的所有成员列表';
+  override actionTags = ['群组接口'];
+  override payloadExample = GroupActionsExamples.GetGroupMemberList.payload;
+  override returnExample = GroupActionsExamples.GetGroupMemberList.response;
 
-  async _handle (payload: Payload) {
+  async _handle (payload: PayloadType) {
     const groupIdStr = payload.group_id.toString();
     const noCache = this.parseBoolean(payload.no_cache ?? false);
     const groupMembers = await this.getGroupMembers(groupIdStr, noCache);

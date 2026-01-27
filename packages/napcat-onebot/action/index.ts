@@ -156,7 +156,7 @@ import { ReceiveOnlineFile } from './file/online/ReceiveOnlineFile';
 import { RefuseOnlineFile } from './file/online/RefuseOnlineFile';
 import { GetFilesetId } from './file/flash/GetFilesetIdByCode';
 
-export function createActionMap (obContext: NapCatOneBot11Adapter, core: NapCatCore) {
+export function getAllHandlers (obContext: NapCatOneBot11Adapter, core: NapCatCore) {
   const actionHandlers = [
     new CleanStreamTempFile(obContext, core),
     new DownloadFileStream(obContext, core),
@@ -324,7 +324,11 @@ export function createActionMap (obContext: NapCatOneBot11Adapter, core: NapCatC
     new DownloadFileset(obContext, core),
     new GetFilesetId(obContext, core),
   ];
+  return actionHandlers;
+}
 
+export function createActionMap (obContext: NapCatOneBot11Adapter, core: NapCatCore) {
+  const actionHandlers = getAllHandlers(obContext, core);
   type HandlerUnion = typeof actionHandlers[number];
   type MapType = {
     [H in HandlerUnion as H['actionName']]: H;

@@ -3,22 +3,34 @@ import { FileNapCatOneBotUUID } from 'napcat-common/src/file-uuid';
 import { GetPacketStatusDepends } from '@/napcat-onebot/action/packet/GetPacketStatus';
 import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = Type.Object({
-  group_id: Type.Union([Type.Number(), Type.String()]),
-  file_id: Type.String(),
+const PayloadSchema = Type.Object({
+  group_id: Type.String({ description: '群号' }),
+  file_id: Type.String({ description: '文件ID' }),
 });
 
-type Payload = Static<typeof SchemaData>;
+type PayloadType = Static<typeof PayloadSchema>;
 
-interface TransGroupFileResponse {
-  ok: boolean;
-}
+const ReturnSchema = Type.Object({
+  ok: Type.Boolean({ description: '是否成功' }),
+}, { description: '转发文件结果' });
 
-export class TransGroupFile extends GetPacketStatusDepends<Payload, TransGroupFileResponse> {
+type ReturnType = Static<typeof ReturnSchema>;
+
+export class TransGroupFile extends GetPacketStatusDepends<PayloadType, ReturnType> {
   override actionName = ActionName.TransGroupFile;
-  override payloadSchema = SchemaData;
+  override actionSummary = '传输群文件';
+  override actionTags = ['文件扩展'];
+  override payloadExample = {
+    group_id: '123456',
+    file_id: '/file_id'
+  };
+  override returnExample = {
+    ok: true
+  };
+  override payloadSchema = PayloadSchema;
+  override returnSchema = ReturnSchema;
 
-  async _handle (payload: Payload) {
+  async _handle (payload: PayloadType) {
     const contextMsgFile = FileNapCatOneBotUUID.decode(payload.file_id) || FileNapCatOneBotUUID.decodeModelId(payload.file_id);
     if (contextMsgFile?.fileUUID) {
       const result = await this.core.apis.GroupApi.transGroupFile(payload.group_id.toString(), contextMsgFile.fileUUID);
