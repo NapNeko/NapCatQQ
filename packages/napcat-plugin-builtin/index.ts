@@ -1,7 +1,7 @@
-import type { ActionMap } from 'napcat-types/dist/napcat-onebot/action/index';
-import { EventType } from 'napcat-types/dist/napcat-onebot/event/index';
-import type { PluginModule } from 'napcat-types/dist/napcat-onebot/network/plugin-manger';
-import type { OB11Message, OB11PostSendMsg } from 'napcat-types/dist/napcat-onebot/types/index';
+import type { ActionMap } from 'napcat-types/napcat-onebot/action/index';
+import { EventType } from 'napcat-types/napcat-onebot/event/index';
+import type { PluginModule } from 'napcat-types/napcat-onebot/network/plugin-manger';
+import type { OB11Message, OB11PostSendMsg } from 'napcat-types/napcat-onebot/types/index';
 
 let actions: ActionMap | undefined = undefined;
 let startTime: number = Date.now();
