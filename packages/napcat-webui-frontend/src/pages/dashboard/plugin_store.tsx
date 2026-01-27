@@ -64,16 +64,13 @@ export default function PluginStorePage () {
       );
     }
 
-    // 按下载量排序
-    filtered.sort((a, b) => (b.downloads || 0) - (a.downloads || 0));
-
     // 定义主要分类
     const categories: Record<string, PluginStoreItem[]> = {
       all: filtered,
-      popular: filtered.filter(p => (p.downloads || 0) > 5000),
-      tools: filtered.filter(p => p.tags?.some(t => ['工具', '管理', '群管理'].includes(t))),
-      entertainment: filtered.filter(p => p.tags?.some(t => ['娱乐', '音乐', '游戏'].includes(t))),
-      message: filtered.filter(p => p.tags?.some(t => ['消息处理', '自动回复', '欢迎'].includes(t))),
+      official: filtered.filter(p => p.tags?.includes('官方')),
+      tools: filtered.filter(p => p.tags?.includes('工具')),
+      entertainment: filtered.filter(p => p.tags?.includes('娱乐')),
+      other: filtered.filter(p => !p.tags?.some(t => ['官方', '工具', '娱乐'].includes(t))),
     };
 
     return categories;
@@ -82,10 +79,10 @@ export default function PluginStorePage () {
   const tabs = useMemo(() => {
     return [
       { key: 'all', title: '全部', count: categorizedPlugins.all?.length || 0 },
-      { key: 'popular', title: '热门推荐', count: categorizedPlugins.popular?.length || 0 },
-      { key: 'tools', title: '工具管理', count: categorizedPlugins.tools?.length || 0 },
-      { key: 'entertainment', title: '娱乐功能', count: categorizedPlugins.entertainment?.length || 0 },
-      { key: 'message', title: '消息处理', count: categorizedPlugins.message?.length || 0 },
+      { key: 'official', title: '官方', count: categorizedPlugins.official?.length || 0 },
+      { key: 'tools', title: '工具', count: categorizedPlugins.tools?.length || 0 },
+      { key: 'entertainment', title: '娱乐', count: categorizedPlugins.entertainment?.length || 0 },
+      { key: 'other', title: '其它', count: categorizedPlugins.other?.length || 0 },
     ];
   }, [categorizedPlugins]);
 
