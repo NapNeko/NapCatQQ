@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { GetPluginListHandler, ReloadPluginHandler, SetPluginStatusHandler, UninstallPluginHandler } from '@/napcat-webui-backend/src/api/Plugin';
-import { GetPluginStoreListHandler, GetPluginStoreDetailHandler, InstallPluginFromStoreHandler } from '@/napcat-webui-backend/src/api/PluginStore';
+import { GetPluginStoreListHandler, GetPluginStoreDetailHandler, InstallPluginFromStoreHandler, InstallPluginFromStoreSSEHandler } from '@/napcat-webui-backend/src/api/PluginStore';
 
 const router: Router = Router();
 
@@ -13,5 +13,6 @@ router.post('/Uninstall', UninstallPluginHandler);
 router.get('/Store/List', GetPluginStoreListHandler);
 router.get('/Store/Detail/:id', GetPluginStoreDetailHandler);
 router.post('/Store/Install', InstallPluginFromStoreHandler);
+router.get('/Store/Install/SSE', InstallPluginFromStoreSSEHandler);
 
 export { router as PluginRouter };

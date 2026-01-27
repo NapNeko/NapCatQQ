@@ -1,15 +1,21 @@
 import { Button } from '@heroui/button';
 import { Input } from '@heroui/input';
+import { Select, SelectItem } from '@heroui/select';
 import { Tab, Tabs } from '@heroui/tabs';
 import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import { IoMdRefresh, IoMdSearch } from 'react-icons/io';
 import clsx from 'clsx';
+import { useRequest } from 'ahooks';
+import { EventSourcePolyfill } from 'event-source-polyfill';
 
 import PageLoading from '@/components/page_loading';
 import PluginStoreCard from '@/components/display_card/plugin_store_card';
 import PluginManager from '@/controllers/plugin_manager';
+import WebUIManager from '@/controllers/webui_manager';
 import { PluginStoreItem } from '@/types/plugin-store';
+import useDialog from '@/hooks/use-dialog';
+import key from '@/const/key';
 
 interface EmptySectionProps {
   isEmpty: boolean;
@@ -32,6 +38,14 @@ export default function PluginStorePage () {
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<string>('all');
+  const dialog = useDialog();
+
+  // 获取镜像列表
+  const { data: mirrorsData } = useRequest(WebUIManager.getMirrors, {
+    cacheKey: 'napcat-mirrors',
+    staleTime: 60 * 60 * 1000,
+  });
+  const mirrors = mirrorsData?.mirrors || [];
 
   const loadPlugins = async () => {
     setLoading(true);
@@ -86,13 +100,116 @@ export default function PluginStorePage () {
     ];
   }, [categorizedPlugins]);
 
-  const handleInstall = async (pluginId: string) => {
+  const handleInstall = async (plugin: PluginStoreItem) => {
+    // 检测是否是 GitHub 下载链接
+    const githubPattern = /^https:\/\/github\.com\//;
+    const isGitHubUrl = githubPattern.test(plugin.downloadUrl);
+
+    // 如果是 GitHub 链接，弹出镜像选择对话框
+    if (isGitHubUrl) {
+      let selectedMirror: string | undefined = undefined;
+
+      dialog.confirm({
+        title: '安装插件',
+        content: (
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm mb-2">
+                插件名称: <span className="font-semibold">{plugin.name}</span>
+              </p>
+              <p className="text-sm mb-2">
+                版本: <span className="font-semibold">v{plugin.version}</span>
+              </p>
+              <p className="text-sm text-default-500 mb-4">
+                {plugin.description}
+              </p>
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">选择下载镜像源</label>
+              <Select
+                placeholder="自动选择 (默认)"
+                defaultSelectedKeys={['default']}
+                onSelectionChange={(keys) => {
+                  const m = Array.from(keys)[0] as string;
+                  selectedMirror = m === 'default' ? undefined : m;
+                }}
+                size="sm"
+                aria-label="选择镜像源"
+              >
+                {['default', ...mirrors].map(m => (
+                  <SelectItem key={m} textValue={m === 'default' ? '自动选择' : m}>
+                    {m === 'default' ? '自动选择 (默认)' : m}
+                  </SelectItem>
+                ))}
+              </Select>
+            </div>
+          </div>
+        ),
+        confirmText: '开始安装',
+        cancelText: '取消',
+        onConfirm: async () => {
+          await installPluginWithSSE(plugin.id, selectedMirror);
+        },
+      });
+    } else {
+      // 非 GitHub 链接，直接安装
+      await installPluginWithSSE(plugin.id);
+    }
+  };
+
+  const installPluginWithSSE = async (pluginId: string, mirror?: string) => {
+    const loadingToast = toast.loading('正在准备安装...');
+
     try {
-      await PluginManager.installPluginFromStore(pluginId);
-      toast.success('插件安装成功！');
-      // 可以选择刷新插件列表或导航到插件管理页面
+      // 获取认证 token
+      const token = localStorage.getItem(key.token);
+      if (!token) {
+        toast.error('未登录，请先登录', { id: loadingToast });
+        return;
+      }
+      const _token = JSON.parse(token);
+
+      const params = new URLSearchParams({ id: pluginId });
+      if (mirror) {
+        params.append('mirror', mirror);
+      }
+
+      const eventSource = new EventSourcePolyfill(
+        `/api/Plugin/Store/Install/SSE?${params.toString()}`,
+        {
+          headers: {
+            Authorization: `Bearer ${_token}`,
+            Accept: 'text/event-stream',
+          },
+          withCredentials: true,
+        }
+      );
+
+      eventSource.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+
+          if (data.error) {
+            toast.error(`安装失败: ${data.error}`, { id: loadingToast });
+            eventSource.close();
+          } else if (data.success) {
+            toast.success('插件安装成功！', { id: loadingToast });
+            eventSource.close();
+          } else if (data.message) {
+            toast.loading(data.message, { id: loadingToast });
+          }
+        } catch (e) {
+          console.error('Failed to parse SSE message:', e);
+        }
+      };
+
+      eventSource.onerror = (error) => {
+        console.error('SSE连接出错:', error);
+        toast.error('连接中断，安装失败', { id: loadingToast });
+        eventSource.close();
+      };
     } catch (error: any) {
-      toast.error(`安装失败: ${error.message || '未知错误'}`);
+      toast.error(`安装失败: ${error.message || '未知错误'}`, { id: loadingToast });
     }
   };
 
@@ -148,7 +265,7 @@ export default function PluginStorePage () {
                   <PluginStoreCard
                     key={plugin.id}
                     data={plugin}
-                    onInstall={() => handleInstall(plugin.id)}
+                    onInstall={() => handleInstall(plugin)}
                   />
                 ))}
               </div>

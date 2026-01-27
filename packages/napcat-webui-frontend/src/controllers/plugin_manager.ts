@@ -50,7 +50,10 @@ export default class PluginManager {
     return data.data;
   }
 
-  public static async installPluginFromStore (id: string) {
-    await serverRequest.post<ServerResponse<void>>('/Plugin/Store/Install', { id });
+  public static async installPluginFromStore (id: string, mirror?: string) {
+    // 插件安装可能需要较长时间（下载+解压），设置5分钟超时
+    await serverRequest.post<ServerResponse<void>>('/Plugin/Store/Install', { id, mirror }, {
+      timeout: 300000, // 5分钟
+    });
   }
 }

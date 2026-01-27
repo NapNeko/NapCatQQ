@@ -383,17 +383,14 @@ export async function testUrlHead (url: string, timeout: number = 5000): Promise
     }, (res) => {
       const statusCode = res.statusCode || 0;
       const contentType = (res.headers['content-type'] as string) || '';
-      const contentLength = parseInt((res.headers['content-length'] as string) || '0', 10);
 
-      // 验证条件：
+      // 简化验证条件：
       // 1. 状态码 2xx 或 3xx
       // 2. Content-Type 不应该是 text/html（表示错误页面）
-      // 3. 对于 .zip 文件，Content-Length 应该 > 1MB（避免获取到错误页面）
       const isValidStatus = statusCode >= 200 && statusCode < 400;
       const isNotHtmlError = !contentType.includes('text/html');
-      const isValidSize = url.endsWith('.zip') ? contentLength > 1024 * 1024 : true;
 
-      resolve(isValidStatus && isNotHtmlError && isValidSize);
+      resolve(isValidStatus && isNotHtmlError);
     });
 
     req.on('error', () => resolve(false));
@@ -437,10 +434,9 @@ export async function validateUrl (url: string, timeout: number = 5000): Promise
       const contentType = (res.headers['content-type'] as string) || '';
       const contentLength = parseInt((res.headers['content-length'] as string) || '0', 10);
 
-      // 验证条件
+      // 简化验证条件
       const isValidStatus = statusCode >= 200 && statusCode < 400;
       const isNotHtmlError = !contentType.includes('text/html');
-      const isValidSize = url.endsWith('.zip') ? contentLength > 1024 * 1024 : true;
 
       if (!isValidStatus) {
         resolve({
@@ -457,14 +453,6 @@ export async function validateUrl (url: string, timeout: number = 5000): Promise
           contentType,
           contentLength,
           error: '返回了 HTML 页面而非文件',
-        });
-      } else if (!isValidSize) {
-        resolve({
-          valid: false,
-          statusCode,
-          contentType,
-          contentLength,
-          error: `文件过小 (${contentLength} bytes)，可能是错误页面`,
         });
       } else {
         resolve({
@@ -542,21 +530,21 @@ export async function findAvailableDownloadUrl (
   const testWithValidation = async (url: string): Promise<boolean> => {
     if (validateContent) {
       const result = await validateUrl(url, timeout);
-      // 额外检查文件大小
+      // 额外检查文件大小（仅当指定了 minFileSize 时）
       if (result.valid && minFileSize && result.contentLength && result.contentLength < minFileSize) {
         return false;
       }
       return result.valid;
     }
-    return testMethod === 'head' ? testUrlHead(url, timeout) : testUrl(url, timeout);
+    // 不验证内容，只检查状态码
+    const isValid = testMethod === 'head' ? await testUrlHead(url, timeout) : await testUrl(url, timeout);
+    return isValid;
   };
 
-  // 1. 如果设置了自定义镜像，优先使用
+  // 1. 如果设置了自定义镜像，直接使用（不测试，信任用户选择）
   if (customMirror) {
     const customUrl = buildMirrorUrl(originalUrl, customMirror);
-    if (await testWithValidation(customUrl)) {
-      return customUrl;
-    }
+    return customUrl;
   }
 
   // 2. 先测试原始 URL
