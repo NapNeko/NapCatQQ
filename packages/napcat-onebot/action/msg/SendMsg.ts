@@ -16,7 +16,7 @@ import { PacketMsg } from 'napcat-core/packet/message/message';
 import { rawMsgWithSendMsg } from 'napcat-core/packet/message/converter';
 import { Static, Type } from '@sinclair/typebox';
 import { MsgActionsExamples } from '@/napcat-onebot/action/msg/examples';
-import { OB11MessageMixTypeSchema } from '@/napcat-onebot/types/message-segment-schema';
+import { OB11MessageMixTypeSchema } from '@/napcat-onebot/types/message';
 
 export const SendMsgPayloadSchema = Type.Object({
   message_type: Type.Optional(Type.Union([Type.Literal('private'), Type.Literal('group')], { description: '消息类型 (private/group)' })),
