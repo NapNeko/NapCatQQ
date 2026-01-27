@@ -5,7 +5,14 @@ export const ExtendsActionsExamples = {
   },
   GetAiCharacters: {
     payload: { group_id: '123456' },
-    response: { characters: [] },
+    response: [
+      {
+        type: 'string',
+        characters: [
+          { character_id: 'id', character_name: 'name', preview_url: 'url' }
+        ]
+      }
+    ],
   },
   GetClientkey: {
     payload: {},
@@ -13,11 +20,11 @@ export const ExtendsActionsExamples = {
   },
   SetQQAvatar: {
     payload: { file: 'base64://...' },
-    response: {},
+    response: null,
   },
   SetGroupKickMembers: {
     payload: { group_id: '123456', user_id: ['123456789'], reject_add_request: false },
-    response: {},
+    response: null,
   },
   TranslateEnWordToZn: {
     payload: { words: ['hello'] },
@@ -29,10 +36,10 @@ export const ExtendsActionsExamples = {
   },
   SetLongNick: {
     payload: { longNick: '个性签名' },
-    response: {},
+    response: null,
   },
   SetSpecialTitle: {
     payload: { group_id: '123456', user_id: '123456789', special_title: '头衔' },
-    response: {},
+    response: null,
   },
 };

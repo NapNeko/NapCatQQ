@@ -21,12 +21,11 @@ export class TransGroupFile extends GetPacketStatusDepends<PayloadType, ReturnTy
   override actionSummary = '传输群文件';
   override actionTags = ['文件扩展'];
   override payloadExample = {
-    group_id: 123456,
-    file_id: '/file_id',
-    target_group_id: 654321
+    group_id: '123456',
+    file_id: '/file_id'
   };
   override returnExample = {
-    result: true
+    ok: true
   };
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;

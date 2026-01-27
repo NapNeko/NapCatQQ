@@ -23,12 +23,13 @@ export class RenameGroupFile extends GetPacketStatusDepends<PayloadType, ReturnT
   override actionSummary = '重命名群文件';
   override actionTags = ['文件扩展'];
   override payloadExample = {
-    group_id: 123456,
+    group_id: '123456',
     file_id: '/file_id',
-    name: 'new_name.jpg'
+    current_parent_directory: '/',
+    new_name: 'new_name.jpg'
   };
   override returnExample = {
-    result: true
+    ok: true
   };
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;

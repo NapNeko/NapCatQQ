@@ -1,11 +1,11 @@
 export const GroupActionsExamples = {
   DelEssenceMsg: {
     payload: { message_id: 123456 },
-    response: {},
+    response: null,
   },
   DelGroupNotice: {
     payload: { group_id: '123456', notice_id: 'notice_123' },
-    response: {},
+    response: null,
   },
   GetGroupDetailInfo: {
     payload: { group_id: '123456' },
@@ -41,38 +41,38 @@ export const GroupActionsExamples = {
   },
   SetEssenceMsg: {
     payload: { message_id: 123456 },
-    response: {},
+    response: null,
   },
   SetGroupAddRequest: {
     payload: { flag: 'flag_123', sub_type: 'add', approve: true },
-    response: {},
+    response: null,
   },
   SetGroupAdmin: {
     payload: { group_id: '123456', user_id: '123456789', enable: true },
-    response: {},
+    response: null,
   },
   SetGroupBan: {
     payload: { group_id: '123456', user_id: '123456789', duration: 1800 },
-    response: {},
+    response: null,
   },
   SetGroupCard: {
     payload: { group_id: '123456', user_id: '123456789', card: '新名片' },
-    response: {},
+    response: null,
   },
   SetGroupKick: {
     payload: { group_id: '123456', user_id: '123456789', reject_add_request: false },
-    response: {},
+    response: null,
   },
   SetGroupLeave: {
     payload: { group_id: '123456', is_dismiss: false },
-    response: {},
+    response: null,
   },
   SetGroupName: {
     payload: { group_id: '123456', group_name: '新群名' },
-    response: {},
+    response: null,
   },
   SetGroupWholeBan: {
     payload: { group_id: '123456', enable: true },
-    response: {},
+    response: null,
   },
 };

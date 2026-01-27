@@ -57,7 +57,7 @@ export const GoCQHTTPActionsExamples = {
   },
   GetOnlineClient: {
     payload: { no_cache: false },
-    response: { clients: [] },
+    response: [],
   },
   GoCQHTTPCheckUrlSafely: {
     payload: { url: 'https://example.com' },
@@ -85,7 +85,7 @@ export const GoCQHTTPActionsExamples = {
   },
   SetGroupPortrait: {
     payload: { group_id: '123456', file: 'base64://...' },
-    response: {},
+    response: { result: 0, errMsg: '' },
   },
   SetQQProfile: {
     payload: { nickname: '新昵称', personal_note: '个性签名' },

@@ -10,7 +10,9 @@ const PayloadSchema = Type.Object({
 
 type PayloadType = Static<typeof PayloadSchema>;
 
-const ReturnSchema = Type.Union([Type.Array(Type.Any()), Type.Undefined()], { description: '翻译结果列表' });
+const ReturnSchema = Type.Object({
+  words: Type.Array(Type.String(), { description: '翻译结果列表' }),
+}, { description: '翻译结果' });
 
 type ReturnType = Static<typeof ReturnSchema>;
 
@@ -29,6 +31,8 @@ export class TranslateEnWordToZn extends OneBotAction<PayloadType, ReturnType> {
     if (ret.result !== 0) {
       throw new Error('翻译失败');
     }
-    return ret.words;
+    return {
+      words: ret.words
+    };
   }
 }

@@ -23,7 +23,7 @@ class MarkMsgAsRead extends OneBotAction<PayloadType, ReturnType> {
   override payloadExample = {
     message_id: 12345
   };
-  override returnExample = {};
+  override returnExample = null;
 
   async getPeer (payload: PayloadType): Promise<Peer> {
     if (payload.message_id) {
@@ -86,7 +86,7 @@ export class MarkAllMsgAsRead extends OneBotAction<void, null> {
   override actionSummary = '标记所有消息已读';
   override actionTags = ['消息接口'];
   override payloadExample = {};
-  override returnExample = {};
+  override returnExample = null;
 
   async _handle (): Promise<null> {
     await this.core.apis.MsgApi.markAllMsgAsRead();

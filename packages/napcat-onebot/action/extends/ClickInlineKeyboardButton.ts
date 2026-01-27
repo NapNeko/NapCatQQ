@@ -22,12 +22,14 @@ export class ClickInlineKeyboardButton extends OneBotAction<PayloadType, ReturnT
   override returnSchema = ReturnSchema; override actionSummary = '点击内联键盘按钮';
   override actionTags = ['消息扩展'];
   override payloadExample = {
-    message_id: 12345,
-    button_id: 'btn_1'
+    group_id: '123456',
+    bot_appid: '1234567890',
+    button_id: 'btn_1',
+    callback_data: '',
+    msg_seq: '10086'
   };
   override returnExample = {
-    result: true
-  };
+  } as any;
   async _handle (payload: PayloadType) {
     return await this.core.apis.MsgApi.clickInlineKeyboardButton({
       buttonId: payload.button_id,

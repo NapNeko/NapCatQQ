@@ -33,10 +33,25 @@ export class FetchEmojiLike extends OneBotAction<PayloadType, ReturnType> {
   override actionSummary = '获取表情点赞详情';
   override actionTags = ['消息扩展'];
   override payloadExample = {
-    message_id: 12345
+    message_id: 12345,
+    emojiId: '123',
+    emojiType: 1,
+    count: 10,
+    cookie: ''
   };
   override returnExample = {
-    likes: [{ emoji_id: '123', count: 10 }]
+    emojiLikesList: [
+      {
+        tinyId: '123456',
+        nickName: '测试用户',
+        headUrl: 'http://example.com/avatar.png'
+      }
+    ],
+    cookie: '',
+    isLastPage: true,
+    isFirstPage: true,
+    result: 0,
+    errMsg: ''
   };
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;

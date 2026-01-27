@@ -21,9 +21,7 @@ export default class SetGroupSearch extends OneBotAction<PayloadType, ReturnType
   override payloadExample = {
     group_id: '123456'
   };
-  override returnExample = {
-    result: null
-  };
+  override returnExample = null;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
   async _handle (payload: PayloadType): Promise<ReturnType> {

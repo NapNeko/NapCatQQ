@@ -29,10 +29,16 @@ export class GetEmojiLikes extends OneBotAction<PayloadType, ReturnType> {
   override actionSummary = '获取消息表情点赞列表';
   override actionTags = ['消息扩展'];
   override payloadExample = {
-    message_id: 12345
+    message_id: '12345',
+    emoji_id: '123'
   };
   override returnExample = {
-    likes: [{ emoji_id: '123', user_id: 654321 }]
+    emoji_like_list: [
+      {
+        user_id: '654321',
+        nick_name: '测试用户'
+      }
+    ]
   };
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;

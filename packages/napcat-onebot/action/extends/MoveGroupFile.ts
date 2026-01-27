@@ -23,12 +23,13 @@ export class MoveGroupFile extends GetPacketStatusDepends<PayloadType, ReturnTyp
   override actionSummary = '移动群文件';
   override actionTags = ['文件扩展'];
   override payloadExample = {
-    group_id: 123456,
+    group_id: '123456',
     file_id: '/file_id',
-    parent_id: '/target_folder_id'
+    current_parent_directory: '/current_folder_id',
+    target_parent_directory: '/target_folder_id',
   };
   override returnExample = {
-    result: true
+    ok: true
   };
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;

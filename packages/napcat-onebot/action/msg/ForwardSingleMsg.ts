@@ -24,7 +24,7 @@ class ForwardSingleMsg extends OneBotAction<PayloadType, ReturnType> {
     message_id: 12345,
     group_id: '123456'
   };
-  override returnExample = {};
+  override returnExample = null;
 
   protected async getTargetPeer (payload: PayloadType): Promise<Peer> {
     if (payload.user_id) {

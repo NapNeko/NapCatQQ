@@ -23,7 +23,7 @@ class DeleteMsg extends OneBotAction<PayloadType, ReturnType> {
   override payloadExample = {
     message_id: 12345
   };
-  override returnExample = {};
+  override returnExample = null;
 
   async _handle (payload: PayloadType) {
     const msg = MessageUnique.getMsgIdAndPeerByShortId(Number(payload.message_id));

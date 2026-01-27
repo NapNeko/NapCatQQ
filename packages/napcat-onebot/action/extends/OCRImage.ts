@@ -20,7 +20,7 @@ class OCRImageBase extends OneBotAction<PayloadType, ReturnType> {
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
   override actionSummary = '图片 OCR 识别';
-  override actionDescription = '识别图片中的文字内容';
+  override actionDescription = '识别图片中的文字内容(仅Windows端支持)';
   override actionTags = ['扩展接口'];
   override payloadExample = ExtendsActionsExamples.OCRImage.payload;
   override returnExample = ExtendsActionsExamples.OCRImage.response;

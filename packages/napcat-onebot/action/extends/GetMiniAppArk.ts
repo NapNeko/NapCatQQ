@@ -48,10 +48,16 @@ export class GetMiniAppArk extends GetPacketStatusDepends<PayloadType, ReturnTyp
   override returnSchema = ReturnSchema; override actionSummary = '获取小程序 Ark';
   override actionTags = ['系统扩展'];
   override payloadExample = {
-    app_id: 'wx123456'
+    type: 'bili',
+    title: '测试标题',
+    desc: '测试描述',
+    picUrl: 'http://example.com/pic.jpg',
+    jumpUrl: 'http://example.com'
   };
   override returnExample = {
-    ark: 'ark_content'
+    data: {
+      ark: 'ark_content'
+    }
   };
   async _handle (payload: PayloadType) {
     let reqParam: MiniAppReqParams;

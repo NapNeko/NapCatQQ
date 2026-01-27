@@ -16,10 +16,10 @@ export class GetGroupInfoEx extends OneBotAction<PayloadType, ReturnType> {
   override actionSummary = '获取群详细信息 (扩展)';
   override actionTags = ['群组扩展'];
   override payloadExample = {
-    group_id: 123456
+    group_id: '123456'
   };
   override returnExample = {
-
+    
   };
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;

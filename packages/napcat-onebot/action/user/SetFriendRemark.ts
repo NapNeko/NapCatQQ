@@ -22,7 +22,7 @@ export default class SetFriendRemark extends OneBotAction<SetFriendRemarkPayload
     user_id: '123456',
     remark: '测试备注'
   };
-  override returnExample = {};
+  override returnExample = null;
   override errorExamples = [
     ...ActionExamples.Common.errors,
     { code: 1400, description: '备注设置失败（好友不存在或非法输入）' }
