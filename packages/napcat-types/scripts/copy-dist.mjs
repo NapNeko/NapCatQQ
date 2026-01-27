@@ -1,4 +1,4 @@
-// 复制 cp README.md dist/ && cp package.public.json dist/package.json
+// 复制 cp README.md dist/ && cp package.public.json dist/package.json && cp external-shims.d.ts dist/
 import { copyFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -10,4 +10,8 @@ await copyFile(
 await copyFile(
   join(__dirname, 'README.md'),
   join(__dirname, 'dist', 'README.md')
+);
+await copyFile(
+  join(__dirname, 'external-shims.d.ts'),
+  join(__dirname, 'dist', 'external-shims.d.ts')
 );
