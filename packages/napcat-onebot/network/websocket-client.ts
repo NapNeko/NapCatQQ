@@ -74,7 +74,7 @@ export class OB11WebSocketClientAdapter extends IOB11NetworkAdapter<WebsocketCli
       let isClosedByError = false;
 
       this.connection = new WebSocket(this.config.url, {
-        maxPayload: 1024 * 1024 * 1024,
+        maxPayload: 50 * 1024 * 1024, // 50 MB
         handshakeTimeout: 2000,
         perMessageDeflate: false,
         headers: {

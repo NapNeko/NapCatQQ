@@ -32,7 +32,7 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
     this.wsServer = new WebSocketServer({
       port: this.config.port,
       host: this.config.host === '0.0.0.0' ? '' : this.config.host,
-      maxPayload: 1024 * 1024 * 1024,
+      maxPayload: 50 * 1024 * 1024, // 50 MB
     });
     this.createServer(this.wsServer);
   }
@@ -237,7 +237,7 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
       this.wsServer = new WebSocketServer({
         port: newConfig.port,
         host: newConfig.host === '0.0.0.0' ? '' : newConfig.host,
-        maxPayload: 1024 * 1024 * 1024,
+        maxPayload: 50 * 1024 * 1024, // 50 MB
       });
       this.createServer(this.wsServer);
       if (newConfig.enable) {
