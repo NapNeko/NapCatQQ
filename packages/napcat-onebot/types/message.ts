@@ -264,14 +264,14 @@ export interface OB11MessageOnlineFile {
     fileName: string;
     fileSize: string;
     isDir: boolean;
-  }
+  };
 }
 
 export interface OB11MessageFlashTransfer {
   type: OB11MessageDataType.flashtransfer;
   data: {
     fileSetId: string;
-  }
+  };
 }
 
 // 消息数据类型定义

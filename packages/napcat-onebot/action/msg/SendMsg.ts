@@ -16,12 +16,13 @@ import { PacketMsg } from 'napcat-core/packet/message/message';
 import { rawMsgWithSendMsg } from 'napcat-core/packet/message/converter';
 import { Static, Type } from '@sinclair/typebox';
 import { MsgActionsExamples } from '@/napcat-onebot/action/msg/examples';
+import { OB11MessageMixTypeSchema } from '@/napcat-onebot/types/message-segment-schema';
 
 export const SendMsgPayloadSchema = Type.Object({
   message_type: Type.Optional(Type.Union([Type.Literal('private'), Type.Literal('group')], { description: '消息类型 (private/group)' })),
   user_id: Type.Optional(Type.String({ description: '用户QQ' })),
   group_id: Type.Optional(Type.String({ description: '群号' })),
-  message: Type.Unknown({ description: '消息内容' }),
+  message: OB11MessageMixTypeSchema,
   auto_escape: Type.Optional(Type.Union([Type.Boolean(), Type.String()], { description: '是否作为纯文本发送' })),
   // 以下为扩展字段
   source: Type.Optional(Type.String({ description: '合并转发来源' })),
@@ -30,9 +31,7 @@ export const SendMsgPayloadSchema = Type.Object({
   prompt: Type.Optional(Type.String({ description: '合并转发提示' })),
 });
 
-export type SendMsgPayload = Static<typeof SendMsgPayloadSchema> & {
-  message: OB11MessageMixType;
-};
+export type SendMsgPayload = Static<typeof SendMsgPayloadSchema>;
 
 export const SendMsgReturnSchema = Type.Object({
   message_id: Type.Number({ description: '消息ID' }),
