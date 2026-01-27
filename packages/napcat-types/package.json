@@ -8,7 +8,7 @@
     "dist/**/*"
   ],
   "scripts": {
-    "build": "tsc --project tsconfig.json && tsc-alias --project tsconfig.json --outDir dist && node ./scripts/copy-dist.mjs",
+    "build": "tsc --project tsconfig.json && tsc-alias --project tsconfig.json --outDir dist && node ./scripts/post-build.mjs && node ./scripts/copy-dist.mjs",
     "test": "pnpm -s exec tsc --project tsconfig.json --noEmit",
     "publish": "cd dist && npm publish"
   },

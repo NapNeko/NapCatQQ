@@ -68,14 +68,7 @@ export default defineConfig({
       entry: 'index.ts',
       formats: ['es'],
       fileName: () => 'index.mjs',
-    },
-    rollupOptions: {
-      external: (id) => {
-        if (nodeModules.includes(id)) return true;
-        if (id.startsWith('napcat-')) return true;
-        return false;
-      },
-    },
+    }
   },
   plugins: [nodeResolve(), copyToShellPlugin()],
 });
