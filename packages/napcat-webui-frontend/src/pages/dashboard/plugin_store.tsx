@@ -86,11 +86,14 @@ export default function PluginStorePage () {
     ];
   }, [categorizedPlugins]);
 
-  const handleInstall = async () => {
-    toast('该功能尚未完工，敬请期待', {
-      icon: '🚧',
-      duration: 3000,
-    });
+  const handleInstall = async (pluginId: string) => {
+    try {
+      await PluginManager.installPluginFromStore(pluginId);
+      toast.success('插件安装成功！');
+      // 可以选择刷新插件列表或导航到插件管理页面
+    } catch (error: any) {
+      toast.error(`安装失败: ${error.message || '未知错误'}`);
+    }
   };
 
   return (
@@ -145,7 +148,7 @@ export default function PluginStorePage () {
                   <PluginStoreCard
                     key={plugin.id}
                     data={plugin}
-                    onInstall={handleInstall}
+                    onInstall={() => handleInstall(plugin.id)}
                   />
                 ))}
               </div>

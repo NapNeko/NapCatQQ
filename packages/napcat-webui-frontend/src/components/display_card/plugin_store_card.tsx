@@ -1,7 +1,7 @@
 import { Button } from '@heroui/button';
 import { Chip } from '@heroui/chip';
 import { useState } from 'react';
-import { IoMdStar, IoMdDownload } from 'react-icons/io';
+import { IoMdDownload } from 'react-icons/io';
 
 import DisplayCardContainer from './container';
 import { PluginStoreItem } from '@/types/plugin-store';
@@ -15,7 +15,7 @@ const PluginStoreCard: React.FC<PluginStoreCardProps> = ({
   data,
   onInstall,
 }) => {
-  const { name, version, author, description, tags, rating, icon } = data;
+  const { name, version, author, description, tags, id } = data;
   const [processing, setProcessing] = useState(false);
 
   const handleInstall = () => {
@@ -37,17 +37,7 @@ const PluginStoreCard: React.FC<PluginStoreCardProps> = ({
           v{version}
         </Chip>
       }
-      enableSwitch={
-        icon ? (
-          <div className="flex items-center gap-2">
-            <img
-              src={icon}
-              alt={name}
-              className="w-10 h-10 rounded-lg object-cover"
-            />
-          </div>
-        ) : undefined
-      }
+      enableSwitch={undefined}
       action={
         <Button
           fullWidth
@@ -88,14 +78,13 @@ const PluginStoreCard: React.FC<PluginStoreCardProps> = ({
             {description || '暂无描述'}
           </div>
         </div>
-        {rating && (
+        {id && (
           <div className='flex flex-col gap-1 p-3 bg-default-100/50 dark:bg-white/10 rounded-xl border border-transparent hover:border-default-200 transition-colors'>
             <span className='text-xs text-default-500 dark:text-white/50 font-medium tracking-wide'>
-              评分
+              包名
             </span>
-            <div className='flex items-center gap-1 text-sm font-medium text-default-700 dark:text-white/90'>
-              <IoMdStar className='text-warning' size={16} />
-              <span>{rating.toFixed(1)}</span>
+            <div className='text-sm font-medium text-default-700 dark:text-white/90 break-words line-clamp-2 h-10 overflow-hidden'>
+              {id || '包名'}
             </div>
           </div>
         )}

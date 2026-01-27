@@ -1,126 +1,166 @@
 import { RequestHandler } from 'express';
 import { sendError, sendSuccess } from '@/napcat-webui-backend/src/utils/response';
 import { PluginStoreList } from '@/napcat-webui-backend/src/types/PluginStore';
+import * as fs from 'fs';
+import * as path from 'path';
+import { pipeline } from 'stream/promises';
+import { createWriteStream } from 'fs';
+import compressing from 'compressing';
+import { findAvailableDownloadUrl, GITHUB_RAW_MIRRORS } from 'napcat-common/src/mirror';
 
-// Mock数据 - 模拟远程插件列表
-const mockPluginStoreData: PluginStoreList = {
-  version: '1.0.0',
-  updateTime: new Date().toISOString(),
-  plugins: [
-    {
-      id: 'napcat-plugin-example',
-      name: '示例插件',
-      version: '1.0.0',
-      description: '这是一个示例插件，展示如何开发NapCat插件',
-      author: 'NapCat Team',
-      homepage: 'https://github.com/NapNeko/NapCatQQ',
-      repository: 'https://github.com/NapNeko/NapCatQQ',
-      downloadUrl: 'https://example.com/plugins/napcat-plugin-example-1.0.0.zip',
-      tags: ['示例', '教程'],
-      screenshots: ['https://picsum.photos/800/600?random=1'],
-      minNapCatVersion: '1.0.0',
-      downloads: 1234,
-      rating: 4.5,
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-20T00:00:00Z',
-    },
-    {
-      id: 'napcat-plugin-auto-reply',
-      name: '自动回复插件',
-      version: '2.1.0',
-      description: '支持关键词匹配的自动回复功能，可配置多种回复规则',
-      author: 'Community',
-      homepage: 'https://github.com/example/auto-reply',
-      repository: 'https://github.com/example/auto-reply',
-      downloadUrl: 'https://example.com/plugins/napcat-plugin-auto-reply-2.1.0.zip',
-      tags: ['自动回复', '消息处理'],
-      minNapCatVersion: '1.0.0',
-      downloads: 5678,
-      rating: 4.8,
-      createdAt: '2024-01-05T00:00:00Z',
-      updatedAt: '2024-01-22T00:00:00Z',
-    },
-    {
-      id: 'napcat-plugin-welcome',
-      name: '入群欢迎插件',
-      version: '1.2.3',
-      description: '新成员入群时自动发送欢迎消息，支持自定义欢迎语',
-      author: 'Developer',
-      homepage: 'https://github.com/example/welcome',
-      repository: 'https://github.com/example/welcome',
-      downloadUrl: 'https://example.com/plugins/napcat-plugin-welcome-1.2.3.zip',
-      tags: ['欢迎', '群管理'],
-      minNapCatVersion: '1.0.0',
-      downloads: 3456,
-      rating: 4.3,
-      createdAt: '2024-01-10T00:00:00Z',
-      updatedAt: '2024-01-18T00:00:00Z',
-    },
-    {
-      id: 'napcat-plugin-music',
-      name: '音乐点歌插件',
-      version: '3.0.1',
-      description: '支持网易云、QQ音乐等平台的点歌功能',
-      author: 'Music Lover',
-      homepage: 'https://github.com/example/music',
-      repository: 'https://github.com/example/music',
-      downloadUrl: 'https://example.com/plugins/napcat-plugin-music-3.0.1.zip',
-      tags: ['音乐', '娱乐'],
-      screenshots: ['https://picsum.photos/800/600?random=4', 'https://picsum.photos/800/600?random=5'],
-      minNapCatVersion: '1.1.0',
-      downloads: 8901,
-      rating: 4.9,
-      createdAt: '2023-12-01T00:00:00Z',
-      updatedAt: '2024-01-23T00:00:00Z',
-    },
-    {
-      id: 'napcat-plugin-admin',
-      name: '群管理插件',
-      version: '2.5.0',
-      description: '提供踢人、禁言、设置管理员等群管理功能',
-      author: 'Admin Tools',
-      homepage: 'https://github.com/example/admin',
-      repository: 'https://github.com/example/admin',
-      downloadUrl: 'https://example.com/plugins/napcat-plugin-admin-2.5.0.zip',
-      tags: ['管理', '群管理', '工具'],
-      minNapCatVersion: '1.0.0',
-      downloads: 6789,
-      rating: 4.6,
-      createdAt: '2023-12-15T00:00:00Z',
-      updatedAt: '2024-01-21T00:00:00Z',
-    },
-    {
-      id: 'napcat-plugin-image-search',
-      name: '以图搜图插件',
-      version: '1.5.2',
-      description: '支持多个搜图引擎，快速找到图片来源',
-      author: 'Image Hunter',
-      homepage: 'https://github.com/example/image-search',
-      repository: 'https://github.com/example/image-search',
-      downloadUrl: 'https://example.com/plugins/napcat-plugin-image-search-1.5.2.zip',
-      tags: ['图片', '搜索', '工具'],
-      minNapCatVersion: '1.0.0',
-      downloads: 4567,
-      rating: 4.4,
-      createdAt: '2024-01-08T00:00:00Z',
-      updatedAt: '2024-01-19T00:00:00Z',
-    },
-  ],
-};
+// 插件商店源配置
+const PLUGIN_STORE_SOURCES = [
+  'https://raw.githubusercontent.com/NapNeko/napcat-plugin-index/main/plugins.v4.json',
+];
+
+// 插件目录
+const PLUGINS_DIR = path.join(process.cwd(), 'plugins');
+
+// 确保插件目录存在
+if (!fs.existsSync(PLUGINS_DIR)) {
+  fs.mkdirSync(PLUGINS_DIR, { recursive: true });
+}
+
+// 插件列表缓存
+let pluginListCache: PluginStoreList | null = null;
+let cacheTimestamp: number = 0;
+const CACHE_TTL = 10 * 60 * 1000; // 10分钟缓存
+
+/**
+ * 从多个源获取插件列表，使用镜像系统
+ * 带10分钟缓存
+ */
+async function fetchPluginList (): Promise<PluginStoreList> {
+  // 检查缓存
+  const now = Date.now();
+  if (pluginListCache && (now - cacheTimestamp) < CACHE_TTL) {
+    //console.log('Using cached plugin list');
+    return pluginListCache;
+  }
+
+  const errors: string[] = [];
+
+  for (const source of PLUGIN_STORE_SOURCES) {
+    // 使用镜像系统的 raw 镜像列表
+    for (const mirror of GITHUB_RAW_MIRRORS) {
+      try {
+        const url = mirror ? `${mirror}/${source.replace('https://raw.githubusercontent.com/', '')}` : source;
+
+        const response = await fetch(url, {
+          headers: {
+            'User-Agent': 'NapCat-WebUI',
+          },
+          signal: AbortSignal.timeout(10000), // 10秒超时
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        //console.log(`Successfully fetched plugin list from: ${url}`);
+
+        // 更新缓存
+        pluginListCache = data as PluginStoreList;
+        cacheTimestamp = now;
+
+        return pluginListCache;
+      } catch (e: any) {
+        const errorMsg = `Failed to fetch from ${source} via mirror: ${e.message}`;
+        console.warn(errorMsg);
+        errors.push(errorMsg);
+      }
+    }
+  }
+
+  throw new Error(`All plugin sources failed:\n${errors.join('\n')}`);
+}
+
+/**
+ * 下载文件，使用镜像系统
+ * 自动识别 GitHub Release URL 并使用镜像加速
+ */
+async function downloadFile (url: string, destPath: string): Promise<void> {
+  try {
+    let downloadUrl: string;
+
+    // 判断是否是 GitHub Release URL
+    // 格式: https://github.com/{owner}/{repo}/releases/download/{tag}/{filename}
+    const githubReleasePattern = /^https:\/\/github\.com\/[^/]+\/[^/]+\/releases\/download\//;
+
+    if (githubReleasePattern.test(url)) {
+      // 使用镜像系统查找可用的下载 URL（支持 GitHub Release 镜像）
+      console.log(`Detected GitHub Release URL: ${url}`);
+      downloadUrl = await findAvailableDownloadUrl(url, {
+        validateContent: true,
+        minFileSize: 1024, // 最小 1KB
+        timeout: 60000, // 60秒超时
+        useFastMirrors: true, // 使用快速镜像列表
+      });
+    } else {
+      // 其他URL直接下载
+      console.log(`Direct download URL: ${url}`);
+      downloadUrl = url;
+    }
+
+    console.log(`Downloading from: ${downloadUrl}`);
+
+    const response = await fetch(downloadUrl, {
+      headers: {
+        'User-Agent': 'NapCat-WebUI',
+      },
+      signal: AbortSignal.timeout(60000),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    if (!response.body) {
+      throw new Error('Response body is null');
+    }
+
+    // 写入文件
+    const fileStream = createWriteStream(destPath);
+    await pipeline(response.body as any, fileStream);
+
+    console.log(`Successfully downloaded to: ${destPath}`);
+  } catch (e: any) {
+    // 删除可能的不完整文件
+    if (fs.existsSync(destPath)) {
+      fs.unlinkSync(destPath);
+    }
+    throw new Error(`Download failed: ${e.message}`);
+  }
+}
+
+/**
+ * 解压插件到指定目录
+ */
+async function extractPlugin (zipPath: string, pluginId: string): Promise<void> {
+  const pluginDir = path.join(PLUGINS_DIR, pluginId);
+
+  // 如果目录已存在，先删除
+  if (fs.existsSync(pluginDir)) {
+    fs.rmSync(pluginDir, { recursive: true, force: true });
+  }
+
+  // 创建插件目录
+  fs.mkdirSync(pluginDir, { recursive: true });
+
+  // 解压
+  await compressing.zip.uncompress(zipPath, pluginDir);
+
+  //console.log(`Plugin extracted to: ${pluginDir}`);
+}
 
 /**
  * 获取插件商店列表
- * 未来可以从远程URL读取
  */
 export const GetPluginStoreListHandler: RequestHandler = async (_req, res) => {
   try {
-    // TODO: 未来从远程URL读取
-    // const remoteUrl = 'https://napcat.example.com/plugin-list.json';
-    // const response = await fetch(remoteUrl);
-    // const data = await response.json();
-
-    // 目前返回Mock数据
-    return sendSuccess(res, mockPluginStoreData);
+    const data = await fetchPluginList();
+    return sendSuccess(res, data);
   } catch (e: any) {
     return sendError(res, 'Failed to fetch plugin store list: ' + e.message);
   }
@@ -132,7 +172,8 @@ export const GetPluginStoreListHandler: RequestHandler = async (_req, res) => {
 export const GetPluginStoreDetailHandler: RequestHandler = async (req, res) => {
   try {
     const { id } = req.params;
-    const plugin = mockPluginStoreData.plugins.find(p => p.id === id);
+    const data = await fetchPluginList();
+    const plugin = data.plugins.find(p => p.id === id);
 
     if (!plugin) {
       return sendError(res, 'Plugin not found');
@@ -146,7 +187,6 @@ export const GetPluginStoreDetailHandler: RequestHandler = async (req, res) => {
 
 /**
  * 安装插件（从商店）
- * TODO: 实现实际的下载和安装逻辑
  */
 export const InstallPluginFromStoreHandler: RequestHandler = async (req, res) => {
   try {
@@ -156,21 +196,38 @@ export const InstallPluginFromStoreHandler: RequestHandler = async (req, res) =>
       return sendError(res, 'Plugin ID is required');
     }
 
-    const plugin = mockPluginStoreData.plugins.find(p => p.id === id);
+    // 获取插件信息
+    const data = await fetchPluginList();
+    const plugin = data.plugins.find(p => p.id === id);
 
     if (!plugin) {
       return sendError(res, 'Plugin not found in store');
     }
 
-    // TODO: 实现实际的下载和安装逻辑
-    // 1. 下载插件文件
-    // 2. 解压到插件目录
-    // 3. 加载插件
+    // 下载插件
+    const tempZipPath = path.join(PLUGINS_DIR, `${id}.temp.zip`);
 
-    return sendSuccess(res, {
-      message: 'Plugin installation started',
-      plugin: plugin
-    });
+    try {
+      await downloadFile(plugin.downloadUrl, tempZipPath);
+
+      // 解压插件
+      await extractPlugin(tempZipPath, id);
+
+      // 删除临时文件
+      fs.unlinkSync(tempZipPath);
+
+      return sendSuccess(res, {
+        message: 'Plugin installed successfully',
+        plugin: plugin,
+        installPath: path.join(PLUGINS_DIR, id),
+      });
+    } catch (downloadError: any) {
+      // 清理临时文件
+      if (fs.existsSync(tempZipPath)) {
+        fs.unlinkSync(tempZipPath);
+      }
+      throw downloadError;
+    }
   } catch (e: any) {
     return sendError(res, 'Failed to install plugin: ' + e.message);
   }
