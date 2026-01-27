@@ -66,7 +66,7 @@ export function generateOpenAPI () {
   }
 
   const openapi: Record<string, unknown> = {
-    openapi: '3.1.0',
+    openapi: '3.0.1',
     info: {
       title: 'NapCat OneBot 11 HTTP API',
       description: 'NapCatOneBot11 HTTP POST 接口文档',

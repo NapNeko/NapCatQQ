@@ -38,7 +38,7 @@ jobs:
       - name: Build napcat-schema
         run: |
           cd packages/napcat-schema
-          pnpm run build:schema
+          pnpm run build:openapi
       
       - name: Checkout NapCatDocs
         uses: actions/checkout@v4

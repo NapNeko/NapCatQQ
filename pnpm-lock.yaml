@@ -267,6 +267,9 @@ importers:
       napcat-onebot:
         specifier: workspace:*
         version: link:../napcat-onebot
+      napcat-vite:
+        specifier: workspace:*
+        version: link:../napcat-vite
     devDependencies:
       tsx:
         specifier: ^4.7.1
