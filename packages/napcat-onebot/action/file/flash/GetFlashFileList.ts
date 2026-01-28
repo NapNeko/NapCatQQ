@@ -12,7 +12,7 @@ export class GetFlashFileList extends OneBotAction<GetFlashFileListPayload, any>
   override actionName = ActionName.GetFlashFileList;
   override payloadSchema = GetFlashFileListPayloadSchema;
   override returnSchema = Type.Any({ description: '文件列表' });
-  override actionSummary = '获取闪照文件列表';
+  override actionSummary = '获取闪传文件列表';
   override actionTags = ['文件扩展'];
   override payloadExample = {
     fileset_id: 'set_123'
