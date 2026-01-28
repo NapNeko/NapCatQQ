@@ -6,8 +6,6 @@ import type { OB11Message, OB11PostSendMsg } from 'napcat-types/napcat-onebot/ty
 import fs from 'fs';
 import path from 'path';
 import type { PluginConfigSchema } from 'napcat-types/napcat-onebot/network/plugin-manger';
-
-let actions: ActionMap | undefined = undefined;
 let startTime: number = Date.now();
 
 interface BuiltinPluginConfig {
@@ -31,30 +29,23 @@ export let plugin_config_ui: PluginConfigSchema = [];
 /**
  * 插件初始化
  */
-/**
- * 插件初始化
- */
 const plugin_init: PluginModule['plugin_init'] = async (ctx) => {
   console.log('[Plugin: builtin] NapCat 内置插件已初始化');
-  actions = ctx.actions;
-  // platformInstance = _instance; // No longer valid or needed like this
-
-  const NapCatConfig = ctx.NapCatConfig;
-  plugin_config_ui = NapCatConfig.combine(
-    NapCatConfig.html('<div style="padding: 10px; background: rgba(0,0,0,0.05); border-radius: 8px;"><h3>👋 Welcome to NapCat Builtin Plugin</h3><p>This is a demonstration of the plugin configuration interface.</p></div>'),
-    NapCatConfig.text('prefix', 'Command Prefix', '#napcat', 'The prefix to trigger the version info command'),
-    NapCatConfig.boolean('enableReply', 'Enable Reply', true, 'Switch to enable or disable the reply functionality'),
-    NapCatConfig.select('theme', 'Theme Selection', [
+  plugin_config_ui = ctx.NapCatConfig.combine(
+    ctx.NapCatConfig.html('<div style="padding: 10px; background: rgba(0,0,0,0.05); border-radius: 8px;"><h3>👋 Welcome to NapCat Builtin Plugin</h3><p>This is a demonstration of the plugin configuration interface.</p></div>'),
+    ctx.NapCatConfig.text('prefix', 'Command Prefix', '#napcat', 'The prefix to trigger the version info command'),
+    ctx.NapCatConfig.boolean('enableReply', 'Enable Reply', true, 'Switch to enable or disable the reply functionality'),
+    ctx.NapCatConfig.select('theme', 'Theme Selection', [
       { label: 'Light Mode', value: 'light' },
       { label: 'Dark Mode', value: 'dark' },
       { label: 'Auto', value: 'auto' }
     ], 'light', 'Select a theme for the response (Demo purpose only)'),
-    NapCatConfig.multiSelect('features', 'Enabled Features', [
+    ctx.NapCatConfig.multiSelect('features', 'Enabled Features', [
       { label: 'Version Info', value: 'version' },
       { label: 'Status Report', value: 'status' },
       { label: 'Debug Log', value: 'debug' }
     ], ['version'], 'Select features to enable'),
-    NapCatConfig.text('description', 'Description', '这是一个内置插件的配置示例', 'A multi-line text area for notes')
+    ctx.NapCatConfig.text('description', 'Description', '这是一个内置插件的配置示例', 'A multi-line text area for notes')
   );
 
   // Try to load config
@@ -107,11 +98,11 @@ const plugin_onmessage: PluginModule['plugin_onmessage'] = async (_ctx, event) =
   }
 
   try {
-    const versionInfo = await getVersionInfo('ob11', {});
+    const versionInfo = await getVersionInfo(_ctx.actions, _ctx.adapterName, {});
     if (!versionInfo) return;
 
     const message = formatVersionMessage(versionInfo);
-    await sendMessage(event, message, 'ob11', {});
+    await sendMessage(_ctx.actions, event, message, _ctx.adapterName, {});
 
     console.log('[Plugin: builtin] 已回复版本信息');
   } catch (error) {
@@ -122,7 +113,7 @@ const plugin_onmessage: PluginModule['plugin_onmessage'] = async (_ctx, event) =
 /**
  * 获取版本信息（完美的类型推导，无需 as 断言）
  */
-async function getVersionInfo (adapter: string, config: any) {
+async function getVersionInfo (actions: ActionMap, adapter: string, config: any) {
   if (!actions) return null;
 
   try {
@@ -169,9 +160,7 @@ function formatVersionMessage (info: { appName: string; appVersion: string; prot
 /**
  * 发送消息（完美的类型推导）
  */
-async function sendMessage (event: OB11Message, message: string, adapter: string, config: any) {
-  if (!actions) return;
-
+async function sendMessage (actions: ActionMap, event: OB11Message, message: string, adapter: string, config: any) {
   const params: OB11PostSendMsg = {
     message,
     message_type: event.message_type,

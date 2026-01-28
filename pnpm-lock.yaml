@@ -210,21 +210,11 @@ importers:
         specifier: ^1.6.7
         version: 1.6.7
 
-  packages/napcat-plugin:
-    dependencies:
-      napcat-types:
-        specifier: workspace:*
-        version: link:../napcat-types
-    devDependencies:
-      '@types/node':
-        specifier: ^22.0.1
-        version: 22.19.1
-
   packages/napcat-plugin-builtin:
     dependencies:
       napcat-types:
-        specifier: 0.0.7
-        version: 0.0.7
+        specifier: 0.0.8
+        version: 0.0.8
     devDependencies:
       '@types/node':
         specifier: ^22.0.1
@@ -5448,8 +5438,8 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
-  napcat-types@0.0.7:
-    resolution: {integrity: sha512-PIDaQ6YnTxxpC1yb+VIDsQDamV6Ry+fUhHUBCXUVSzj1outisf6jSKFr2O7c9wX9zdX6Pi6NaVECNRy0ob4dmg==}
+  napcat-types@0.0.8:
+    resolution: {integrity: sha512-QxpYmAWr44tGimWmA6Az+eODlSOU3H2cJ9QzHvC09eaEwLvP6BpD0TApdWFYkzNBFFiHVLXv6lqdCAyAV3RAPg==}
 
   napcat.protobuf@1.1.4:
     resolution: {integrity: sha512-z7XtLSBJ/PxmYb0VD/w+eYr/X3LyGz+SZ2QejFTOczwt6zWNxy2yV1mTMTvJoc3BWkI3ESVFRxkuT6+pj1tb1Q==}
@@ -12819,7 +12809,7 @@ snapshots:
 
   nanoid@3.3.11: {}
 
-  napcat-types@0.0.7:
+  napcat-types@0.0.8:
     dependencies:
       '@sinclair/typebox': 0.34.41
       '@types/cors': 2.8.19
