@@ -167,28 +167,22 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
       const items = fs.readdirSync(this.pluginPath, { withFileTypes: true });
       const pluginConfig = this.loadPluginConfig();
 
-      // 扫描文件和目录
+      // 扫描文件和目录 (Only support directories as plugins now)
       for (const item of items) {
-        let pluginName = '';
-        if (item.isFile()) {
-          pluginName = path.parse(item.name).name;
-        } else if (item.isDirectory()) {
-          pluginName = item.name;
-        }
-
-        // Check if plugin is disabled in config
-        if (pluginConfig[pluginName] === false) {
-          this.logger.log(`[Plugin Adapter] Plugin ${pluginName} is disabled in config, skipping`);
+        if (!item.isDirectory()) {
           continue;
         }
 
-        if (item.isFile()) {
-          // 处理单文件插件
-          await this.loadFilePlugin(item.name);
-        } else if (item.isDirectory()) {
-          // 处理目录插件
-          await this.loadDirectoryPlugin(item.name);
+        const pluginId = item.name;
+
+        // Check if plugin is disabled in config
+        if (pluginConfig[pluginId] === false) {
+          this.logger.log(`[Plugin Adapter] Plugin ${pluginId} is disabled in config, skipping`);
+          continue;
         }
+
+        // 处理目录插件
+        await this.loadDirectoryPlugin(item.name);
       }
 
       this.logger.log(
@@ -199,49 +193,7 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
     }
   }
 
-  /**
-   * 加载单文件插件 (.mjs, .js)
-   */
-  public async loadFilePlugin (filename: string): Promise<void> {
-    // 只处理支持的文件类型
-    if (!this.isSupportedFile(filename)) {
-      return;
-    }
-
-    const filePath = path.join(this.pluginPath, filename);
-    const pluginName = path.parse(filename).name;
-    const pluginConfig = this.loadPluginConfig();
-
-    // Check if plugin is disabled in config
-    if (pluginConfig[pluginName] === false) {
-      this.logger.log(`[Plugin Adapter] Plugin ${pluginName} is disabled by user`);
-      return;
-    }
-
-    try {
-      const module = await this.importModule(filePath);
-      if (!this.isValidPluginModule(module)) {
-        this.logger.logWarn(
-          `[Plugin Adapter] File ${filename} is not a valid plugin (missing plugin methods)`
-        );
-        return;
-      }
-
-      const plugin: LoadedPlugin = {
-        name: pluginName,
-        pluginPath: this.pluginPath,
-        entryPath: filePath,
-        module,
-      };
-
-      await this.registerPlugin(plugin);
-    } catch (error) {
-      this.logger.logError(
-        `[Plugin Adapter] Error loading file plugin ${filename}:`,
-        error
-      );
-    }
-  }
+  // loadFilePlugin removed
 
   /**
    * 加载目录插件
@@ -249,16 +201,10 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
   public async loadDirectoryPlugin (dirname: string): Promise<void> {
     const pluginDir = path.join(this.pluginPath, dirname);
     const pluginConfig = this.loadPluginConfig();
+    const pluginId = dirname; // Use directory name as unique ID
 
-    // Ideally we'd get the name from package.json first, but we can use dirname as a fallback identifier initially.
-    // However, the list scan uses item.name (dirname) as the key. Let's stick to using dirname/filename as the config key for simplicity and consistency.
-    // Wait, package.json name might override. But for management, consistent ID is better.
-    // Let's check config after parsing package.json?
-    // User expects to disable 'plugin-name'. But if multiple folders have same name? Not handled.
-    // Let's use dirname as the key for config to be consistent with file system.
-
-    if (pluginConfig[dirname] === false) {
-      this.logger.log(`[Plugin Adapter] Plugin ${dirname} is disabled by user`);
+    if (pluginConfig[pluginId] === false) {
+      this.logger.log(`[Plugin Adapter] Plugin ${pluginId} is disabled by user`);
       return;
     }
 
@@ -278,9 +224,6 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
           );
         }
       }
-
-      // Check if disabled by package name IF package.json exists?
-      // No, file system name is more reliable ID for resource management here.
 
       // 确定入口文件
       const entryFile = this.findEntryFile(pluginDir, packageJson);
@@ -302,7 +245,7 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
       }
 
       const plugin: LoadedPlugin = {
-        name: packageJson?.name || dirname,
+        name: pluginId, // Use Directory Name as Internal Plugin Name/ID
         version: packageJson?.version,
         pluginPath: pluginDir,
         entryPath,
@@ -345,13 +288,7 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
     return null;
   }
 
-  /**
-   * 检查是否为支持的文件类型
-   */
-  private isSupportedFile (filename: string): boolean {
-    const ext = path.extname(filename).toLowerCase();
-    return ['.mjs', '.js'].includes(ext);
-  }
+
 
   /**
    * 动态导入模块
@@ -632,18 +569,8 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
       await this.unloadPlugin(pluginName);
 
       // 重新加载插件
-      // Use logic to re-determine if it is directory or file based on original paths
-      // Note: we can't fully trust fs status if it's gone.
-      const isDirectory =
-        plugin.pluginPath !== this.pluginPath; // Simple check: if path is nested, it's a dir plugin
-
-      if (isDirectory) {
-        const dirname = path.basename(plugin.pluginPath);
-        await this.loadDirectoryPlugin(dirname);
-      } else {
-        const filename = path.basename(plugin.entryPath);
-        await this.loadFilePlugin(filename);
-      }
+      // We assume pluginName IS the directory name (the ID)
+      await this.loadDirectoryPlugin(pluginName);
 
       this.logger.log(
         `[Plugin Adapter] Plugin ${pluginName} reloaded successfully`

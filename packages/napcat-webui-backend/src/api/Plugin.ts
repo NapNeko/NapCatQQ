@@ -132,13 +132,8 @@ export const SetPluginStatusHandler: RequestHandler = async (req, res) => {
     return sendError(res, 'Plugin Manager not found');
   }
 
-  // Calculate ID from filename (remove ext if file)
-  // Or just use the logic consistent with loadPlugins
-  let id = filename;
-  // If it has extension .js/.mjs, remove it to get the ID used in config
-  if (filename.endsWith('.js') || filename.endsWith('.mjs')) {
-    id = path.parse(filename).name;
-  }
+  // ID IS the filename (directory name) now
+  const id = filename;
 
   try {
     pluginManager.setPluginStatus(id, enable);
@@ -148,19 +143,17 @@ export const SetPluginStatusHandler: RequestHandler = async (req, res) => {
       const pluginPath = pluginManager.getPluginPath();
       const fullPath = path.join(pluginPath, filename);
 
-      if (fs.statSync(fullPath).isDirectory()) {
+      if (fs.existsSync(fullPath) && fs.statSync(fullPath).isDirectory()) {
         await pluginManager.loadDirectoryPlugin(filename);
       } else {
-        await pluginManager.loadFilePlugin(filename);
+        return sendError(res, 'Plugin directory not found: ' + filename);
       }
     } else {
-      // Disabling is handled inside setPluginStatus usually if implemented,
-      // OR we can explicitly unload here using the loaded name.
-      // The Manager's setPluginStatus implementation (if added) might logic this out.
-      // But our current Manager implementation just saves config.
-      // Wait, I updated Manager to try to unload.
-      // Let's rely on Manager's setPluginStatus or do it here?
-      // I implemented a basic unload loop in Manager.setPluginStatus.
+      // Disabling behavior is managed by setPluginStatus which updates config
+      // If we want to unload immediately?
+      // The config update will prevent load on next startup.
+      // Does pluginManager.setPluginStatus unload it?
+      // Inspecting pluginManager.setPluginStatus... it iterates and unloads if match found.
     }
 
     return sendSuccess(res, { message: 'Status updated successfully' });
