@@ -1,12 +1,12 @@
 import type { ActionMap } from 'napcat-types/napcat-onebot/action/index';
 import { EventType } from 'napcat-types/napcat-onebot/event/index';
-import type { PluginModule } from 'napcat-types/napcat-onebot/network/plugin-manger';
+import type { PluginModule, PluginLogger, PluginConfigSchema } from 'napcat-types/napcat-onebot/network/plugin-manger';
 import type { OB11Message, OB11PostSendMsg } from 'napcat-types/napcat-onebot/types/index';
 import fs from 'fs';
 import path from 'path';
-import type { PluginConfigSchema } from 'napcat-types/napcat-onebot/network/plugin-manger';
 import { NetworkAdapterConfig } from 'napcat-types/napcat-onebot/config/config';
 let startTime: number = Date.now();
+let logger: PluginLogger | null = null;
 
 interface BuiltinPluginConfig {
   prefix: string;
@@ -27,7 +27,8 @@ let currentConfig: BuiltinPluginConfig = {
 export let plugin_config_ui: PluginConfigSchema = [];
 
 const plugin_init: PluginModule['plugin_init'] = async (ctx) => {
-  console.log('[Plugin: builtin] NapCat 内置插件已初始化');
+  logger = ctx.logger;
+  logger.info('NapCat 内置插件已初始化');
   plugin_config_ui = ctx.NapCatConfig.combine(
     ctx.NapCatConfig.html('<div style="padding: 10px; background: rgba(0,0,0,0.05); border-radius: 8px;"><h3>👋 Welcome to NapCat Builtin Plugin</h3><p>This is a demonstration of the plugin configuration interface.</p></div>'),
     ctx.NapCatConfig.text('prefix', 'Command Prefix', '#napcat', 'The prefix to trigger the version info command'),
@@ -53,7 +54,7 @@ const plugin_init: PluginModule['plugin_init'] = async (ctx) => {
       Object.assign(currentConfig, savedConfig);
     }
   } catch (e) {
-    console.log('[Plugin: builtin] Failed to load config', e);
+    logger?.warn('Failed to load config', e);
   }
 
 };
@@ -73,7 +74,7 @@ export const plugin_set_config = async (ctx: any, config: BuiltinPluginConfig) =
       }
       fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8');
     } catch (e) {
-      console.error('[Plugin: builtin] Failed to save config', e);
+      logger?.error('Failed to save config', e);
       throw e;
     }
   }
@@ -95,9 +96,9 @@ const plugin_onmessage: PluginModule['plugin_onmessage'] = async (_ctx, event) =
     const message = formatVersionMessage(versionInfo);
     await sendMessage(_ctx.actions, event, message, _ctx.adapterName, _ctx.pluginManager.config);
 
-    console.log('[Plugin: builtin] 已回复版本信息');
+    logger?.info('已回复版本信息');
   } catch (error) {
-    console.log('[Plugin: builtin] 处理消息时发生错误:', error);
+    logger?.error('处理消息时发生错误:', error);
   }
 };
 
@@ -112,7 +113,7 @@ async function getVersionInfo (actions: ActionMap, adapter: string, config: Netw
       protocolVersion: data.protocol_version,
     };
   } catch (error) {
-    console.error('[Plugin: builtin] 获取版本信息失败:', error);
+    logger?.error('获取版本信息失败:', error);
     return null;
   }
 }
@@ -150,7 +151,7 @@ async function sendMessage (actions: ActionMap, event: OB11Message, message: str
   try {
     await actions.call('send_msg', params, adapter, config);
   } catch (error) {
-    console.log('[Plugin: builtin] 发送消息失败:', error);
+    logger?.error('发送消息失败:', error);
   }
 }
 

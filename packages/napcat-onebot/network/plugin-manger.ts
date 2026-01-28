@@ -54,6 +54,22 @@ export class NapCatConfig {
 
 export type PluginConfigSchema = PluginConfigItem[];
 
+/**
+ * 插件日志接口 - 简化的日志 API
+ */
+export interface PluginLogger {
+  /** 普通日志 */
+  log (...args: any[]): void;
+  /** 调试日志 */
+  debug (...args: any[]): void;
+  /** 信息日志 */
+  info (...args: any[]): void;
+  /** 警告日志 */
+  warn (...args: any[]): void;
+  /** 错误日志 */
+  error (...args: any[]): void;
+}
+
 export interface NapCatPluginContext {
   core: NapCatCore;
   oneBot: NapCatOneBot11Adapter;
@@ -65,6 +81,8 @@ export interface NapCatPluginContext {
   NapCatConfig: typeof NapCatConfig;
   adapterName: string;
   pluginManager: OB11PluginMangerAdapter;
+  /** 插件日志器 - 自动添加插件名称前缀 */
+  logger: PluginLogger;
 }
 
 export interface PluginModule<T extends OB11EmitEventContent = OB11EmitEventContent> {
@@ -331,6 +349,17 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
     const dataPath = path.join(this.pluginPath, plugin.dirname, 'data');
     const configPath = path.join(dataPath, 'config.json');
 
+    // Create plugin-specific logger with prefix
+    const pluginPrefix = `[Plugin: ${plugin.name}]`;
+    const coreLogger = this.logger;
+    const pluginLogger: PluginLogger = {
+      log: (...args: any[]) => coreLogger.log(pluginPrefix, ...args),
+      debug: (...args: any[]) => coreLogger.logDebug(pluginPrefix, ...args),
+      info: (...args: any[]) => coreLogger.log(pluginPrefix, ...args),
+      warn: (...args: any[]) => coreLogger.logWarn(pluginPrefix, ...args),
+      error: (...args: any[]) => coreLogger.logError(pluginPrefix, ...args),
+    };
+
     const context: NapCatPluginContext = {
       core: this.core,
       oneBot: this.obContext,
@@ -341,7 +370,8 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
       configPath: configPath,
       NapCatConfig: NapCatConfig,
       adapterName: this.name,
-      pluginManager: this
+      pluginManager: this,
+      logger: pluginLogger
     };
 
     plugin.context = context; // Store context on plugin object

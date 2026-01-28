@@ -1,6 +1,6 @@
 {
   "name": "napcat-types",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "private": false,
   "type": "module",
   "types": "./napcat-types/index.d.ts",
