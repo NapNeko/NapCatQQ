@@ -107,6 +107,7 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
   private readonly configPath: string;
   private loadedPlugins: Map<string, LoadedPlugin> = new Map();
   declare config: PluginConfig;
+  public NapCatConfig = NapCatConfig;
 
   override get isActive (): boolean {
     return this.isEnable && this.loadedPlugins.size > 0;

@@ -42,16 +42,7 @@ export default function PluginPage () {
     loadPlugins();
   }, []);
 
-  const handleReload = async (name: string) => {
-    const loadingToast = toast.loading('重载中...');
-    try {
-      await PluginManager.reloadPlugin(name);
-      toast.success('重载成功', { id: loadingToast });
-      loadPlugins();
-    } catch (e: any) {
-      toast.error(e.message, { id: loadingToast });
-    }
-  };
+
 
   const handleToggle = async (plugin: PluginItem) => {
     const isEnable = plugin.status !== 'active';
@@ -156,7 +147,6 @@ export default function PluginPage () {
               <PluginDisplayCard
                 key={plugin.name}
                 data={plugin}
-                onReload={() => handleReload(plugin.name)}
                 onToggleStatus={() => handleToggle(plugin)}
                 onUninstall={() => handleUninstall(plugin)}
                 onConfig={() => {

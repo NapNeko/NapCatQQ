@@ -43,9 +43,7 @@ export default class PluginManager {
     return data.data;
   }
 
-  public static async reloadPlugin (name: string) {
-    await serverRequest.post<ServerResponse<void>>('/Plugin/Reload', { name });
-  }
+
 
   public static async setPluginStatus (name: string, enable: boolean, filename?: string) {
     await serverRequest.post<ServerResponse<void>>('/Plugin/SetStatus', { name, enable, filename });
