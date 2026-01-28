@@ -14,7 +14,7 @@ export class GetFlashFileUrl extends OneBotAction<GetFlashFileUrlPayload, any> {
   override actionName = ActionName.GetFlashFileUrl;
   override payloadSchema = GetFlashFileUrlPayloadSchema;
   override returnSchema = Type.Any({ description: '文件下载链接' });
-  override actionSummary = '获取闪照文件链接';
+  override actionSummary = '获取闪传文件链接';
   override actionTags = ['文件扩展'];
   override payloadExample = {
     fileset_id: 'set_123'

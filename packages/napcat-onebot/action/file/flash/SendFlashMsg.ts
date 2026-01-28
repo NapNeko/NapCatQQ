@@ -15,7 +15,7 @@ export class SendFlashMsg extends OneBotAction<SendFlashMsgPayload, any> {
   override actionName = ActionName.SendFlashMsg;
   override payloadSchema = SendFlashMsgPayloadSchema;
   override returnSchema = Type.Any({ description: '发送结果' });
-  override actionSummary = '发送闪照消息';
+  override actionSummary = '发送闪传消息';
   override actionTags = ['文件扩展'];
   override payloadExample = {
     fileset_id: 'set_123',
