@@ -2,10 +2,10 @@ import type { ActionMap } from 'napcat-types/napcat-onebot/action/index';
 import { EventType } from 'napcat-types/napcat-onebot/event/index';
 import type { PluginModule } from 'napcat-types/napcat-onebot/network/plugin-manger';
 import type { OB11Message, OB11PostSendMsg } from 'napcat-types/napcat-onebot/types/index';
-
 import fs from 'fs';
 import path from 'path';
 import type { PluginConfigSchema } from 'napcat-types/napcat-onebot/network/plugin-manger';
+import { NetworkAdapterConfig } from 'napcat-types/napcat-onebot/config/config';
 let startTime: number = Date.now();
 
 interface BuiltinPluginConfig {
@@ -26,9 +26,6 @@ let currentConfig: BuiltinPluginConfig = {
 
 export let plugin_config_ui: PluginConfigSchema = [];
 
-/**
- * 插件初始化
- */
 const plugin_init: PluginModule['plugin_init'] = async (ctx) => {
   console.log('[Plugin: builtin] NapCat 内置插件已初始化');
   plugin_config_ui = ctx.NapCatConfig.combine(
@@ -56,7 +53,7 @@ const plugin_init: PluginModule['plugin_init'] = async (ctx) => {
       Object.assign(currentConfig, savedConfig);
     }
   } catch (e) {
-    console.warn('[Plugin: builtin] Failed to load config', e);
+    console.log('[Plugin: builtin] Failed to load config', e);
   }
 
 };
@@ -82,27 +79,21 @@ export const plugin_set_config = async (ctx: any, config: BuiltinPluginConfig) =
   }
 };
 
-/**
- * 消息处理
- * 当收到包含 #napcat 的消息时，回复版本信息
- */
 const plugin_onmessage: PluginModule['plugin_onmessage'] = async (_ctx, event) => {
-  // Use config logic
-  const prefix = currentConfig.prefix || '#napcat';
   if (currentConfig.enableReply === false) {
     return;
   }
-
+  const prefix = currentConfig.prefix || '#napcat';
   if (event.post_type !== EventType.MESSAGE || !event.raw_message.startsWith(prefix)) {
     return;
   }
 
   try {
-    const versionInfo = await getVersionInfo(_ctx.actions, _ctx.adapterName, {});
+    const versionInfo = await getVersionInfo(_ctx.actions, _ctx.adapterName, _ctx.pluginManager.config);
     if (!versionInfo) return;
 
     const message = formatVersionMessage(versionInfo);
-    await sendMessage(_ctx.actions, event, message, _ctx.adapterName, {});
+    await sendMessage(_ctx.actions, event, message, _ctx.adapterName, _ctx.pluginManager.config);
 
     console.log('[Plugin: builtin] 已回复版本信息');
   } catch (error) {
@@ -110,10 +101,7 @@ const plugin_onmessage: PluginModule['plugin_onmessage'] = async (_ctx, event) =
   }
 };
 
-/**
- * 获取版本信息（完美的类型推导，无需 as 断言）
- */
-async function getVersionInfo (actions: ActionMap, adapter: string, config: any) {
+async function getVersionInfo (actions: ActionMap, adapter: string, config: NetworkAdapterConfig) {
   if (!actions) return null;
 
   try {
@@ -129,9 +117,6 @@ async function getVersionInfo (actions: ActionMap, adapter: string, config: any)
   }
 }
 
-/**
- * 格式化运行时间
- */
 function formatUptime (ms: number): string {
   const seconds = Math.floor(ms / 1000);
   const minutes = Math.floor(seconds / 60);
@@ -149,18 +134,12 @@ function formatUptime (ms: number): string {
   }
 }
 
-/**
- * 格式化版本信息消息
- */
 function formatVersionMessage (info: { appName: string; appVersion: string; protocolVersion: string; }) {
   const uptime = Date.now() - startTime;
   return `NapCat 信息\n版本: ${info.appVersion}\n平台: ${process.platform}${process.arch === 'x64' ? ' (64-bit)' : ''}\n运行时间: ${formatUptime(uptime)}`;
 }
 
-/**
- * 发送消息（完美的类型推导）
- */
-async function sendMessage (actions: ActionMap, event: OB11Message, message: string, adapter: string, config: any) {
+async function sendMessage (actions: ActionMap, event: OB11Message, message: string, adapter: string, config: NetworkAdapterConfig) {
   const params: OB11PostSendMsg = {
     message,
     message_type: event.message_type,
