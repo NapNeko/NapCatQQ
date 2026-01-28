@@ -3,14 +3,13 @@ import { Switch } from '@heroui/switch';
 import { Chip } from '@heroui/chip';
 
 import { useState } from 'react';
-import { MdDeleteForever, MdPublishedWithChanges, MdSettings } from 'react-icons/md';
+import { MdDeleteForever, MdSettings } from 'react-icons/md';
 
 import DisplayCardContainer from './container';
 import { PluginItem } from '@/controllers/plugin_manager';
 
 export interface PluginDisplayCardProps {
   data: PluginItem;
-  onReload: () => Promise<void>;
   onToggleStatus: () => Promise<void>;
   onUninstall: () => Promise<void>;
   onConfig?: () => void;
@@ -19,7 +18,6 @@ export interface PluginDisplayCardProps {
 
 const PluginDisplayCard: React.FC<PluginDisplayCardProps> = ({
   data,
-  onReload,
   onToggleStatus,
   onUninstall,
   onConfig,
@@ -34,11 +32,6 @@ const PluginDisplayCard: React.FC<PluginDisplayCardProps> = ({
     onToggleStatus().finally(() => setProcessing(false));
   };
 
-  const handleReload = () => {
-    setProcessing(true);
-    onReload().finally(() => setProcessing(false));
-  };
-
   const handleUninstall = () => {
     setProcessing(true);
     onUninstall().finally(() => setProcessing(false));
@@ -50,19 +43,6 @@ const PluginDisplayCard: React.FC<PluginDisplayCardProps> = ({
       action={
         <div className='flex flex-col gap-2 w-full'>
           <div className='flex gap-2 w-full'>
-            <Button
-              fullWidth
-              radius='full'
-              size='sm'
-              variant='flat'
-              className='flex-1 bg-default-100 dark:bg-default-50 text-default-600 font-medium hover:bg-primary/20 hover:text-primary transition-colors'
-              startContent={<MdPublishedWithChanges size={16} />}
-              onPress={handleReload}
-              isDisabled={!isEnabled || processing}
-            >
-              重载
-            </Button>
-
             <Button
               fullWidth
               radius='full'

@@ -118,24 +118,7 @@ export const GetPluginListHandler: RequestHandler = async (_req, res) => {
   return sendSuccess(res, { plugins: allPlugins, pluginManagerNotFound: false });
 };
 
-export const ReloadPluginHandler: RequestHandler = async (req, res) => {
-  const { name } = req.body;
-  // Note: we should probably accept ID or Name. But ReloadPlugin uses valid loaded name.
-  // Let's stick to name for now, but be aware of ambiguity.
-  if (!name) return sendError(res, 'Plugin Name is required');
-
-  const pluginManager = getPluginManager();
-  if (!pluginManager) {
-    return sendError(res, '插件管理器未加载，请检查 plugins 目录是否存在');
-  }
-
-  const success = await pluginManager.reloadPlugin(name);
-  if (success) {
-    return sendSuccess(res, { message: 'Reloaded successfully' });
-  } else {
-    return sendError(res, 'Failed to reload plugin');
-  }
-};
+// ReloadPluginHandler removed
 
 export const SetPluginStatusHandler: RequestHandler = async (req, res) => {
   const { enable, filename } = req.body;
@@ -291,7 +274,11 @@ export const SetPluginConfigHandler: RequestHandler = async (req, res) => {
         fs.mkdirSync(configDir, { recursive: true });
       }
       fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8');
-      return sendSuccess(res, { message: 'Config saved' });
+
+      // Auto-Reload plugin to apply changes
+      await pluginManager.reloadPlugin(name);
+
+      return sendSuccess(res, { message: 'Config saved and plugin reloaded' });
     } catch (e: any) {
       return sendError(res, 'Error saving config: ' + e.message);
     }
