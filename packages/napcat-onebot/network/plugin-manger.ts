@@ -54,39 +54,36 @@ export class NapCatConfig {
 
 export type PluginConfigSchema = PluginConfigItem[];
 
+export interface NapCatPluginContext {
+  core: NapCatCore;
+  oneBot: NapCatOneBot11Adapter;
+  actions: ActionMap;
+  pluginName: string;
+  pluginPath: string;
+  configPath: string;
+  dataPath: string;
+  NapCatConfig: typeof NapCatConfig;
+  adapterName: string;
+  pluginManager: OB11PluginMangerAdapter;
+}
+
 export interface PluginModule<T extends OB11EmitEventContent = OB11EmitEventContent> {
-  plugin_init: (
-    core: NapCatCore,
-    obContext: NapCatOneBot11Adapter,
-    actions: ActionMap,
-    instance: OB11PluginMangerAdapter
-  ) => void | Promise<void>;
+  plugin_init: (ctx: NapCatPluginContext) => void | Promise<void>;
   plugin_onmessage?: (
-    adapter: string,
-    core: NapCatCore,
-    obCtx: NapCatOneBot11Adapter,
+    ctx: NapCatPluginContext,
     event: OB11Message,
-    actions: ActionMap,
-    instance: OB11PluginMangerAdapter
   ) => void | Promise<void>;
   plugin_onevent?: (
-    adapter: string,
-    core: NapCatCore,
-    obCtx: NapCatOneBot11Adapter,
+    ctx: NapCatPluginContext,
     event: T,
-    actions: ActionMap,
-    instance: OB11PluginMangerAdapter
   ) => void | Promise<void>;
   plugin_cleanup?: (
-    core: NapCatCore,
-    obContext: NapCatOneBot11Adapter,
-    actions: ActionMap,
-    instance: OB11PluginMangerAdapter
+    ctx: NapCatPluginContext
   ) => void | Promise<void>;
   plugin_config_schema?: PluginConfigSchema;
   plugin_config_ui?: PluginConfigSchema;
-  plugin_get_config?: () => any | Promise<any>;
-  plugin_set_config?: (config: any) => void | Promise<void>;
+  plugin_get_config?: (ctx: NapCatPluginContext) => any | Promise<any>;
+  plugin_set_config?: (ctx: NapCatPluginContext, config: any) => void | Promise<void>;
 }
 
 export interface LoadedPlugin {
@@ -96,6 +93,7 @@ export interface LoadedPlugin {
   entryPath: string;
   packageJson?: PluginPackageJson;
   module: PluginModule;
+  context: NapCatPluginContext; // Store context
 }
 
 export interface PluginStatusConfig {
@@ -106,6 +104,8 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
   private readonly pluginPath: string;
   private readonly configPath: string;
   private loadedPlugins: Map<string, LoadedPlugin> = new Map();
+  // Track failed plugins: ID -> Error Message
+  private failedPlugins: Map<string, string> = new Map();
   declare config: PluginConfig;
   public NapCatConfig = NapCatConfig;
 
@@ -251,6 +251,7 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
         entryPath,
         packageJson,
         module,
+        context: {} as NapCatPluginContext // Will be populated in registerPlugin
       };
 
       await this.registerPlugin(plugin);
@@ -311,6 +312,9 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
   /**
    * 注册插件
    */
+  /**
+   * 注册插件
+   */
   private async registerPlugin (plugin: LoadedPlugin): Promise<void> {
     // 检查名称冲突
     if (this.loadedPlugins.has(plugin.name)) {
@@ -320,6 +324,26 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
       return;
     }
 
+    // Create Context
+    const id = plugin.name; // directory name as ID
+    const dataPath = path.join(this.pluginPath, id, 'data');
+    const configPath = path.join(dataPath, 'config.json');
+
+    const context: NapCatPluginContext = {
+      core: this.core,
+      oneBot: this.obContext,
+      actions: this.actions,
+      pluginName: id,
+      pluginPath: plugin.pluginPath,
+      dataPath: dataPath,
+      configPath: configPath,
+      NapCatConfig: NapCatConfig,
+      adapterName: this.name,
+      pluginManager: this
+    };
+
+    plugin.context = context; // Store context on plugin object
+
     this.loadedPlugins.set(plugin.name, plugin);
     this.logger.log(
       `[Plugin Adapter] Registered plugin: ${plugin.name}${plugin.version ? ` v${plugin.version}` : ''
@@ -328,18 +352,16 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
 
     // 调用插件初始化方法（必须存在）
     try {
-      await plugin.module.plugin_init(
-        this.core,
-        this.obContext,
-        this.actions,
-        this
-      );
+      await plugin.module.plugin_init(context);
       this.logger.log(`[Plugin Adapter] Initialized plugin: ${plugin.name}`);
-    } catch (error) {
+    } catch (error: any) {
       this.logger.logError(
         `[Plugin Adapter] Error initializing plugin ${plugin.name}:`,
         error
       );
+      // Mark as failed
+      this.failedPlugins.set(plugin.name, error.message || 'Initialization failed');
+      this.loadedPlugins.delete(plugin.name);
     }
   }
 
@@ -355,12 +377,7 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
     // 调用插件清理方法
     if (typeof plugin.module.plugin_cleanup === 'function') {
       try {
-        await plugin.module.plugin_cleanup(
-          this.core,
-          this.obContext,
-          this.actions,
-          this
-        );
+        await plugin.module.plugin_cleanup(plugin.context);
         this.logger.log(`[Plugin Adapter] Cleaned up plugin: ${pluginName}`);
       } catch (error) {
         this.logger.logError(
@@ -391,50 +408,17 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
     config[pluginName] = enable;
     this.savePluginConfig(config);
 
-    // If disabling, unload immediately if loaded
     if (!enable) {
-      // Note: pluginName passed here might be the package name or the filename/dirname
-      // But our registerPlugin uses plugin.name which comes from package.json or dirname.
-      // This mismatch is tricky. 
-      // Ideally, we should use a consistent ID. 
-      // Let's assume pluginName passed here effectively matches the ID used in loadedPlugins.
-      // But wait, loadDirectoryPlugin logic: name = packageJson.name || dirname.
-      // config key = dirname.
-      // If packageJson.name != dirname, we have a problem.
-      // To fix this properly: 
-      // 1. We need to know which LoadedPlugin corresponds to the enabled/disabled item.
-      // 2. Or we iterate loadedPlugins and find match.
-
       for (const [_, loaded] of this.loadedPlugins.entries()) {
         const dirOrFile = path.basename(loaded.pluginPath === this.pluginPath ? loaded.entryPath : loaded.pluginPath);
         const ext = path.extname(dirOrFile);
-        const simpleName = ext ? path.parse(dirOrFile).name : dirOrFile; // filename without ext
-
-        // But wait, config key is the FILENAME (with ext for files?). 
-        // In Scan loop: 
-        // pluginName = path.parse(item.name).name (for file)
-        // pluginName = item.name (for dir)
-        // config[pluginName] check.
-
-        // So if file is "test.js", pluginName is "test". Config key "test".
-        // If dir is "test-plugin", pluginName is "test-plugin". Config key "test-plugin".
-
-        // loadedPlugin.name might be distinct.
-        // So we need to match loadedPlugin back to its fs source to unload it?
-
-        // loadedPlugin.entryPath or pluginPath helps.
-        // If it's a file plugin: loaded.entryPath ends with pluginName + ext.
-        // If it's a dir plugin: loaded.pluginPath ends with pluginName.
+        const simpleName = ext ? path.parse(dirOrFile).name : dirOrFile;
 
         if (pluginName === simpleName) {
           this.unloadPlugin(loaded.name).catch(e => this.logger.logError('Error unloading', e));
         }
       }
     }
-    // If enabling, we need to load it. 
-    // But we can just rely on the API handler to call loadFile/DirectoryPlugin which now checks config.
-    // Wait, if I call loadFilePlugin("test.js") and config says enable=true, it loads.
-    // API handler needs to change to pass filename/dirname.
   }
 
   async onEvent<T extends OB11EmitEventContent> (event: T) {
@@ -442,7 +426,6 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
       return;
     }
 
-    // 遍历所有已加载的插件，调用它们的事件处理方法
     try {
       await Promise.allSettled(
         Array.from(this.loadedPlugins.values()).map((plugin) =>
@@ -465,12 +448,8 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
       // 优先使用 plugin_onevent 方法
       if (typeof plugin.module.plugin_onevent === 'function') {
         await plugin.module.plugin_onevent(
-          this.name,
-          this.core,
-          this.obContext,
-          event,
-          this.actions,
-          this
+          plugin.context,
+          event
         );
       }
 
@@ -480,12 +459,8 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
         typeof plugin.module.plugin_onmessage === 'function'
       ) {
         await plugin.module.plugin_onmessage(
-          this.name,
-          this.core,
-          this.obContext,
-          event as OB11Message,
-          this.actions,
-          this
+          plugin.context,
+          event as OB11Message
         );
       }
     } catch (error) {
