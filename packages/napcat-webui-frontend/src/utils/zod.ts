@@ -25,13 +25,15 @@ import {
 export type LiteralValue = string | number | boolean | null;
 
 export type ParsedSchema = {
-  name?: string
-  type: string | string[]
-  optional: boolean
-  value?: LiteralValue
-  enum?: LiteralValue[]
-  children?: ParsedSchema[]
-  description?: string
+  name?: string;
+  type: string | string[];
+  optional: boolean;
+  value?: LiteralValue;
+  enum?: LiteralValue[];
+  children?: ParsedSchema[];
+  description?: string;
+  isCircularRef?: boolean;  // 标记循环引用
+  isTruncated?: boolean;    // 标记被截断
 };
 
 export function parse (

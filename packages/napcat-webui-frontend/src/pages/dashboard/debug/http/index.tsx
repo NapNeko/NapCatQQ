@@ -112,9 +112,17 @@ export default function HttpDebug () {
   const executeCommand = (commandId: string, mode: CommandPaletteExecuteMode) => {
     const api = commandId as OneBotHttpApiPath;
     const item = oneBotHttpApi[api];
-    const body = item?.payloadExample
-      ? JSON.stringify(item.payloadExample, null, 2)
-      : (item?.payload ? JSON.stringify(generateDefaultFromTypeBox(item.payload), null, 2) : '{}');
+    let body = '{}';
+    if (item?.payloadExample) {
+      body = JSON.stringify(item.payloadExample, null, 2);
+    } else if (item?.payload) {
+      try {
+        body = JSON.stringify(generateDefaultFromTypeBox(item.payload), null, 2);
+      } catch (e) {
+        console.error('Error generating default:', e);
+        body = '{}';
+      }
+    }
 
     handleSelectApi(api);
     // 确保请求参数可见
