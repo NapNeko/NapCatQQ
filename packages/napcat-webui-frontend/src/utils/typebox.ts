@@ -22,14 +22,44 @@ export const BaseResponseSchema = Type.Object({
 });
 
 // 最大解析深度，防止过深的嵌套
-const MAX_PARSE_DEPTH = 10;
+const MAX_PARSE_DEPTH = 6;
 
 /**
  * 获取 schema 的唯一标识符用于循环引用检测
- * 优先使用 $id，否则使用对象引用
+ * 优先使用 $id 字符串标识符
  */
-function getSchemaId (schema: TSchema): string | TSchema {
-  return schema.$id || schema;
+function getSchemaId (schema: TSchema): string | undefined {
+  // 优先使用 $id
+  if (schema.$id) {
+    return schema.$id;
+  }
+  return undefined;
+}
+
+/**
+ * 收集 schema 中所有的 $id，用于预先检测可能的循环引用
+ */
+function collectSchemaIds (schema: TSchema, ids: Set<string> = new Set()): Set<string> {
+  if (!schema) return ids;
+  if (schema.$id) {
+    ids.add(schema.$id);
+  }
+  if (schema.anyOf) {
+    (schema.anyOf as TSchema[]).forEach(s => collectSchemaIds(s, ids));
+  }
+  if (schema.oneOf) {
+    (schema.oneOf as TSchema[]).forEach(s => collectSchemaIds(s, ids));
+  }
+  if (schema.allOf) {
+    (schema.allOf as TSchema[]).forEach(s => collectSchemaIds(s, ids));
+  }
+  if (schema.items) {
+    collectSchemaIds(schema.items as TSchema, ids);
+  }
+  if (schema.properties) {
+    Object.values(schema.properties).forEach(s => collectSchemaIds(s as TSchema, ids));
+  }
+  return ids;
 }
 
 export function parseTypeBox (
