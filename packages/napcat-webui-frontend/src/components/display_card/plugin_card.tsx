@@ -3,7 +3,7 @@ import { Switch } from '@heroui/switch';
 import { Chip } from '@heroui/chip';
 
 import { useState } from 'react';
-import { MdDeleteForever, MdPublishedWithChanges } from 'react-icons/md';
+import { MdDeleteForever, MdPublishedWithChanges, MdSettings } from 'react-icons/md';
 
 import DisplayCardContainer from './container';
 import { PluginItem } from '@/controllers/plugin_manager';
@@ -13,6 +13,8 @@ export interface PluginDisplayCardProps {
   onReload: () => Promise<void>;
   onToggleStatus: () => Promise<void>;
   onUninstall: () => Promise<void>;
+  onConfig?: () => void;
+  hasConfig?: boolean;
 }
 
 const PluginDisplayCard: React.FC<PluginDisplayCardProps> = ({
@@ -20,6 +22,8 @@ const PluginDisplayCard: React.FC<PluginDisplayCardProps> = ({
   onReload,
   onToggleStatus,
   onUninstall,
+  onConfig,
+  hasConfig = false,
 }) => {
   const { name, version, author, description, status } = data;
   const isEnabled = status !== 'disabled';
@@ -44,32 +48,47 @@ const PluginDisplayCard: React.FC<PluginDisplayCardProps> = ({
     <DisplayCardContainer
       className='w-full max-w-[420px]'
       action={
-        <div className='flex gap-2 w-full'>
-          <Button
-            fullWidth
-            radius='full'
-            size='sm'
-            variant='flat'
-            className='flex-1 bg-default-100 dark:bg-default-50 text-default-600 font-medium hover:bg-primary/20 hover:text-primary transition-colors'
-            startContent={<MdPublishedWithChanges size={16} />}
-            onPress={handleReload}
-            isDisabled={!isEnabled || processing}
-          >
-            重载
-          </Button>
+        <div className='flex flex-col gap-2 w-full'>
+          <div className='flex gap-2 w-full'>
+            <Button
+              fullWidth
+              radius='full'
+              size='sm'
+              variant='flat'
+              className='flex-1 bg-default-100 dark:bg-default-50 text-default-600 font-medium hover:bg-primary/20 hover:text-primary transition-colors'
+              startContent={<MdPublishedWithChanges size={16} />}
+              onPress={handleReload}
+              isDisabled={!isEnabled || processing}
+            >
+              重载
+            </Button>
 
-          <Button
-            fullWidth
-            radius='full'
-            size='sm'
-            variant='flat'
-            className='flex-1 bg-default-100 dark:bg-default-50 text-default-600 font-medium hover:bg-danger/20 hover:text-danger transition-colors'
-            startContent={<MdDeleteForever size={16} />}
-            onPress={handleUninstall}
-            isDisabled={processing}
-          >
-            卸载
-          </Button>
+            <Button
+              fullWidth
+              radius='full'
+              size='sm'
+              variant='flat'
+              className='flex-1 bg-default-100 dark:bg-default-50 text-default-600 font-medium hover:bg-danger/20 hover:text-danger transition-colors'
+              startContent={<MdDeleteForever size={16} />}
+              onPress={handleUninstall}
+              isDisabled={processing}
+            >
+              卸载
+            </Button>
+          </div>
+          {hasConfig && (
+            <Button
+              fullWidth
+              radius='full'
+              size='sm'
+              variant='flat'
+              className='bg-default-100 dark:bg-default-50 text-default-600 font-medium hover:bg-secondary/20 hover:text-secondary transition-colors'
+              startContent={<MdSettings size={16} />}
+              onPress={onConfig}
+            >
+              配置
+            </Button>
+          )}
         </div>
       }
       enableSwitch={

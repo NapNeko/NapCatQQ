@@ -47,7 +47,8 @@ export const GetPluginListHandler: RequestHandler = async (_req, res) => {
       author: p.packageJson?.author || '',
       status: 'active',
       filename: fsName, // 真实文件/目录名
-      loadedName: p.name // 运行时注册的名称，用于重载/卸载
+      loadedName: p.name, // 运行时注册的名称，用于重载/卸载
+      hasConfig: !!(p.module.plugin_config_schema || p.module.plugin_config_ui)
     });
   }
 
@@ -186,7 +187,7 @@ export const SetPluginStatusHandler: RequestHandler = async (req, res) => {
 };
 
 export const UninstallPluginHandler: RequestHandler = async (req, res) => {
-  const { name, filename } = req.body;
+  const { name, filename, cleanData } = req.body;
   // If it's loaded, we use name. If it's disabled, we might use filename.
 
   const pluginManager = getPluginManager();
@@ -219,8 +220,82 @@ export const UninstallPluginHandler: RequestHandler = async (req, res) => {
     if (fs.existsSync(fsPath)) {
       fs.rmSync(fsPath, { recursive: true, force: true });
     }
+
+    if (cleanData && name) {
+      const dataPath = pluginManager.getPluginDataPath(name);
+      if (fs.existsSync(dataPath)) {
+        fs.rmSync(dataPath, { recursive: true, force: true });
+      }
+    }
+
     return sendSuccess(res, { message: 'Uninstalled successfully' });
   } catch (e: any) {
     return sendError(res, 'Failed to uninstall: ' + e.message);
+  }
+};
+
+export const GetPluginConfigHandler: RequestHandler = async (req, res) => {
+  const name = req.query['name'] as string;
+  if (!name) return sendError(res, 'Plugin Name is required');
+
+  const pluginManager = getPluginManager();
+  if (!pluginManager) return sendError(res, 'Plugin Manager not found');
+
+  const plugin = pluginManager.getPluginInfo(name);
+  if (!plugin) return sendError(res, 'Plugin not loaded');
+
+  // Support legacy schema or new API
+  const schema = plugin.module.plugin_config_schema || plugin.module.plugin_config_ui;
+  let config = {};
+
+  if (plugin.module.plugin_get_config) {
+    try {
+      config = await plugin.module.plugin_get_config();
+    } catch (e) { }
+  } else if (schema) {
+    // Default behavior: read from default config path
+    try {
+      const configPath = pluginManager.getPluginConfigPath(name);
+      if (fs.existsSync(configPath)) {
+        config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+      }
+    } catch (e) { }
+  }
+
+  return sendSuccess(res, { schema, config });
+};
+
+export const SetPluginConfigHandler: RequestHandler = async (req, res) => {
+  const { name, config } = req.body;
+  if (!name || !config) return sendError(res, 'Name and Config required');
+
+  const pluginManager = getPluginManager();
+  if (!pluginManager) return sendError(res, 'Plugin Manager not found');
+
+  const plugin = pluginManager.getPluginInfo(name);
+  if (!plugin) return sendError(res, 'Plugin not loaded');
+
+  if (plugin.module.plugin_set_config) {
+    try {
+      await plugin.module.plugin_set_config(config);
+      return sendSuccess(res, { message: 'Config updated' });
+    } catch (e: any) {
+      return sendError(res, 'Error updating config: ' + e.message);
+    }
+  } else if (plugin.module.plugin_config_schema || plugin.module.plugin_config_ui) {
+    // Default behavior: write to default config path
+    try {
+      const configPath = pluginManager.getPluginConfigPath(name);
+      const configDir = path.dirname(configPath);
+      if (!fs.existsSync(configDir)) {
+        fs.mkdirSync(configDir, { recursive: true });
+      }
+      fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8');
+      return sendSuccess(res, { message: 'Config saved' });
+    } catch (e: any) {
+      return sendError(res, 'Error saving config: ' + e.message);
+    }
+  } else {
+    return sendError(res, 'Plugin does not support config update');
   }
 };
