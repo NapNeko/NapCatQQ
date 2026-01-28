@@ -88,6 +88,7 @@ export interface PluginModule<T extends OB11EmitEventContent = OB11EmitEventCont
 
 export interface LoadedPlugin {
   name: string;
+  dirname: string; // Actual directory name for path resolution
   version?: string;
   pluginPath: string;
   entryPath: string;
@@ -245,7 +246,8 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
       }
 
       const plugin: LoadedPlugin = {
-        name: pluginId, // Use Directory Name as Internal Plugin Name/ID
+        name: packageJson?.name || pluginId, // Use package.json name for API lookups, fallback to dir name
+        dirname: pluginId, // Keep track of actual directory name for path resolution
         version: packageJson?.version,
         pluginPath: pluginDir,
         entryPath,
@@ -325,15 +327,15 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
     }
 
     // Create Context
-    const id = plugin.name; // directory name as ID
-    const dataPath = path.join(this.pluginPath, id, 'data');
+    // Use dirname for path resolution, name for identification
+    const dataPath = path.join(this.pluginPath, plugin.dirname, 'data');
     const configPath = path.join(dataPath, 'config.json');
 
     const context: NapCatPluginContext = {
       core: this.core,
       oneBot: this.obContext,
       actions: this.actions,
-      pluginName: id,
+      pluginName: plugin.name, // Use package name for identification
       pluginPath: plugin.pluginPath,
       dataPath: dataPath,
       configPath: configPath,
@@ -404,20 +406,18 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
   }
 
   public setPluginStatus (pluginName: string, enable: boolean): void {
+    // Try to find plugin by package name first
+    const plugin = this.loadedPlugins.get(pluginName);
+    // Use dirname for config storage (if plugin is loaded), otherwise assume pluginName is dirname
+    const configKey = plugin?.dirname || pluginName;
+
     const config = this.loadPluginConfig();
-    config[pluginName] = enable;
+    config[configKey] = enable;
     this.savePluginConfig(config);
 
-    if (!enable) {
-      for (const [_, loaded] of this.loadedPlugins.entries()) {
-        const dirOrFile = path.basename(loaded.pluginPath === this.pluginPath ? loaded.entryPath : loaded.pluginPath);
-        const ext = path.extname(dirOrFile);
-        const simpleName = ext ? path.parse(dirOrFile).name : dirOrFile;
-
-        if (pluginName === simpleName) {
-          this.unloadPlugin(loaded.name).catch(e => this.logger.logError('Error unloading', e));
-        }
-      }
+    if (!enable && plugin) {
+      // Unload by plugin.name (package name, which is the key in loadedPlugins)
+      this.unloadPlugin(plugin.name).catch(e => this.logger.logError('Error unloading', e));
     }
   }
 
@@ -539,13 +539,14 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
       return false;
     }
 
+    const dirname = plugin.dirname;
+
     try {
       // 卸载插件
       await this.unloadPlugin(pluginName);
 
-      // 重新加载插件
-      // We assume pluginName IS the directory name (the ID)
-      await this.loadDirectoryPlugin(pluginName);
+      // 重新加载插件 - use dirname for directory loading
+      await this.loadDirectoryPlugin(dirname);
 
       this.logger.log(
         `[Plugin Adapter] Plugin ${pluginName} reloaded successfully`
@@ -560,7 +561,10 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
     }
   }
   public getPluginDataPath (pluginName: string): string {
-    return path.join(this.pluginPath, pluginName, 'data');
+    // Lookup plugin by name (package name) and use dirname for path
+    const plugin = this.loadedPlugins.get(pluginName);
+    const dirname = plugin?.dirname || pluginName; // fallback to pluginName if not found
+    return path.join(this.pluginPath, dirname, 'data');
   }
 
   public getPluginConfigPath (pluginName: string): string {
