@@ -127,6 +127,20 @@ const SchemaContainer: React.FC<{
 };
 
 const RenderSchema: React.FC<{ schema: ParsedSchema; }> = ({ schema }) => {
+  // 处理循环引用和截断的情况，直接显示提示而不继续递归
+  if (schema.isCircularRef || schema.isTruncated) {
+    return (
+      <div className='mb-2 flex items-center gap-1 pl-5'>
+        {schema.name && (
+          <span className='text-default-400'>{schema.name}</span>
+        )}
+        <Chip size='sm' color='default' variant='flat'>
+          {schema.description || '...'}
+        </Chip>
+      </div>
+    );
+  }
+
   if (schema.type === 'object') {
     return (
       <SchemaContainer schema={schema}>

@@ -7,7 +7,7 @@ import { Tab, Tabs } from '@heroui/tabs';
 import { Chip } from '@heroui/chip';
 import { useLocalStorage } from '@uidotdev/usehooks';
 import clsx from 'clsx';
-import { forwardRef, useEffect, useImperativeHandle, useState, useCallback } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useState, useCallback, useMemo } from 'react';
 import toast from 'react-hot-toast';
 import { IoChevronDown, IoSend, IoSettingsSharp, IoCopy } from 'react-icons/io5';
 import { TbCode, TbMessageCode } from 'react-icons/tb';
@@ -59,16 +59,30 @@ const OneBotApiDebug = forwardRef<OneBotApiDebugRef, OneBotApiDebugProps>((props
   const [responseHeight, setResponseHeight] = useState(240);
   const [storedHeight, setStoredHeight] = useLocalStorage('napcat_debug_response_height', 240);
 
-  const parsedRequest = parseTypeBox(data?.payload);
+  // 使用 useMemo 缓存解析结果，避免每次渲染都重新解析
+  const parsedRequest = useMemo(() => {
+    try {
+      return parseTypeBox(data?.payload);
+    } catch (e) {
+      console.error('Error parsing request schema:', e);
+      return [];
+    }
+  }, [data?.payload]);
 
   // 将返回值的 data 结构包装进 BaseResponseSchema 进行展示
   // 使用解构属性的方式重新构建对象，确保 parseTypeBox 能够识别为 object 类型
-  const wrappedResponseSchema = Type.Object({
-    ...BaseResponseSchema.properties,
-    data: data?.response || Type.Any({ description: '数据' })
-  });
-
-  const parsedResponse = parseTypeBox(wrappedResponseSchema);
+  const parsedResponse = useMemo(() => {
+    try {
+      const wrappedResponseSchema = Type.Object({
+        ...BaseResponseSchema.properties,
+        data: data?.response || Type.Any({ description: '数据' })
+      });
+      return parseTypeBox(wrappedResponseSchema);
+    } catch (e) {
+      console.error('Error parsing response schema:', e);
+      return [];
+    }
+  }, [data?.response]);
   const [backgroundImage] = useLocalStorage<string>(key.backgroundImage, '');
   const hasBackground = !!backgroundImage;
 
@@ -166,7 +180,12 @@ const OneBotApiDebug = forwardRef<OneBotApiDebugRef, OneBotApiDebugProps>((props
     if (data?.payloadExample) {
       setRequestBody(JSON.stringify(data.payloadExample, null, 2));
     } else {
-      setRequestBody(JSON.stringify(generateDefaultFromTypeBox(data?.payload), null, 2));
+      try {
+        setRequestBody(JSON.stringify(generateDefaultFromTypeBox(data?.payload), null, 2));
+      } catch (e) {
+        console.error('Error generating default:', e);
+        setRequestBody('{}');
+      }
     }
     setResponseContent('');
     setResponseStatus(null);
@@ -320,7 +339,14 @@ const OneBotApiDebug = forwardRef<OneBotApiDebugRef, OneBotApiDebugProps>((props
                 )}
               </ChatInputModal>
               <Tooltip content="生成示例" closeDelay={0}>
-                <Button isIconOnly size='sm' variant='light' radius='sm' className='w-8 h-8' onPress={() => setRequestBody(JSON.stringify(generateDefaultFromTypeBox(data?.payload), null, 2))}>
+                <Button isIconOnly size='sm' variant='light' radius='sm' className='w-8 h-8' onPress={() => {
+                  try {
+                    setRequestBody(JSON.stringify(generateDefaultFromTypeBox(data?.payload), null, 2));
+                  } catch (e) {
+                    console.error('Error generating default:', e);
+                    toast.error('生成示例失败');
+                  }
+                }}>
                   <TbCode size={16} />
                 </Button>
               </Tooltip>
