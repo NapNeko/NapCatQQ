@@ -33,21 +33,19 @@ export const GetPluginListHandler: RequestHandler = async (_req, res) => {
 
   // 1. 整理已加载的插件
   for (const p of loadedPlugins) {
-    // 计算 ID：需要回溯到加载时的入口信息
-    // 对于已加载的插件，我们通过判断 pluginPath 是否等于根 pluginPath 来判断它是单文件还是目录
-    const isFilePlugin = p.pluginPath === pluginManager.getPluginPath();
-    const fsName = isFilePlugin ? path.basename(p.entryPath) : path.basename(p.pluginPath);
-    const id = getPluginId(fsName, isFilePlugin);
+    // Use dirname for map key (matches filesystem scan)
+    const id = p.dirname;
+    const fsName = p.dirname; // dirname is the actual filesystem directory name
 
     loadedPluginMap.set(id, {
-      name: p.packageJson?.name || p.name, // 优先使用 package.json 的 name
+      name: p.name, // This is now package name (from packageJson.name || dirname)
       id: id,
       version: p.version || '0.0.0',
       description: p.packageJson?.description || '',
       author: p.packageJson?.author || '',
       status: 'active',
       filename: fsName, // 真实文件/目录名
-      loadedName: p.name, // 运行时注册的名称，用于重载/卸载
+      loadedName: p.name, // 运行时注册的名称，用于重载/卸载 (package name)
       hasConfig: !!(p.module.plugin_config_schema || p.module.plugin_config_ui)
     });
   }
@@ -121,40 +119,40 @@ export const GetPluginListHandler: RequestHandler = async (_req, res) => {
 // ReloadPluginHandler removed
 
 export const SetPluginStatusHandler: RequestHandler = async (req, res) => {
-  const { enable, filename } = req.body;
-  // We Use filename / id to control config
-  // Front-end should pass the 'filename' or 'id' as the key identifier
+  const { enable, filename, name } = req.body;
+  // filename is the directory name (used for fs checks)
+  // name is the package name (used for plugin manager API, if provided)
+  // We need to determine: which to use for setPluginStatus call
 
-  if (!filename) return sendError(res, 'Plugin Filename/ID is required');
+  if (!filename && !name) return sendError(res, 'Plugin Filename or Name is required');
 
   const pluginManager = getPluginManager();
   if (!pluginManager) {
     return sendError(res, 'Plugin Manager not found');
   }
 
-  // ID IS the filename (directory name) now
-  const id = filename;
+  // Determine which ID to use
+  // If 'name' (package name) is provided, use it for pluginManager calls
+  // But 'filename' (dirname) is needed for filesystem operations
+  const dirname = filename || name; // fallback
+  const pluginName = name || filename; // fallback
 
   try {
-    pluginManager.setPluginStatus(id, enable);
+    // setPluginStatus now handles both package name and dirname lookup internally
+    pluginManager.setPluginStatus(pluginName, enable);
 
     // If enabling, trigger load
     if (enable) {
       const pluginPath = pluginManager.getPluginPath();
-      const fullPath = path.join(pluginPath, filename);
+      const fullPath = path.join(pluginPath, dirname);
 
       if (fs.existsSync(fullPath) && fs.statSync(fullPath).isDirectory()) {
-        await pluginManager.loadDirectoryPlugin(filename);
+        await pluginManager.loadDirectoryPlugin(dirname);
       } else {
-        return sendError(res, 'Plugin directory not found: ' + filename);
+        return sendError(res, 'Plugin directory not found: ' + dirname);
       }
-    } else {
-      // Disabling behavior is managed by setPluginStatus which updates config
-      // If we want to unload immediately?
-      // The config update will prevent load on next startup.
-      // Does pluginManager.setPluginStatus unload it?
-      // Inspecting pluginManager.setPluginStatus... it iterates and unloads if match found.
     }
+    // Disabling is handled by setPluginStatus
 
     return sendSuccess(res, { message: 'Status updated successfully' });
   } catch (e: any) {

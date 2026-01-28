@@ -97,7 +97,7 @@ const plugin_onmessage: PluginModule['plugin_onmessage'] = async (_ctx, event) =
 
     console.log('[Plugin: builtin] 已回复版本信息');
   } catch (error) {
-    console.error('[Plugin: builtin] 处理消息时发生错误:', error);
+    console.log('[Plugin: builtin] 处理消息时发生错误:', error);
   }
 };
 
@@ -150,7 +150,7 @@ async function sendMessage (actions: ActionMap, event: OB11Message, message: str
   try {
     await actions.call('send_msg', params, adapter, config);
   } catch (error) {
-    console.error('[Plugin: builtin] 发送消息失败:', error);
+    console.log('[Plugin: builtin] 发送消息失败:', error);
   }
 }
 
