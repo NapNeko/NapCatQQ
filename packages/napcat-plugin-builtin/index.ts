@@ -4,11 +4,11 @@ import type { PluginModule } from 'napcat-types/napcat-onebot/network/plugin-man
 import type { OB11Message, OB11PostSendMsg } from 'napcat-types/napcat-onebot/types/index';
 
 import fs from 'fs';
-import type { PluginConfigSchema, OB11PluginMangerAdapter } from 'napcat-types/napcat-onebot/network/plugin-manger';
+import path from 'path';
+import type { PluginConfigSchema } from 'napcat-types/napcat-onebot/network/plugin-manger';
 
 let actions: ActionMap | undefined = undefined;
 let startTime: number = Date.now();
-let platformInstance: OB11PluginMangerAdapter | undefined = undefined;
 
 interface BuiltinPluginConfig {
   prefix: string;
@@ -25,62 +25,61 @@ let currentConfig: BuiltinPluginConfig = {
   description: '这是一个内置插件的配置示例'
 };
 
-const PLUGIN_NAME = 'napcat-plugin-builtin';
 
 export let plugin_config_ui: PluginConfigSchema = [];
 
 /**
  * 插件初始化
  */
-const plugin_init: PluginModule['plugin_init'] = async (_core, _obContext, _actions, _instance) => {
+/**
+ * 插件初始化
+ */
+const plugin_init: PluginModule['plugin_init'] = async (ctx) => {
   console.log('[Plugin: builtin] NapCat 内置插件已初始化');
-  actions = _actions;
-  platformInstance = _instance;
+  actions = ctx.actions;
+  // platformInstance = _instance; // No longer valid or needed like this
 
-  if (_instance.NapCatConfig) {
-    const NapCatConfig = _instance.NapCatConfig;
-    plugin_config_ui = NapCatConfig.combine(
-      NapCatConfig.html('<div style="padding: 10px; background: rgba(0,0,0,0.05); border-radius: 8px;"><h3>👋 Welcome to NapCat Builtin Plugin</h3><p>This is a demonstration of the plugin configuration interface.</p></div>'),
-      NapCatConfig.text('prefix', 'Command Prefix', '#napcat', 'The prefix to trigger the version info command'),
-      NapCatConfig.boolean('enableReply', 'Enable Reply', true, 'Switch to enable or disable the reply functionality'),
-      NapCatConfig.select('theme', 'Theme Selection', [
-        { label: 'Light Mode', value: 'light' },
-        { label: 'Dark Mode', value: 'dark' },
-        { label: 'Auto', value: 'auto' }
-      ], 'light', 'Select a theme for the response (Demo purpose only)'),
-      NapCatConfig.multiSelect('features', 'Enabled Features', [
-        { label: 'Version Info', value: 'version' },
-        { label: 'Status Report', value: 'status' },
-        { label: 'Debug Log', value: 'debug' }
-      ], ['version'], 'Select features to enable'),
-      NapCatConfig.text('description', 'Description', '这是一个内置插件的配置示例', 'A multi-line text area for notes')
-    );
-  }
+  const NapCatConfig = ctx.NapCatConfig;
+  plugin_config_ui = NapCatConfig.combine(
+    NapCatConfig.html('<div style="padding: 10px; background: rgba(0,0,0,0.05); border-radius: 8px;"><h3>👋 Welcome to NapCat Builtin Plugin</h3><p>This is a demonstration of the plugin configuration interface.</p></div>'),
+    NapCatConfig.text('prefix', 'Command Prefix', '#napcat', 'The prefix to trigger the version info command'),
+    NapCatConfig.boolean('enableReply', 'Enable Reply', true, 'Switch to enable or disable the reply functionality'),
+    NapCatConfig.select('theme', 'Theme Selection', [
+      { label: 'Light Mode', value: 'light' },
+      { label: 'Dark Mode', value: 'dark' },
+      { label: 'Auto', value: 'auto' }
+    ], 'light', 'Select a theme for the response (Demo purpose only)'),
+    NapCatConfig.multiSelect('features', 'Enabled Features', [
+      { label: 'Version Info', value: 'version' },
+      { label: 'Status Report', value: 'status' },
+      { label: 'Debug Log', value: 'debug' }
+    ], ['version'], 'Select features to enable'),
+    NapCatConfig.text('description', 'Description', '这是一个内置插件的配置示例', 'A multi-line text area for notes')
+  );
 
   // Try to load config
   try {
-    if (platformInstance && platformInstance.getPluginConfigPath) {
-      const configPath = platformInstance.getPluginConfigPath(PLUGIN_NAME);
-      if (fs.existsSync(configPath)) {
-        const savedConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
-        Object.assign(currentConfig, savedConfig);
-      }
+    // Use ctx.configPath
+    if (fs.existsSync(ctx.configPath)) {
+      const savedConfig = JSON.parse(fs.readFileSync(ctx.configPath, 'utf-8'));
+      Object.assign(currentConfig, savedConfig);
     }
   } catch (e) {
     console.warn('[Plugin: builtin] Failed to load config', e);
   }
+
 };
 
 export const plugin_get_config = async () => {
   return currentConfig;
 };
 
-export const plugin_set_config = async (config: BuiltinPluginConfig) => {
+export const plugin_set_config = async (ctx: any, config: BuiltinPluginConfig) => {
   currentConfig = config;
-  if (platformInstance && platformInstance.getPluginConfigPath) {
+  if (ctx && ctx.configPath) {
     try {
-      const configPath = platformInstance.getPluginConfigPath(PLUGIN_NAME);
-      const configDir = configPath.substring(0, configPath.lastIndexOf(process.platform === 'win32' ? '\\' : '/'));
+      const configPath = ctx.configPath;
+      const configDir = path.dirname(configPath);
       if (!fs.existsSync(configDir)) {
         fs.mkdirSync(configDir, { recursive: true });
       }
@@ -96,7 +95,7 @@ export const plugin_set_config = async (config: BuiltinPluginConfig) => {
  * 消息处理
  * 当收到包含 #napcat 的消息时，回复版本信息
  */
-const plugin_onmessage: PluginModule['plugin_onmessage'] = async (adapter, _core, _obCtx, event, _actions, instance) => {
+const plugin_onmessage: PluginModule['plugin_onmessage'] = async (_ctx, event) => {
   // Use config logic
   const prefix = currentConfig.prefix || '#napcat';
   if (currentConfig.enableReply === false) {
@@ -108,11 +107,11 @@ const plugin_onmessage: PluginModule['plugin_onmessage'] = async (adapter, _core
   }
 
   try {
-    const versionInfo = await getVersionInfo(adapter, instance.config);
+    const versionInfo = await getVersionInfo('ob11', {});
     if (!versionInfo) return;
 
     const message = formatVersionMessage(versionInfo);
-    await sendMessage(event, message, adapter, instance.config);
+    await sendMessage(event, message, 'ob11', {});
 
     console.log('[Plugin: builtin] 已回复版本信息');
   } catch (error) {

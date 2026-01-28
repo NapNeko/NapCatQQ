@@ -226,12 +226,13 @@ export const GetPluginConfigHandler: RequestHandler = async (req, res) => {
 
   if (plugin.module.plugin_get_config) {
     try {
-      config = await plugin.module.plugin_get_config();
+      config = await plugin.module.plugin_get_config(plugin.context);
     } catch (e) { }
   } else if (schema) {
     // Default behavior: read from default config path
     try {
-      const configPath = pluginManager.getPluginConfigPath(name);
+      // Use context configPath if available
+      const configPath = plugin.context?.configPath || pluginManager.getPluginConfigPath(name);
       if (fs.existsSync(configPath)) {
         config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
       }
@@ -253,7 +254,7 @@ export const SetPluginConfigHandler: RequestHandler = async (req, res) => {
 
   if (plugin.module.plugin_set_config) {
     try {
-      await plugin.module.plugin_set_config(config);
+      await plugin.module.plugin_set_config(plugin.context, config);
       return sendSuccess(res, { message: 'Config updated' });
     } catch (e: any) {
       return sendError(res, 'Error updating config: ' + e.message);
@@ -261,7 +262,8 @@ export const SetPluginConfigHandler: RequestHandler = async (req, res) => {
   } else if (plugin.module.plugin_config_schema || plugin.module.plugin_config_ui) {
     // Default behavior: write to default config path
     try {
-      const configPath = pluginManager.getPluginConfigPath(name);
+      const configPath = plugin.context?.configPath || pluginManager.getPluginConfigPath(name);
+
       const configDir = path.dirname(configPath);
       if (!fs.existsSync(configDir)) {
         fs.mkdirSync(configDir, { recursive: true });
