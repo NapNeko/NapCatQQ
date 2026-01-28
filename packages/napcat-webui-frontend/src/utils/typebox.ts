@@ -8,6 +8,7 @@ export type ParsedSchema = {
   enum?: any[];
   children?: ParsedSchema[];
   description?: string;
+  isCircularRef?: boolean;  // 标记循环引用
 };
 
 // 定义基础响应结构 (TypeBox 格式)
@@ -20,18 +21,49 @@ export const BaseResponseSchema = Type.Object({
   echo: Type.Optional(Type.String({ description: '回显' })),
 });
 
-export function parseTypeBox (schema: TSchema | undefined, name?: string, isRoot = true): ParsedSchema | ParsedSchema[] {
+// 最大解析深度，防止过深的嵌套
+const MAX_PARSE_DEPTH = 10;
+
+/**
+ * 获取 schema 的唯一标识符用于循环引用检测
+ * 优先使用 $id，否则使用对象引用
+ */
+function getSchemaId (schema: TSchema): string | TSchema {
+  return schema.$id || schema;
+}
+
+export function parseTypeBox (
+  schema: TSchema | undefined,
+  name?: string,
+  isRoot = true,
+  visited: Set<string | TSchema> = new Set(),
+  depth = 0
+): ParsedSchema | ParsedSchema[] {
   if (!schema) {
     return isRoot ? [] : { name, type: 'unknown', optional: false };
   }
 
-  // 如果是根节点解析，且我们需要将其包装在 BaseResponse 中（通常用于 response）
-  // 但这里我们根据传入的 schema 决定
+  // 检查深度限制
+  if (depth > MAX_PARSE_DEPTH) {
+    return { name, type: 'object', optional: false, description: '(嵌套层级过深)', isCircularRef: true };
+  }
+
+  // 检查循环引用
+  const schemaId = getSchemaId(schema);
+  if (visited.has(schemaId)) {
+    const refName = typeof schemaId === 'string' ? schemaId : (schema.description || 'object');
+    return { name, type: 'object', optional: false, description: `(循环引用: ${refName})`, isCircularRef: true };
+  }
+
+  // 对于复合类型，加入访问集合
+  const isComplexType = schema.type === 'object' || schema.type === 'array' || schema.anyOf || schema.oneOf || schema.allOf;
+  if (isComplexType) {
+    visited = new Set(visited); // 创建副本避免影响兄弟节点的解析
+    visited.add(schemaId);
+  }
 
   const description = schema.description;
-  const optional = false; // TypeBox schema doesn't store optionality in the same way Zod does, usually handled by parent object
-
-  // Handle specific types
+  const optional = false;
   const type = schema.type;
 
   if (schema.const !== undefined) {
@@ -44,13 +76,12 @@ export function parseTypeBox (schema: TSchema | undefined, name?: string, isRoot
 
   if (schema.anyOf || schema.oneOf) {
     const options = (schema.anyOf || schema.oneOf) as TSchema[];
-    const children = options.map(opt => parseTypeBox(opt, undefined, false) as ParsedSchema);
+    const children = options.map(opt => parseTypeBox(opt, undefined, false, visited, depth + 1) as ParsedSchema);
     return { name, type: 'union', children, optional, description };
   }
 
   if (schema.allOf) {
     const parts = schema.allOf as TSchema[];
-    // 如果全是对象，尝试合并属性
     const allProperties: Record<string, TSchema> = {};
     const allRequired: string[] = [];
     let canMerge = true;
@@ -64,10 +95,9 @@ export function parseTypeBox (schema: TSchema | undefined, name?: string, isRoot
     });
 
     if (canMerge) {
-      return parseTypeBox({ ...schema, type: 'object', properties: allProperties, required: allRequired }, name, isRoot);
+      return parseTypeBox({ ...schema, type: 'object', properties: allProperties, required: allRequired }, name, isRoot, visited, depth);
     }
-    // 无法简单合并，当作联合展示
-    const children = parts.map(part => parseTypeBox(part, undefined, false) as ParsedSchema);
+    const children = parts.map(part => parseTypeBox(part, undefined, false, visited, depth + 1) as ParsedSchema);
     return { name, type: 'intersection', children, optional, description };
   }
 
@@ -75,7 +105,7 @@ export function parseTypeBox (schema: TSchema | undefined, name?: string, isRoot
     const properties = schema.properties || {};
     const required = schema.required || [];
     const children = Object.keys(properties).map(key => {
-      const child = parseTypeBox(properties[key], key, false) as ParsedSchema;
+      const child = parseTypeBox(properties[key], key, false, visited, depth + 1) as ParsedSchema;
       child.optional = !required.includes(key);
       return child;
     });
@@ -85,7 +115,7 @@ export function parseTypeBox (schema: TSchema | undefined, name?: string, isRoot
 
   if (type === 'array') {
     const items = schema.items as TSchema;
-    const child = parseTypeBox(items, undefined, false) as ParsedSchema;
+    const child = parseTypeBox(items, undefined, false, visited, depth + 1) as ParsedSchema;
     return { name, type: 'array', children: [child], optional, description };
   }
 
@@ -97,24 +127,67 @@ export function parseTypeBox (schema: TSchema | undefined, name?: string, isRoot
   return { name, type: type || 'unknown', optional, description };
 }
 
-export function generateDefaultFromTypeBox (schema: TSchema | undefined): any {
+// 最大生成深度
+const MAX_GENERATE_DEPTH = 8;
+
+export function generateDefaultFromTypeBox (
+  schema: TSchema | undefined,
+  visited: Set<string | TSchema> = new Set(),
+  depth = 0
+): any {
   if (!schema) return {};
+
+  // 检查深度限制
+  if (depth > MAX_GENERATE_DEPTH) {
+    return null;
+  }
+
+  // 检查循环引用
+  const schemaId = getSchemaId(schema);
+  if (visited.has(schemaId)) {
+    // 遇到循环引用，返回空值而不是继续递归
+    return schema.type === 'array' ? [] : schema.type === 'object' ? {} : null;
+  }
+
   if (schema.const !== undefined) return schema.const;
   if (schema.default !== undefined) return schema.default;
   if (schema.enum) return schema.enum[0];
-  if (schema.anyOf || schema.oneOf) return generateDefaultFromTypeBox((schema.anyOf || schema.oneOf)[0]);
+
+  if (schema.anyOf || schema.oneOf) {
+    const options = (schema.anyOf || schema.oneOf) as TSchema[];
+    // 优先选择非递归的简单类型
+    const simpleOption = options.find(opt => opt.type === 'string' || opt.type === 'number' || opt.type === 'boolean');
+    if (simpleOption) {
+      return generateDefaultFromTypeBox(simpleOption, visited, depth + 1);
+    }
+    return generateDefaultFromTypeBox(options[0], visited, depth + 1);
+  }
 
   const type = schema.type;
+
   if (type === 'object') {
+    // 对于复合类型，加入访问集合
+    visited = new Set(visited);
+    visited.add(schemaId);
+
     const obj: any = {};
     const props = schema.properties || {};
+    const required = schema.required || [];
+
     for (const key in props) {
-      // Only generate defaults for required properties or if we want a full example
-      obj[key] = generateDefaultFromTypeBox(props[key]);
+      // 只为必填字段生成默认值，减少嵌套深度
+      if (required.includes(key) || depth < 3) {
+        obj[key] = generateDefaultFromTypeBox(props[key], visited, depth + 1);
+      }
     }
     return obj;
   }
-  if (type === 'array') return [];
+
+  if (type === 'array') {
+    // 数组类型返回空数组，避免在数组项中继续递归
+    return [];
+  }
+
   if (type === 'string') return '';
   if (type === 'number' || type === 'integer') return 0;
   if (type === 'boolean') return false;
