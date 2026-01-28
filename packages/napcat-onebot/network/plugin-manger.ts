@@ -15,6 +15,45 @@ export interface PluginPackageJson {
   author?: string;
 }
 
+export interface PluginConfigItem {
+  key: string;
+  type: 'string' | 'number' | 'boolean' | 'select' | 'multi-select' | 'html' | 'text';
+  label: string;
+  description?: string;
+  default?: any;
+  options?: { label: string; value: string | number; }[];
+  placeholder?: string;
+}
+
+export class NapCatConfig {
+  static text (key: string, label: string, defaultValue?: string, description?: string): PluginConfigItem {
+    return { key, type: 'string', label, default: defaultValue, description };
+  }
+  static number (key: string, label: string, defaultValue?: number, description?: string): PluginConfigItem {
+    return { key, type: 'number', label, default: defaultValue, description };
+  }
+  static boolean (key: string, label: string, defaultValue?: boolean, description?: string): PluginConfigItem {
+    return { key, type: 'boolean', label, default: defaultValue, description };
+  }
+  static select (key: string, label: string, options: { label: string; value: string | number; }[], defaultValue?: string | number, description?: string): PluginConfigItem {
+    return { key, type: 'select', label, options, default: defaultValue, description };
+  }
+  static multiSelect (key: string, label: string, options: { label: string; value: string | number; }[], defaultValue?: (string | number)[], description?: string): PluginConfigItem {
+    return { key, type: 'multi-select', label, options, default: defaultValue, description };
+  }
+  static html (content: string): PluginConfigItem {
+    return { key: `_html_${Math.random().toString(36).slice(2)}`, type: 'html', label: '', default: content };
+  }
+  static plainText (content: string): PluginConfigItem {
+    return { key: `_text_${Math.random().toString(36).slice(2)}`, type: 'text', label: '', default: content };
+  }
+  static combine (...items: PluginConfigItem[]): PluginConfigSchema {
+    return items;
+  }
+}
+
+export type PluginConfigSchema = PluginConfigItem[];
+
 export interface PluginModule<T extends OB11EmitEventContent = OB11EmitEventContent> {
   plugin_init: (
     core: NapCatCore,
@@ -44,6 +83,10 @@ export interface PluginModule<T extends OB11EmitEventContent = OB11EmitEventCont
     actions: ActionMap,
     instance: OB11PluginMangerAdapter
   ) => void | Promise<void>;
+  plugin_config_schema?: PluginConfigSchema;
+  plugin_config_ui?: PluginConfigSchema;
+  plugin_get_config?: () => any | Promise<any>;
+  plugin_set_config?: (config: any) => void | Promise<void>;
 }
 
 export interface LoadedPlugin {
@@ -612,5 +655,12 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
       );
       return false;
     }
+  }
+  public getPluginDataPath (pluginName: string): string {
+    return path.join(this.pluginPath, pluginName, 'data');
+  }
+
+  public getPluginConfigPath (pluginName: string): string {
+    return path.join(this.getPluginDataPath(pluginName), 'config.json');
   }
 }
