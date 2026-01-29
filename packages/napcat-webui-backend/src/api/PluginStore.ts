@@ -8,6 +8,16 @@ import { createWriteStream } from 'fs';
 import compressing from 'compressing';
 import { findAvailableDownloadUrl, GITHUB_RAW_MIRRORS } from 'napcat-common/src/mirror';
 import { webUiPathWrapper } from '@/napcat-webui-backend/index';
+import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
+import { NapCatOneBot11Adapter } from '@/napcat-onebot/index';
+import { OB11PluginMangerAdapter } from '@/napcat-onebot/network/plugin-manger';
+
+// Helper to get the plugin manager adapter
+const getPluginManager = (): OB11PluginMangerAdapter | null => {
+  const ob11 = WebUiDataRuntime.getOneBotContext() as NapCatOneBot11Adapter;
+  if (!ob11) return null;
+  return ob11.networkManager.findSomeAdapter('plugin_manager') as OB11PluginMangerAdapter;
+};
 
 // 插件商店源配置
 const PLUGIN_STORE_SOURCES = [
@@ -242,6 +252,15 @@ export const InstallPluginFromStoreHandler: RequestHandler = async (req, res) =>
       // 删除临时文件
       fs.unlinkSync(tempZipPath);
 
+      // 如果 pluginManager 存在，立即注册插件
+      const pluginManager = getPluginManager();
+      if (pluginManager) {
+        // 检查是否已注册，避免重复注册
+        if (!pluginManager.getPluginInfo(id)) {
+          await pluginManager.loadPluginById(id);
+        }
+      }
+
       return sendSuccess(res, {
         message: 'Plugin installed successfully',
         plugin: plugin,
@@ -314,6 +333,16 @@ export const InstallPluginFromStoreSSEHandler: RequestHandler = async (req, res)
 
       sendProgress('解压完成，正在清理...', 90);
       fs.unlinkSync(tempZipPath);
+
+      // 如果 pluginManager 存在，立即注册插件
+      const pluginManager = getPluginManager();
+      if (pluginManager) {
+        // 检查是否已注册，避免重复注册
+        if (!pluginManager.getPluginInfo(id)) {
+          sendProgress('正在注册插件...', 95);
+          await pluginManager.loadPluginById(id);
+        }
+      }
 
       sendProgress('安装成功！', 100);
       res.write(`data: ${JSON.stringify({

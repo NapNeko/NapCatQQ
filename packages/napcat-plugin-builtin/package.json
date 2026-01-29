@@ -1,5 +1,6 @@
 {
   "name": "napcat-plugin-builtin",
+  "plugin": "内置插件",
   "version": "1.0.0",
   "type": "module",
   "main": "index.mjs",

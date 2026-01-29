@@ -1,19 +1,25 @@
 import { Button } from '@heroui/button';
 import { Chip } from '@heroui/chip';
 import { useState } from 'react';
-import { IoMdDownload } from 'react-icons/io';
+import { IoMdDownload, IoMdRefresh, IoMdCheckmarkCircle } from 'react-icons/io';
 
 import DisplayCardContainer from './container';
 import { PluginStoreItem } from '@/types/plugin-store';
 
+export type InstallStatus = 'not-installed' | 'installed' | 'update-available';
+
 export interface PluginStoreCardProps {
   data: PluginStoreItem;
   onInstall: () => Promise<void>;
+  installStatus?: InstallStatus;
+  installedVersion?: string;
 }
 
 const PluginStoreCard: React.FC<PluginStoreCardProps> = ({
   data,
   onInstall,
+  installStatus = 'not-installed',
+  installedVersion,
 }) => {
   const { name, version, author, description, tags, id } = data;
   const [processing, setProcessing] = useState(false);
@@ -23,19 +29,65 @@ const PluginStoreCard: React.FC<PluginStoreCardProps> = ({
     onInstall().finally(() => setProcessing(false));
   };
 
+  // 根据安装状态返回按钮配置
+  const getButtonConfig = () => {
+    switch (installStatus) {
+      case 'installed':
+        return {
+          text: '重新安装',
+          icon: <IoMdRefresh size={16} />,
+          color: 'default' as const,
+        };
+      case 'update-available':
+        return {
+          text: '更新',
+          icon: <IoMdDownload size={16} />,
+          color: 'success' as const,
+        };
+      default:
+        return {
+          text: '安装',
+          icon: <IoMdDownload size={16} />,
+          color: 'primary' as const,
+        };
+    }
+  };
+
+  const buttonConfig = getButtonConfig();
+
   return (
     <DisplayCardContainer
       className='w-full max-w-[420px]'
       title={name}
       tag={
-        <Chip
-          className="ml-auto"
-          color="primary"
-          size="sm"
-          variant="flat"
-        >
-          v{version}
-        </Chip>
+        <div className="ml-auto flex items-center gap-1">
+          {installStatus === 'installed' && (
+            <Chip
+              color="success"
+              size="sm"
+              variant="flat"
+              startContent={<IoMdCheckmarkCircle size={14} />}
+            >
+              已安装
+            </Chip>
+          )}
+          {installStatus === 'update-available' && (
+            <Chip
+              color="warning"
+              size="sm"
+              variant="flat"
+            >
+              可更新
+            </Chip>
+          )}
+          <Chip
+            color="primary"
+            size="sm"
+            variant="flat"
+          >
+            v{version}
+          </Chip>
+        </div>
       }
       enableSwitch={undefined}
       action={
@@ -43,13 +95,13 @@ const PluginStoreCard: React.FC<PluginStoreCardProps> = ({
           fullWidth
           radius='full'
           size='sm'
-          color='primary'
-          startContent={<IoMdDownload size={16} />}
+          color={buttonConfig.color}
+          startContent={buttonConfig.icon}
           onPress={handleInstall}
           isLoading={processing}
           isDisabled={processing}
         >
-          安装
+          {buttonConfig.text}
         </Button>
       }
     >
