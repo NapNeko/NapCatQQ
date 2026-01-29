@@ -25,6 +25,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { hostname, systemName, systemVersion } from 'napcat-common/src/system';
 import { NTEventWrapper } from '@/napcat-core/helper/event';
+import { createSessionProxy } from '@/napcat-core/helper/session-proxy';
 import { KickedOffLineInfo, RawMessage, SelfInfo, SelfStatusInfo } from '@/napcat-core/types';
 import { NapCatConfigLoader, NapcatConfigSchema } from '@/napcat-core/helper/config';
 import os from 'node:os';
@@ -45,6 +46,7 @@ export * from './helper/qq-basic-info';
 export * from './helper/event';
 export * from './helper/config';
 export * from './helper/proxy-handler';
+export * from './helper/session-proxy';
 
 export enum NapCatCoreWorkingEnv {
   Unknown = 0,
@@ -118,9 +120,19 @@ export class NapCatCore {
   // 通过构造器递过去的 runtime info 应该尽量少
   constructor (context: InstanceContext, selfInfo: SelfInfo) {
     this.selfInfo = selfInfo;
-    this.context = context;
-    this.util = this.context.wrapper.NodeQQNTWrapperUtil;
+    // 先用原始 session 创建 eventWrapper
     this.eventWrapper = new NTEventWrapper(context.session);
+    // 通过环境变量 NAPCAT_SESSION_PROXY 开启 session 代理
+    if (process.env['NAPCAT_SESSION_PROXY'] === '1') {
+      const proxiedSession = createSessionProxy(context.session, this.eventWrapper);
+      this.context = {
+        ...context,
+        session: proxiedSession,
+      };
+    } else {
+      this.context = context;
+    }
+    this.util = this.context.wrapper.NodeQQNTWrapperUtil;
     this.configLoader = new NapCatConfigLoader(this, this.context.pathWrapper.configPath, NapcatConfigSchema);
     this.apis = {
       FileApi: new NTQQFileApi(this.context, this),
