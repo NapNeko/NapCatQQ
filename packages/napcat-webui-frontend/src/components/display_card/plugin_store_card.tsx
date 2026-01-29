@@ -19,7 +19,6 @@ const PluginStoreCard: React.FC<PluginStoreCardProps> = ({
   data,
   onInstall,
   installStatus = 'not-installed',
-  installedVersion,
 }) => {
   const { name, version, author, description, tags, id } = data;
   const [processing, setProcessing] = useState(false);
