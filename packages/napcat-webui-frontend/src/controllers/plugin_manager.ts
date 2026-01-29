@@ -43,6 +43,14 @@ export default class PluginManager {
     return data.data;
   }
 
+  /**
+   * 手动注册插件管理器到 NetworkManager
+   */
+  public static async registerPluginManager () {
+    const { data } = await serverRequest.post<ServerResponse<{ message: string; }>>('/Plugin/RegisterManager');
+    return data.data;
+  }
+
 
 
   public static async setPluginStatus (name: string, enable: boolean, filename?: string) {
