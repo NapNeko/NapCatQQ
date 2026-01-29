@@ -5,7 +5,9 @@ import {
   UninstallPluginHandler,
   GetPluginConfigHandler,
   SetPluginConfigHandler,
-  RegisterPluginManagerHandler
+  RegisterPluginManagerHandler,
+  PluginConfigSSEHandler,
+  PluginConfigChangeHandler
 } from '@/napcat-webui-backend/src/api/Plugin';
 import {
   GetPluginStoreListHandler,
@@ -21,6 +23,8 @@ router.post('/SetStatus', SetPluginStatusHandler);
 router.post('/Uninstall', UninstallPluginHandler);
 router.get('/Config', GetPluginConfigHandler);
 router.post('/Config', SetPluginConfigHandler);
+router.get('/Config/SSE', PluginConfigSSEHandler);
+router.post('/Config/Change', PluginConfigChangeHandler);
 router.post('/RegisterManager', RegisterPluginManagerHandler);
 
 // 插件商店相关路由

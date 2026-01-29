@@ -37,12 +37,18 @@ export interface PluginConfigSchemaItem {
   default?: any;
   options?: { label: string; value: string | number; }[];
   placeholder?: string;
+  /** 标记此字段为响应式：值变化时触发 schema 刷新 */
+  reactive?: boolean;
+  /** 是否隐藏此字段 */
+  hidden?: boolean;
 }
 
 /** 插件配置响应 */
 export interface PluginConfigResponse {
   schema: PluginConfigSchemaItem[];
   config: Record<string, unknown>;
+  /** 是否支持响应式更新 */
+  supportReactive?: boolean;
 }
 
 /** 服务端响应 */
@@ -142,5 +148,42 @@ export default class PluginManager {
    */
   public static async setPluginConfig (id: string, config: Record<string, unknown>): Promise<void> {
     await serverRequest.post<ServerResponse<void>>('/Plugin/Config', { id, config });
+  }
+
+  /**
+   * 通知配置字段变化
+   * @param id 插件包名
+   * @param sessionId SSE 会话 ID
+   * @param key 变化的字段
+   * @param value 新值
+   * @param currentConfig 当前配置
+   */
+  public static async notifyConfigChange (
+    id: string,
+    sessionId: string,
+    key: string,
+    value: unknown,
+    currentConfig: Record<string, unknown>
+  ): Promise<void> {
+    await serverRequest.post<ServerResponse<void>>('/Plugin/Config/Change', {
+      id,
+      sessionId,
+      key,
+      value,
+      currentConfig
+    });
+  }
+
+  /**
+   * 获取配置 SSE URL
+   * @param id 插件包名
+   * @param config 初始配置
+   */
+  public static getConfigSSEUrl (id: string, config?: Record<string, unknown>): string {
+    const params = new URLSearchParams({ id });
+    if (config) {
+      params.set('config', JSON.stringify(config));
+    }
+    return `/api/Plugin/Config/SSE?${params.toString()}`;
   }
 }

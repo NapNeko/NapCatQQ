@@ -7,7 +7,7 @@
   "description": "NapCat 内置插件",
   "author": "NapNeko",
   "dependencies": {
-    "napcat-types": "0.0.9"
+    "napcat-types": "0.0.10"
   },
   "devDependencies": {
     "@types/node": "^22.0.1"

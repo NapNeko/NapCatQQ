@@ -213,8 +213,8 @@ importers:
   packages/napcat-plugin-builtin:
     dependencies:
       napcat-types:
-        specifier: 0.0.9
-        version: 0.0.9
+        specifier: 0.0.10
+        version: 0.0.10
     devDependencies:
       '@types/node':
         specifier: ^22.0.1
@@ -2943,14 +2943,8 @@ packages:
   '@types/event-source-polyfill@1.0.5':
     resolution: {integrity: sha512-iaiDuDI2aIFft7XkcwMzDWLqo7LVDixd2sR6B4wxJut9xcp/Ev9bO4EFg4rm6S9QxATLBj5OPxdeocgmhjwKaw==}
 
-  '@types/express-serve-static-core@4.19.8':
-    resolution: {integrity: sha512-02S5fmqeoKzVZCHPZid4b8JH2eM5HzQLZWN2FohQEy/0eXTq8VXZfSN6Pcr3F6N9R/vNrj7cpgbhjie6m/1tCA==}
-
   '@types/express-serve-static-core@5.1.0':
     resolution: {integrity: sha512-jnHMsrd0Mwa9Cf4IdOzbz543y4XJepXrbia2T4b6+spXC2We3t1y6K44D3mR8XMFSXMCf3/l7rCgddfx7UNVBA==}
-
-  '@types/express@4.17.25':
-    resolution: {integrity: sha512-dVd04UKsfpINUnK0yBoYHDF3xu7xVH4BuDotC/xGuycx4CgbP48X/KF/586bcObxT0HENHXEU8Nqtu6NR+eKhw==}
 
   '@types/express@5.0.5':
     resolution: {integrity: sha512-LuIQOcb6UmnF7C1PCFmEU1u2hmiHL43fgFQX67sN3H4Z+0Yk0Neo++mFsBjhOAuLzvlQeqAAkeDOZrJs9rzumQ==}
@@ -2966,9 +2960,6 @@ packages:
 
   '@types/http-errors@2.0.5':
     resolution: {integrity: sha512-r8Tayk8HJnX0FztbZN7oVqGccWgw98T/0neJphO91KkmOzug1KkofZURD4UaD5uH8AqcFLfdPErnBod0u71/qg==}
-
-  '@types/ip@1.1.3':
-    resolution: {integrity: sha512-64waoJgkXFTYnCYDUWgSATJ/dXEBanVkaP5d4Sbk7P6U7cTTMhxVyROTckc6JKdwCrgnAjZMn0k3177aQxtDEA==}
 
   '@types/js-cookie@3.0.6':
     resolution: {integrity: sha512-wkw9yd1kEXOPnvEeEV1Go1MmxtBJL0RR79aOTAApecWFVu7w0NNXNqhcWgvw2YgZDYadliXkl14pa3WXw5jlCQ==}
@@ -3053,16 +3044,8 @@ packages:
   '@types/use-sync-external-store@0.0.6':
     resolution: {integrity: sha512-zFDAD+tlpf2r4asuHEj0XH6pY6i0g5NeAHPn+15wk3BV6JA69eERFXC1gyGThDkVa1zCyKr5jox1+2LbV/AMLg==}
 
-  '@types/winston@2.4.4':
-    resolution: {integrity: sha512-BVGCztsypW8EYwJ+Hq+QNYiT/MUyCif0ouBH+flrY66O5W+KIXAMML6E/0fJpm7VjIzgangahl5S03bJJQGrZw==}
-    deprecated: This is a stub types definition. winston provides its own type definitions, so you do not need this installed.
-
   '@types/ws@8.18.1':
     resolution: {integrity: sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg==}
-
-  '@types/yaml@1.9.7':
-    resolution: {integrity: sha512-8WMXRDD1D+wCohjfslHDgICd2JtMATZU8CkhH8LVJqcJs6dyYj5TGptzP8wApbmEullGBSsCEzzap73DQ1HJaA==}
-    deprecated: This is a stub types definition. yaml provides its own type definitions, so you do not need this installed.
 
   '@typescript-eslint/eslint-plugin@8.46.4':
     resolution: {integrity: sha512-R48VhmTJqplNyDxCyqqVkFSZIx1qX6PzwqgcXn1olLrzxcSBDlOsbtcnQuQhNtnNiJ4Xe5gREI1foajYaYU2Vg==}
@@ -5417,8 +5400,8 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
-  napcat-types@0.0.9:
-    resolution: {integrity: sha512-lhK9SgGotQc58jobqnZEnDTadwcwT/Y62aGCH4hQijdiP2eSiu3YWX2oFFoUJxyIpUKFYAfWJkPUv1YHZ/aaWQ==}
+  napcat-types@0.0.10:
+    resolution: {integrity: sha512-Y3EIdDm6rDJjdDqorQMbfyTVpyZvRRPa95yPmIl1LCTbmZMkfJw2YLQHvAcItEpTxUEW1Pve1ipNfmHBVmZL8Q==}
 
   napcat.protobuf@1.1.4:
     resolution: {integrity: sha512-z7XtLSBJ/PxmYb0VD/w+eYr/X3LyGz+SZ2QejFTOczwt6zWNxy2yV1mTMTvJoc3BWkI3ESVFRxkuT6+pj1tb1Q==}
@@ -9805,26 +9788,12 @@ snapshots:
 
   '@types/event-source-polyfill@1.0.5': {}
 
-  '@types/express-serve-static-core@4.19.8':
-    dependencies:
-      '@types/node': 22.19.1
-      '@types/qs': 6.14.0
-      '@types/range-parser': 1.2.7
-      '@types/send': 1.2.1
-
   '@types/express-serve-static-core@5.1.0':
     dependencies:
       '@types/node': 22.19.1
       '@types/qs': 6.14.0
       '@types/range-parser': 1.2.7
       '@types/send': 1.2.1
-
-  '@types/express@4.17.25':
-    dependencies:
-      '@types/body-parser': 1.19.6
-      '@types/express-serve-static-core': 4.19.8
-      '@types/qs': 6.14.0
-      '@types/serve-static': 1.15.10
 
   '@types/express@5.0.5':
     dependencies:
@@ -9844,10 +9813,6 @@ snapshots:
       '@types/unist': 3.0.3
 
   '@types/http-errors@2.0.5': {}
-
-  '@types/ip@1.1.3':
-    dependencies:
-      '@types/node': 22.19.1
 
   '@types/js-cookie@3.0.6': {}
 
@@ -9930,17 +9895,9 @@ snapshots:
 
   '@types/use-sync-external-store@0.0.6': {}
 
-  '@types/winston@2.4.4':
-    dependencies:
-      winston: 3.18.3
-
   '@types/ws@8.18.1':
     dependencies:
       '@types/node': 22.19.1
-
-  '@types/yaml@1.9.7':
-    dependencies:
-      yaml: 2.8.2
 
   '@typescript-eslint/eslint-plugin@8.46.4(@typescript-eslint/parser@8.46.4(eslint@9.39.1(jiti@1.21.7))(typescript@5.9.3))(eslint@9.39.1(jiti@1.21.7))(typescript@5.9.3)':
     dependencies:
@@ -12788,17 +12745,10 @@ snapshots:
 
   nanoid@3.3.11: {}
 
-  napcat-types@0.0.9:
+  napcat-types@0.0.10:
     dependencies:
       '@sinclair/typebox': 0.34.41
-      '@types/cors': 2.8.19
-      '@types/express': 4.17.25
-      '@types/ip': 1.1.3
-      '@types/multer': 1.4.13
       '@types/node': 22.19.1
-      '@types/winston': 2.4.4
-      '@types/ws': 8.18.1
-      '@types/yaml': 1.9.7
 
   napcat.protobuf@1.1.4:
     dependencies:
@@ -14591,7 +14541,8 @@ snapshots:
 
   yallist@4.0.0: {}
 
-  yaml@2.8.2: {}
+  yaml@2.8.2:
+    optional: true
 
   yargs-parser@20.2.9: {}
 
