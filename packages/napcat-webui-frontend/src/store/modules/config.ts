@@ -3,7 +3,7 @@ import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import type { RootState } from '@/store';
 
 interface ConfigState {
-  value: OneBotConfig;
+  value: OneBotConfig
 }
 
 const initialState: ConfigState = {
@@ -18,7 +18,6 @@ const initialState: ConfigState = {
     musicSignUrl: '',
     enableLocalFile2Url: false,
     parseMultMsg: true,
-    imageDownloadProxy: '',
   },
 };
 
