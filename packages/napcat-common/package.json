@@ -1,28 +1,29 @@
 {
-    "name": "napcat-common",
-    "version": "0.0.1",
-    "private": true,
-    "type": "module",
-    "main": "src/index.ts",
-    "scripts": {
-        "typecheck": "tsc --noEmit --skipLibCheck -p tsconfig.json"
+  "name": "napcat-common",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit --skipLibCheck -p tsconfig.json"
+  },
+  "exports": {
+    ".": {
+      "import": "./src/index.ts"
     },
-    "exports": {
-        ".": {
-            "import": "./src/index.ts"
-        },
-        "./src/*": {
-            "import": "./src/*"
-        }
-    },
-    "dependencies": {
-        "ajv": "^8.13.0",
-        "file-type": "^21.0.0"
-    },
-    "devDependencies": {
-        "@types/node": "^22.0.1"
-    },
-    "engines": {
-        "node": ">=18.0.0"
+    "./src/*": {
+      "import": "./src/*"
     }
+  },
+  "dependencies": {
+    "ajv": "^8.13.0",
+    "file-type": "^21.0.0",
+    "undici": "^6.19.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
 }
