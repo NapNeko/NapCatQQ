@@ -24,7 +24,7 @@ const PluginDisplayCard: React.FC<PluginDisplayCardProps> = ({
   hasConfig = false,
 }) => {
   const { name, version, author, description, status } = data;
-  const isEnabled = status !== 'disabled';
+  const isEnabled = status === 'active';
   const [processing, setProcessing] = useState(false);
 
   const handleToggle = () => {
