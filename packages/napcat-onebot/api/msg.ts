@@ -1288,7 +1288,8 @@ export class OneBotMsgApi {
     }
     realUri = await this.handleObfuckName(realUri) ?? realUri;
     try {
-      const { path, fileName, errMsg, success } = await uriToLocalFile(this.core.NapCatTempPath, realUri);
+      const proxy = this.obContext.configLoader.configData.imageDownloadProxy || undefined;
+      const { path, fileName, errMsg, success } = await uriToLocalFile(this.core.NapCatTempPath, realUri, undefined, undefined, proxy);
       if (!success) {
         this.core.context.logger.logError('文件处理失败', errMsg);
         throw new Error('文件处理失败: ' + errMsg);
