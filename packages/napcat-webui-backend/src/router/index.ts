@@ -18,6 +18,7 @@ import { UpdateNapCatRouter } from './UpdateNapCat';
 import DebugRouter from '@/napcat-webui-backend/src/api/Debug';
 import { ProcessRouter } from './Process';
 import { PluginRouter } from './Plugin';
+import { MirrorRouter } from './Mirror';
 
 const router: Router = Router();
 
@@ -50,5 +51,7 @@ router.use('/Debug', DebugRouter);
 router.use('/Process', ProcessRouter);
 // router:插件管理相关路由
 router.use('/Plugin', PluginRouter);
+// router:镜像管理相关路由
+router.use('/Mirror', MirrorRouter);
 
 export { router as ALLRouter };
