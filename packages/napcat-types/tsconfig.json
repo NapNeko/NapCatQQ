@@ -39,9 +39,6 @@
     "../napcat-onebot/**/*.ts",
     "../napcat-common/**/*.ts"
   ],
-  "files": [
-    "./external-shims.d.ts"
-  ],
   "exclude": [
     "node_modules",
     "dist"
