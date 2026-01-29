@@ -43,6 +43,25 @@ importers:
         specifier: ^4.0.9
         version: 4.0.9(@types/debug@4.1.12)(@types/node@22.19.1)(@vitest/ui@4.0.9)(jiti@1.21.7)(tsx@4.21.0)(yaml@2.8.2)
 
+  packages/napcat-adapter:
+    dependencies:
+      napcat-common:
+        specifier: workspace:*
+        version: link:../napcat-common
+      napcat-core:
+        specifier: workspace:*
+        version: link:../napcat-core
+      napcat-onebot:
+        specifier: workspace:*
+        version: link:../napcat-onebot
+      napcat-protocol:
+        specifier: workspace:*
+        version: link:../napcat-protocol
+    devDependencies:
+      '@types/node':
+        specifier: ^22.0.1
+        version: 22.19.1
+
   packages/napcat-common:
     dependencies:
       ajv:
@@ -111,15 +130,15 @@ importers:
 
   packages/napcat-framework:
     dependencies:
+      napcat-adapter:
+        specifier: workspace:*
+        version: link:../napcat-adapter
       napcat-common:
         specifier: workspace:*
         version: link:../napcat-common
       napcat-core:
         specifier: workspace:*
         version: link:../napcat-core
-      napcat-onebot:
-        specifier: workspace:*
-        version: link:../napcat-onebot
       napcat-qrcode:
         specifier: workspace:*
         version: link:../napcat-qrcode
@@ -230,6 +249,43 @@ importers:
         specifier: ^5.6
         version: 5.9.3
 
+  packages/napcat-protocol:
+    dependencies:
+      '@sinclair/typebox':
+        specifier: ^0.34.38
+        version: 0.34.41
+      ajv:
+        specifier: ^8.13.0
+        version: 8.17.1
+      cors:
+        specifier: ^2.8.5
+        version: 2.8.5
+      express:
+        specifier: ^5.0.0
+        version: 5.1.0
+      json5:
+        specifier: ^2.2.3
+        version: 2.2.3
+      napcat-common:
+        specifier: workspace:*
+        version: link:../napcat-common
+      napcat-core:
+        specifier: workspace:*
+        version: link:../napcat-core
+      ws:
+        specifier: ^8.18.3
+        version: 8.18.3
+    devDependencies:
+      '@types/cors':
+        specifier: ^2.8.17
+        version: 2.8.19
+      '@types/express':
+        specifier: ^5.0.0
+        version: 5.0.5
+      '@types/node':
+        specifier: ^22.0.1
+        version: 22.19.1
+
   packages/napcat-pty:
     dependencies:
       '@homebridge/node-pty-prebuilt-multiarch':
@@ -270,15 +326,15 @@ importers:
 
   packages/napcat-shell:
     dependencies:
+      napcat-adapter:
+        specifier: workspace:*
+        version: link:../napcat-adapter
       napcat-common:
         specifier: workspace:*
         version: link:../napcat-common
       napcat-core:
         specifier: workspace:*
         version: link:../napcat-core
-      napcat-onebot:
-        specifier: workspace:*
-        version: link:../napcat-onebot
       napcat-qrcode:
         specifier: workspace:*
         version: link:../napcat-qrcode

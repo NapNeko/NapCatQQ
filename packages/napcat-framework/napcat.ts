@@ -1,6 +1,6 @@
 import { NapCatPathWrapper } from 'napcat-common/src/path';
 import { InitWebUi, WebUiConfig, webUiRuntimePort } from 'napcat-webui-backend/index';
-import { NapCatOneBot11Adapter } from 'napcat-onebot/index';
+import { NapCatAdapterManager } from 'napcat-adapter';
 import { NativePacketHandler } from 'napcat-core/packet/handler/client';
 import { FFmpegService } from 'napcat-core/helper/ffmpeg/ffmpeg';
 import { logSubscription, LogWrapper } from 'napcat-core/helper/log';
@@ -79,11 +79,14 @@ export async function NCoreInitFramework (
   // 启动WebUi
   WebUiDataRuntime.setWorkingEnv(NapCatCoreWorkingEnv.Framework);
   InitWebUi(logger, pathWrapper, logSubscription, statusHelperSubscription).then().catch(e => logger.logError(e));
-  // 初始化LLNC的Onebot实现
-  const oneBotAdapter = new NapCatOneBot11Adapter(loaderObject.core, loaderObject.context, pathWrapper);
-  // 注册到 WebUiDataRuntime，供调试功能使用
-  WebUiDataRuntime.setOneBotContext(oneBotAdapter);
-  await oneBotAdapter.InitOneBot();
+  // 使用 NapCatAdapterManager 统一管理协议适配器
+  const adapterManager = new NapCatAdapterManager(loaderObject.core, loaderObject.context, pathWrapper);
+  await adapterManager.initAdapters();
+  // 注册 OneBot 适配器到 WebUiDataRuntime，供调试功能使用
+  const oneBotAdapter = adapterManager.getOneBotAdapter();
+  if (oneBotAdapter) {
+    WebUiDataRuntime.setOneBotContext(oneBotAdapter);
+  }
 }
 
 export class NapCatFramework {
