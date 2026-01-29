@@ -3,6 +3,7 @@ import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
 import { sendError, sendSuccess } from '@/napcat-webui-backend/src/utils/response';
 import { NapCatOneBot11Adapter } from '@/napcat-onebot/index';
 import { OB11PluginMangerAdapter } from '@/napcat-onebot/network/plugin-manger';
+import { webUiPathWrapper } from '@/napcat-webui-backend/index';
 import path from 'path';
 import fs from 'fs';
 
@@ -11,6 +12,49 @@ const getPluginManager = (): OB11PluginMangerAdapter | null => {
   const ob11 = WebUiDataRuntime.getOneBotContext() as NapCatOneBot11Adapter;
   if (!ob11) return null;
   return ob11.networkManager.findSomeAdapter('plugin_manager') as OB11PluginMangerAdapter;
+};
+
+// Helper to get OneBot context
+const getOneBotContext = (): NapCatOneBot11Adapter | null => {
+  return WebUiDataRuntime.getOneBotContext() as NapCatOneBot11Adapter;
+};
+
+/**
+ * 手动注册插件管理器到 NetworkManager
+ */
+export const RegisterPluginManagerHandler: RequestHandler = async (_req, res) => {
+  const ob11 = getOneBotContext();
+  if (!ob11) {
+    return sendError(res, 'OneBot context not found');
+  }
+
+  // 检查是否已经注册
+  const existingManager = ob11.networkManager.findSomeAdapter('plugin_manager');
+  if (existingManager) {
+    return sendError(res, '插件管理器已经注册');
+  }
+
+  try {
+    // 确保插件目录存在
+    const pluginPath = webUiPathWrapper.pluginPath;
+    if (!fs.existsSync(pluginPath)) {
+      fs.mkdirSync(pluginPath, { recursive: true });
+    }
+
+    // 创建并注册插件管理器
+    const pluginManager = new OB11PluginMangerAdapter(
+      'plugin_manager',
+      ob11.core,
+      ob11,
+      ob11.actions
+    );
+
+    await ob11.networkManager.registerAdapterAndOpen(pluginManager);
+
+    return sendSuccess(res, { message: '插件管理器注册成功' });
+  } catch (e: any) {
+    return sendError(res, '注册插件管理器失败: ' + e.message);
+  }
 };
 
 export const GetPluginListHandler: RequestHandler = async (_req, res) => {

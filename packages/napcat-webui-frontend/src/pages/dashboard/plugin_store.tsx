@@ -38,6 +38,7 @@ export default function PluginStorePage () {
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<string>('all');
+  const [pluginManagerNotFound, setPluginManagerNotFound] = useState(false);
   const dialog = useDialog();
 
   // 获取镜像列表
@@ -52,6 +53,10 @@ export default function PluginStorePage () {
     try {
       const data = await PluginManager.getPluginStoreList();
       setPlugins(data.plugins);
+
+      // 检查插件管理器是否已加载
+      const listResult = await PluginManager.getPluginList();
+      setPluginManagerNotFound(listResult.pluginManagerNotFound);
     } catch (e: any) {
       toast.error(e.message);
     } finally {
@@ -195,6 +200,33 @@ export default function PluginStorePage () {
           } else if (data.success) {
             toast.success('插件安装成功！', { id: loadingToast });
             eventSource.close();
+            // 安装成功后检查插件管理器状态
+            if (pluginManagerNotFound) {
+              dialog.confirm({
+                title: '插件管理器未加载',
+                content: (
+                  <div className="space-y-2">
+                    <p className="text-sm text-default-600">
+                      插件已安装成功，但插件管理器尚未加载。
+                    </p>
+                    <p className="text-sm text-default-600">
+                      是否立即注册插件管理器？注册后插件才能正常运行。
+                    </p>
+                  </div>
+                ),
+                confirmText: '注册插件管理器',
+                cancelText: '稍后再说',
+                onConfirm: async () => {
+                  try {
+                    await PluginManager.registerPluginManager();
+                    toast.success('插件管理器注册成功');
+                    setPluginManagerNotFound(false);
+                  } catch (e: any) {
+                    toast.error('注册失败: ' + e.message);
+                  }
+                },
+              });
+            }
           } else if (data.message) {
             toast.loading(data.message, { id: loadingToast });
           }
