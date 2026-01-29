@@ -10,8 +10,8 @@ import { useRequest } from 'ahooks';
 import { EventSourcePolyfill } from 'event-source-polyfill';
 
 import PageLoading from '@/components/page_loading';
-import PluginStoreCard from '@/components/display_card/plugin_store_card';
-import PluginManager from '@/controllers/plugin_manager';
+import PluginStoreCard, { InstallStatus } from '@/components/display_card/plugin_store_card';
+import PluginManager, { PluginItem } from '@/controllers/plugin_manager';
 import WebUIManager from '@/controllers/webui_manager';
 import { PluginStoreItem } from '@/types/plugin-store';
 import useDialog from '@/hooks/use-dialog';
@@ -35,6 +35,7 @@ const EmptySection: React.FC<EmptySectionProps> = ({ isEmpty }) => {
 
 export default function PluginStorePage () {
   const [plugins, setPlugins] = useState<PluginStoreItem[]>([]);
+  const [installedPlugins, setInstalledPlugins] = useState<PluginItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<string>('all');
@@ -57,6 +58,7 @@ export default function PluginStorePage () {
       // 检查插件管理器是否已加载
       const listResult = await PluginManager.getPluginList();
       setPluginManagerNotFound(listResult.pluginManagerNotFound);
+      setInstalledPlugins(listResult.plugins || []);
     } catch (e: any) {
       toast.error(e.message);
     } finally {
@@ -94,6 +96,23 @@ export default function PluginStorePage () {
 
     return categories;
   }, [plugins, searchQuery]);
+
+  // 获取插件的安装状态和已安装版本
+  const getPluginInstallInfo = (plugin: PluginStoreItem): { status: InstallStatus; installedVersion?: string; } => {
+    // 通过 id (包名) 或 name 匹配已安装的插件
+    const installed = installedPlugins.find(p => p.id === plugin.id);
+
+    if (!installed) {
+      return { status: 'not-installed' };
+    }
+
+    // 使用不等于判断：版本不同就显示更新
+    if (installed.version !== plugin.version) {
+      return { status: 'update-available', installedVersion: installed.version };
+    }
+
+    return { status: 'installed', installedVersion: installed.version };
+  };
 
   const tabs = useMemo(() => {
     return [
@@ -293,13 +312,18 @@ export default function PluginStorePage () {
             >
               <EmptySection isEmpty={!categorizedPlugins[tab.key]?.length} />
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 justify-start items-stretch gap-x-2 gap-y-4">
-                {categorizedPlugins[tab.key]?.map((plugin) => (
-                  <PluginStoreCard
-                    key={plugin.id}
-                    data={plugin}
-                    onInstall={() => handleInstall(plugin)}
-                  />
-                ))}
+                {categorizedPlugins[tab.key]?.map((plugin) => {
+                  const installInfo = getPluginInstallInfo(plugin);
+                  return (
+                    <PluginStoreCard
+                      key={plugin.id}
+                      data={plugin}
+                      installStatus={installInfo.status}
+                      installedVersion={installInfo.installedVersion}
+                      onInstall={() => handleInstall(plugin)}
+                    />
+                  );
+                })}
               </div>
             </Tab>
           ))}

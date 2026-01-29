@@ -17,7 +17,7 @@ export default function PluginPage () {
   const dialog = useDialog();
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const [currentPluginName, setCurrentPluginName] = useState<string>('');
+  const [currentPluginId, setCurrentPluginId] = useState<string>('');
 
   const loadPlugins = async () => {
     setLoading(true);
@@ -49,7 +49,7 @@ export default function PluginPage () {
     const actionText = isEnable ? '启用' : '禁用';
     const loadingToast = toast.loading(`${actionText}中...`);
     try {
-      await PluginManager.setPluginStatus(plugin.name, isEnable, plugin.filename);
+      await PluginManager.setPluginStatus(plugin.id, isEnable);
       toast.success(`${actionText}成功`, { id: loadingToast });
       loadPlugins();
     } catch (e: any) {
@@ -85,7 +85,7 @@ export default function PluginPage () {
 
           const loadingToast = toast.loading('卸载中...');
           try {
-            await PluginManager.uninstallPlugin(plugin.name, plugin.filename, cleanData);
+            await PluginManager.uninstallPlugin(plugin.id, cleanData);
             toast.success('卸载成功', { id: loadingToast });
             loadPlugins();
             resolve();
@@ -102,7 +102,7 @@ export default function PluginPage () {
   };
 
   const handleConfig = (plugin: PluginItem) => {
-    setCurrentPluginName(plugin.name); // Use Loaded Name for config lookup
+    setCurrentPluginId(plugin.id);
     onOpen();
   };
 
@@ -114,7 +114,7 @@ export default function PluginPage () {
         <PluginConfigModal
           isOpen={isOpen}
           onOpenChange={onOpenChange}
-          pluginName={currentPluginName}
+          pluginId={currentPluginId}
         />
 
         <div className='flex mb-6 items-center gap-4'>
@@ -145,7 +145,7 @@ export default function PluginPage () {
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 justify-start items-stretch gap-x-2 gap-y-4'>
             {plugins.map(plugin => (
               <PluginDisplayCard
-                key={plugin.name}
+                key={plugin.id}
                 data={plugin}
                 onToggleStatus={() => handleToggle(plugin)}
                 onUninstall={() => handleUninstall(plugin)}

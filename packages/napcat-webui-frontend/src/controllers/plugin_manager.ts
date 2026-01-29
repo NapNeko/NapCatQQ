@@ -1,21 +1,34 @@
 import { serverRequest } from '@/utils/request';
 import { PluginStoreList, PluginStoreItem } from '@/types/plugin-store';
 
+/** 插件状态 */
+export type PluginStatus = 'active' | 'disabled' | 'stopped';
+
+/** 插件信息 */
 export interface PluginItem {
+  /** 显示名称 (优先 package.json 的 plugin 字段) */
   name: string;
+  /** 包名 (package name)，用于 API 操作 */
+  id: string;
+  /** 版本号 */
   version: string;
+  /** 描述 */
   description: string;
+  /** 作者 */
   author: string;
-  status: 'active' | 'disabled' | 'stopped';
-  filename?: string;
+  /** 状态: active-运行中, disabled-已禁用, stopped-已停止 */
+  status: PluginStatus;
+  /** 是否有配置项 */
   hasConfig?: boolean;
 }
 
+/** 插件列表响应 */
 export interface PluginListResponse {
   plugins: PluginItem[];
   pluginManagerNotFound: boolean;
 }
 
+/** 插件配置项定义 */
 export interface PluginConfigSchemaItem {
   key: string;
   type: 'string' | 'number' | 'boolean' | 'select' | 'multi-select' | 'html' | 'text';
@@ -26,19 +39,27 @@ export interface PluginConfigSchemaItem {
   placeholder?: string;
 }
 
+/** 插件配置响应 */
 export interface PluginConfigResponse {
   schema: PluginConfigSchemaItem[];
-  config: any;
+  config: Record<string, unknown>;
 }
 
+/** 服务端响应 */
 export interface ServerResponse<T> {
   code: number;
   message: string;
   data: T;
 }
 
+/**
+ * 插件管理器 API
+ */
 export default class PluginManager {
-  public static async getPluginList () {
+  /**
+   * 获取插件列表
+   */
+  public static async getPluginList (): Promise<PluginListResponse> {
     const { data } = await serverRequest.get<ServerResponse<PluginListResponse>>('/Plugin/List');
     return data.data;
   }
@@ -46,46 +67,80 @@ export default class PluginManager {
   /**
    * 手动注册插件管理器到 NetworkManager
    */
-  public static async registerPluginManager () {
+  public static async registerPluginManager (): Promise<{ message: string; }> {
     const { data } = await serverRequest.post<ServerResponse<{ message: string; }>>('/Plugin/RegisterManager');
     return data.data;
   }
 
-
-
-  public static async setPluginStatus (name: string, enable: boolean, filename?: string) {
-    await serverRequest.post<ServerResponse<void>>('/Plugin/SetStatus', { name, enable, filename });
+  /**
+   * 设置插件状态（启用/禁用）
+   * @param id 插件包名
+   * @param enable 是否启用
+   */
+  public static async setPluginStatus (id: string, enable: boolean): Promise<void> {
+    await serverRequest.post<ServerResponse<void>>('/Plugin/SetStatus', { id, enable });
   }
 
-  public static async uninstallPlugin (name: string, filename?: string, cleanData?: boolean) {
-    await serverRequest.post<ServerResponse<void>>('/Plugin/Uninstall', { name, filename, cleanData });
+  /**
+   * 卸载插件
+   * @param id 插件包名
+   * @param cleanData 是否清理数据
+   */
+  public static async uninstallPlugin (id: string, cleanData?: boolean): Promise<void> {
+    await serverRequest.post<ServerResponse<void>>('/Plugin/Uninstall', { id, cleanData });
   }
 
-  // 插件商店相关方法
-  public static async getPluginStoreList () {
+  // ==================== 插件商店 ====================
+
+  /**
+   * 获取插件商店列表
+   */
+  public static async getPluginStoreList (): Promise<PluginStoreList> {
     const { data } = await serverRequest.get<ServerResponse<PluginStoreList>>('/Plugin/Store/List');
     return data.data;
   }
 
-  public static async getPluginStoreDetail (id: string) {
+  /**
+   * 获取插件商店详情
+   * @param id 插件 ID
+   */
+  public static async getPluginStoreDetail (id: string): Promise<PluginStoreItem> {
     const { data } = await serverRequest.get<ServerResponse<PluginStoreItem>>(`/Plugin/Store/Detail/${id}`);
     return data.data;
   }
 
-  public static async installPluginFromStore (id: string, mirror?: string) {
-    // 插件安装可能需要较长时间（下载+解压），设置5分钟超时
-    await serverRequest.post<ServerResponse<void>>('/Plugin/Store/Install', { id, mirror }, {
-      timeout: 300000, // 5分钟
-    });
+  /**
+   * 从商店安装插件
+   * @param id 插件 ID
+   * @param mirror 镜像源
+   */
+  public static async installPluginFromStore (id: string, mirror?: string): Promise<void> {
+    await serverRequest.post<ServerResponse<void>>(
+      '/Plugin/Store/Install',
+      { id, mirror },
+      { timeout: 300000 } // 5分钟超时
+    );
   }
 
-  // 插件配置相关方法
-  public static async getPluginConfig (name: string) {
-    const { data } = await serverRequest.get<ServerResponse<PluginConfigResponse>>('/Plugin/Config', { params: { name } });
+  // ==================== 插件配置 ====================
+
+  /**
+   * 获取插件配置
+   * @param id 插件包名
+   */
+  public static async getPluginConfig (id: string): Promise<PluginConfigResponse> {
+    const { data } = await serverRequest.get<ServerResponse<PluginConfigResponse>>('/Plugin/Config', {
+      params: { id }
+    });
     return data.data;
   }
 
-  public static async setPluginConfig (name: string, config: any) {
-    await serverRequest.post<ServerResponse<void>>('/Plugin/Config', { name, config });
+  /**
+   * 设置插件配置
+   * @param id 插件包名
+   * @param config 配置内容
+   */
+  public static async setPluginConfig (id: string, config: Record<string, unknown>): Promise<void> {
+    await serverRequest.post<ServerResponse<void>>('/Plugin/Config', { id, config });
   }
 }

@@ -9,6 +9,7 @@ import path from 'path';
 
 export interface PluginPackageJson {
   name?: string;
+  plugin?: string;
   version?: string;
   main?: string;
 }
@@ -255,7 +256,7 @@ export class OB11PluginAdapter extends IOB11NetworkAdapter<PluginConfig> {
     this.logger.log(`[Plugin Adapter] Unloaded plugin: ${pluginName}`);
   }
 
-  async onEvent<T extends OB11EmitEventContent>(event: T) {
+  async onEvent<T extends OB11EmitEventContent> (event: T) {
     if (!this.isEnable) {
       return;
     }
@@ -357,7 +358,7 @@ export class OB11PluginAdapter extends IOB11NetworkAdapter<PluginConfig> {
 
       // 重新加载插件
       const isDirectory = fs.statSync(plugin.pluginPath).isDirectory() &&
-                plugin.pluginPath !== this.pluginPath;
+        plugin.pluginPath !== this.pluginPath;
 
       if (isDirectory) {
         const dirname = path.basename(plugin.pluginPath);

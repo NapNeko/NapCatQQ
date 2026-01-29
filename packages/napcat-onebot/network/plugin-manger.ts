@@ -9,6 +9,7 @@ import path from 'path';
 
 export interface PluginPackageJson {
   name?: string;
+  plugin?: string;
   version?: string;
   main?: string;
   description?: string;
@@ -106,7 +107,7 @@ export interface PluginModule<T extends OB11EmitEventContent = OB11EmitEventCont
 
 export interface LoadedPlugin {
   name: string;
-  dirname: string; // Actual directory name for path resolution
+  fileId: string; // 文件系统目录名，用于路径解析
   version?: string;
   pluginPath: string;
   entryPath: string;
@@ -122,14 +123,15 @@ export interface PluginStatusConfig {
 export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
   private readonly pluginPath: string;
   private readonly configPath: string;
-  private loadedPlugins: Map<string, LoadedPlugin> = new Map();
-  // Track failed plugins: ID -> Error Message
+  /** 插件注册表: 包名(id) -> 插件数据 */
+  private pluginRegistry: Map<string, LoadedPlugin> = new Map();
+  /** 失败的插件: ID -> 错误信息 */
   private failedPlugins: Map<string, string> = new Map();
   declare config: PluginConfig;
   public NapCatConfig = NapCatConfig;
 
   override get isActive (): boolean {
-    return this.isEnable && this.loadedPlugins.size > 0;
+    return this.isEnable && this.pluginRegistry.size > 0;
   }
 
   constructor (
@@ -192,9 +194,19 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
           continue;
         }
 
-        const pluginId = item.name;
+        // 先读取 package.json 获取包名(id)
+        const packageJsonPath = path.join(this.pluginPath, item.name, 'package.json');
+        let pluginId = item.name; // 默认使用目录名
+        if (fs.existsSync(packageJsonPath)) {
+          try {
+            const pkg = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+            if (pkg.name) {
+              pluginId = pkg.name;
+            }
+          } catch (e) { }
+        }
 
-        // Check if plugin is disabled in config
+        // Check if plugin is disabled in config (by id)
         if (pluginConfig[pluginId] === false) {
           this.logger.log(`[Plugin Adapter] Plugin ${pluginId} is disabled in config, skipping`);
           continue;
@@ -205,7 +217,7 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
       }
 
       this.logger.log(
-        `[Plugin Adapter] Loaded ${this.loadedPlugins.size} plugins`
+        `[Plugin Adapter] Loaded ${this.pluginRegistry.size} plugins`
       );
     } catch (error) {
       this.logger.logError('[Plugin Adapter] Error loading plugins:', error);
@@ -219,13 +231,6 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
    */
   public async loadDirectoryPlugin (dirname: string): Promise<void> {
     const pluginDir = path.join(this.pluginPath, dirname);
-    const pluginConfig = this.loadPluginConfig();
-    const pluginId = dirname; // Use directory name as unique ID
-
-    if (pluginConfig[pluginId] === false) {
-      this.logger.log(`[Plugin Adapter] Plugin ${pluginId} is disabled by user`);
-      return;
-    }
 
     try {
       // 尝试读取 package.json
@@ -242,6 +247,16 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
             error
           );
         }
+      }
+
+      // 获取插件 id（包名）
+      const pluginId = packageJson?.name || dirname;
+
+      // 检查插件是否被禁用 (by id)
+      const pluginConfig = this.loadPluginConfig();
+      if (pluginConfig[pluginId] === false) {
+        this.logger.log(`[Plugin Adapter] Plugin ${pluginId} is disabled by user`);
+        return;
       }
 
       // 确定入口文件
@@ -264,8 +279,8 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
       }
 
       const plugin: LoadedPlugin = {
-        name: packageJson?.name || pluginId, // Use package.json name for API lookups, fallback to dir name
-        dirname: pluginId, // Keep track of actual directory name for path resolution
+        name: pluginId, // 使用包名作为 id
+        fileId: dirname, // 保留目录名用于路径解析
         version: packageJson?.version,
         pluginPath: pluginDir,
         entryPath,
@@ -332,12 +347,9 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
   /**
    * 注册插件
    */
-  /**
-   * 注册插件
-   */
   private async registerPlugin (plugin: LoadedPlugin): Promise<void> {
     // 检查名称冲突
-    if (this.loadedPlugins.has(plugin.name)) {
+    if (this.pluginRegistry.has(plugin.name)) {
       this.logger.logWarn(
         `[Plugin Adapter] Plugin name conflict: ${plugin.name}, skipping...`
       );
@@ -345,8 +357,7 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
     }
 
     // Create Context
-    // Use dirname for path resolution, name for identification
-    const dataPath = path.join(this.pluginPath, plugin.dirname, 'data');
+    const dataPath = path.join(plugin.pluginPath, 'data');
     const configPath = path.join(dataPath, 'config.json');
 
     // Create plugin-specific logger with prefix
@@ -376,7 +387,9 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
 
     plugin.context = context; // Store context on plugin object
 
-    this.loadedPlugins.set(plugin.name, plugin);
+    // 注册到映射表
+    this.pluginRegistry.set(plugin.name, plugin);
+
     this.logger.log(
       `[Plugin Adapter] Registered plugin: ${plugin.name}${plugin.version ? ` v${plugin.version}` : ''
       }`
@@ -393,7 +406,7 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
       );
       // Mark as failed
       this.failedPlugins.set(plugin.name, error.message || 'Initialization failed');
-      this.loadedPlugins.delete(plugin.name);
+      this.pluginRegistry.delete(plugin.name);
     }
   }
 
@@ -401,7 +414,7 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
    * 卸载插件
    */
   private async unloadPlugin (pluginName: string): Promise<void> {
-    const plugin = this.loadedPlugins.get(pluginName);
+    const plugin = this.pluginRegistry.get(pluginName);
     if (!plugin) {
       return;
     }
@@ -419,7 +432,8 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
       }
     }
 
-    this.loadedPlugins.delete(pluginName);
+    // 从映射表中移除
+    this.pluginRegistry.delete(pluginName);
     this.logger.log(`[Plugin Adapter] Unloaded plugin: ${pluginName}`);
   }
 
@@ -435,19 +449,22 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
     return this.loadPluginConfig();
   }
 
-  public setPluginStatus (pluginName: string, enable: boolean): void {
-    // Try to find plugin by package name first
-    const plugin = this.loadedPlugins.get(pluginName);
-    // Use dirname for config storage (if plugin is loaded), otherwise assume pluginName is dirname
-    const configKey = plugin?.dirname || pluginName;
-
+  /**
+   * 设置插件状态（启用/禁用）
+   * @param pluginId 插件包名(id)
+   * @param enable 是否启用
+   */
+  public setPluginStatus (pluginId: string, enable: boolean): void {
     const config = this.loadPluginConfig();
-    config[configKey] = enable;
+    config[pluginId] = enable;
     this.savePluginConfig(config);
 
-    if (!enable && plugin) {
-      // Unload by plugin.name (package name, which is the key in loadedPlugins)
-      this.unloadPlugin(plugin.name).catch(e => this.logger.logError('Error unloading', e));
+    // 如果禁用且插件已加载，则卸载
+    if (!enable) {
+      const plugin = this.pluginRegistry.get(pluginId);
+      if (plugin) {
+        this.unloadPlugin(pluginId).catch(e => this.logger.logError('Error unloading', e));
+      }
     }
   }
 
@@ -458,7 +475,7 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
 
     try {
       await Promise.allSettled(
-        Array.from(this.loadedPlugins.values()).map((plugin) =>
+        Array.from(this.pluginRegistry.values()).map((plugin) =>
           this.callPluginEventHandler(plugin, event)
         )
       );
@@ -513,7 +530,7 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
     await this.loadPlugins();
 
     this.logger.log(
-      `[Plugin Adapter] Plugin adapter opened with ${this.loadedPlugins.size} plugins loaded`
+      `[Plugin Adapter] Plugin adapter opened with ${this.pluginRegistry.size} plugins loaded`
     );
   }
 
@@ -526,7 +543,7 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
     this.isEnable = false;
 
     // 卸载所有插件
-    const pluginNames = Array.from(this.loadedPlugins.keys());
+    const pluginNames = Array.from(this.pluginRegistry.keys());
     for (const pluginName of pluginNames) {
       await this.unloadPlugin(pluginName);
     }
@@ -549,55 +566,119 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
    * 获取已加载的插件列表
    */
   public getLoadedPlugins (): LoadedPlugin[] {
-    return Array.from(this.loadedPlugins.values());
+    return Array.from(this.pluginRegistry.values());
   }
 
   /**
-   * 获取插件信息
+   * 通过包名(id)获取插件信息
    */
-  public getPluginInfo (pluginName: string): LoadedPlugin | undefined {
-    return this.loadedPlugins.get(pluginName);
+  public getPluginInfo (pluginId: string): LoadedPlugin | undefined {
+    return this.pluginRegistry.get(pluginId);
+  }
+
+  /**
+   * 通过 id 加载插件
+   */
+  public async loadPluginById (id: string): Promise<boolean> {
+    // 扫描文件系统查找 fileId
+    if (!fs.existsSync(this.pluginPath)) {
+      this.logger.logWarn(`[Plugin Adapter] Plugin ${id} not found in filesystem`);
+      return false;
+    }
+
+    const items = fs.readdirSync(this.pluginPath, { withFileTypes: true });
+    for (const item of items) {
+      if (!item.isDirectory()) continue;
+
+      const packageJsonPath = path.join(this.pluginPath, item.name, 'package.json');
+      if (fs.existsSync(packageJsonPath)) {
+        try {
+          const pkg = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+          if (pkg.name === id) {
+            await this.loadDirectoryPlugin(item.name);
+            return this.pluginRegistry.has(id);
+          }
+        } catch (e) { }
+      }
+    }
+
+    this.logger.logWarn(`[Plugin Adapter] Plugin ${id} not found in filesystem`);
+    return false;
+  }
+
+  /**
+   * 卸载并删除插件
+   */
+  public async uninstallPlugin (id: string, cleanData: boolean = false): Promise<void> {
+    const plugin = this.pluginRegistry.get(id);
+    if (!plugin) {
+      throw new Error(`Plugin ${id} not found or not loaded`);
+    }
+
+    const pluginPath = plugin.context.pluginPath;
+    const dataPath = plugin.context.dataPath;
+
+    // 先卸载插件
+    await this.unloadPlugin(id);
+
+    // 删除插件目录
+    if (fs.existsSync(pluginPath)) {
+      fs.rmSync(pluginPath, { recursive: true, force: true });
+    }
+
+    // 清理数据
+    if (cleanData && fs.existsSync(dataPath)) {
+      fs.rmSync(dataPath, { recursive: true, force: true });
+    }
   }
 
   /**
    * 重载指定插件
    */
-  public async reloadPlugin (pluginName: string): Promise<boolean> {
-    const plugin = this.loadedPlugins.get(pluginName);
+  public async reloadPlugin (pluginId: string): Promise<boolean> {
+    const plugin = this.pluginRegistry.get(pluginId);
     if (!plugin) {
-      this.logger.logWarn(`[Plugin Adapter] Plugin ${pluginName} not found`);
+      this.logger.logWarn(`[Plugin Adapter] Plugin ${pluginId} not found`);
       return false;
     }
 
-    const dirname = plugin.dirname;
+    const dirname = path.basename(plugin.pluginPath);
 
     try {
       // 卸载插件
-      await this.unloadPlugin(pluginName);
+      await this.unloadPlugin(pluginId);
 
-      // 重新加载插件 - use dirname for directory loading
+      // 重新加载插件
       await this.loadDirectoryPlugin(dirname);
 
       this.logger.log(
-        `[Plugin Adapter] Plugin ${pluginName} reloaded successfully`
+        `[Plugin Adapter] Plugin ${pluginId} reloaded successfully`
       );
       return true;
     } catch (error) {
       this.logger.logError(
-        `[Plugin Adapter] Error reloading plugin ${pluginName}:`,
+        `[Plugin Adapter] Error reloading plugin ${pluginId}:`,
         error
       );
       return false;
     }
   }
-  public getPluginDataPath (pluginName: string): string {
-    // Lookup plugin by name (package name) and use dirname for path
-    const plugin = this.loadedPlugins.get(pluginName);
-    const dirname = plugin?.dirname || pluginName; // fallback to pluginName if not found
-    return path.join(this.pluginPath, dirname, 'data');
+
+  /**
+   * 获取插件数据目录路径
+   */
+  public getPluginDataPath (pluginId: string): string {
+    const plugin = this.pluginRegistry.get(pluginId);
+    if (!plugin) {
+      throw new Error(`Plugin ${pluginId} not found`);
+    }
+    return plugin.context.dataPath;
   }
 
-  public getPluginConfigPath (pluginName: string): string {
-    return path.join(this.getPluginDataPath(pluginName), 'config.json');
+  /**
+   * 获取插件配置文件路径
+   */
+  public getPluginConfigPath (pluginId: string): string {
+    return path.join(this.getPluginDataPath(pluginId), 'config.json');
   }
 }

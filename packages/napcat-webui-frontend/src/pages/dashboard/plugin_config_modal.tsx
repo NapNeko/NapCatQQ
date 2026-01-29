@@ -10,31 +10,32 @@ import PluginManager, { PluginConfigSchemaItem } from '@/controllers/plugin_mana
 interface Props {
   isOpen: boolean;
   onOpenChange: () => void;
-  pluginName: string;
+  /** 插件包名 (id) */
+  pluginId: string;
 }
 
-export default function PluginConfigModal ({ isOpen, onOpenChange, pluginName }: Props) {
+export default function PluginConfigModal ({ isOpen, onOpenChange, pluginId }: Props) {
   const [loading, setLoading] = useState(false);
   const [schema, setSchema] = useState<PluginConfigSchemaItem[]>([]);
-  const [config, setConfig] = useState<any>({});
+  const [config, setConfig] = useState<Record<string, unknown>>({});
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (isOpen && pluginName) {
+    if (isOpen && pluginId) {
       loadConfig();
     }
-  }, [isOpen, pluginName]);
+  }, [isOpen, pluginId]);
 
   const loadConfig = async () => {
     setLoading(true);
     setSchema([]);
     setConfig({});
     try {
-      const data = await PluginManager.getPluginConfig(pluginName);
+      const data = await PluginManager.getPluginConfig(pluginId);
       setSchema(data.schema || []);
       setConfig(data.config || {});
     } catch (e: any) {
-      toast.error('Load config failed: ' + e.message);
+      toast.error('加载配置失败: ' + e.message);
     } finally {
       setLoading(false);
     }
@@ -43,7 +44,7 @@ export default function PluginConfigModal ({ isOpen, onOpenChange, pluginName }:
   const handleSave = async () => {
     setSaving(true);
     try {
-      await PluginManager.setPluginConfig(pluginName, config);
+      await PluginManager.setPluginConfig(pluginId, config);
       toast.success('Configuration saved');
       onOpenChange();
     } catch (e: any) {
@@ -177,7 +178,7 @@ export default function PluginConfigModal ({ isOpen, onOpenChange, pluginName }:
         {(onClose) => (
           <>
             <ModalHeader className="flex flex-col gap-1">
-              Configuration: {pluginName}
+              插件配置: {pluginId}
             </ModalHeader>
             <ModalBody>
               {loading ? (

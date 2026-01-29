@@ -64,32 +64,18 @@ export const GetPluginListHandler: RequestHandler = async (_req, res) => {
     return sendSuccess(res, { plugins: [], pluginManagerNotFound: true });
   }
 
-  // 辅助函数：根据文件名/路径生成唯一ID（作为配置键）
-  const getPluginId = (fsName: string, isFile: boolean): string => {
-    if (isFile) {
-      return path.parse(fsName).name;
-    }
-    return fsName;
-  };
-
   const loadedPlugins = pluginManager.getLoadedPlugins();
-  const loadedPluginMap = new Map<string, any>(); // Map ID -> Loaded Info
+  const loadedPluginMap = new Map<string, any>(); // Map id -> Loaded Info
 
   // 1. 整理已加载的插件
   for (const p of loadedPlugins) {
-    // Use dirname for map key (matches filesystem scan)
-    const id = p.dirname;
-    const fsName = p.dirname; // dirname is the actual filesystem directory name
-
-    loadedPluginMap.set(id, {
-      name: p.name, // This is now package name (from packageJson.name || dirname)
-      id: id,
+    loadedPluginMap.set(p.name, {
+      name: p.packageJson?.plugin || p.name, // 优先显示 package.json 的 plugin 字段
+      id: p.name, // 包名，用于 API 操作
       version: p.version || '0.0.0',
       description: p.packageJson?.description || '',
       author: p.packageJson?.author || '',
       status: 'active',
-      filename: fsName, // 真实文件/目录名
-      loadedName: p.name, // 运行时注册的名称，用于重载/卸载 (package name)
       hasConfig: !!(p.module.plugin_config_schema || p.module.plugin_config_ui)
     });
   }
@@ -103,15 +89,25 @@ export const GetPluginListHandler: RequestHandler = async (_req, res) => {
     const items = fs.readdirSync(pluginPath, { withFileTypes: true });
 
     for (const item of items) {
-      let id = '';
+      if (!item.isDirectory()) continue;
 
-      if (item.isFile()) {
-        if (!['.js', '.mjs'].includes(path.extname(item.name))) continue;
-        id = getPluginId(item.name, true);
-      } else if (item.isDirectory()) {
-        id = getPluginId(item.name, false);
-      } else {
-        continue;
+      // 读取 package.json 获取插件信息
+      let id = item.name;
+      let name = item.name;
+      let version = '0.0.0';
+      let description = '';
+      let author = '';
+
+      const packageJsonPath = path.join(pluginPath, item.name, 'package.json');
+      if (fs.existsSync(packageJsonPath)) {
+        try {
+          const pkg = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+          id = pkg.name || id;
+          name = pkg.plugin || pkg.name || name;
+          version = pkg.version || version;
+          description = pkg.description || description;
+          author = pkg.author || author;
+        } catch (e) { }
       }
 
       const isActiveConfig = pluginConfig[id] !== false; // 默认为 true
@@ -121,37 +117,14 @@ export const GetPluginListHandler: RequestHandler = async (_req, res) => {
         const loadedInfo = loadedPluginMap.get(id);
         allPlugins.push(loadedInfo);
       } else {
-        // 未加载 (可能是被禁用，或者加载失败，或者新增未运行)
-        let version = '0.0.0';
-        let description = '';
-        let author = '';
-        // 默认显示名称为 ID (文件名/目录名)
-        let name = id;
-
-        try {
-          // 尝试读取 package.json 获取信息
-          if (item.isDirectory()) {
-            const packageJsonPath = path.join(pluginPath, item.name, 'package.json');
-            if (fs.existsSync(packageJsonPath)) {
-              const pkg = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-              version = pkg.version || version;
-              description = pkg.description || description;
-              author = pkg.author || author;
-              // 如果 package.json 有 name，优先使用
-              name = pkg.name || name;
-            }
-          }
-        } catch (e) { }
-
         allPlugins.push({
-          name: name,
-          id: id,
+          name,
+          id,
           version,
           description,
           author,
           // 如果配置是 false，则为 disabled；否则是 stopped (应启动但未启动)
-          status: isActiveConfig ? 'stopped' : 'disabled',
-          filename: item.name
+          status: isActiveConfig ? 'stopped' : 'disabled'
         });
       }
     }
@@ -160,43 +133,27 @@ export const GetPluginListHandler: RequestHandler = async (_req, res) => {
   return sendSuccess(res, { plugins: allPlugins, pluginManagerNotFound: false });
 };
 
-// ReloadPluginHandler removed
-
 export const SetPluginStatusHandler: RequestHandler = async (req, res) => {
-  const { enable, filename, name } = req.body;
-  // filename is the directory name (used for fs checks)
-  // name is the package name (used for plugin manager API, if provided)
-  // We need to determine: which to use for setPluginStatus call
+  const { enable, id } = req.body;
 
-  if (!filename && !name) return sendError(res, 'Plugin Filename or Name is required');
+  if (!id) return sendError(res, 'Plugin id is required');
 
   const pluginManager = getPluginManager();
   if (!pluginManager) {
     return sendError(res, 'Plugin Manager not found');
   }
 
-  // Determine which ID to use
-  // If 'name' (package name) is provided, use it for pluginManager calls
-  // But 'filename' (dirname) is needed for filesystem operations
-  const dirname = filename || name; // fallback
-  const pluginName = name || filename; // fallback
-
   try {
-    // setPluginStatus now handles both package name and dirname lookup internally
-    pluginManager.setPluginStatus(pluginName, enable);
+    // 设置插件状态
+    pluginManager.setPluginStatus(id, enable);
 
-    // If enabling, trigger load
+    // 如果启用，需要加载插件
     if (enable) {
-      const pluginPath = pluginManager.getPluginPath();
-      const fullPath = path.join(pluginPath, dirname);
-
-      if (fs.existsSync(fullPath) && fs.statSync(fullPath).isDirectory()) {
-        await pluginManager.loadDirectoryPlugin(dirname);
-      } else {
-        return sendError(res, 'Plugin directory not found: ' + dirname);
+      const loaded = await pluginManager.loadPluginById(id);
+      if (!loaded) {
+        return sendError(res, 'Plugin not found: ' + id);
       }
     }
-    // Disabling is handled by setPluginStatus
 
     return sendSuccess(res, { message: 'Status updated successfully' });
   } catch (e: any) {
@@ -205,47 +162,17 @@ export const SetPluginStatusHandler: RequestHandler = async (req, res) => {
 };
 
 export const UninstallPluginHandler: RequestHandler = async (req, res) => {
-  const { name, filename, cleanData } = req.body;
-  // If it's loaded, we use name. If it's disabled, we might use filename.
+  const { id, cleanData } = req.body;
+
+  if (!id) return sendError(res, 'Plugin id is required');
 
   const pluginManager = getPluginManager();
   if (!pluginManager) {
     return sendError(res, 'Plugin Manager not found');
   }
 
-  // Check if loaded
-  const plugin = pluginManager.getPluginInfo(name);
-  let fsPath = '';
-
-  if (plugin) {
-    // Active plugin
-    await pluginManager.unregisterPlugin(name);
-    if (plugin.pluginPath === pluginManager.getPluginPath()) {
-      fsPath = plugin.entryPath;
-    } else {
-      fsPath = plugin.pluginPath;
-    }
-  } else {
-    // Disabled or not loaded
-    if (filename) {
-      fsPath = path.join(pluginManager.getPluginPath(), filename);
-    } else {
-      return sendError(res, 'Plugin not found, provide filename if disabled');
-    }
-  }
-
   try {
-    if (fs.existsSync(fsPath)) {
-      fs.rmSync(fsPath, { recursive: true, force: true });
-    }
-
-    if (cleanData && name) {
-      const dataPath = pluginManager.getPluginDataPath(name);
-      if (fs.existsSync(dataPath)) {
-        fs.rmSync(dataPath, { recursive: true, force: true });
-      }
-    }
-
+    await pluginManager.uninstallPlugin(id, cleanData);
     return sendSuccess(res, { message: 'Uninstalled successfully' });
   } catch (e: any) {
     return sendError(res, 'Failed to uninstall: ' + e.message);
@@ -253,13 +180,13 @@ export const UninstallPluginHandler: RequestHandler = async (req, res) => {
 };
 
 export const GetPluginConfigHandler: RequestHandler = async (req, res) => {
-  const name = req.query['name'] as string;
-  if (!name) return sendError(res, 'Plugin Name is required');
+  const id = req.query['id'] as string;
+  if (!id) return sendError(res, 'Plugin id is required');
 
   const pluginManager = getPluginManager();
   if (!pluginManager) return sendError(res, 'Plugin Manager not found');
 
-  const plugin = pluginManager.getPluginInfo(name);
+  const plugin = pluginManager.getPluginInfo(id);
   if (!plugin) return sendError(res, 'Plugin not loaded');
 
   // Support legacy schema or new API
@@ -274,7 +201,7 @@ export const GetPluginConfigHandler: RequestHandler = async (req, res) => {
     // Default behavior: read from default config path
     try {
       // Use context configPath if available
-      const configPath = plugin.context?.configPath || pluginManager.getPluginConfigPath(name);
+      const configPath = plugin.context?.configPath || pluginManager.getPluginConfigPath(id);
       if (fs.existsSync(configPath)) {
         config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
       }
@@ -285,13 +212,13 @@ export const GetPluginConfigHandler: RequestHandler = async (req, res) => {
 };
 
 export const SetPluginConfigHandler: RequestHandler = async (req, res) => {
-  const { name, config } = req.body;
-  if (!name || !config) return sendError(res, 'Name and Config required');
+  const { id, config } = req.body;
+  if (!id || !config) return sendError(res, 'Plugin id and config required');
 
   const pluginManager = getPluginManager();
   if (!pluginManager) return sendError(res, 'Plugin Manager not found');
 
-  const plugin = pluginManager.getPluginInfo(name);
+  const plugin = pluginManager.getPluginInfo(id);
   if (!plugin) return sendError(res, 'Plugin not loaded');
 
   if (plugin.module.plugin_set_config) {
@@ -304,7 +231,7 @@ export const SetPluginConfigHandler: RequestHandler = async (req, res) => {
   } else if (plugin.module.plugin_config_schema || plugin.module.plugin_config_ui) {
     // Default behavior: write to default config path
     try {
-      const configPath = plugin.context?.configPath || pluginManager.getPluginConfigPath(name);
+      const configPath = plugin.context?.configPath || pluginManager.getPluginConfigPath(id);
 
       const configDir = path.dirname(configPath);
       if (!fs.existsSync(configDir)) {
@@ -313,7 +240,7 @@ export const SetPluginConfigHandler: RequestHandler = async (req, res) => {
       fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8');
 
       // Auto-Reload plugin to apply changes
-      await pluginManager.reloadPlugin(name);
+      await pluginManager.reloadPlugin(id);
 
       return sendSuccess(res, { message: 'Config saved and plugin reloaded' });
     } catch (e: any) {
