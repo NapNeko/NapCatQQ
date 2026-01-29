@@ -1,11 +1,10 @@
 {
-  "name": "napcat-framework",
+  "name": "napcat-adapter",
   "version": "0.0.1",
   "private": true,
   "type": "module",
   "main": "index.ts",
   "scripts": {
-    "build": "vite build",
     "typecheck": "tsc --noEmit --skipLibCheck -p tsconfig.json"
   },
   "exports": {
@@ -19,10 +18,8 @@
   "dependencies": {
     "napcat-core": "workspace:*",
     "napcat-common": "workspace:*",
-    "napcat-adapter": "workspace:*",
-    "napcat-webui-backend": "workspace:*",
-    "napcat-vite": "workspace:*",
-    "napcat-qrcode": "workspace:*"
+    "napcat-onebot": "workspace:*",
+    "napcat-protocol": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.0.1"

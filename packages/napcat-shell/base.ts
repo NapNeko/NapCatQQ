@@ -22,7 +22,7 @@ import fs from 'fs';
 import os from 'os';
 import { LoginListItem, NodeIKernelLoginService } from 'napcat-core/services';
 import qrcode from 'napcat-qrcode/lib/main';
-import { NapCatOneBot11Adapter } from 'napcat-onebot/index';
+import { NapCatAdapterManager } from 'napcat-adapter';
 import { InitWebUi } from 'napcat-webui-backend/index';
 import { WebUiDataRuntime } from 'napcat-webui-backend/src/helper/Data';
 import { napCatVersion } from 'napcat-common/src/version';
@@ -475,10 +475,14 @@ export class NapCatShell {
     this.core.event.on('KickedOffLine', (tips: string) => {
       WebUiDataRuntime.setQQLoginError(tips);
     });
-    const oneBotAdapter = new NapCatOneBot11Adapter(this.core, this.context, this.context.pathWrapper);
-    // 注册到 WebUiDataRuntime，供调试功能使用
-    WebUiDataRuntime.setOneBotContext(oneBotAdapter);
-    oneBotAdapter.InitOneBot()
-      .catch(e => this.context.logger.logError('初始化OneBot失败', e));
+    // 使用 NapCatAdapterManager 统一管理协议适配器
+    const adapterManager = new NapCatAdapterManager(this.core, this.context, this.context.pathWrapper);
+    await adapterManager.initAdapters()
+      .catch(e => this.context.logger.logError('初始化协议适配器失败', e));
+    // 注册 OneBot 适配器到 WebUiDataRuntime，供调试功能使用
+    const oneBotAdapter = adapterManager.getOneBotAdapter();
+    if (oneBotAdapter) {
+      WebUiDataRuntime.setOneBotContext(oneBotAdapter);
+    }
   }
 }

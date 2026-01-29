@@ -15,12 +15,7 @@ export default defineConfig({
   resolve: {
     conditions: ['node', 'default'],
     alias: {
-      '@/napcat-core': resolve(__dirname, '../napcat-core'),
-      '@/napcat-common': resolve(__dirname, '../napcat-common'),
-      '@/napcat-onebot': resolve(__dirname, '../napcat-onebot'),
-      '@/napcat-pty': resolve(__dirname, '../napcat-pty'),
-      '@/napcat-webui-backend': resolve(__dirname, '../napcat-webui-backend'),
-      '@/image-size': resolve(__dirname, '../image-size'),
+      '@/': resolve(__dirname, '../'),
     },
   },
   plugins: [

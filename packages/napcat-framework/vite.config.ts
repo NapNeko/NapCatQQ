@@ -50,6 +50,8 @@ const FrameworkBaseConfig = () =>
         '@/napcat-pty': resolve(__dirname, '../napcat-pty'),
         '@/napcat-webui-backend': resolve(__dirname, '../napcat-webui-backend'),
         '@/image-size': resolve(__dirname, '../image-size'),
+        '@/napcat-protocol': resolve(__dirname, '../napcat-protocol'),
+        '@/napcat-adapter': resolve(__dirname, '../napcat-adapter'),
       },
     },
     build: {

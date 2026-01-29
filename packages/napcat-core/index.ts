@@ -45,6 +45,7 @@ export * from './helper/log';
 export * from './helper/qq-basic-info';
 export * from './helper/event';
 export * from './helper/config';
+export * from './helper/config-base';
 export * from './helper/proxy-handler';
 export * from './helper/session-proxy';
 
