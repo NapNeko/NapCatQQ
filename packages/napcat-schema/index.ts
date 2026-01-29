@@ -105,7 +105,8 @@ export function generateOpenAPI () {
           retcode: 0,
           data: schemas.returnExample || {},
           message: '',
-          wording: ''
+          wording: '',
+          stream: 'normal-action'
         }
       }
     };
@@ -119,7 +120,8 @@ export function generateOpenAPI () {
             retcode: error.code,
             data: null,
             message: error.description,
-            wording: error.description
+            wording: error.description,
+            stream: 'normal-action'
           }
         };
       });
@@ -132,7 +134,8 @@ export function generateOpenAPI () {
           retcode: 1400,
           data: null,
           message: '请求参数错误或业务逻辑执行失败',
-          wording: '请求参数错误或业务逻辑执行失败'
+          wording: '请求参数错误或业务逻辑执行失败',
+          stream: 'normal-action'
         }
       };
     }
@@ -171,7 +174,8 @@ export function generateOpenAPI () {
                     retcode: { type: 'number', description: '返回码' },
                     data: { ...cleanReturn, description: '数据' },
                     message: { type: 'string', description: '消息' },
-                    wording: { type: 'string', description: '提示' }
+                    wording: { type: 'string', description: '提示' },
+                    stream: { type: 'string', description: '流式响应', enum: ['stream-action', 'normal-action'] }
                   },
                   required: ['status', 'retcode', 'data']
                 },
