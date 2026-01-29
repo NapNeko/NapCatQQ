@@ -24,23 +24,45 @@ export interface PluginConfigItem {
   default?: any;
   options?: { label: string; value: string | number; }[];
   placeholder?: string;
+  /** 标记此字段为响应式：值变化时触发 schema 刷新 */
+  reactive?: boolean;
+  /** 是否隐藏此字段 */
+  hidden?: boolean;
+}
+
+/** 插件配置 UI 控制器 - 用于动态控制配置界面 */
+export interface PluginConfigUIController {
+  /** 更新整个 schema */
+  updateSchema: (schema: PluginConfigSchema) => void;
+  /** 更新单个字段 */
+  updateField: (key: string, field: Partial<PluginConfigItem>) => void;
+  /** 移除字段 */
+  removeField: (key: string) => void;
+  /** 添加字段 */
+  addField: (field: PluginConfigItem, afterKey?: string) => void;
+  /** 显示字段 */
+  showField: (key: string) => void;
+  /** 隐藏字段 */
+  hideField: (key: string) => void;
+  /** 获取当前配置值 */
+  getCurrentConfig: () => Record<string, any>;
 }
 
 export class NapCatConfig {
-  static text (key: string, label: string, defaultValue?: string, description?: string): PluginConfigItem {
-    return { key, type: 'string', label, default: defaultValue, description };
+  static text (key: string, label: string, defaultValue?: string, description?: string, reactive?: boolean): PluginConfigItem {
+    return { key, type: 'string', label, default: defaultValue, description, reactive };
   }
-  static number (key: string, label: string, defaultValue?: number, description?: string): PluginConfigItem {
-    return { key, type: 'number', label, default: defaultValue, description };
+  static number (key: string, label: string, defaultValue?: number, description?: string, reactive?: boolean): PluginConfigItem {
+    return { key, type: 'number', label, default: defaultValue, description, reactive };
   }
-  static boolean (key: string, label: string, defaultValue?: boolean, description?: string): PluginConfigItem {
-    return { key, type: 'boolean', label, default: defaultValue, description };
+  static boolean (key: string, label: string, defaultValue?: boolean, description?: string, reactive?: boolean): PluginConfigItem {
+    return { key, type: 'boolean', label, default: defaultValue, description, reactive };
   }
-  static select (key: string, label: string, options: { label: string; value: string | number; }[], defaultValue?: string | number, description?: string): PluginConfigItem {
-    return { key, type: 'select', label, options, default: defaultValue, description };
+  static select (key: string, label: string, options: { label: string; value: string | number; }[], defaultValue?: string | number, description?: string, reactive?: boolean): PluginConfigItem {
+    return { key, type: 'select', label, options, default: defaultValue, description, reactive };
   }
-  static multiSelect (key: string, label: string, options: { label: string; value: string | number; }[], defaultValue?: (string | number)[], description?: string): PluginConfigItem {
-    return { key, type: 'multi-select', label, options, default: defaultValue, description };
+  static multiSelect (key: string, label: string, options: { label: string; value: string | number; }[], defaultValue?: (string | number)[], description?: string, reactive?: boolean): PluginConfigItem {
+    return { key, type: 'multi-select', label, options, default: defaultValue, description, reactive };
   }
   static html (content: string): PluginConfigItem {
     return { key: `_html_${Math.random().toString(36).slice(2)}`, type: 'html', label: '', default: content };
@@ -103,6 +125,25 @@ export interface PluginModule<T extends OB11EmitEventContent = OB11EmitEventCont
   plugin_config_ui?: PluginConfigSchema;
   plugin_get_config?: (ctx: NapCatPluginContext) => any | Promise<any>;
   plugin_set_config?: (ctx: NapCatPluginContext, config: any) => void | Promise<void>;
+  /** 
+   * 配置界面控制器 - 当配置界面打开时调用
+   * 返回清理函数，在界面关闭时调用
+   */
+  plugin_config_controller?: (
+    ctx: NapCatPluginContext,
+    ui: PluginConfigUIController,
+    initialConfig: Record<string, any>
+  ) => void | (() => void) | Promise<void | (() => void)>;
+  /**
+   * 响应式字段变化回调 - 当标记为 reactive 的字段值变化时调用
+   */
+  plugin_on_config_change?: (
+    ctx: NapCatPluginContext,
+    ui: PluginConfigUIController,
+    key: string,
+    value: any,
+    currentConfig: Record<string, any>
+  ) => void | Promise<void>;
 }
 
 export interface LoadedPlugin {
