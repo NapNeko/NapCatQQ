@@ -82,7 +82,6 @@ export const OneBotConfigSchema = Type.Object({
   musicSignUrl: Type.String({ default: '' }),
   enableLocalFile2Url: Type.Boolean({ default: false }),
   parseMultMsg: Type.Boolean({ default: false }),
-  imageDownloadProxy: Type.String({ default: '' }),
 });
 
 export type OneBotConfig = Static<typeof OneBotConfigSchema>;

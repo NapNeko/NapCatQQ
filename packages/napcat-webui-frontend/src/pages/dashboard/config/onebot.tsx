@@ -22,14 +22,12 @@ const OneBotConfigCard = () => {
       musicSignUrl: '',
       enableLocalFile2Url: false,
       parseMultMsg: false,
-      imageDownloadProxy: '',
     },
   });
   const reset = () => {
     setOnebotValue('musicSignUrl', config.musicSignUrl);
     setOnebotValue('enableLocalFile2Url', config.enableLocalFile2Url);
     setOnebotValue('parseMultMsg', config.parseMultMsg);
-    setOnebotValue('imageDownloadProxy', config.imageDownloadProxy);
   };
 
   const onSubmit = handleOnebotSubmit(async (data) => {
@@ -103,22 +101,6 @@ const OneBotConfigCard = () => {
             {...field}
             description='启用上报解析合并消息'
             label='启用上报解析合并消息'
-          />
-        )}
-      />
-      <Controller
-        control={control}
-        name='imageDownloadProxy'
-        render={({ field }) => (
-          <Input
-            {...field}
-            label='图片下载代理'
-            placeholder='请输入代理地址，如 http://127.0.0.1:7890'
-            classNames={{
-              inputWrapper:
-                'bg-default-100/50 dark:bg-white/5 backdrop-blur-md border border-transparent hover:bg-default-200/50 dark:hover:bg-white/10 transition-all shadow-sm data-[hover=true]:border-default-300',
-              input: 'bg-transparent text-default-700 placeholder:text-default-400',
-            }}
           />
         )}
       />
