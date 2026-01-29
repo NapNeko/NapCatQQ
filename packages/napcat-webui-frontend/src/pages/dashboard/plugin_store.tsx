@@ -1,18 +1,18 @@
 import { Button } from '@heroui/button';
 import { Input } from '@heroui/input';
-import { Select, SelectItem } from '@heroui/select';
 import { Tab, Tabs } from '@heroui/tabs';
+import { Card, CardBody } from '@heroui/card';
+import { Tooltip } from '@heroui/tooltip';
+import { Spinner } from '@heroui/spinner';
 import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
-import { IoMdRefresh, IoMdSearch } from 'react-icons/io';
+import { IoMdRefresh, IoMdSearch, IoMdSettings } from 'react-icons/io';
 import clsx from 'clsx';
-import { useRequest } from 'ahooks';
 import { EventSourcePolyfill } from 'event-source-polyfill';
 
-import PageLoading from '@/components/page_loading';
 import PluginStoreCard, { InstallStatus } from '@/components/display_card/plugin_store_card';
 import PluginManager, { PluginItem } from '@/controllers/plugin_manager';
-import WebUIManager from '@/controllers/webui_manager';
+import MirrorSelectorModal from '@/components/mirror_selector_modal';
 import { PluginStoreItem } from '@/types/plugin-store';
 import useDialog from '@/hooks/use-dialog';
 import key from '@/const/key';
@@ -42,12 +42,14 @@ export default function PluginStorePage () {
   const [pluginManagerNotFound, setPluginManagerNotFound] = useState(false);
   const dialog = useDialog();
 
-  // 获取镜像列表
-  const { data: mirrorsData } = useRequest(WebUIManager.getMirrors, {
-    cacheKey: 'napcat-mirrors',
-    staleTime: 60 * 60 * 1000,
-  });
-  const mirrors = mirrorsData?.mirrors || [];
+  // 商店列表源相关状态
+  const [storeSourceModalOpen, setStoreSourceModalOpen] = useState(false);
+  const [currentStoreSource, setCurrentStoreSource] = useState<string | undefined>(undefined);
+
+  // 下载镜像弹窗状态（安装时使用）
+  const [downloadMirrorModalOpen, setDownloadMirrorModalOpen] = useState(false);
+  const [pendingInstallPlugin, setPendingInstallPlugin] = useState<PluginStoreItem | null>(null);
+  const [selectedDownloadMirror, setSelectedDownloadMirror] = useState<string | undefined>(undefined);
 
   const loadPlugins = async () => {
     setLoading(true);
@@ -68,7 +70,7 @@ export default function PluginStorePage () {
 
   useEffect(() => {
     loadPlugins();
-  }, []);
+  }, [currentStoreSource]);
 
   // 按标签分类和搜索
   const categorizedPlugins = useMemo(() => {
@@ -125,60 +127,9 @@ export default function PluginStorePage () {
   }, [categorizedPlugins]);
 
   const handleInstall = async (plugin: PluginStoreItem) => {
-    // 检测是否是 GitHub 下载链接
-    const githubPattern = /^https:\/\/github\.com\//;
-    const isGitHubUrl = githubPattern.test(plugin.downloadUrl);
-
-    // 如果是 GitHub 链接，弹出镜像选择对话框
-    if (isGitHubUrl) {
-      let selectedMirror: string | undefined = undefined;
-
-      dialog.confirm({
-        title: '安装插件',
-        content: (
-          <div className="space-y-4">
-            <div>
-              <p className="text-sm mb-2">
-                插件名称: <span className="font-semibold">{plugin.name}</span>
-              </p>
-              <p className="text-sm mb-2">
-                版本: <span className="font-semibold">v{plugin.version}</span>
-              </p>
-              <p className="text-sm text-default-500 mb-4">
-                {plugin.description}
-              </p>
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">选择下载镜像源</label>
-              <Select
-                placeholder="自动选择 (默认)"
-                defaultSelectedKeys={['default']}
-                onSelectionChange={(keys) => {
-                  const m = Array.from(keys)[0] as string;
-                  selectedMirror = m === 'default' ? undefined : m;
-                }}
-                size="sm"
-                aria-label="选择镜像源"
-              >
-                {['default', ...mirrors].map(m => (
-                  <SelectItem key={m} textValue={m === 'default' ? '自动选择' : m}>
-                    {m === 'default' ? '自动选择 (默认)' : m}
-                  </SelectItem>
-                ))}
-              </Select>
-            </div>
-          </div>
-        ),
-        confirmText: '开始安装',
-        cancelText: '取消',
-        onConfirm: async () => {
-          await installPluginWithSSE(plugin.id, selectedMirror);
-        },
-      });
-    } else {
-      // 非 GitHub 链接，直接安装
-      await installPluginWithSSE(plugin.id);
-    }
+    // 弹窗选择下载镜像
+    setPendingInstallPlugin(plugin);
+    setDownloadMirrorModalOpen(true);
   };
 
   const installPluginWithSSE = async (pluginId: string, mirror?: string) => {
@@ -219,6 +170,8 @@ export default function PluginStorePage () {
           } else if (data.success) {
             toast.success('插件安装成功！', { id: loadingToast });
             eventSource.close();
+            // 刷新插件列表
+            loadPlugins();
             // 安装成功后检查插件管理器状态
             if (pluginManagerNotFound) {
               dialog.confirm({
@@ -264,23 +217,55 @@ export default function PluginStorePage () {
     }
   };
 
+  const getStoreSourceDisplayName = () => {
+    if (!currentStoreSource) return '默认源';
+    try {
+      return new URL(currentStoreSource).hostname;
+    } catch {
+      return currentStoreSource;
+    }
+  };
+
   return (
     <>
       <title>插件商店 - NapCat WebUI</title>
       <div className="p-2 md:p-4 relative">
-        <PageLoading loading={loading} />
-
         {/* 头部 */}
-        <div className="flex mb-6 items-center gap-4">
-          <h1 className="text-2xl font-bold">插件商店</h1>
-          <Button
-            isIconOnly
-            className="bg-default-100/50 hover:bg-default-200/50 text-default-700 backdrop-blur-md"
-            radius="full"
-            onPress={loadPlugins}
-          >
-            <IoMdRefresh size={24} />
-          </Button>
+        <div className="flex mb-6 items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-4">
+            <h1 className="text-2xl font-bold">插件商店</h1>
+            <Button
+              isIconOnly
+              className="bg-default-100/50 hover:bg-default-200/50 text-default-700 backdrop-blur-md"
+              radius="full"
+              onPress={loadPlugins}
+              isLoading={loading}
+            >
+              <IoMdRefresh size={24} />
+            </Button>
+          </div>
+
+          {/* 商店列表源卡片 */}
+          <Card className="bg-default-100/50 backdrop-blur-md shadow-sm">
+            <CardBody className="py-2 px-3">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-default-500">列表源:</span>
+                  <span className="text-sm font-medium">{getStoreSourceDisplayName()}</span>
+                </div>
+                <Tooltip content="切换列表源">
+                  <Button
+                    isIconOnly
+                    size="sm"
+                    variant="light"
+                    onPress={() => setStoreSourceModalOpen(true)}
+                  >
+                    <IoMdSettings size={16} />
+                  </Button>
+                </Tooltip>
+              </div>
+            </CardBody>
+          </Card>
         </div>
 
         {/* 搜索框 */}
@@ -295,40 +280,80 @@ export default function PluginStorePage () {
         </div>
 
         {/* 标签页 */}
-        <Tabs
-          aria-label="Plugin Store Categories"
-          className="max-w-full"
-          selectedKey={activeTab}
-          onSelectionChange={(key) => setActiveTab(String(key))}
-          classNames={{
-            tabList: 'bg-white/40 dark:bg-black/20 backdrop-blur-md',
-            cursor: 'bg-white/80 dark:bg-white/10 backdrop-blur-md shadow-sm',
-          }}
-        >
-          {tabs.map((tab) => (
-            <Tab
-              key={tab.key}
-              title={`${tab.title} (${tab.count})`}
-            >
-              <EmptySection isEmpty={!categorizedPlugins[tab.key]?.length} />
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 justify-start items-stretch gap-x-2 gap-y-4">
-                {categorizedPlugins[tab.key]?.map((plugin) => {
-                  const installInfo = getPluginInstallInfo(plugin);
-                  return (
-                    <PluginStoreCard
-                      key={plugin.id}
-                      data={plugin}
-                      installStatus={installInfo.status}
-                      installedVersion={installInfo.installedVersion}
-                      onInstall={() => handleInstall(plugin)}
-                    />
-                  );
-                })}
-              </div>
-            </Tab>
-          ))}
-        </Tabs>
+        <div className="relative">
+          {/* 加载遮罩 - 只遮住插件列表区域 */}
+          {loading && (
+            <div className="absolute inset-0 bg-zinc-500/10 z-30 flex justify-center items-center backdrop-blur-sm rounded-lg">
+              <Spinner size='lg' />
+            </div>
+          )}
+          
+          <Tabs
+            aria-label="Plugin Store Categories"
+            className="max-w-full"
+            selectedKey={activeTab}
+            onSelectionChange={(key) => setActiveTab(String(key))}
+            classNames={{
+              tabList: 'bg-white/40 dark:bg-black/20 backdrop-blur-md',
+              cursor: 'bg-white/80 dark:bg-white/10 backdrop-blur-md shadow-sm',
+            }}
+          >
+            {tabs.map((tab) => (
+              <Tab
+                key={tab.key}
+                title={`${tab.title} (${tab.count})`}
+              >
+                <EmptySection isEmpty={!categorizedPlugins[tab.key]?.length} />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 justify-start items-stretch gap-x-2 gap-y-4">
+                  {categorizedPlugins[tab.key]?.map((plugin) => {
+                    const installInfo = getPluginInstallInfo(plugin);
+                    return (
+                      <PluginStoreCard
+                        key={plugin.id}
+                        data={plugin}
+                        installStatus={installInfo.status}
+                        installedVersion={installInfo.installedVersion}
+                        onInstall={() => handleInstall(plugin)}
+                      />
+                    );
+                  })}
+                </div>
+              </Tab>
+            ))}
+          </Tabs>
+        </div>
       </div>
+
+      {/* 商店列表源选择弹窗 */}
+      <MirrorSelectorModal
+        isOpen={storeSourceModalOpen}
+        onClose={() => setStoreSourceModalOpen(false)}
+        onSelect={(mirror) => {
+          setCurrentStoreSource(mirror);
+        }}
+        currentMirror={currentStoreSource}
+        type="raw"
+      />
+
+      {/* 下载镜像选择弹窗 */}
+      <MirrorSelectorModal
+        isOpen={downloadMirrorModalOpen}
+        onClose={() => {
+          setDownloadMirrorModalOpen(false);
+          setPendingInstallPlugin(null);
+        }}
+        onSelect={(mirror) => {
+          setSelectedDownloadMirror(mirror);
+          // 选择后立即开始安装
+          if (pendingInstallPlugin) {
+            setDownloadMirrorModalOpen(false);
+            installPluginWithSSE(pendingInstallPlugin.id, mirror);
+            setPendingInstallPlugin(null);
+          }
+        }}
+        currentMirror={selectedDownloadMirror}
+        type="file"
+      />
     </>
   );
 }

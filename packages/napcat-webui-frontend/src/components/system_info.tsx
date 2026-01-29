@@ -8,18 +8,22 @@ import { Switch } from '@heroui/switch';
 import { Pagination } from '@heroui/pagination';
 import { Tabs, Tab } from '@heroui/tabs';
 import { Input } from '@heroui/input';
+import { Button } from '@heroui/button';
 import { useLocalStorage, useDebounce } from '@uidotdev/usehooks';
 import { useRequest } from 'ahooks';
 import clsx from 'clsx';
 import { FaCircleInfo, FaQq } from 'react-icons/fa6';
 import { IoLogoChrome, IoLogoOctocat, IoSearch } from 'react-icons/io5';
+import { IoMdFlash, IoMdCheckmark, IoMdSettings } from 'react-icons/io';
 import { RiMacFill } from 'react-icons/ri';
 import { useState, useCallback } from 'react';
 
 import key from '@/const/key';
 import WebUIManager from '@/controllers/webui_manager';
+import MirrorManager from '@/controllers/mirror_manager';
 import useDialog from '@/hooks/use-dialog';
 import Modal from '@/components/modal';
+import MirrorSelectorModal from '@/components/mirror_selector_modal';
 import { hasNewVersion, compareVersion } from '@/utils/version';
 
 
@@ -304,17 +308,54 @@ const VersionSelectDialogContent: React.FC<VersionSelectDialogProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebounce(searchQuery, 300);
 
+  // 镜像相关状态
   const [selectedMirror, setSelectedMirror] = useState<string | undefined>(undefined);
-  const { data: mirrorsData } = useRequest(WebUIManager.getMirrors, {
-    cacheKey: 'napcat-mirrors',
-    staleTime: 60 * 60 * 1000,
-  });
-  const mirrors = mirrorsData?.mirrors || [];
+  const [mirrorLatency, setMirrorLatency] = useState<number | null>(null);
+  const [mirrorTesting, setMirrorTesting] = useState(false);
+  const [mirrorModalOpen, setMirrorModalOpen] = useState(false);
 
-  const pageSize = 15;
+  // 测试当前镜像速度
+  const testCurrentMirror = async () => {
+    setMirrorTesting(true);
+    try {
+      const result = await MirrorManager.testSingleMirror(selectedMirror || '', 'file');
+      if (result.success) {
+        setMirrorLatency(result.latency);
+      } else {
+        setMirrorLatency(null);
+      }
+    } catch (e) {
+      setMirrorLatency(null);
+    } finally {
+      setMirrorTesting(false);
+    }
+  };
+
+  const formatLatency = (latency: number) => {
+    if (latency >= 5000) return '>5s';
+    if (latency >= 1000) return `${(latency / 1000).toFixed(1)}s`;
+    return `${latency}ms`;
+  };
+
+  const getLatencyColor = (latency: number | null): 'success' | 'warning' | 'danger' | 'default' => {
+    if (latency === null) return 'default';
+    if (latency < 300) return 'success';
+    if (latency < 1000) return 'warning';
+    return 'danger';
+  };
+
+  const getMirrorDisplayName = () => {
+    if (!selectedMirror) return '自动选择';
+    try {
+      return new URL(selectedMirror).hostname;
+    } catch {
+      return selectedMirror;
+    }
+  };
 
   // 获取所有可用版本（带分页、过滤和搜索）
   // 懒加载：根据 activeTab 只获取对应类型的版本
+  const pageSize = 15;
   const { data: releasesData, loading: releasesLoading, error: releasesError } = useRequest(
     () => WebUIManager.getAllReleases({
       page: currentPage,
@@ -502,46 +543,78 @@ const VersionSelectDialogContent: React.FC<VersionSelectDialogProps> = ({
         <Tab key='action' title='临时版本 (Action)' />
       </Tabs>
 
-      <div className="flex gap-2">
-        {/* 搜索框 */}
-        <Input
-          placeholder='搜索版本号...'
-          size='sm'
-          value={searchQuery}
-          onValueChange={(value) => {
-            setSearchQuery(value);
-            setCurrentPage(1);
-            setSelectedVersion(null);
-          }}
-          startContent={<IoSearch className='text-default-400' />}
-          isClearable
-          onClear={() => setSearchQuery('')}
-          classNames={{
-            inputWrapper: 'h-9',
-            base: 'flex-1'
-          }}
-        />
+      {/* 下载镜像状态卡片 */}
+      <Card className="bg-default-100/50 shadow-sm">
+        <CardBody className="py-2 px-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-default-500">镜像源:</span>
+              <span className="text-sm font-medium">{getMirrorDisplayName()}</span>
+              {mirrorLatency !== null && (
+                <Chip
+                  size="sm"
+                  color={getLatencyColor(mirrorLatency)}
+                  variant="flat"
+                  startContent={<IoMdCheckmark size={12} />}
+                >
+                  {formatLatency(mirrorLatency)}
+                </Chip>
+              )}
+              {mirrorLatency === null && !mirrorTesting && (
+                <Chip size="sm" color="default" variant="flat">
+                  未测试
+                </Chip>
+              )}
+              {mirrorTesting && (
+                <Chip size="sm" color="primary" variant="flat">
+                  测速中...
+                </Chip>
+              )}
+            </div>
+            <div className="flex items-center gap-1">
+              <Tooltip content="测速">
+                <Button
+                  isIconOnly
+                  size="sm"
+                  variant="light"
+                  onPress={testCurrentMirror}
+                  isLoading={mirrorTesting}
+                >
+                  <IoMdFlash size={16} />
+                </Button>
+              </Tooltip>
+              <Tooltip content="切换镜像">
+                <Button
+                  isIconOnly
+                  size="sm"
+                  variant="light"
+                  onPress={() => setMirrorModalOpen(true)}
+                >
+                  <IoMdSettings size={16} />
+                </Button>
+              </Tooltip>
+            </div>
+          </div>
+        </CardBody>
+      </Card>
 
-        {/* 镜像选择 */}
-        <Select
-          placeholder="自动选择 (默认)"
-          selectedKeys={selectedMirror ? [selectedMirror] : ['default']}
-          onSelectionChange={(keys) => {
-            const m = Array.from(keys)[0] as string;
-            setSelectedMirror(m === 'default' ? undefined : m);
-          }}
-          size="sm"
-          className="w-48"
-          classNames={{ trigger: 'h-9 min-h-9' }}
-          aria-label="选择镜像源"
-        >
-          {['default', ...mirrors].map(m => (
-            <SelectItem key={m} textValue={m === 'default' ? '自动选择' : m}>
-              {m === 'default' ? '自动选择 (默认)' : m}
-            </SelectItem>
-          ))}
-        </Select>
-      </div>
+      {/* 搜索框 */}
+      <Input
+        placeholder='搜索版本号...'
+        size='sm'
+        value={searchQuery}
+        onValueChange={(value) => {
+          setSearchQuery(value);
+          setCurrentPage(1);
+          setSelectedVersion(null);
+        }}
+        startContent={<IoSearch className='text-default-400' />}
+        isClearable
+        onClear={() => setSearchQuery('')}
+        classNames={{
+          inputWrapper: 'h-9',
+        }}
+      />
 
       {/* 版本选择 */}
       <div className='space-y-2'>
@@ -703,6 +776,18 @@ const VersionSelectDialogContent: React.FC<VersionSelectDialogProps> = ({
           {isSelectedDowngrade ? '确认降级更新' : '更新到此版本'}
         </button>
       </div>
+
+      {/* 镜像选择弹窗 */}
+      <MirrorSelectorModal
+        isOpen={mirrorModalOpen}
+        onClose={() => setMirrorModalOpen(false)}
+        currentMirror={selectedMirror}
+        onSelect={(mirror) => {
+          setSelectedMirror(mirror || undefined);
+          setMirrorLatency(null);
+        }}
+        type="file"
+      />
     </div>
   );
 };
