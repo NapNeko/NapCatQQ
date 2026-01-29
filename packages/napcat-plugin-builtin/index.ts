@@ -38,7 +38,7 @@ const plugin_init: PluginModule['plugin_init'] = async (ctx) => {
     ctx.NapCatConfig.text('prefix', 'Command Prefix', '#napcat', 'The prefix to trigger the version info command'),
     ctx.NapCatConfig.boolean('enableReply', 'Enable Reply', true, 'Switch to enable or disable the reply functionality'),
     // 代表监听 apiUrl 字段的变化
-    { ...ctx.NapCatConfig.text('apiUrl', 'API URL', '', 'Enter an API URL to load available endpoints'), reactive: true },
+    ctx.NapCatConfig.text('apiUrl', 'API URL', '', 'Enter an API URL to load available endpoints', true),
     ctx.NapCatConfig.select('theme', 'Theme Selection', [
       { label: 'Light Mode', value: 'light' },
       { label: 'Dark Mode', value: 'dark' },
