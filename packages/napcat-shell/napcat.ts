@@ -38,6 +38,11 @@ let isElectron = false;
 let isRestarting = false;
 let isShuttingDown = false;
 
+// 进程崩溃保护：记录最近的异常退出时间戳
+const recentCrashTimestamps: number[] = [];
+const CRASH_TIME_WINDOW = 10000; // 10秒时间窗口
+const MAX_CRASHES_IN_WINDOW = 3; // 最大崩溃次数
+
 /**
  * 获取进程类型名称（用于日志）
  */
@@ -217,7 +222,23 @@ async function startWorker (passQuickLogin: boolean = true, secretKey?: string, 
     }
     // 如果不是由于主动重启或关闭引起的退出，尝试自动重新拉起
     if (!isRestarting && !isShuttingDown) {
-      logger.logWarn(`[NapCat] [${processType}] Worker进程意外退出，正在尝试重新拉起...`);
+      const now = Date.now();
+      
+      // 清理超出时间窗口的崩溃记录
+      while (recentCrashTimestamps.length > 0 && now - recentCrashTimestamps[0]! > CRASH_TIME_WINDOW) {
+        recentCrashTimestamps.shift();
+      }
+      
+      // 记录本次崩溃
+      recentCrashTimestamps.push(now);
+      
+      // 检查是否超过崩溃阈值
+      if (recentCrashTimestamps.length >= MAX_CRASHES_IN_WINDOW) {
+        logger.logError(`[NapCat] [${processType}] Worker进程在 ${CRASH_TIME_WINDOW / 1000} 秒内异常退出 ${MAX_CRASHES_IN_WINDOW} 次，主进程退出`);
+        process.exit(1);
+      }
+      
+      logger.logWarn(`[NapCat] [${processType}] Worker进程意外退出 (${recentCrashTimestamps.length}/${MAX_CRASHES_IN_WINDOW})，正在尝试重新拉起...`);
       startWorker(true).catch(e => {
         logger.logError(`[NapCat] [${processType}] 重新拉起Worker进程失败:`, e);
       });
