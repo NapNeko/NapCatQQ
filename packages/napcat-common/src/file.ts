@@ -7,6 +7,7 @@ import { solveProblem } from '@/napcat-common/src/helper';
 export interface HttpDownloadOptions {
   url: string;
   headers?: Record<string, string> | string;
+  proxy?: string;
 }
 
 type Uri2LocalRes = {
@@ -96,6 +97,7 @@ export function calculateFileMD5 (filePath: string): Promise<string> {
 
 async function tryDownload (options: string | HttpDownloadOptions, useReferer: boolean = false): Promise<Response> {
   let url: string;
+  let proxy: string | undefined;
   let headers: Record<string, string> = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.71 Safari/537.36',
   };
@@ -104,6 +106,7 @@ async function tryDownload (options: string | HttpDownloadOptions, useReferer: b
     headers['Host'] = new URL(url).hostname;
   } else {
     url = options.url;
+    proxy = options.proxy;
     if (options.headers) {
       if (typeof options.headers === 'string') {
         headers = JSON.parse(options.headers);
@@ -115,6 +118,25 @@ async function tryDownload (options: string | HttpDownloadOptions, useReferer: b
   if (useReferer && !headers['Referer']) {
     headers['Referer'] = url;
   }
+
+  // 如果配置了代理，使用代理下载
+  if (proxy) {
+    try {
+      // Node.js 18+ 内置 undici，使用动态导入
+      const undici = await import('undici');
+      const dispatcher = new undici.ProxyAgent(proxy);
+      const response = await undici.fetch(url, {
+        headers,
+        redirect: 'follow',
+        dispatcher,
+      });
+      return response as unknown as Response;
+    } catch (proxyError) {
+      // 如果代理失败，记录错误并尝试直接下载
+      console.error('代理下载失败，尝试直接下载:', proxyError);
+    }
+  }
+
   const fetchRes = await fetch(url, { headers, redirect: 'follow' }).catch((err) => {
     if (err.cause) {
       throw err.cause;
@@ -176,7 +198,7 @@ export async function checkUriType (Uri: string) {
   return { Uri, Type: FileUriType.Unknown };
 }
 
-export async function uriToLocalFile (dir: string, uri: string, filename: string = randomUUID(), headers?: Record<string, string>): Promise<Uri2LocalRes> {
+export async function uriToLocalFile (dir: string, uri: string, filename: string = randomUUID(), headers?: Record<string, string>, proxy?: string): Promise<Uri2LocalRes> {
   const { Uri: HandledUri, Type: UriType } = await checkUriType(uri);
 
   const filePath = path.join(dir, filename);
@@ -191,7 +213,7 @@ export async function uriToLocalFile (dir: string, uri: string, filename: string
     }
 
     case FileUriType.Remote: {
-      const buffer = await httpDownload({ url: HandledUri, headers: headers ?? {} });
+      const buffer = await httpDownload({ url: HandledUri, headers: headers ?? {}, proxy });
       fs.writeFileSync(filePath, buffer);
       return { success: true, errMsg: '', fileName: filename, path: filePath };
     }
