@@ -63,14 +63,68 @@ const plugin_init: PluginModule['plugin_init'] = async (ctx) => {
     logger?.warn('Failed to load config', e);
   }
 
+  // ==================== 注册 WebUI 路由示例 ====================
+
+  // 注册静态资源目录（webui 目录下的文件可通过 /api/Plugin/ext/{pluginId}/static/ 访问）
+  ctx.router.static('/static', 'webui');
+
+  // 注册 API 路由
+  ctx.router.get('/status', (_req, res) => {
+    const uptime = Date.now() - startTime;
+    res.json({
+      code: 0,
+      data: {
+        pluginName: ctx.pluginName,
+        uptime,
+        uptimeFormatted: formatUptime(uptime),
+        config: currentConfig,
+        platform: process.platform,
+        arch: process.arch
+      }
+    });
+  });
+
+  ctx.router.get('/config', (_req, res) => {
+    res.json({
+      code: 0,
+      data: currentConfig
+    });
+  });
+
+  ctx.router.post('/config', (req, res) => {
+    try {
+      const newConfig = req.body as Partial<BuiltinPluginConfig>;
+      Object.assign(currentConfig, newConfig);
+      // 保存配置
+      const configDir = path.dirname(ctx.configPath);
+      if (!fs.existsSync(configDir)) {
+        fs.mkdirSync(configDir, { recursive: true });
+      }
+      fs.writeFileSync(ctx.configPath, JSON.stringify(currentConfig, null, 2), 'utf-8');
+      res.json({ code: 0, message: 'Config saved successfully' });
+    } catch (e: any) {
+      res.status(500).json({ code: -1, message: e.message });
+    }
+  });
+
+  // 注册扩展页面
+  ctx.router.page({
+    path: 'dashboard',
+    title: '插件仪表盘',
+    icon: '📊',
+    htmlFile: 'webui/dashboard.html',
+    description: '查看内置插件的运行状态和配置'
+  });
+
+  logger.info('WebUI 路由已注册: /api/Plugin/ext/' + ctx.pluginName);
 };
 
 export const plugin_get_config: PluginModule['plugin_get_config'] = async () => {
   return currentConfig;
 };
 
-export const plugin_set_config: PluginModule['plugin_set_config'] = async (ctx, config: BuiltinPluginConfig) => {
-  currentConfig = config;
+export const plugin_set_config: PluginModule['plugin_set_config'] = async (ctx, config) => {
+  currentConfig = config as BuiltinPluginConfig;
   if (ctx && ctx.configPath) {
     try {
       const configPath = ctx.configPath;

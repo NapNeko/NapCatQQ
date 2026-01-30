@@ -2,6 +2,7 @@ import { NapCatCore } from 'napcat-core';
 import { NapCatOneBot11Adapter, OB11Message } from '@/napcat-onebot/index';
 import { ActionMap } from '@/napcat-onebot/action';
 import { OB11EmitEventContent } from '@/napcat-onebot/network/index';
+import { NetworkAdapterConfig } from '@/napcat-onebot/config/config';
 
 // ==================== 插件包信息 ====================
 
@@ -49,11 +50,130 @@ export interface INapCatConfigStatic {
 /** NapCatConfig 类型（包含静态方法） */
 export type NapCatConfigClass = INapCatConfigStatic;
 
+// ==================== 插件路由相关类型（包装层，不直接依赖 express） ====================
+
+/** HTTP 请求对象（包装类型） */
+export interface PluginHttpRequest {
+  /** 请求路径 */
+  path: string;
+  /** 请求方法 */
+  method: string;
+  /** 查询参数 */
+  query: Record<string, string | string[] | undefined>;
+  /** 请求体 */
+  body: unknown;
+  /** 请求头 */
+  headers: Record<string, string | string[] | undefined>;
+  /** 路由参数 */
+  params: Record<string, string>;
+  /** 原始请求对象（用于高级用法） */
+  raw: unknown;
+}
+
+/** HTTP 响应对象（包装类型） */
+export interface PluginHttpResponse {
+  /** 设置状态码 */
+  status (code: number): PluginHttpResponse;
+  /** 发送 JSON 响应 */
+  json (data: unknown): void;
+  /** 发送文本响应 */
+  send (data: string | Buffer): void;
+  /** 设置响应头 */
+  setHeader (name: string, value: string): PluginHttpResponse;
+  /** 发送文件 */
+  sendFile (filePath: string): void;
+  /** 重定向 */
+  redirect (url: string): void;
+  /** 原始响应对象（用于高级用法） */
+  raw: unknown;
+}
+
+/** 下一步函数类型 */
+export type PluginNextFunction = (err?: unknown) => void;
+
+/** 插件请求处理器类型 */
+export type PluginRequestHandler = (
+  req: PluginHttpRequest,
+  res: PluginHttpResponse,
+  next: PluginNextFunction
+) => void | Promise<void>;
+
+/** HTTP 方法类型 */
+export type HttpMethod = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'all';
+
+/** 插件 API 路由定义 */
+export interface PluginApiRouteDefinition {
+  /** HTTP 方法 */
+  method: HttpMethod;
+  /** 路由路径（相对于插件路由前缀） */
+  path: string;
+  /** 请求处理器 */
+  handler: PluginRequestHandler;
+}
+
+/** 插件页面定义 */
+export interface PluginPageDefinition {
+  /** 页面路径（用于路由，如 'settings'） */
+  path: string;
+  /** 页面标题（显示在 Tab 上） */
+  title: string;
+  /** 页面图标（可选，支持 emoji 或图标名） */
+  icon?: string;
+  /** 页面 HTML 文件路径（相对于插件目录） */
+  htmlFile: string;
+  /** 页面描述 */
+  description?: string;
+}
+
+/** 插件路由注册器 */
+export interface PluginRouterRegistry {
+  // ==================== API 路由注册 ====================
+
+  /** 
+   * 注册单个 API 路由
+   * @param method HTTP 方法
+   * @param path 路由路径
+   * @param handler 请求处理器
+   */
+  api (method: HttpMethod, path: string, handler: PluginRequestHandler): void;
+  /** 注册 GET API */
+  get (path: string, handler: PluginRequestHandler): void;
+  /** 注册 POST API */
+  post (path: string, handler: PluginRequestHandler): void;
+  /** 注册 PUT API */
+  put (path: string, handler: PluginRequestHandler): void;
+  /** 注册 DELETE API */
+  delete (path: string, handler: PluginRequestHandler): void;
+
+  // ==================== 页面注册 ====================
+
+  /**
+   * 注册插件页面
+   * @param page 页面定义
+   */
+  page (page: PluginPageDefinition): void;
+
+  /**
+   * 注册多个插件页面
+   * @param pages 页面定义数组
+   */
+  pages (pages: PluginPageDefinition[]): void;
+
+  // ==================== 静态资源 ====================
+
+  /**
+   * 提供静态文件服务
+   * @param urlPath URL 路径
+   * @param localPath 本地文件夹路径（相对于插件目录或绝对路径）
+   */
+  static (urlPath: string, localPath: string): void;
+}
+
 // ==================== 插件管理器接口 ====================
 
 /** 插件管理器公共接口 */
 export interface IPluginManager {
-  readonly config: unknown;
+  readonly config: NetworkAdapterConfig;
   getPluginPath (): string;
   getPluginConfig (): PluginStatusConfig;
   getAllPlugins (): PluginEntry[];
@@ -124,11 +244,16 @@ export interface NapCatPluginContext {
   pluginManager: IPluginManager;
   /** 插件日志器 - 自动添加插件名称前缀 */
   logger: PluginLogger;
+  /** 
+   * WebUI 路由注册器
+   * 用于注册插件的 HTTP API 路由，路由将挂载到 /api/Plugin/ext/{pluginId}/
+   */
+  router: PluginRouterRegistry;
 }
 
 // ==================== 插件模块接口 ====================
 
-export interface PluginModule<T extends OB11EmitEventContent = OB11EmitEventContent> {
+export interface PluginModule<T extends OB11EmitEventContent = OB11EmitEventContent, C = unknown> {
   plugin_init: (ctx: NapCatPluginContext) => void | Promise<void>;
   plugin_onmessage?: (
     ctx: NapCatPluginContext,
@@ -143,8 +268,8 @@ export interface PluginModule<T extends OB11EmitEventContent = OB11EmitEventCont
   ) => void | Promise<void>;
   plugin_config_schema?: PluginConfigSchema;
   plugin_config_ui?: PluginConfigSchema;
-  plugin_get_config?: (ctx: NapCatPluginContext) => unknown | Promise<unknown>;
-  plugin_set_config?: (ctx: NapCatPluginContext, config: unknown) => void | Promise<void>;
+  plugin_get_config?: (ctx: NapCatPluginContext) => C | Promise<C>;
+  plugin_set_config?: (ctx: NapCatPluginContext, config: C) => void | Promise<void>;
   /** 
    * 配置界面控制器 - 当配置界面打开时调用
    * 返回清理函数，在界面关闭时调用

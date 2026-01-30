@@ -15,6 +15,7 @@ import {
   NapCatPluginContext,
   IPluginManager,
 } from './plugin/types';
+import { PluginRouterRegistryImpl } from './plugin/router-registry';
 
 export { PluginPackageJson } from './plugin/types';
 export { PluginConfigItem } from './plugin/types';
@@ -25,6 +26,9 @@ export { PluginLogger } from './plugin/types';
 export { NapCatPluginContext } from './plugin/types';
 export { PluginModule } from './plugin/types';
 export { PluginStatusConfig } from './plugin/types';
+export { PluginRouterRegistry, PluginRequestHandler, PluginApiRouteDefinition, PluginPageDefinition, HttpMethod } from './plugin/types';
+export { PluginHttpRequest, PluginHttpResponse, PluginNextFunction } from './plugin/types';
+export { PluginRouterRegistryImpl } from './plugin/router-registry';
 export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> implements IPluginManager {
   private readonly pluginPath: string;
   private readonly configPath: string;
@@ -32,6 +36,9 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> i
 
   /** 插件注册表: ID -> 插件条目 */
   private plugins: Map<string, PluginEntry> = new Map();
+
+  /** 插件路由注册表: ID -> 路由注册器 */
+  private pluginRouters: Map<string, PluginRouterRegistryImpl> = new Map();
 
   declare config: PluginConfig;
   public NapCatConfig = NapCatConfig;
@@ -165,6 +172,13 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> i
       }
     }
 
+    // 清理插件路由
+    const routerRegistry = this.pluginRouters.get(entry.id);
+    if (routerRegistry) {
+      routerRegistry.clear();
+      this.pluginRouters.delete(entry.id);
+    }
+
     // 重置状态
     entry.loaded = false;
     entry.runtime = {
@@ -192,6 +206,11 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> i
       error: (...args: any[]) => coreLogger.logError(pluginPrefix, ...args),
     };
 
+    // 创建插件路由注册器
+    const routerRegistry = new PluginRouterRegistryImpl(entry.id, entry.pluginPath);
+    // 保存到路由注册表
+    this.pluginRouters.set(entry.id, routerRegistry);
+
     return {
       core: this.core,
       oneBot: this.obContext,
@@ -204,6 +223,7 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> i
       adapterName: this.name,
       pluginManager: this,
       logger: pluginLogger,
+      router: routerRegistry,
     };
   }
 
@@ -235,6 +255,20 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> i
    */
   public getPluginInfo (pluginId: string): PluginEntry | undefined {
     return this.plugins.get(pluginId);
+  }
+
+  /**
+   * 获取插件路由注册器
+   */
+  public getPluginRouter (pluginId: string): PluginRouterRegistryImpl | undefined {
+    return this.pluginRouters.get(pluginId);
+  }
+
+  /**
+   * 获取所有插件路由注册器
+   */
+  public getAllPluginRouters (): Map<string, PluginRouterRegistryImpl> {
+    return this.pluginRouters;
   }
 
   /**

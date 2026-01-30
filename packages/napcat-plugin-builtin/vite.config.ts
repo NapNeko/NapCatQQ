@@ -14,8 +14,10 @@ function copyToShellPlugin () {
     writeBundle () {
       try {
         const sourceDir = resolve(__dirname, 'dist');
-        const targetDir = resolve(__dirname, '../napcat-shell/dist/plugins/builtin');
+        const targetDir = resolve(__dirname, '../napcat-shell/dist/plugins/napcat-plugin-builtin');
         const packageJsonSource = resolve(__dirname, 'package.json');
+        const webuiSourceDir = resolve(__dirname, 'webui');
+        const webuiTargetDir = resolve(targetDir, 'webui');
 
         // 确保目标目录存在
         if (!fs.existsSync(targetDir)) {
@@ -44,6 +46,12 @@ function copyToShellPlugin () {
           copiedCount++;
         }
 
+        // 拷贝 webui 目录
+        if (fs.existsSync(webuiSourceDir)) {
+          copyDirRecursive(webuiSourceDir, webuiTargetDir);
+          console.log(`[copy-to-shell] Copied webui directory to ${webuiTargetDir}`);
+        }
+
         console.log(`[copy-to-shell] Successfully copied ${copiedCount} file(s) to ${targetDir}`);
       } catch (error) {
         console.error('[copy-to-shell] Failed to copy files:', error);
@@ -51,6 +59,26 @@ function copyToShellPlugin () {
       }
     },
   };
+}
+
+// 递归复制目录
+function copyDirRecursive (src: string, dest: string) {
+  if (!fs.existsSync(dest)) {
+    fs.mkdirSync(dest, { recursive: true });
+  }
+
+  const entries = fs.readdirSync(src, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const srcPath = resolve(src, entry.name);
+    const destPath = resolve(dest, entry.name);
+
+    if (entry.isDirectory()) {
+      copyDirRecursive(srcPath, destPath);
+    } else {
+      fs.copyFileSync(srcPath, destPath);
+    }
+  }
 }
 
 export default defineConfig({

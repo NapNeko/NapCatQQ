@@ -20,12 +20,31 @@ export interface PluginItem {
   status: PluginStatus;
   /** 是否有配置项 */
   hasConfig?: boolean;
+  /** 是否有扩展页面 */
+  hasPages?: boolean;
+}
+
+/** 扩展页面信息 */
+export interface ExtensionPageItem {
+  /** 插件 ID */
+  pluginId: string;
+  /** 插件名称 */
+  pluginName: string;
+  /** 页面路径 */
+  path: string;
+  /** 页面标题 */
+  title: string;
+  /** 页面图标 */
+  icon?: string;
+  /** 页面描述 */
+  description?: string;
 }
 
 /** 插件列表响应 */
 export interface PluginListResponse {
   plugins: PluginItem[];
   pluginManagerNotFound: boolean;
+  extensionPages: ExtensionPageItem[];
 }
 
 /** 插件配置项定义 */
