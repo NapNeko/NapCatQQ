@@ -1,7 +1,9 @@
 import { RequestHandler } from 'express';
-import { WebUiConfig } from '@/napcat-webui-backend/index';
+import { WebUiConfig, webUiPathWrapper } from '@/napcat-webui-backend/index';
 import { sendError, sendSuccess } from '@/napcat-webui-backend/src/utils/response';
 import { isEmpty } from '@/napcat-webui-backend/src/utils/check';
+import { existsSync, promises as fsProm } from 'node:fs';
+import { join } from 'node:path';
 
 // 获取WebUI基础配置
 export const GetWebUIConfigHandler: RequestHandler = async (_, res) => {
@@ -156,5 +158,88 @@ export const UpdateWebUIConfigHandler: RequestHandler = async (req, res) => {
   } catch (error) {
     const msg = (error as Error).message;
     return sendError(res, `更新WebUI配置失败: ${msg}`);
+  }
+};
+
+// 获取SSL证书状态
+export const GetSSLStatusHandler: RequestHandler = async (_, res) => {
+  try {
+    const certPath = join(webUiPathWrapper.configPath, 'cert.pem');
+    const keyPath = join(webUiPathWrapper.configPath, 'key.pem');
+
+    const certExists = existsSync(certPath);
+    const keyExists = existsSync(keyPath);
+
+    let certContent = '';
+    let keyContent = '';
+
+    if (certExists) {
+      certContent = await fsProm.readFile(certPath, 'utf-8');
+    }
+    if (keyExists) {
+      keyContent = await fsProm.readFile(keyPath, 'utf-8');
+    }
+
+    return sendSuccess(res, {
+      enabled: certExists && keyExists,
+      certExists,
+      keyExists,
+      certContent,
+      keyContent,
+    });
+  } catch (error) {
+    const msg = (error as Error).message;
+    return sendError(res, `获取SSL状态失败: ${msg}`);
+  }
+};
+
+// 保存SSL证书（通过文本内容）
+export const UploadSSLCertHandler: RequestHandler = async (req, res) => {
+  try {
+    const { cert, key } = req.body;
+
+    if (isEmpty(cert) || isEmpty(key)) {
+      return sendError(res, 'cert和key内容不能为空');
+    }
+
+    // 简单验证证书格式
+    if (!cert.includes('-----BEGIN CERTIFICATE-----') || !cert.includes('-----END CERTIFICATE-----')) {
+      return sendError(res, 'cert格式不正确，应为PEM格式的证书');
+    }
+
+    if (!key.includes('-----BEGIN') || !key.includes('KEY-----')) {
+      return sendError(res, 'key格式不正确，应为PEM格式的私钥');
+    }
+
+    const certPath = join(webUiPathWrapper.configPath, 'cert.pem');
+    const keyPath = join(webUiPathWrapper.configPath, 'key.pem');
+
+    await fsProm.writeFile(certPath, cert, 'utf-8');
+    await fsProm.writeFile(keyPath, key, 'utf-8');
+
+    return sendSuccess(res, { message: 'SSL证书保存成功，重启后生效' });
+  } catch (error) {
+    const msg = (error as Error).message;
+    return sendError(res, `保存SSL证书失败: ${msg}`);
+  }
+};
+
+// 删除SSL证书
+export const DeleteSSLCertHandler: RequestHandler = async (_, res) => {
+  try {
+    const certPath = join(webUiPathWrapper.configPath, 'cert.pem');
+    const keyPath = join(webUiPathWrapper.configPath, 'key.pem');
+
+    if (existsSync(certPath)) {
+      await fsProm.unlink(certPath);
+    }
+    if (existsSync(keyPath)) {
+      await fsProm.unlink(keyPath);
+    }
+
+    return sendSuccess(res, { message: 'SSL证书已删除，重启后生效' });
+  } catch (error) {
+    const msg = (error as Error).message;
+    return sendError(res, `删除SSL证书失败: ${msg}`);
   }
 };

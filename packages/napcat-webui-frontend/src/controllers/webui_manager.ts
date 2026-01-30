@@ -281,6 +281,35 @@ export default class WebUIManager {
     return data.data;
   }
 
+  // 获取SSL证书状态
+  public static async getSSLStatus () {
+    const { data } = await serverRequest.get<ServerResponse<{
+      enabled: boolean;
+      certExists: boolean;
+      keyExists: boolean;
+      certContent: string;
+      keyContent: string;
+    }>>('/WebUIConfig/GetSSLStatus');
+    return data.data;
+  }
+
+  // 保存SSL证书
+  public static async saveSSLCert (cert: string, key: string) {
+    const { data } = await serverRequest.post<ServerResponse<{ message: string; }>>(
+      '/WebUIConfig/UploadSSLCert',
+      { cert, key }
+    );
+    return data.data;
+  }
+
+  // 删除SSL证书
+  public static async deleteSSLCert () {
+    const { data } = await serverRequest.post<ServerResponse<{ message: string; }>>(
+      '/WebUIConfig/DeleteSSLCert'
+    );
+    return data.data;
+  }
+
   // Passkey相关方法
   public static async generatePasskeyRegistrationOptions () {
     const { data } = await serverRequest.post<ServerResponse<any>>(
