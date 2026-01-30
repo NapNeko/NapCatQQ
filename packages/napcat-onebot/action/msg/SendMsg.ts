@@ -215,6 +215,7 @@ export class SendMsgBase extends OneBotAction<SendMsgPayload, ReturnDataType> {
     uuid?: string,
     packetMsg: PacketMsg[],
     deleteAfterSentFiles: string[],
+    innerPacketMsg?: Array<{ uuid: string, packetMsg: PacketMsg[]; }>;
   } | null> {
     const packetMsg: PacketMsg[] = [];
     const delFiles: string[] = [];
@@ -238,6 +239,9 @@ export class SendMsgBase extends OneBotAction<SendMsgPayload, ReturnDataType> {
           delFiles.push(...(uploadReturnData?.deleteAfterSentFiles || []));
           if (uploadReturnData?.uuid) {
             innerMsg.push({ uuid: uploadReturnData.uuid, packetMsg: uploadReturnData.packetMsg });
+            uploadReturnData.innerPacketMsg?.forEach(m => {
+              innerMsg.push({ uuid: m.uuid, packetMsg: m.packetMsg });
+            });
           }
 
         } else {
@@ -306,6 +310,7 @@ export class SendMsgBase extends OneBotAction<SendMsgPayload, ReturnDataType> {
       res_id: resid,
       uuid: uuid,
       packetMsg: packetMsg,
+      innerPacketMsg: innerMsg,
     };
   }
 
