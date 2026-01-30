@@ -6,26 +6,17 @@ import { NapCatOneBot11Adapter, OB11Message } from '@/napcat-onebot/index';
 import { OB11EmitEventContent, OB11NetworkReloadType } from '@/napcat-onebot/network/index';
 import { IOB11NetworkAdapter } from '@/napcat-onebot/network/adapter';
 import { PluginConfig } from '@/napcat-onebot/config/config';
-import { NapCatConfig } from './plugin/config';
-import { PluginLoader } from './plugin/loader';
+import { NapCatConfig } from './config';
+import { PluginLoader } from './loader';
 import {
   PluginEntry,
   PluginLogger,
   PluginStatusConfig,
   NapCatPluginContext,
   IPluginManager,
-} from './plugin/types';
+} from './types';
 
-export { PluginPackageJson } from './plugin/types';
-export { PluginConfigItem } from './plugin/types';
-export { PluginConfigUIController } from './plugin/types';
-export { NapCatConfig } from './plugin/config';
-export { PluginConfigSchema } from './plugin/types';
-export { PluginLogger } from './plugin/types';
-export { NapCatPluginContext } from './plugin/types';
-export { PluginModule } from './plugin/types';
-export { PluginStatusConfig } from './plugin/types';
-export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> implements IPluginManager {
+export class OB11PluginManager extends IOB11NetworkAdapter<PluginConfig> implements IPluginManager {
   private readonly pluginPath: string;
   private readonly configPath: string;
   private readonly loader: PluginLoader;
@@ -307,9 +298,8 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> i
     const pluginPath = entry.pluginPath;
     const dataPath = path.join(pluginPath, 'data');
 
-    if (entry.loaded) {
-      await this.unloadPlugin(entry);
-    }
+    // 先卸载插件
+    await this.unloadPlugin(entry);
 
     // 从注册表移除
     this.plugins.delete(pluginId);

@@ -6,6 +6,7 @@ import { OB11PluginMangerAdapter } from '@/napcat-onebot/network/plugin-manger';
 import { webUiPathWrapper } from '@/napcat-webui-backend/index';
 import path from 'path';
 import fs from 'fs';
+import compressing from 'compressing';
 
 // Helper to get the plugin manager adapter
 const getPluginManager = (): OB11PluginMangerAdapter | null => {
@@ -64,73 +65,42 @@ export const GetPluginListHandler: RequestHandler = async (_req, res) => {
     return sendSuccess(res, { plugins: [], pluginManagerNotFound: true });
   }
 
-  const loadedPlugins = pluginManager.getLoadedPlugins();
-  const loadedPluginMap = new Map<string, any>(); // Map id -> Loaded Info
+  const loadedPlugins = pluginManager.getAllPlugins();
+  const AllPlugins: Array<{
+    name: string;
+    id: string;
+    version: string;
+    description: string;
+    author: string;
+    status: string;
+    hasConfig: boolean;
+  }> = new Array();
 
   // 1. 整理已加载的插件
   for (const p of loadedPlugins) {
-    loadedPluginMap.set(p.name, {
-      name: p.packageJson?.plugin || p.name, // 优先显示 package.json 的 plugin 字段
-      id: p.name, // 包名，用于 API 操作
+    // 根据插件状态确定 status
+    let status: string;
+    if (!p.enable) {
+      status = 'disabled';
+    } else if (p.loaded) {
+      status = 'active';
+    } else {
+      status = 'stopped'; // 启用但未加载（可能加载失败）
+    }
+
+    AllPlugins.push({
+      name: p.packageJson?.plugin || p.name || '', // 优先显示 package.json 的 plugin 字段
+      id: p.id, // 包名，用于 API 操作
       version: p.version || '0.0.0',
       description: p.packageJson?.description || '',
       author: p.packageJson?.author || '',
-      status: 'active',
-      hasConfig: !!(p.module.plugin_config_schema || p.module.plugin_config_ui)
+      status,
+      hasConfig: !!(p.runtime.module?.plugin_config_schema || p.runtime.module?.plugin_config_ui)
     });
   }
 
-  const pluginPath = pluginManager.getPluginPath();
-  const pluginConfig = pluginManager.getPluginConfig();
-  const allPlugins: any[] = [];
 
-  // 2. 扫描文件系统，合并状态
-  if (fs.existsSync(pluginPath)) {
-    const items = fs.readdirSync(pluginPath, { withFileTypes: true });
-
-    for (const item of items) {
-      if (!item.isDirectory()) continue;
-
-      // 读取 package.json 获取插件信息
-      let id = item.name;
-      let name = item.name;
-      let version = '0.0.0';
-      let description = '';
-      let author = '';
-
-      const packageJsonPath = path.join(pluginPath, item.name, 'package.json');
-      if (fs.existsSync(packageJsonPath)) {
-        try {
-          const pkg = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-          id = pkg.name || id;
-          name = pkg.plugin || pkg.name || name;
-          version = pkg.version || version;
-          description = pkg.description || description;
-          author = pkg.author || author;
-        } catch (e) { }
-      }
-
-      const isActiveConfig = pluginConfig[id] !== false; // 默认为 true
-
-      if (loadedPluginMap.has(id)) {
-        // 已加载，使用加载的信息
-        const loadedInfo = loadedPluginMap.get(id);
-        allPlugins.push(loadedInfo);
-      } else {
-        allPlugins.push({
-          name,
-          id,
-          version,
-          description,
-          author,
-          // 如果配置是 false，则为 disabled；否则是 stopped (应启动但未启动)
-          status: isActiveConfig ? 'stopped' : 'disabled'
-        });
-      }
-    }
-  }
-
-  return sendSuccess(res, { plugins: allPlugins, pluginManagerNotFound: false });
+  return sendSuccess(res, { plugins: AllPlugins, pluginManagerNotFound: false });
 };
 
 export const SetPluginStatusHandler: RequestHandler = async (req, res) => {
@@ -144,14 +114,14 @@ export const SetPluginStatusHandler: RequestHandler = async (req, res) => {
   }
 
   try {
-    // 设置插件状态
-    pluginManager.setPluginStatus(id, enable);
+    // 设置插件状态（需要 await，因为内部会加载/卸载插件）
+    await pluginManager.setPluginStatus(id, enable);
 
-    // 如果启用，需要加载插件
+    // 如果启用，检查插件是否加载成功
     if (enable) {
-      const loaded = await pluginManager.loadPluginById(id);
-      if (!loaded) {
-        return sendError(res, 'Plugin not found: ' + id);
+      const plugin = pluginManager.getPluginInfo(id);
+      if (!plugin || !plugin.loaded) {
+        return sendError(res, 'Plugin load failed: ' + id);
       }
     }
 
@@ -191,15 +161,15 @@ export const GetPluginConfigHandler: RequestHandler = async (req, res) => {
   if (!plugin) return sendError(res, 'Plugin not loaded');
 
   // 获取配置值
-  let config = {};
-  if (plugin.module.plugin_get_config) {
+  let config: unknown = {};
+  if (plugin.runtime.module?.plugin_get_config && plugin.runtime.context) {
     try {
-      config = await plugin.module.plugin_get_config(plugin.context);
+      config = await plugin.runtime.module?.plugin_get_config(plugin.runtime.context);
     } catch (e) { }
   } else {
     // Default behavior: read from default config path
     try {
-      const configPath = plugin.context?.configPath || pluginManager.getPluginConfigPath(id);
+      const configPath = plugin.runtime.context?.configPath || pluginManager.getPluginConfigPath(id);
       if (fs.existsSync(configPath)) {
         config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
       }
@@ -207,10 +177,10 @@ export const GetPluginConfigHandler: RequestHandler = async (req, res) => {
   }
 
   // 获取静态 schema
-  const schema = plugin.module.plugin_config_schema || plugin.module.plugin_config_ui || [];
+  const schema = plugin.runtime.module?.plugin_config_schema || plugin.runtime.module?.plugin_config_ui || [];
 
   // 检查是否支持动态控制
-  const supportReactive = !!(plugin.module.plugin_config_controller || plugin.module.plugin_on_config_change);
+  const supportReactive = !!(plugin.runtime.module?.plugin_config_controller || plugin.runtime.module?.plugin_on_config_change);
 
   return sendSuccess(res, { schema, config, supportReactive });
 };
@@ -302,10 +272,10 @@ export const PluginConfigSSEHandler: RequestHandler = (req, res): void => {
   // 调用插件的控制器初始化（异步处理）
   (async () => {
     let cleanup: (() => void) | undefined;
-    if (plugin.module.plugin_config_controller) {
+    if (plugin.runtime.module?.plugin_config_controller && plugin.runtime.context) {
       try {
-        const result = await plugin.module.plugin_config_controller(
-          plugin.context,
+        const result = await plugin.runtime.module.plugin_config_controller(
+          plugin.runtime.context,
           uiController,
           currentConfig
         );
@@ -368,7 +338,7 @@ export const PluginConfigChangeHandler: RequestHandler = async (req, res) => {
   session.currentConfig = currentConfig || {};
 
   // 如果插件有响应式处理器，调用它
-  if (plugin.module.plugin_on_config_change) {
+  if (plugin.runtime.module?.plugin_on_config_change) {
     const uiController = {
       updateSchema: (schema: any[]) => {
         session.res.write(`event: schema\n`);
@@ -398,13 +368,15 @@ export const PluginConfigChangeHandler: RequestHandler = async (req, res) => {
     };
 
     try {
-      await plugin.module.plugin_on_config_change(
-        plugin.context,
-        uiController,
-        key,
-        value,
-        currentConfig || {}
-      );
+      if (plugin.runtime.context) {
+        await plugin.runtime.module.plugin_on_config_change(
+          plugin.runtime.context,
+          uiController,
+          key,
+          value,
+          currentConfig || {}
+        );
+      }
     } catch (e: any) {
       session.res.write(`event: error\n`);
       session.res.write(`data: ${JSON.stringify({ message: e.message })}\n\n`);
@@ -424,17 +396,17 @@ export const SetPluginConfigHandler: RequestHandler = async (req, res) => {
   const plugin = pluginManager.getPluginInfo(id);
   if (!plugin) return sendError(res, 'Plugin not loaded');
 
-  if (plugin.module.plugin_set_config) {
+  if (plugin.runtime.module?.plugin_set_config && plugin.runtime.context) {
     try {
-      await plugin.module.plugin_set_config(plugin.context, config);
+      await plugin.runtime.module.plugin_set_config(plugin.runtime.context, config);
       return sendSuccess(res, { message: 'Config updated' });
     } catch (e: any) {
       return sendError(res, 'Error updating config: ' + e.message);
     }
-  } else if (plugin.module.plugin_config_schema || plugin.module.plugin_config_ui || plugin.module.plugin_config_controller) {
+  } else if (plugin.runtime.module?.plugin_config_schema || plugin.runtime.module?.plugin_config_ui || plugin.runtime.module?.plugin_config_controller) {
     // Default behavior: write to default config path
     try {
-      const configPath = plugin.context?.configPath || pluginManager.getPluginConfigPath(id);
+      const configPath = plugin.runtime.context?.configPath || pluginManager.getPluginConfigPath(id);
 
       const configDir = path.dirname(configPath);
       if (!fs.existsSync(configDir)) {
@@ -451,5 +423,143 @@ export const SetPluginConfigHandler: RequestHandler = async (req, res) => {
     }
   } else {
     return sendError(res, 'Plugin does not support config update');
+  }
+};
+
+/**
+ * 导入本地插件包（支持 .zip 文件）
+ */
+export const ImportLocalPluginHandler: RequestHandler = async (req, res) => {
+  const pluginManager = getPluginManager();
+  if (!pluginManager) {
+    return sendError(res, 'Plugin Manager not found');
+  }
+
+  // multer 会将文件信息放在 req.file 中
+  const file = req.file;
+  if (!file) {
+    return sendError(res, 'No file uploaded');
+  }
+
+  const PLUGINS_DIR = webUiPathWrapper.pluginPath;
+
+  // 确保插件目录存在
+  if (!fs.existsSync(PLUGINS_DIR)) {
+    fs.mkdirSync(PLUGINS_DIR, { recursive: true });
+  }
+
+  const tempZipPath = file.path;
+
+  try {
+    // 创建临时解压目录
+    const tempExtractDir = path.join(PLUGINS_DIR, `_temp_extract_${Date.now()}`);
+    fs.mkdirSync(tempExtractDir, { recursive: true });
+
+    // 解压到临时目录
+    await compressing.zip.uncompress(tempZipPath, tempExtractDir);
+
+    // 检查解压后的内容
+    const extractedItems = fs.readdirSync(tempExtractDir);
+
+    let pluginSourceDir: string;
+    let pluginId: string;
+
+    // 判断解压结构：可能是直接的插件文件，或者包含一个子目录
+    const hasPackageJson = extractedItems.includes('package.json');
+    const hasIndexFile = extractedItems.some(item =>
+      ['index.js', 'index.mjs', 'main.js', 'main.mjs'].includes(item)
+    );
+
+    if (hasPackageJson || hasIndexFile) {
+      // 直接是插件文件
+      pluginSourceDir = tempExtractDir;
+
+      // 尝试从 package.json 获取插件 ID
+      const packageJsonPath = path.join(tempExtractDir, 'package.json');
+      if (fs.existsSync(packageJsonPath)) {
+        try {
+          const pkg = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+          pluginId = pkg.name || path.basename(file.originalname, '.zip');
+        } catch {
+          pluginId = path.basename(file.originalname, '.zip');
+        }
+      } else {
+        pluginId = path.basename(file.originalname, '.zip');
+      }
+    } else if (extractedItems.length === 1 && fs.statSync(path.join(tempExtractDir, extractedItems[0]!)).isDirectory()) {
+      // 包含一个子目录
+      const subDir = extractedItems[0]!;
+      pluginSourceDir = path.join(tempExtractDir, subDir);
+
+      // 尝试从子目录的 package.json 获取插件 ID
+      const packageJsonPath = path.join(pluginSourceDir, 'package.json');
+      if (fs.existsSync(packageJsonPath)) {
+        try {
+          const pkg = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+          pluginId = pkg.name || subDir;
+        } catch {
+          pluginId = subDir;
+        }
+      } else {
+        pluginId = subDir;
+      }
+    } else {
+      // 清理临时文件
+      fs.rmSync(tempExtractDir, { recursive: true, force: true });
+      fs.unlinkSync(tempZipPath);
+      return sendError(res, 'Invalid plugin package structure');
+    }
+
+    // 目标插件目录
+    const targetPluginDir = path.join(PLUGINS_DIR, pluginId);
+
+    // 如果目标目录已存在，先删除
+    if (fs.existsSync(targetPluginDir)) {
+      // 先卸载已存在的插件
+      const existingPlugin = pluginManager.getPluginInfo(pluginId);
+      if (existingPlugin && existingPlugin.loaded) {
+        await pluginManager.unregisterPlugin(pluginId);
+      }
+      fs.rmSync(targetPluginDir, { recursive: true, force: true });
+    }
+
+    // 移动插件文件到目标目录
+    if (pluginSourceDir === tempExtractDir) {
+      // 直接重命名临时目录
+      fs.renameSync(tempExtractDir, targetPluginDir);
+    } else {
+      // 移动子目录内容
+      fs.renameSync(pluginSourceDir, targetPluginDir);
+      // 清理临时目录
+      fs.rmSync(tempExtractDir, { recursive: true, force: true });
+    }
+
+    // 删除上传的临时文件
+    if (fs.existsSync(tempZipPath)) {
+      fs.unlinkSync(tempZipPath);
+    }
+
+    // 加载插件
+    const loaded = await pluginManager.loadPluginById(pluginId);
+
+    if (loaded) {
+      return sendSuccess(res, {
+        message: 'Plugin imported and loaded successfully',
+        pluginId,
+        installPath: targetPluginDir,
+      });
+    } else {
+      return sendSuccess(res, {
+        message: 'Plugin imported but failed to load (check plugin structure)',
+        pluginId,
+        installPath: targetPluginDir,
+      });
+    }
+  } catch (e: any) {
+    // 清理临时文件
+    if (fs.existsSync(tempZipPath)) {
+      fs.unlinkSync(tempZipPath);
+    }
+    return sendError(res, 'Failed to import plugin: ' + e.message);
   }
 };
