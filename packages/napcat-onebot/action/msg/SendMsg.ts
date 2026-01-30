@@ -17,6 +17,7 @@ import { rawMsgWithSendMsg } from 'napcat-core/packet/message/converter';
 import { Static, Type } from '@sinclair/typebox';
 import { MsgActionsExamples } from '@/napcat-onebot/action/msg/examples';
 import { OB11MessageMixTypeSchema } from '@/napcat-onebot/types/message';
+import { UploadForwardMsgParams } from '@/napcat-core/packet/transformer/message/UploadForwardMsgV2';
 
 export const SendMsgPayloadSchema = Type.Object({
   message_type: Type.Optional(Type.Union([Type.Literal('private'), Type.Literal('group')], { description: '消息类型 (private/group)' })),
@@ -211,10 +212,13 @@ export class SendMsgBase extends OneBotAction<SendMsgPayload, ReturnDataType> {
   }, dp: number = 0): Promise<{
     finallySendElements: SendArkElement,
     res_id?: string,
+    uuid?: string,
+    packetMsg: PacketMsg[],
     deleteAfterSentFiles: string[],
   } | null> {
     const packetMsg: PacketMsg[] = [];
     const delFiles: string[] = [];
+    const innerMsg: Array<{ uuid: string, packetMsg: PacketMsg[]; }> = new Array();
     for (const node of messageNodes) {
       if (dp >= 3) {
         this.core.context.logger.logWarn('转发消息深度超过3层，将停止解析！');
@@ -232,6 +236,10 @@ export class SendMsgBase extends OneBotAction<SendMsgPayload, ReturnDataType> {
           }, dp + 1);
           sendElements = uploadReturnData?.finallySendElements ? [uploadReturnData.finallySendElements] : [];
           delFiles.push(...(uploadReturnData?.deleteAfterSentFiles || []));
+          if (uploadReturnData?.uuid) {
+            innerMsg.push({ uuid: uploadReturnData.uuid, packetMsg: uploadReturnData.packetMsg });
+          }
+
         } else {
           const sendElementsCreateReturn = await this.obContext.apis.MsgApi.createSendElements(OB11Data, msgPeer);
           sendElements = sendElementsCreateReturn.sendElements;
@@ -273,8 +281,19 @@ export class SendMsgBase extends OneBotAction<SendMsgPayload, ReturnDataType> {
       this.core.context.logger.logWarn('handleForwardedNodesPacket 元素为空！');
       return null;
     }
-    const resid = await this.core.apis.PacketApi.pkt.operation.UploadForwardMsg(packetMsg, msgPeer.chatType === ChatType.KCHATTYPEGROUP ? +msgPeer.peerUid : 0);
-    const forwardJson = ForwardMsgBuilder.fromPacketMsg(resid, packetMsg, source, news, summary, prompt);
+    const uploadMsgData: UploadForwardMsgParams[] = [{
+      actionCommand: 'MultiMsg',
+      actionMsg: packetMsg,
+    }];
+    innerMsg.forEach(({ uuid, packetMsg: msg }) => {
+      uploadMsgData.push({
+        actionCommand: uuid,
+        actionMsg: msg,
+      });
+    });
+    const resid = await this.core.apis.PacketApi.pkt.operation.UploadForwardMsgV2(uploadMsgData, msgPeer.chatType === ChatType.KCHATTYPEGROUP ? +msgPeer.peerUid : 0);
+    const uuid = crypto.randomUUID();
+    const forwardJson = ForwardMsgBuilder.fromPacketMsg(resid, packetMsg, source, news, summary, prompt, uuid);
     return {
       deleteAfterSentFiles: delFiles,
       finallySendElements: {
@@ -285,6 +304,8 @@ export class SendMsgBase extends OneBotAction<SendMsgPayload, ReturnDataType> {
         },
       } as SendArkElement,
       res_id: resid,
+      uuid: uuid,
+      packetMsg: packetMsg,
     };
   }
 
