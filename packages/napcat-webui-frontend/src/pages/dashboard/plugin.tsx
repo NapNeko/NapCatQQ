@@ -222,7 +222,9 @@ export default function PluginPage () {
                 onToggleStatus={() => handleToggle(plugin)}
                 onUninstall={() => handleUninstall(plugin)}
                 onConfig={() => {
-                  if (plugin.hasConfig) {
+                  if (plugin.status !== 'active') {
+                    toast.error('未启用插件，无法配置插件');
+                  } else if (plugin.hasConfig) {
                     handleConfig(plugin);
                   } else {
                     toast.error('此插件没有配置哦');
