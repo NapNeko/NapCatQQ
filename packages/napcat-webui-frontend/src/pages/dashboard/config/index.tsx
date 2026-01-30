@@ -10,6 +10,7 @@ import ChangePasswordCard from './change_password';
 import LoginConfigCard from './login';
 import OneBotConfigCard from './onebot';
 import ServerConfigCard from './server';
+import SSLConfigCard from './ssl';
 import ThemeConfigCard from './theme';
 import WebUIConfigCard from './webui';
 
@@ -79,6 +80,11 @@ export default function ConfigPage () {
         <Tab title='服务器配置' key='server'>
           <ConfigPageItem>
             <ServerConfigCard />
+          </ConfigPageItem>
+        </Tab>
+        <Tab title='SSL配置' key='ssl'>
+          <ConfigPageItem size='sm'>
+            <SSLConfigCard />
           </ConfigPageItem>
         </Tab>
         <Tab title='WebUI配置' key='webui'>
