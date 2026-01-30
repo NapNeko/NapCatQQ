@@ -12,7 +12,7 @@ import { getRandomToken } from '../utils/url';
 // 限制尝试端口的次数，避免死循环
 // 定义配置的类型
 const WebUiConfigSchema = Type.Object({
-  host: Type.String({ default: '0.0.0.0' }),
+  host: Type.String({ default: '::' }),
   port: Type.Number({ default: 6099 }),
   token: Type.String({ default: getRandomToken(12) }),
   loginRate: Type.Number({ default: 10 }),
