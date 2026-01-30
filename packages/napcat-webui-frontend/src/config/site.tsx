@@ -37,11 +37,6 @@ export const siteConfig = {
       href: '/network',
     },
     {
-      label: '其他配置',
-      icon: <LuSettings className='w-5 h-5' />,
-      href: '/config',
-    },
-    {
       label: '猫猫日志',
       icon: <LuFileText className='w-5 h-5' />,
       href: '/logs',
@@ -75,6 +70,11 @@ export const siteConfig = {
       label: '系统终端',
       icon: <LuTerminal className='w-5 h-5' />,
       href: '/terminal',
+    },
+    {
+      label: '系统配置',
+      icon: <LuSettings className='w-5 h-5' />,
+      href: '/config',
     },
     {
       label: '关于我们',
