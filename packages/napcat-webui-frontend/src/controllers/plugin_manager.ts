@@ -96,6 +96,27 @@ export default class PluginManager {
     await serverRequest.post<ServerResponse<void>>('/Plugin/Uninstall', { id, cleanData });
   }
 
+  /**
+   * 导入本地插件包
+   * @param file 插件 zip 文件
+   */
+  public static async importLocalPlugin (file: File): Promise<{ message: string; pluginId: string; installPath: string; }> {
+    const formData = new FormData();
+    formData.append('plugin', file);
+
+    const { data } = await serverRequest.post<ServerResponse<{ message: string; pluginId: string; installPath: string; }>>(
+      '/Plugin/Import',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        timeout: 60000, // 60秒超时
+      }
+    );
+    return data.data;
+  }
+
   // ==================== 插件商店 ====================
 
   /**

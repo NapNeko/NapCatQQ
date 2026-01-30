@@ -1,7 +1,8 @@
 import { Button } from '@heroui/button';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { IoMdRefresh } from 'react-icons/io';
+import { FiUpload } from 'react-icons/fi';
 import { useDisclosure } from '@heroui/modal';
 
 import PageLoading from '@/components/page_loading';
@@ -18,6 +19,7 @@ export default function PluginPage () {
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [currentPluginId, setCurrentPluginId] = useState<string>('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const loadPlugins = async () => {
     setLoading(true);
@@ -106,6 +108,61 @@ export default function PluginPage () {
     onOpen();
   };
 
+  const handleImportClick = () => {
+    if (pluginManagerNotFound) {
+      dialog.confirm({
+        title: '插件管理器未加载',
+        content: (
+          <div className="space-y-2">
+            <p className="text-sm text-default-600">
+              插件管理器尚未加载，无法导入插件。
+            </p>
+            <p className="text-sm text-default-600">
+              是否立即注册插件管理器？
+            </p>
+          </div>
+        ),
+        confirmText: '注册插件管理器',
+        cancelText: '取消',
+        onConfirm: async () => {
+          try {
+            await PluginManager.registerPluginManager();
+            toast.success('插件管理器注册成功');
+            setPluginManagerNotFound(false);
+            // 注册成功后打开文件选择器
+            fileInputRef.current?.click();
+          } catch (e: any) {
+            toast.error('注册失败: ' + e.message);
+          }
+        },
+      });
+      return;
+    }
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // 重置 input，允许重复选择同一文件
+    e.target.value = '';
+
+    if (!file.name.endsWith('.zip')) {
+      toast.error('请选择 .zip 格式的插件包');
+      return;
+    }
+
+    const loadingToast = toast.loading('正在导入插件...');
+    try {
+      const result = await PluginManager.importLocalPlugin(file);
+      toast.success(result.message, { id: loadingToast });
+      loadPlugins();
+    } catch (err: any) {
+      toast.error(err.message || '导入失败', { id: loadingToast });
+    }
+  };
+
   return (
     <>
       <title>插件管理 - NapCat WebUI</title>
@@ -127,6 +184,21 @@ export default function PluginPage () {
           >
             <IoMdRefresh size={24} />
           </Button>
+          <Button
+            className="bg-primary-100/50 hover:bg-primary-200/50 text-primary-700 backdrop-blur-md"
+            radius='full'
+            startContent={<FiUpload size={18} />}
+            onPress={handleImportClick}
+          >
+            导入插件
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".zip"
+            className="hidden"
+            onChange={handleFileChange}
+          />
         </div>
 
         {pluginManagerNotFound ? (
