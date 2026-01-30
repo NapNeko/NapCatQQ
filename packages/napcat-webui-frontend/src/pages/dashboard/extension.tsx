@@ -123,7 +123,7 @@ export default function ExtensionPage () {
                 selectedKey={selectedTab}
                 onSelectionChange={(key) => setSelectedTab(key as string)}
                 classNames={{
-                  tabList: 'bg-white/40 dark:bg-black/20 backdrop-blur-md flex-wrap',
+                  tabList: 'bg-white/40 dark:bg-black/20 backdrop-blur-md',
                   cursor: 'bg-white/80 dark:bg-white/10 backdrop-blur-md shadow-sm',
                   panel: 'flex-1 min-h-0 p-0',
                 }}
