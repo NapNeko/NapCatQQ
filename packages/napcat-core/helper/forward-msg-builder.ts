@@ -2,14 +2,14 @@ import * as crypto from 'node:crypto';
 import { PacketMsg } from '@/napcat-core/packet/message/message';
 
 interface ForwardMsgJson {
-  app: string
+  app: string;
   config: ForwardMsgJsonConfig,
   desc: string,
   extra: ForwardMsgJsonExtra,
   meta: ForwardMsgJsonMeta,
   prompt: string,
   ver: string,
-  view: string
+  view: string;
 }
 
 interface ForwardMsgJsonConfig {
@@ -17,7 +17,7 @@ interface ForwardMsgJsonConfig {
   forward: number,
   round: number,
   type: string,
-  width: number
+  width: number;
 }
 
 interface ForwardMsgJsonExtra {
@@ -26,17 +26,17 @@ interface ForwardMsgJsonExtra {
 }
 
 interface ForwardMsgJsonMeta {
-  detail: ForwardMsgJsonMetaDetail
+  detail: ForwardMsgJsonMetaDetail;
 }
 
 interface ForwardMsgJsonMetaDetail {
   news: {
-    text: string
+    text: string;
   }[],
   resid: string,
   source: string,
   summary: string,
-  uniseq: string
+  uniseq: string;
 }
 
 interface ForwardAdaptMsg {
@@ -50,8 +50,8 @@ interface ForwardAdaptMsgElement {
 }
 
 export class ForwardMsgBuilder {
-  private static build (resId: string, msg: ForwardAdaptMsg[], source?: string, news?: ForwardMsgJsonMetaDetail['news'], summary?: string, prompt?: string): ForwardMsgJson {
-    const id = crypto.randomUUID();
+  private static build (resId: string, msg: ForwardAdaptMsg[], source?: string, news?: ForwardMsgJsonMetaDetail['news'], summary?: string, prompt?: string, uuid?: string): ForwardMsgJson {
+    const id = uuid ?? crypto.randomUUID();
     const isGroupMsg = msg.some(m => m.isGroupMsg);
     if (!source) {
       source = msg.length === 0 ? '聊天记录' : (isGroupMsg ? '群聊的聊天记录' : msg.map(m => m.senderName).filter((v, i, a) => a.indexOf(v) === i).slice(0, 4).join('和') + '的聊天记录');
@@ -104,13 +104,19 @@ export class ForwardMsgBuilder {
     return this.build(resId, []);
   }
 
-  static fromPacketMsg (resId: string, packetMsg: PacketMsg[], source?: string, news?: ForwardMsgJsonMetaDetail['news'], summary?: string, prompt?: string): ForwardMsgJson {
+  static fromPacketMsg (resId: string, packetMsg: PacketMsg[], source?: string, news?: ForwardMsgJsonMetaDetail['news'], summary?: string, prompt?: string, uuid?: string): ForwardMsgJson {
     return this.build(resId, packetMsg.map(msg => ({
       senderName: msg.senderName,
       isGroupMsg: msg.groupId !== undefined,
       msg: msg.msg.map(m => ({
         preview: m.valid ? m.toPreview() : '[该消息类型暂不支持查看]',
       })),
-    })), source, news, summary, prompt);
+    })),
+      source,
+      news,
+      summary,
+      prompt,
+      uuid,
+    );
   }
 }

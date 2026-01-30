@@ -18,6 +18,7 @@ import { OidbPacket } from '@/napcat-core/packet/transformer/base';
 import { ImageOcrResult } from '@/napcat-core/packet/entities/ocrResult';
 import { gunzipSync } from 'zlib';
 import { PacketMsgConverter } from '@/napcat-core/packet/message/converter';
+import { UploadForwardMsgParams } from '@/napcat-core/packet/transformer/message/UploadForwardMsgV2';
 
 export class PacketOperationContext {
   private readonly context: PacketContext;
@@ -26,7 +27,7 @@ export class PacketOperationContext {
     this.context = context;
   }
 
-  async sendPacket<T extends boolean = false>(pkt: OidbPacket, rsp?: T): Promise<T extends true ? Buffer : void> {
+  async sendPacket<T extends boolean = false> (pkt: OidbPacket, rsp?: T): Promise<T extends true ? Buffer : void> {
     return await this.context.client.sendOidbPacket(pkt, rsp);
   }
 
@@ -224,7 +225,15 @@ export class PacketOperationContext {
     const res = trans.UploadForwardMsg.parse(resp);
     return res.result.resId;
   }
-
+  async UploadForwardMsgV2 (msg: UploadForwardMsgParams[], groupUin: number = 0) {
+    //await this.SendPreprocess(msg, groupUin);
+    // 遍历上传资源
+    await Promise.allSettled(msg.map(async (item) => { return await this.SendPreprocess(item.actionMsg, groupUin); }));
+    const req = trans.UploadForwardMsgV2.build(this.context.napcore.basicInfo.uid, msg, groupUin);
+    const resp = await this.context.client.sendOidbPacket(req, true);
+    const res = trans.UploadForwardMsg.parse(resp);
+    return res.result.resId;
+  }
   async MoveGroupFile (
     groupUin: number,
     fileUUID: string,
