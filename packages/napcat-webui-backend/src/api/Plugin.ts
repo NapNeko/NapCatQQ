@@ -189,7 +189,7 @@ export const GetPluginConfigHandler: RequestHandler = async (req, res) => {
   if (!pluginManager) return sendError(res, 'Plugin Manager not found');
 
   const plugin = pluginManager.getPluginInfo(id);
-  if (!plugin) return sendError(res, 'Plugin not found');
+  if (!plugin) return sendError(res, 'Plugin not loaded');
 
   // 获取配置值
   let config: unknown = {};
@@ -198,7 +198,7 @@ export const GetPluginConfigHandler: RequestHandler = async (req, res) => {
       config = await plugin.runtime.module?.plugin_get_config(plugin.runtime.context);
     } catch (e) { }
   } else {
-    // 直接从配置文件读取（支持未加载的插件）
+    // Default behavior: read from default config path
     try {
       const configPath = plugin.runtime.context?.configPath || pluginManager.getPluginConfigPath(id);
       if (fs.existsSync(configPath)) {
@@ -207,16 +207,13 @@ export const GetPluginConfigHandler: RequestHandler = async (req, res) => {
     } catch (e) { }
   }
 
-  // 获取静态 schema（未加载的插件返回空数组）
+  // 获取静态 schema
   const schema = plugin.runtime.module?.plugin_config_schema || plugin.runtime.module?.plugin_config_ui || [];
 
   // 检查是否支持动态控制
   const supportReactive = !!(plugin.runtime.module?.plugin_config_controller || plugin.runtime.module?.plugin_on_config_change);
 
-  // 标记插件是否已加载
-  const loaded = plugin.loaded;
-
-  return sendSuccess(res, { schema, config, supportReactive, loaded });
+  return sendSuccess(res, { schema, config, supportReactive });
 };
 
 /** 活跃的 SSE 连接 */
@@ -428,9 +425,8 @@ export const SetPluginConfigHandler: RequestHandler = async (req, res) => {
   if (!pluginManager) return sendError(res, 'Plugin Manager not found');
 
   const plugin = pluginManager.getPluginInfo(id);
-  if (!plugin) return sendError(res, 'Plugin not found');
+  if (!plugin) return sendError(res, 'Plugin not loaded');
 
-  // 已加载的插件：使用插件提供的配置方法
   if (plugin.runtime.module?.plugin_set_config && plugin.runtime.context) {
     try {
       await plugin.runtime.module.plugin_set_config(plugin.runtime.context, config);
@@ -438,25 +434,26 @@ export const SetPluginConfigHandler: RequestHandler = async (req, res) => {
     } catch (e: any) {
       return sendError(res, 'Error updating config: ' + e.message);
     }
-  }
+  } else if (plugin.runtime.module?.plugin_config_schema || plugin.runtime.module?.plugin_config_ui || plugin.runtime.module?.plugin_config_controller) {
+    // Default behavior: write to default config path
+    try {
+      const configPath = plugin.runtime.context?.configPath || pluginManager.getPluginConfigPath(id);
 
-  // 直接写入配置文件（支持未加载的插件预配置）
-  try {
-    const configPath = plugin.runtime.context?.configPath || pluginManager.getPluginConfigPath(id);
-    const configDir = path.dirname(configPath);
-    if (!fs.existsSync(configDir)) {
-      fs.mkdirSync(configDir, { recursive: true });
-    }
-    fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8');
+      const configDir = path.dirname(configPath);
+      if (!fs.existsSync(configDir)) {
+        fs.mkdirSync(configDir, { recursive: true });
+      }
+      fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8');
 
-    // 只有已加载的插件才重载
-    if (plugin.loaded) {
+      // Auto-Reload plugin to apply changes
       await pluginManager.reloadPlugin(id);
+
       return sendSuccess(res, { message: 'Config saved and plugin reloaded' });
+    } catch (e: any) {
+      return sendError(res, 'Error saving config: ' + e.message);
     }
-    return sendSuccess(res, { message: 'Config saved' });
-  } catch (e: any) {
-    return sendError(res, 'Error saving config: ' + e.message);
+  } else {
+    return sendError(res, 'Plugin does not support config update');
   }
 };
 
