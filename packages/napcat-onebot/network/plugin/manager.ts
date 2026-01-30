@@ -8,6 +8,7 @@ import { IOB11NetworkAdapter } from '@/napcat-onebot/network/adapter';
 import { PluginConfig } from '@/napcat-onebot/config/config';
 import { NapCatConfig } from './config';
 import { PluginLoader } from './loader';
+import { PluginRouterRegistryImpl } from './router-registry';
 import {
   PluginEntry,
   PluginLogger,
@@ -23,6 +24,9 @@ export class OB11PluginManager extends IOB11NetworkAdapter<PluginConfig> impleme
 
   /** 插件注册表: ID -> 插件条目 */
   private plugins: Map<string, PluginEntry> = new Map();
+
+  /** 插件路由注册表: pluginId -> PluginRouterRegistry */
+  private pluginRouters: Map<string, PluginRouterRegistryImpl> = new Map();
 
   declare config: PluginConfig;
   public NapCatConfig = NapCatConfig;
@@ -183,6 +187,13 @@ export class OB11PluginManager extends IOB11NetworkAdapter<PluginConfig> impleme
       error: (...args: any[]) => coreLogger.logError(pluginPrefix, ...args),
     };
 
+    // 创建或获取插件路由注册器
+    let router = this.pluginRouters.get(entry.id);
+    if (!router) {
+      router = new PluginRouterRegistryImpl(entry.id, entry.pluginPath);
+      this.pluginRouters.set(entry.id, router);
+    }
+
     return {
       core: this.core,
       oneBot: this.obContext,
@@ -195,6 +206,7 @@ export class OB11PluginManager extends IOB11NetworkAdapter<PluginConfig> impleme
       adapterName: this.name,
       pluginManager: this,
       logger: pluginLogger,
+      router,
     };
   }
 
@@ -389,6 +401,20 @@ export class OB11PluginManager extends IOB11NetworkAdapter<PluginConfig> impleme
    */
   public getPluginConfigPath (pluginId: string): string {
     return path.join(this.getPluginDataPath(pluginId), 'config.json');
+  }
+
+  /**
+   * 获取插件路由注册器
+   */
+  public getPluginRouter (pluginId: string): PluginRouterRegistryImpl | undefined {
+    return this.pluginRouters.get(pluginId);
+  }
+
+  /**
+   * 获取所有插件路由注册器
+   */
+  public getAllPluginRouters (): Map<string, PluginRouterRegistryImpl> {
+    return this.pluginRouters;
   }
 
   // ==================== 事件处理 ====================

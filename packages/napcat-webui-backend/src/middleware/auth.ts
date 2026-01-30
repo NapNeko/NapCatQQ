@@ -16,10 +16,7 @@ export async function auth (req: Request, res: Response, next: NextFunction) {
     req.url === '/auth/passkey/verify-authentication') {
     return next();
   }
-
-
-
-  // 判断是否有Authorization头
+  let hash: string | undefined;
   if (req.headers?.authorization) {
     // 切割参数以获取token
     const authorization = req.headers.authorization.split(' ');
@@ -28,8 +25,14 @@ export async function auth (req: Request, res: Response, next: NextFunction) {
       return sendError(res, 'Unauthorized');
     }
     // 获取token
-    const hash = authorization[1];
-    if (!hash) return sendError(res, 'Unauthorized');
+    hash = authorization[1];
+  } else if (req.query['webui_token'] && typeof req.query['webui_token'] === 'string') {
+    // 支持通过query参数传递token
+    hash = req.query['webui_token'];
+  }
+  // 判断是否有Authorization头
+  if (hash) {
+    //if (!hash) return sendError(res, 'Unauthorized');
     // 解析token
     let Credential: WebUiCredentialJson;
     try {

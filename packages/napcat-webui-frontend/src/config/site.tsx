@@ -10,6 +10,7 @@ import {
   LuZap,
   LuPackage,
   LuStore,
+  LuPuzzle,
 } from 'react-icons/lu';
 
 export type SiteConfig = typeof siteConfig;
@@ -65,6 +66,11 @@ export const siteConfig = {
       label: '插件商店',
       icon: <LuStore className='w-5 h-5' />,
       href: '/plugin_store',
+    },
+    {
+      label: '扩展页面',
+      icon: <LuPuzzle className='w-5 h-5' />,
+      href: '/extension',
     },
     {
       label: '系统终端',

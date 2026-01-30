@@ -62,7 +62,7 @@ export const GetPluginListHandler: RequestHandler = async (_req, res) => {
   const pluginManager = getPluginManager();
   if (!pluginManager) {
     // 返回成功但带特殊标记
-    return sendSuccess(res, { plugins: [], pluginManagerNotFound: true });
+    return sendSuccess(res, { plugins: [], pluginManagerNotFound: true, extensionPages: [] });
   }
 
   const loadedPlugins = pluginManager.getAllPlugins();
@@ -74,7 +74,18 @@ export const GetPluginListHandler: RequestHandler = async (_req, res) => {
     author: string;
     status: string;
     hasConfig: boolean;
+    hasPages: boolean;
   }> = new Array();
+
+  // 收集所有插件的扩展页面
+  const extensionPages: Array<{
+    pluginId: string;
+    pluginName: string;
+    path: string;
+    title: string;
+    icon?: string;
+    description?: string;
+  }> = [];
 
   // 1. 整理已加载的插件
   for (const p of loadedPlugins) {
@@ -88,6 +99,10 @@ export const GetPluginListHandler: RequestHandler = async (_req, res) => {
       status = 'stopped'; // 启用但未加载（可能加载失败）
     }
 
+    // 检查插件是否有注册页面
+    const pluginRouter = pluginManager.getPluginRouter(p.id);
+    const hasPages = pluginRouter?.hasPages() ?? false;
+
     AllPlugins.push({
       name: p.packageJson?.plugin || p.name || '', // 优先显示 package.json 的 plugin 字段
       id: p.id, // 包名，用于 API 操作
@@ -95,12 +110,28 @@ export const GetPluginListHandler: RequestHandler = async (_req, res) => {
       description: p.packageJson?.description || '',
       author: p.packageJson?.author || '',
       status,
-      hasConfig: !!(p.runtime.module?.plugin_config_schema || p.runtime.module?.plugin_config_ui)
+      hasConfig: !!(p.runtime.module?.plugin_config_schema || p.runtime.module?.plugin_config_ui),
+      hasPages
     });
+
+    // 收集插件的扩展页面
+    if (hasPages && pluginRouter) {
+      const pages = pluginRouter.getPages();
+      for (const page of pages) {
+        extensionPages.push({
+          pluginId: p.id,
+          pluginName: p.packageJson?.plugin || p.name || p.id,
+          path: page.path,
+          title: page.title,
+          icon: page.icon,
+          description: page.description
+        });
+      }
+    }
   }
 
 
-  return sendSuccess(res, { plugins: AllPlugins, pluginManagerNotFound: false });
+  return sendSuccess(res, { plugins: AllPlugins, pluginManagerNotFound: false, extensionPages });
 };
 
 export const SetPluginStatusHandler: RequestHandler = async (req, res) => {

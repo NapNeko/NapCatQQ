@@ -20,6 +20,9 @@ import {
   InstallPluginFromStoreHandler,
   InstallPluginFromStoreSSEHandler
 } from '@/napcat-webui-backend/src/api/PluginStore';
+import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
+import { NapCatOneBot11Adapter } from '@/napcat-onebot/index';
+import { OB11PluginMangerAdapter } from '@/napcat-onebot/network/plugin-manger';
 
 // 配置 multer 用于文件上传
 const uploadDir = path.join(os.tmpdir(), 'napcat-plugin-uploads');
@@ -71,5 +74,93 @@ router.get('/Store/List', GetPluginStoreListHandler);
 router.get('/Store/Detail/:id', GetPluginStoreDetailHandler);
 router.post('/Store/Install', InstallPluginFromStoreHandler);
 router.get('/Store/Install/SSE', InstallPluginFromStoreSSEHandler);
+
+// 插件扩展路由 - 动态挂载插件注册的 API 路由
+router.use('/ext/:pluginId', (req, res, next): void => {
+  const { pluginId } = req.params;
+
+  if (!pluginId) {
+    res.status(400).json({ code: -1, message: 'Plugin ID is required' });
+    return;
+  }
+
+  // 获取插件管理器
+  const ob11 = WebUiDataRuntime.getOneBotContext() as NapCatOneBot11Adapter;
+  if (!ob11) {
+    res.status(503).json({ code: -1, message: 'OneBot context not available' });
+    return;
+  }
+
+  const pluginManager = ob11.networkManager.findSomeAdapter('plugin_manager') as OB11PluginMangerAdapter;
+  if (!pluginManager) {
+    res.status(503).json({ code: -1, message: 'Plugin manager not available' });
+    return;
+  }
+
+  // 获取插件路由
+  const routerRegistry = pluginManager.getPluginRouter(pluginId);
+  if (!routerRegistry || !routerRegistry.hasApiRoutes()) {
+    res.status(404).json({ code: -1, message: `Plugin '${pluginId}' has no registered API routes` });
+    return;
+  }
+
+  // 构建并执行插件路由
+  const pluginRouter = routerRegistry.buildApiRouter();
+  pluginRouter(req, res, next);
+});
+
+// 插件页面路由 - 服务插件注册的 HTML 页面
+router.get('/page/:pluginId/:pagePath', (req, res): void => {
+  const { pluginId, pagePath } = req.params;
+
+  if (!pluginId) {
+    res.status(400).json({ code: -1, message: 'Plugin ID is required' });
+    return;
+  }
+
+  // 获取插件管理器
+  const ob11 = WebUiDataRuntime.getOneBotContext() as NapCatOneBot11Adapter;
+  if (!ob11) {
+    res.status(503).json({ code: -1, message: 'OneBot context not available' });
+    return;
+  }
+
+  const pluginManager = ob11.networkManager.findSomeAdapter('plugin_manager') as OB11PluginMangerAdapter;
+  if (!pluginManager) {
+    res.status(503).json({ code: -1, message: 'Plugin manager not available' });
+    return;
+  }
+
+  // 获取插件路由
+  const routerRegistry = pluginManager.getPluginRouter(pluginId);
+  if (!routerRegistry || !routerRegistry.hasPages()) {
+    res.status(404).json({ code: -1, message: `Plugin '${pluginId}' has no registered pages` });
+    return;
+  }
+
+  // 查找匹配的页面
+  const pages = routerRegistry.getPages();
+  const page = pages.find(p => p.path === '/' + pagePath || p.path === pagePath);
+  if (!page) {
+    res.status(404).json({ code: -1, message: `Page '${pagePath}' not found in plugin '${pluginId}'` });
+    return;
+  }
+
+  // 获取插件路径
+  const pluginPath = routerRegistry.getPluginPath();
+  if (!pluginPath) {
+    res.status(500).json({ code: -1, message: 'Plugin path not available' });
+    return;
+  }
+
+  // 构建 HTML 文件路径并发送
+  const htmlFilePath = path.join(pluginPath, page.htmlFile);
+  if (!fs.existsSync(htmlFilePath)) {
+    res.status(404).json({ code: -1, message: `HTML file not found: ${page.htmlFile}` });
+    return;
+  }
+
+  res.sendFile(htmlFilePath);
+});
 
 export { router as PluginRouter };
