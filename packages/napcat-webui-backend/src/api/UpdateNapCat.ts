@@ -340,7 +340,7 @@ export async function applyPendingUpdates (webUiPathWrapper: NapCatPathWrapper, 
   const configPath = path.join(webUiPathWrapper.configPath, 'napcat-update.json');
 
   if (!fs.existsSync(configPath)) {
-    logger.log('[NapCat Update] No pending updates found');
+    //logger.log('[NapCat Update] No pending updates found');
     return;
   }
 

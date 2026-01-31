@@ -43,7 +43,7 @@ const PluginStoreCard: React.FC<PluginStoreCardProps> = ({
         return {
           text: '更新',
           icon: <IoMdDownload size={16} />,
-          color: 'success' as const,
+          color: 'default' as const,
         };
       default:
         return {
