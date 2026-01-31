@@ -16,6 +16,8 @@ export interface PluginItem {
   description: string;
   /** 作者 */
   author: string;
+  /** 主页链接 */
+  homepage?: string;
   /** 状态: active-运行中, disabled-已禁用, stopped-已停止 */
   status: PluginStatus;
   /** 是否有配置项 */

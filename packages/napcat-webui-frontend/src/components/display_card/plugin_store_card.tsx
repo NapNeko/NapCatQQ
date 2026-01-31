@@ -1,7 +1,9 @@
 import { Button } from '@heroui/button';
 import { Chip } from '@heroui/chip';
+import { Tooltip } from '@heroui/tooltip';
 import { useState } from 'react';
 import { IoMdDownload, IoMdRefresh, IoMdCheckmarkCircle } from 'react-icons/io';
+import { FaGithub } from 'react-icons/fa';
 
 import DisplayCardContainer from './container';
 import { PluginStoreItem } from '@/types/plugin-store';
@@ -20,7 +22,7 @@ const PluginStoreCard: React.FC<PluginStoreCardProps> = ({
   onInstall,
   installStatus = 'not-installed',
 }) => {
-  const { name, version, author, description, tags, id } = data;
+  const { name, version, author, description, tags, id, homepage } = data;
   const [processing, setProcessing] = useState(false);
 
   const handleInstall = () => {
@@ -60,6 +62,19 @@ const PluginStoreCard: React.FC<PluginStoreCardProps> = ({
       title={name}
       tag={
         <div className="ml-auto flex items-center gap-1">
+          {homepage && (
+            <Tooltip content="仓库主页">
+              <Button
+                isIconOnly
+                size='sm'
+                variant='light'
+                className='min-w-6 w-6 h-6 text-default-500 hover:text-default-700'
+                onPress={() => window.open(homepage, '_blank')}
+              >
+                <FaGithub size={14} />
+              </Button>
+            </Tooltip>
+          )}
           {installStatus === 'installed' && (
             <Chip
               color="success"
@@ -104,51 +119,40 @@ const PluginStoreCard: React.FC<PluginStoreCardProps> = ({
         </Button>
       }
     >
-      <div className='grid grid-cols-2 gap-3'>
-        <div className='flex flex-col gap-1 p-3 bg-default-100/50 dark:bg-white/10 rounded-xl border border-transparent hover:border-default-200 transition-colors'>
-          <span className='text-xs text-default-500 dark:text-white/50 font-medium tracking-wide'>
-            作者
-          </span>
-          <div className='text-sm font-medium text-default-700 dark:text-white/90 truncate'>
-            {author || '未知'}
-          </div>
+      <div className='flex flex-col gap-2 h-[120px]'>
+        {/* 作者和包名 */}
+        <div className='flex items-center gap-2 text-xs text-default-500 dark:text-white/50'>
+          <span>作者: <span className='text-default-700 dark:text-white/80'>{author || '未知'}</span></span>
+          <span className='text-default-300'>·</span>
+          <Tooltip content={id}>
+            <span className='truncate max-w-[150px]'>{id}</span>
+          </Tooltip>
         </div>
-        <div className='flex flex-col gap-1 p-3 bg-default-100/50 dark:bg-white/10 rounded-xl border border-transparent hover:border-default-200 transition-colors'>
-          <span className='text-xs text-default-500 dark:text-white/50 font-medium tracking-wide'>
-            版本
-          </span>
-          <div className='text-sm font-medium text-default-700 dark:text-white/90 truncate'>
-            v{version}
-          </div>
-        </div>
-        <div className='col-span-2 flex flex-col gap-1 p-3 bg-default-100/50 dark:bg-white/10 rounded-xl border border-transparent hover:border-default-200 transition-colors'>
-          <span className='text-xs text-default-500 dark:text-white/50 font-medium tracking-wide'>
-            描述
-          </span>
-          <div className='text-sm font-medium text-default-700 dark:text-white/90 break-words line-clamp-2 h-10 overflow-hidden'>
+
+        {/* 描述 */}
+        <div className='flex-1 p-3 bg-default-100/50 dark:bg-white/10 rounded-xl'>
+          <div className='text-sm text-default-700 dark:text-white/90 break-words line-clamp-2'>
             {description || '暂无描述'}
           </div>
         </div>
-        {id && (
-          <div className='flex flex-col gap-1 p-3 bg-default-100/50 dark:bg-white/10 rounded-xl border border-transparent hover:border-default-200 transition-colors'>
-            <span className='text-xs text-default-500 dark:text-white/50 font-medium tracking-wide'>
-              包名
-            </span>
-            <div className='text-sm font-medium text-default-700 dark:text-white/90 break-words line-clamp-2 h-10 overflow-hidden'>
-              {id || '包名'}
-            </div>
-          </div>
-        )}
-        {tags && tags.length > 0 && (
-          <div className='flex flex-col gap-1 p-3 bg-default-100/50 dark:bg-white/10 rounded-xl border border-transparent hover:border-default-200 transition-colors'>
-            <span className='text-xs text-default-500 dark:text-white/50 font-medium tracking-wide'>
-              标签
-            </span>
-            <div className='text-sm font-medium text-default-700 dark:text-white/90 truncate'>
-              {tags.slice(0, 2).join(' · ')}
-            </div>
-          </div>
-        )}
+
+        {/* 标签 */}
+        <div className='flex flex-wrap gap-1 min-h-[24px]'>
+          {tags && tags.length > 0 ? (
+            tags.slice(0, 3).map((tag, index) => (
+              <Chip
+                key={index}
+                size='sm'
+                variant='flat'
+                className='text-xs'
+              >
+                {tag}
+              </Chip>
+            ))
+          ) : (
+            <span className='text-xs text-default-400'>暂无标签</span>
+          )}
+        </div>
       </div>
     </DisplayCardContainer>
   );

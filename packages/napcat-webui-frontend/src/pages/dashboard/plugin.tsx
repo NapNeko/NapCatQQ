@@ -1,5 +1,5 @@
 import { Button } from '@heroui/button';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import toast from 'react-hot-toast';
 import { IoMdRefresh } from 'react-icons/io';
 import { FiUpload } from 'react-icons/fi';
@@ -10,9 +10,11 @@ import PluginDisplayCard from '@/components/display_card/plugin_card';
 import PluginManager, { PluginItem } from '@/controllers/plugin_manager';
 import useDialog from '@/hooks/use-dialog';
 import PluginConfigModal from '@/pages/dashboard/plugin_config_modal';
+import { PluginStoreItem } from '@/types/plugin-store';
 
 export default function PluginPage () {
   const [plugins, setPlugins] = useState<PluginItem[]>([]);
+  const [storePlugins, setStorePlugins] = useState<PluginStoreItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [pluginManagerNotFound, setPluginManagerNotFound] = useState(false);
   const dialog = useDialog();
@@ -25,7 +27,11 @@ export default function PluginPage () {
     setLoading(true);
     setPluginManagerNotFound(false);
     try {
-      const listResult = await PluginManager.getPluginList();
+      // 并行加载本地插件列表和商店插件列表
+      const [listResult, storeResult] = await Promise.all([
+        PluginManager.getPluginList(),
+        PluginManager.getPluginStoreList().catch(() => ({ plugins: [] }))
+      ]);
 
       if (listResult.pluginManagerNotFound) {
         setPluginManagerNotFound(true);
@@ -33,12 +39,32 @@ export default function PluginPage () {
       } else {
         setPlugins(listResult.plugins);
       }
+      setStorePlugins(storeResult.plugins || []);
     } catch (e: any) {
       toast.error(e.message);
     } finally {
       setLoading(false);
     }
   };
+
+  // 创建一个 Map 用于快速查找商店插件的 homepage
+  const storeHomepageMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const plugin of storePlugins) {
+      if (plugin.homepage) {
+        map.set(plugin.id, plugin.homepage);
+      }
+    }
+    return map;
+  }, [storePlugins]);
+
+  // 合并本地插件和商店数据中的 homepage
+  const pluginsWithHomepage = useMemo(() => {
+    return plugins.map(plugin => ({
+      ...plugin,
+      homepage: plugin.homepage || storeHomepageMap.get(plugin.id)
+    }));
+  }, [plugins, storeHomepageMap]);
 
   useEffect(() => {
     loadPlugins();
@@ -172,6 +198,7 @@ export default function PluginPage () {
           isOpen={isOpen}
           onOpenChange={onOpenChange}
           pluginId={currentPluginId}
+          homepage={storeHomepageMap.get(currentPluginId)}
         />
 
         <div className='flex mb-6 items-center gap-4'>
@@ -211,11 +238,11 @@ export default function PluginPage () {
               插件管理器未加载，请检查 plugins 目录是否存在
             </p>
           </div>
-        ) : plugins.length === 0 ? (
+        ) : pluginsWithHomepage.length === 0 ? (
           <div className="text-default-400">暂时没有安装插件</div>
         ) : (
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 justify-start items-stretch gap-x-2 gap-y-4'>
-            {plugins.map(plugin => (
+            {pluginsWithHomepage.map(plugin => (
               <PluginDisplayCard
                 key={plugin.id}
                 data={plugin}

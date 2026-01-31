@@ -22,6 +22,7 @@ export interface DisplayCardProps {
 
 const DisplayCardContainer: React.FC<ContainerProps> = ({
   title: _title,
+  tag,
   action,
   enableSwitch,
   children,
@@ -45,7 +46,8 @@ const DisplayCardContainer: React.FC<ContainerProps> = ({
             </span>
           </div>
         </div>
-        <div className='flex-shrink-0'>{enableSwitch}</div>
+        {tag && <div className='flex-shrink-0'>{tag}</div>}
+        {enableSwitch && <div className='flex-shrink-0'>{enableSwitch}</div>}
       </CardHeader>
       <CardBody className='px-4 py-2 text-sm text-default-600'>{children}</CardBody>
       <CardFooter className='px-4 pb-4 pt-2'>{action}</CardFooter>

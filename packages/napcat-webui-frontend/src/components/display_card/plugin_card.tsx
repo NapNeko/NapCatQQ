@@ -1,6 +1,7 @@
 import { Button } from '@heroui/button';
 import { Switch } from '@heroui/switch';
 import { Chip } from '@heroui/chip';
+import { Tooltip } from '@heroui/tooltip';
 
 import { useState } from 'react';
 import { MdDeleteForever, MdSettings } from 'react-icons/md';
@@ -41,28 +42,27 @@ const PluginDisplayCard: React.FC<PluginDisplayCardProps> = ({
     <DisplayCardContainer
       className='w-full max-w-[420px]'
       action={
-        <div className='flex flex-col gap-2 w-full'>
-          <div className='flex gap-2 w-full'>
+        <div className='flex gap-2 w-full'>
+          <Tooltip content="卸载">
             <Button
-              fullWidth
+              isIconOnly
               radius='full'
               size='sm'
               variant='flat'
-              className='flex-1 bg-default-100 dark:bg-default-50 text-default-600 font-medium hover:bg-danger/20 hover:text-danger transition-colors'
-              startContent={<MdDeleteForever size={16} />}
+              className='bg-default-100 dark:bg-default-50 text-default-600 hover:bg-danger/20 hover:text-danger transition-colors'
               onPress={handleUninstall}
               isDisabled={processing}
             >
-              卸载
+              <MdDeleteForever size={16} />
             </Button>
-          </div>
+          </Tooltip>
           {hasConfig && (
             <Button
               fullWidth
               radius='full'
               size='sm'
               variant='flat'
-              className='bg-default-100 dark:bg-default-50 text-default-600 font-medium hover:bg-secondary/20 hover:text-secondary transition-colors'
+              className='flex-1 bg-default-100 dark:bg-default-50 text-default-600 font-medium hover:bg-secondary/20 hover:text-secondary transition-colors'
               startContent={<MdSettings size={16} />}
               onPress={onConfig}
             >
