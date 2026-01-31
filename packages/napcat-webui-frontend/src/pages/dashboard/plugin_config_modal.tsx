@@ -3,11 +3,9 @@ import { Button } from '@heroui/button';
 import { Input } from '@heroui/input';
 import { Select, SelectItem } from '@heroui/select';
 import { Switch } from '@heroui/switch';
-import { Tooltip } from '@heroui/tooltip';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { EventSourcePolyfill } from 'event-source-polyfill';
-import { IoMdOpen } from 'react-icons/io';
 import PluginManager, { PluginConfigSchemaItem } from '@/controllers/plugin_manager';
 import key from '@/const/key';
 
@@ -16,8 +14,6 @@ interface Props {
   onOpenChange: () => void;
   /** 插件包名 (id) */
   pluginId: string;
-  /** 插件主页 URL */
-  homepage?: string;
 }
 
 /** Schema 更新事件类型 */
@@ -29,7 +25,7 @@ interface SchemaUpdateEvent {
   afterKey?: string;
 }
 
-export default function PluginConfigModal ({ isOpen, onOpenChange, pluginId, homepage }: Props) {
+export default function PluginConfigModal ({ isOpen, onOpenChange, pluginId }: Props) {
   const [loading, setLoading] = useState(false);
   const [schema, setSchema] = useState<PluginConfigSchemaItem[]>([]);
   const [config, setConfig] = useState<Record<string, unknown>>({});
@@ -377,21 +373,6 @@ export default function PluginConfigModal ({ isOpen, onOpenChange, pluginId, hom
               )}
             </ModalBody>
             <ModalFooter>
-              {homepage && (
-                <Tooltip content="反馈问题">
-                  <Button
-                    isIconOnly
-                    variant="light"
-                    onPress={() => {
-                      const issueUrl = homepage.includes('github.com') ? `${homepage}/issues` : homepage;
-                      window.open(issueUrl, '_blank');
-                    }}
-                    className="mr-auto"
-                  >
-                    <IoMdOpen size={18} />
-                  </Button>
-                </Tooltip>
-              )}
               <Button color="danger" variant="light" onPress={onClose}>
                 Close
               </Button>

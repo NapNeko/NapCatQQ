@@ -13,7 +13,6 @@ export interface PluginPackageJson {
   main?: string;
   description?: string;
   author?: string;
-  homepage?: string;
 }
 
 // ==================== 插件配置 Schema ====================

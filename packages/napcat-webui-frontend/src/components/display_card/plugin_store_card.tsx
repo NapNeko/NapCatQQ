@@ -2,8 +2,8 @@ import { Button } from '@heroui/button';
 import { Chip } from '@heroui/chip';
 import { Tooltip } from '@heroui/tooltip';
 import { useState } from 'react';
+import clsx from 'clsx';
 import { IoMdDownload, IoMdRefresh, IoMdCheckmarkCircle } from 'react-icons/io';
-import { FaGithub } from 'react-icons/fa';
 
 import DisplayCardContainer from './container';
 import { PluginStoreItem } from '@/types/plugin-store';
@@ -59,28 +59,32 @@ const PluginStoreCard: React.FC<PluginStoreCardProps> = ({
   return (
     <DisplayCardContainer
       className='w-full max-w-[420px]'
-      title={name}
+      title={
+        <div className="flex items-baseline gap-2">
+          {homepage ? (
+            <Tooltip content="打开插件主页">
+              <span
+                className="cursor-pointer hover:text-default-900 dark:hover:text-white transition-colors underline decoration-dashed decoration-default-400/70 underline-offset-4 hover:decoration-default-600"
+                onClick={() => window.open(homepage, '_blank')}
+              >
+                {name}
+              </span>
+            </Tooltip>
+          ) : (
+            <span>{name}</span>
+          )}
+          <span className="text-[10px] font-normal text-default-400">v{version}</span>
+        </div>
+      }
       tag={
         <div className="ml-auto flex items-center gap-1">
-          {homepage && (
-            <Tooltip content="仓库主页">
-              <Button
-                isIconOnly
-                size='sm'
-                variant='light'
-                className='min-w-6 w-6 h-6 text-default-500 hover:text-default-700'
-                onPress={() => window.open(homepage, '_blank')}
-              >
-                <FaGithub size={14} />
-              </Button>
-            </Tooltip>
-          )}
           {installStatus === 'installed' && (
             <Chip
               color="success"
               size="sm"
               variant="flat"
-              startContent={<IoMdCheckmarkCircle size={14} />}
+              className="h-6 text-[10px] bg-success-50 dark:bg-success-500/10 text-success-600"
+              startContent={<IoMdCheckmarkCircle size={12} />}
             >
               已安装
             </Chip>
@@ -90,17 +94,11 @@ const PluginStoreCard: React.FC<PluginStoreCardProps> = ({
               color="warning"
               size="sm"
               variant="flat"
+              className="h-6 text-[10px] bg-warning-50 dark:bg-warning-500/10 text-warning-600"
             >
               可更新
             </Chip>
           )}
-          <Chip
-            color="primary"
-            size="sm"
-            variant="flat"
-          >
-            v{version}
-          </Chip>
         </div>
       }
       enableSwitch={undefined}
@@ -119,38 +117,46 @@ const PluginStoreCard: React.FC<PluginStoreCardProps> = ({
         </Button>
       }
     >
-      <div className='flex flex-col gap-2 h-[120px]'>
+      <div className='flex flex-col gap-2 h-[132px]'>
         {/* 作者和包名 */}
-        <div className='flex items-center gap-2 text-xs text-default-500 dark:text-white/50'>
-          <span>作者: <span className='text-default-700 dark:text-white/80'>{author || '未知'}</span></span>
-          <span className='text-default-300'>·</span>
+        <div className='flex items-center gap-2 text-[12px] text-default-400'>
+          <span className="flex items-center gap-1">
+            作者: <span className='text-default-600 dark:text-white/70 font-medium'>{author || '未知'}</span>
+          </span>
+          <span className='text-default-300'>/</span>
           <Tooltip content={id}>
-            <span className='truncate max-w-[150px]'>{id}</span>
+            <span className='truncate max-w-[140px] opacity-70 italic'>{id}</span>
           </Tooltip>
         </div>
 
         {/* 描述 */}
-        <div className='flex-1 p-3 bg-default-100/50 dark:bg-white/10 rounded-xl'>
-          <div className='text-sm text-default-700 dark:text-white/90 break-words line-clamp-2'>
-            {description || '暂无描述'}
+        <Tooltip content={description || '暂无描述'}>
+          <div className='h-[62px] p-3 bg-default-100/30 dark:bg-white/5 rounded-xl border border-default-100 dark:border-white/5 flex items-center'>
+            <div className='text-[14px] leading-relaxed text-default-600 dark:text-white/80 break-words line-clamp-2 text-center w-full'>
+              {description || '暂无描述'}
+            </div>
           </div>
-        </div>
+        </Tooltip>
 
-        {/* 标签 */}
-        <div className='flex flex-wrap gap-1 min-h-[24px]'>
+        {/* 标签栏 - 优化后的极简风格 */}
+        <div className='flex flex-wrap gap-1.5 min-h-[20px] items-center pt-1'>
           {tags && tags.length > 0 ? (
-            tags.slice(0, 3).map((tag, index) => (
-              <Chip
+            tags.map((tag, index) => (
+              <div 
                 key={index}
-                size='sm'
-                variant='flat'
-                className='text-xs'
+                className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-default-100/50 dark:bg-white/10 text-[11px] text-default-500 dark:text-white/60 border border-transparent hover:border-default-200 transition-all"
               >
+                <span className={clsx(
+                  "w-1 h-1 rounded-full",
+                  tag === '官方' ? "bg-secondary-400" : 
+                  tag === '工具' ? "bg-primary-400" : 
+                  tag === '娱乐' ? "bg-warning-400" : "bg-default-400"
+                )} />
                 {tag}
-              </Chip>
+              </div>
             ))
           ) : (
-            <span className='text-xs text-default-400'>暂无标签</span>
+            <span className='text-[10px] text-default-300 italic'>no tags</span>
           )}
         </div>
       </div>
