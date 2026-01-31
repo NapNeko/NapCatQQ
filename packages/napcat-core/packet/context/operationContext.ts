@@ -95,12 +95,15 @@ export class PacketOperationContext {
         .filter(Boolean)
     );
     const res = await Promise.allSettled(reqList);
-    this.context.logger.info(`上传资源${res.length}个，失败${res.filter((r) => r.status === 'rejected').length}个`);
-    res.forEach((result, index) => {
-      if (result.status === 'rejected') {
-        this.context.logger.error(`上传第${index + 1}个资源失败：${result.reason.stack}`);
-      }
-    });
+    const failedCount = res.filter((r) => r.status === 'rejected').length;
+    if (failedCount > 0) {
+      this.context.logger.warn(`上传资源${res.length}个，失败${failedCount}个`);
+      res.forEach((result, index) => {
+        if (result.status === 'rejected') {
+          this.context.logger.error(`上传第${index + 1}个资源失败：${result.reason.stack}`);
+        }
+      });
+    }
   }
 
   async UploadImage (img: PacketMsgPicElement) {
