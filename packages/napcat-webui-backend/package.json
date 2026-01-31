@@ -19,6 +19,7 @@
     "@simplewebauthn/server": "^13.2.2",
     "@sinclair/typebox": "^0.34.38",
     "ajv": "^8.13.0",
+    "archiver": "^7.0.1",
     "compressing": "^1.10.3",
     "compression": "^1.8.1",
     "express": "^5.0.0",
@@ -27,13 +28,16 @@
     "multer": "^2.0.1",
     "napcat-common": "workspace:*",
     "napcat-pty": "workspace:*",
+    "unzipper": "^0.10.14",
     "ws": "^8.18.3"
   },
   "devDependencies": {
+    "@types/archiver": "^7.0.0",
     "@types/compression": "^1.8.1",
     "@types/express": "^5.0.0",
     "@types/multer": "^1.4.12",
     "@types/node": "^22.0.1",
+    "@types/unzipper": "^0.10.9",
     "@types/ws": "^8.5.12"
   },
   "engines": {
