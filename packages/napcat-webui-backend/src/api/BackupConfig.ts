@@ -1,6 +1,7 @@
 import { RequestHandler } from 'express';
 import { existsSync, createReadStream, mkdirSync, rmSync, cpSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, normalize } from 'node:path';
+import os from 'node:os';
 import { webUiPathWrapper } from '@/napcat-webui-backend/index';
 import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
 import { sendError, sendSuccess } from '@/napcat-webui-backend/src/utils/response';
@@ -60,16 +61,8 @@ export const BackupExportConfigHandler: RequestHandler = async (_req, res) => {
   }
 };
 
-// 导入配置
-// 将上传的zip文件解压到工作目录下的tmp目录，然后覆盖到config文件夹
+// 导入配置，将上传的zip文件解压到工作目录下的tmp目录，然后覆盖到config文件夹
 export const BackupImportConfigHandler: RequestHandler = async (req, res) => {
-  // 获取QQ登录状态
-  const isLogin = WebUiDataRuntime.getQQLoginStatus();
-  // 如果未登录，返回错误
-  if (!isLogin) {
-    return sendError(res, 'Not Login');
-  }
-
   // 检查是否有文件上传
   if (!req.file) {
     return sendError(res, '请选择要导入的配置文件');
@@ -77,8 +70,8 @@ export const BackupImportConfigHandler: RequestHandler = async (req, res) => {
 
   try {
     const configPath = webUiPathWrapper.configPath;
-    const tmpPath = join(webUiPathWrapper.cachePath, './tmp');
-    const backupRootPath = join(webUiPathWrapper.cachePath, './backup');
+    const tmpPath = join(os.tmpdir(), 'napcat-upload', 'tmp');
+    const backupRootPath = join(os.tmpdir(), 'napcat-upload', 'backup');
     let extractPath = join(tmpPath, 'imported_config');
     const uploadedFilePath = req.file.path;
 
@@ -129,6 +122,14 @@ export const BackupImportConfigHandler: RequestHandler = async (req, res) => {
         for (const entry of entries) {
           const srcPath = join(src, entry.name);
           const destPath = join(dest, entry.name);
+
+          // 防止路径穿越攻击
+          const normalizedDestPath = normalize(destPath);
+          const normalizedDestDir = normalize(dest);
+          if (!normalizedDestPath.startsWith(normalizedDestDir)) {
+            continue;
+          }
+
           if (entry.isDirectory()) {
             mkdirSync(destPath, { recursive: true });
             copyRecursive(srcPath, destPath);
@@ -146,6 +147,14 @@ export const BackupImportConfigHandler: RequestHandler = async (req, res) => {
       for (const entry of entries) {
         const srcPath = join(src, entry.name);
         const destPath = join(dest, entry.name);
+
+        // 防止路径穿越攻击
+        const normalizedDestPath = normalize(destPath);
+        const normalizedDestDir = normalize(dest);
+        if (!normalizedDestPath.startsWith(normalizedDestDir)) {
+          continue;
+        }
+
         if (entry.isDirectory()) {
           mkdirSync(destPath, { recursive: true });
           copyRecursive(srcPath, destPath);
@@ -156,16 +165,13 @@ export const BackupImportConfigHandler: RequestHandler = async (req, res) => {
     };
     copyRecursive(extractPath, configPath);
 
-    // 清理临时文件
-    rmSync(join(tmpPath, 'imported_config'), { recursive: true, force: true });
-    rmSync(uploadedFilePath, { force: true });
-
     return sendSuccess(res, {
       message: '配置导入成功，重启后生效~',
       backupPath: backupPath
     });
 
   } catch (error) {
+    console.error('导入配置失败:', error);
     const msg = (error as Error).message;
     return sendError(res, `导入配置失败: ${msg}`);
   }

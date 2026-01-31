@@ -1,8 +1,7 @@
 import { Button } from '@heroui/button';
 import toast from 'react-hot-toast';
 import { LuDownload, LuUpload } from 'react-icons/lu';
-
-import key from '@/const/key';
+import { requestServerWithFetch } from '@/utils/request';
 
 // 导入配置
 const handleImportConfig = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -19,15 +18,8 @@ const handleImportConfig = async (event: React.ChangeEvent<HTMLInputElement>) =>
     const formData = new FormData();
     formData.append('configFile', file);
 
-    const token = localStorage.getItem(key.token);
-    const headers: HeadersInit = {};
-    if (token) {
-      headers['Authorization'] = `Bearer ${JSON.parse(token)}`;
-    }
-
-    const response = await fetch('/api/OB11Config/ImportConfig', {
+    const response = await requestServerWithFetch('/OB11Config/ImportConfig', {
       method: 'POST',
-      headers,
       body: formData,
     });
 
@@ -37,7 +29,12 @@ const handleImportConfig = async (event: React.ChangeEvent<HTMLInputElement>) =>
     }
 
     const result = await response.json();
-    toast.success(result.data?.message || '配置导入成功。');
+    // 检查是否成功导入
+    if (result.code === 0) {
+      toast.success(result.data?.message || '配置导入成功。');
+    } else {
+      toast.error(`配置导入失败: ${result.data?.message || '未知错误'}`);
+    }
 
   } catch (error) {
     const msg = (error as Error).message;
@@ -51,16 +48,8 @@ const handleImportConfig = async (event: React.ChangeEvent<HTMLInputElement>) =>
 // 导出配置
 const handleExportConfig = async () => {
   try {
-    const token = localStorage.getItem(key.token);
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${JSON.parse(token)}`;
-    }
-    const response = await fetch('/api/OB11Config/ExportConfig', {
+    const response = await requestServerWithFetch('/OB11Config/ExportConfig', {
       method: 'GET',
-      headers,
     });
 
     if (!response.ok) {
