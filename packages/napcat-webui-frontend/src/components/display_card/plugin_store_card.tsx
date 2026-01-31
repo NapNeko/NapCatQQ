@@ -24,6 +24,7 @@ const PluginStoreCard: React.FC<PluginStoreCardProps> = ({
 }) => {
   const { name, version, author, description, tags, id, homepage } = data;
   const [processing, setProcessing] = useState(false);
+  const displayId = id?.replace(/^napcat-plugin-/, '') || id;
 
   const handleInstall = () => {
     setProcessing(true);
@@ -58,7 +59,7 @@ const PluginStoreCard: React.FC<PluginStoreCardProps> = ({
 
   return (
     <DisplayCardContainer
-      className='w-full max-w-[420px]'
+      className='w-full max-w-[420px] md:max-w-[460px] lg:max-w-[520px] 2xl:max-w-[560px]'
       title={
         <div className="flex items-baseline gap-2">
           {homepage ? (
@@ -125,7 +126,7 @@ const PluginStoreCard: React.FC<PluginStoreCardProps> = ({
           </span>
           <span className='text-default-300'>/</span>
           <Tooltip content={id}>
-            <span className='truncate max-w-[140px] opacity-70 italic'>{id}</span>
+            <span className='truncate max-w-[160px] opacity-70 italic'>{displayId}</span>
           </Tooltip>
         </div>
 
