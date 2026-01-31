@@ -123,8 +123,8 @@ export class PluginLoader {
       const entryFile = this.findEntryFile(pluginDir, packageJson);
       const entryPath = entryFile ? path.join(pluginDir, entryFile) : undefined;
 
-      // 获取启用状态（默认启用）
-      const enable = statusConfig[pluginId] !== false;
+      // 获取启用状态（默认禁用，内置插件除外）
+      const enable = statusConfig[pluginId] ?? (pluginId === 'napcat-plugin-builtin');
 
       // 创建插件条目
       const entry: PluginEntry = {
@@ -159,7 +159,7 @@ export class PluginLoader {
         id: dirname, // 使用目录名作为 ID
         fileId: dirname,
         pluginPath: path.join(this.pluginPath, dirname),
-        enable: statusConfig[dirname] !== false,
+        enable: statusConfig[dirname] ?? (dirname === 'napcat-plugin-builtin'),
         loaded: false,
         runtime: {
           status: 'error',

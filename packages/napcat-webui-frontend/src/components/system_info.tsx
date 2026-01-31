@@ -260,14 +260,14 @@ const NewVersionTip = (props: NewVersionTipProps) => {
       <div className="cursor-pointer flex items-center justify-center" onClick={updateStatus === 'updating' ? undefined : showUpdateDialog}>
         <Chip
           size="sm"
-          color="danger"
+          color="primary"
           variant="flat"
           classNames={{
             content: "font-bold text-[10px] px-1 flex items-center justify-center",
             base: "h-5 min-h-5 min-w-[42px]"
           }}
         >
-          {updateStatus === 'updating' ? <Spinner size="sm" color="danger" classNames={{ wrapper: "w-3 h-3" }} /> : 'New'}
+          {updateStatus === 'updating' ? <Spinner size="sm" color="primary" classNames={{ wrapper: "w-3 h-3" }} /> : 'New'}
         </Chip>
       </div>
     </Tooltip>
