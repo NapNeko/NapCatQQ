@@ -316,6 +316,11 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> i
       entry = newEntry;
     }
 
+    if (!entry.enable) {
+      this.logger.log(`[PluginManager] Skipping loading disabled plugin: ${pluginId}`);
+      return false;
+    }
+
     return await this.loadPlugin(entry);
   }
 
