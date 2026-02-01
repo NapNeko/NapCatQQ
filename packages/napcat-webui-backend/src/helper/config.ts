@@ -32,8 +32,6 @@ const WebUiConfigSchema = Type.Object({
   ipBlacklist: Type.Array(Type.String(), { default: [] }),
   // 是否启用 X-Forwarded-For 获取真实IP
   enableXForwardedFor: Type.Boolean({ default: false }),
-  // 上传文件大小限制（MB）
-  uploadSizeLimit: Type.Number({ default: 50 }),
 });
 
 export type WebUiConfigType = Static<typeof WebUiConfigSchema>;
