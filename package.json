@@ -14,7 +14,8 @@
     "test": "pnpm --filter napcat-test run test",
     "test:ui": "pnpm --filter napcat-test run test:ui",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "build:shell:config": "pnpm --filter napcat-shell run build && pnpm --filter napcat-develop run copy-env"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^16.0.3",

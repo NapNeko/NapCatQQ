@@ -1,27 +1,28 @@
 {
-    "name": "napcat-develop",
-    "version": "0.0.1",
-    "private": true,
-    "type": "module",
-    "main": "index.js",
-    "scripts": {
-        "dev": "powershell ./nodeTest.ps1"
+  "name": "napcat-develop",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "powershell ./nodeTest.ps1",
+    "copy-env": "xcopy config ..\\napcat-shell\\dist\\config /E /I /Y"
+  },
+  "exports": {
+    ".": {
+      "require": "./index.js"
     },
-    "exports": {
-        ".": {
-            "require": "./index.js"
-        },
-        "./*": {
-            "require": "./*"
-        }
-    },
-    "dependencies": {
-        "fs-extra": "^11.3.2"
-    },
-    "devDependencies": {
-        "@types/node": "^22.0.1"
-    },
-    "engines": {
-        "node": ">=18.0.0"
+    "./*": {
+      "require": "./*"
     }
+  },
+  "dependencies": {
+    "fs-extra": "^11.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
 }
