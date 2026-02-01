@@ -1,5 +1,6 @@
 import { Button } from '@heroui/button';
 import { Chip } from '@heroui/chip';
+import { Tooltip } from '@heroui/tooltip';
 import { useState } from 'react';
 import { IoMdDownload, IoMdRefresh, IoMdCheckmarkCircle } from 'react-icons/io';
 
@@ -20,7 +21,7 @@ const PluginStoreCard: React.FC<PluginStoreCardProps> = ({
   onInstall,
   installStatus = 'not-installed',
 }) => {
-  const { name, version, author, description, tags, id } = data;
+  const { name, version, author, description, tags, id, homepage } = data;
   const [processing, setProcessing] = useState(false);
 
   const handleInstall = () => {
@@ -53,11 +54,31 @@ const PluginStoreCard: React.FC<PluginStoreCardProps> = ({
   };
 
   const buttonConfig = getButtonConfig();
+  const titleContent = homepage ? (
+    <Tooltip
+      content="跳转到插件主页"
+      placement="top"
+      showArrow
+      offset={8}
+      delay={200}
+    >
+      <a
+        href={homepage}
+        target="_blank"
+        rel="noreferrer"
+        className="text-inherit inline-block bg-no-repeat bg-left-bottom [background-image:repeating-linear-gradient(90deg,currentColor_0_2px,transparent_2px_5px)] [background-size:0%_2px] hover:[background-size:100%_2px] transition-[background-size] duration-200 ease-out"
+      >
+        {name}
+      </a>
+    </Tooltip>
+  ) : (
+    name
+  );
 
   return (
     <DisplayCardContainer
       className='w-full max-w-[420px]'
-      title={name}
+      title={titleContent}
       tag={
         <div className="ml-auto flex items-center gap-1">
           {installStatus === 'installed' && (
