@@ -2,10 +2,9 @@ import { Button } from '@heroui/button';
 import { useDisclosure } from '@heroui/modal';
 import { Tab, Tabs } from '@heroui/tabs';
 import clsx from 'clsx';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import { IoMdRefresh } from 'react-icons/io';
-import { FiDownload, FiUpload } from 'react-icons/fi';
 
 import AddButton from '@/components/button/add_button';
 import HTTPClientDisplayCard from '@/components/display_card/http_client';
@@ -56,9 +55,7 @@ export default function NetworkPage () {
     deleteNetworkConfig,
     enableNetworkConfig,
     enableDebugNetworkConfig,
-    updateSingleConfig,
   } = useConfig();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [activeField, setActiveField] =
     useState<keyof OneBotConfig['network']>('httpServers');
   const [activeName, setActiveName] = useState<string>('');
@@ -100,45 +97,6 @@ export default function NetworkPage () {
     setActiveField(key);
     setActiveName('');
     onOpen();
-  };
-
-  // 导出网络配置
-  const handleExport = () => {
-    const blob = new Blob([JSON.stringify(config.network, null, 2)], { type: 'application/json' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `network-config-${Date.now()}.json`;
-    link.click();
-    URL.revokeObjectURL(link.href);
-    toast.success('导出成功');
-  };
-
-  // 导入网络配置
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    e.target.value = '';
-
-    try {
-      const data = JSON.parse(await file.text()) as OneBotConfig['network'];
-      const keys: (keyof OneBotConfig['network'])[] = ['httpServers', 'httpClients', 'httpSseServers', 'websocketServers', 'websocketClients'];
-      if (keys.some(k => !Array.isArray(data[k]))) throw new Error('配置格式错误');
-
-      dialog.confirm({
-        title: '导入配置',
-        content: '确定导入？这将覆盖现有网络配置。',
-        onConfirm: async () => {
-          try {
-            await updateSingleConfig('network', data);
-            toast.success('导入成功');
-          } catch (err) {
-            toast.error(`导入失败: ${(err as Error).message}`);
-          }
-        },
-      });
-    } catch (err) {
-      toast.error(`解析失败: ${(err as Error).message}`);
-    }
   };
 
   const onDelete = async (
@@ -415,21 +373,6 @@ export default function NetworkPage () {
         <PageLoading loading={loading} />
         <div className='flex mb-6 items-center gap-4'>
           <AddButton onOpen={handleClickCreate} />
-          <Button
-            className="bg-default-100/50 hover:bg-default-200/50 text-default-700 backdrop-blur-md"
-            startContent={<FiUpload size={18} />}
-            onPress={handleExport}
-          >
-            导出
-          </Button>
-          <Button
-            className="bg-default-100/50 hover:bg-default-200/50 text-default-700 backdrop-blur-md"
-            startContent={<FiDownload size={18} />}
-            onPress={() => fileInputRef.current?.click()}
-          >
-            导入
-          </Button>
-          <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleFileChange} />
           <Button
             isIconOnly
             className="bg-default-100/50 hover:bg-default-200/50 text-default-700 backdrop-blur-md"
