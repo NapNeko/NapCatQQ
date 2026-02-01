@@ -40,9 +40,8 @@ const DisplayCardContainer: React.FC<ContainerProps> = ({
     >
       <CardHeader className='p-4 pb-2 flex items-center justify-between gap-3'>
         <div className='flex-1 min-w-0 mr-2'>
-          {/* 限制标题区域最大宽度并隐藏溢出，确保 long title 能正确截断显示省略号 */}
-          <div className='inline-flex items-center px-3 py-1 rounded-lg bg-default-100/50 dark:bg-white/10 border border-transparent dark:border-white/5 max-w-full overflow-hidden'>
-            <span className='block font-bold text-default-600 dark:text-white/90 text-sm truncate select-text whitespace-nowrap'>
+          <div className='inline-flex items-center px-3 py-1 rounded-lg bg-default-100/50 dark:bg-white/10 border border-transparent dark:border-white/5'>
+            <span className='font-bold text-default-600 dark:text-white/90 text-sm truncate select-text'>
               {_title}
             </span>
           </div>
