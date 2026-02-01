@@ -123,9 +123,14 @@ export async function InitWebUi (logger: ILogWrapper, pathWrapper: NapCatPathWra
     return;
   }
 
-  // 检查并更新默认密码（仅在启用WebUI时）
-  if (config.token === 'napcat' || !config.token) {
-    const randomToken = process.env['NAPCAT_WEBUI_SECRET_KEY'] || getRandomToken(8);
+  // 优先使用环境变量覆盖 Token
+  if (process.env['NAPCAT_WEBUI_SECRET_KEY'] && config.token !== process.env['NAPCAT_WEBUI_SECRET_KEY']) {
+    await WebUiConfig.UpdateWebUIConfig({ token: process.env['NAPCAT_WEBUI_SECRET_KEY'] });
+    logger.log(`[NapCat] [WebUi] 检测到环境变量配置，已更新 WebUI Token 为 ${process.env['NAPCAT_WEBUI_SECRET_KEY']}`);
+    config = await WebUiConfig.GetWebUIConfig();
+  } else if (config.token === 'napcat' || !config.token) {
+    // 只有没设置环境变量，且是默认密码时，才生成随机密码
+    const randomToken = getRandomToken(8);
     await WebUiConfig.UpdateWebUIConfig({ token: randomToken });
     logger.log('[NapCat] [WebUi] 检测到默认密码，已自动更新为安全密码');
 
