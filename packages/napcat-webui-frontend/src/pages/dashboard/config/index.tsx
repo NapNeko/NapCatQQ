@@ -13,6 +13,7 @@ import ServerConfigCard from './server';
 import SSLConfigCard from './ssl';
 import ThemeConfigCard from './theme';
 import WebUIConfigCard from './webui';
+import BackupConfigCard from './backup';
 
 export interface ConfigPageProps {
   children?: React.ReactNode;
@@ -106,6 +107,11 @@ export default function ConfigPage () {
         <Tab title='主题配置' key='theme'>
           <ConfigPageItem size='lg'>
             <ThemeConfigCard />
+          </ConfigPageItem>
+        </Tab>
+        <Tab title='备份与恢复' key='backup'>
+          <ConfigPageItem>
+            <BackupConfigCard />
           </ConfigPageItem>
         </Tab>
       </Tabs>
