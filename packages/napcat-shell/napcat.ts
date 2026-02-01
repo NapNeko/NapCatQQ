@@ -7,11 +7,33 @@ import { AuthHelper } from '@/napcat-webui-backend/src/helper/SignToken';
 import { webUiRuntimePort } from '@/napcat-webui-backend/index';
 import { createProcessManager, type IProcessManager, type IWorkerProcess } from './process-api';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 
-// ES 模块中获取 __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const pathWrapper = new NapCatPathWrapper();
+const envPath = path.join(__dirname, 'config', '.env');
+if (fs.existsSync(envPath)) {
+  try {
+    const data = fs.readFileSync(envPath, 'utf8');
+    let loadedCount = 0;
+    data.split(/\r?\n/).forEach(line => {
+      line = line.trim();
+      if (line && !line.startsWith('#')) {
+        const parts = line.split('=');
+        const key = parts[0]?.trim();
+        const value = parts.slice(1).join('=').trim();
+        if (key && value) {
+          process.env[key] = value;
+          loadedCount++;
+        }
+      }
+    });
+  } catch (e) {
+    console.log('[NapCat] Failed to load .env file:', e);
+  }
+}
 
 // 环境变量配置
 const ENV = {
@@ -20,6 +42,7 @@ const ENV = {
   isPipeDisabled: process.env['NAPCAT_DISABLE_PIPE'] === '1',
 } as const;
 
+
 // Worker 消息类型
 interface WorkerMessage {
   type: 'restart' | 'restart-prepare' | 'shutdown';
@@ -27,8 +50,7 @@ interface WorkerMessage {
   port?: number;
 }
 
-// 初始化日志
-const pathWrapper = new NapCatPathWrapper();
+
 const logger = new LogWrapper(pathWrapper.logsPath);
 
 // 进程管理器和当前 Worker 进程引用
@@ -223,21 +245,21 @@ async function startWorker (passQuickLogin: boolean = true, secretKey?: string, 
     // 如果不是由于主动重启或关闭引起的退出，尝试自动重新拉起
     if (!isRestarting && !isShuttingDown) {
       const now = Date.now();
-      
+
       // 清理超出时间窗口的崩溃记录
       while (recentCrashTimestamps.length > 0 && now - recentCrashTimestamps[0]! > CRASH_TIME_WINDOW) {
         recentCrashTimestamps.shift();
       }
-      
+
       // 记录本次崩溃
       recentCrashTimestamps.push(now);
-      
+
       // 检查是否超过崩溃阈值
       if (recentCrashTimestamps.length >= MAX_CRASHES_IN_WINDOW) {
         logger.logError(`[NapCat] [${processType}] Worker进程在 ${CRASH_TIME_WINDOW / 1000} 秒内异常退出 ${MAX_CRASHES_IN_WINDOW} 次，主进程退出`);
         process.exit(1);
       }
-      
+
       logger.logWarn(`[NapCat] [${processType}] Worker进程意外退出 (${recentCrashTimestamps.length}/${MAX_CRASHES_IN_WINDOW})，正在尝试重新拉起...`);
       startWorker(true).catch(e => {
         logger.logError(`[NapCat] [${processType}] 重新拉起Worker进程失败:`, e);
