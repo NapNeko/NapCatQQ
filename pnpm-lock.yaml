@@ -354,6 +354,9 @@ importers:
       napcat-core:
         specifier: workspace:*
         version: link:../napcat-core
+      napcat-image-size:
+        specifier: workspace:*
+        version: link:../napcat-image-size
     devDependencies:
       vitest:
         specifier: ^4.0.9

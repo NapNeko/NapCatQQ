@@ -11,6 +11,7 @@
     "vitest": "^4.0.9"
   },
   "dependencies": {
-    "napcat-core": "workspace:*"
+    "napcat-core": "workspace:*",
+    "napcat-image-size": "workspace:*"
   }
 }
