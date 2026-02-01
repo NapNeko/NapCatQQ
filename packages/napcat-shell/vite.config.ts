@@ -46,7 +46,7 @@ const ShellBaseConfig = (source_map: boolean = false) =>
         '@/napcat-onebot': resolve(__dirname, '../napcat-onebot'),
         '@/napcat-pty': resolve(__dirname, '../napcat-pty'),
         '@/napcat-webui-backend': resolve(__dirname, '../napcat-webui-backend'),
-        '@/image-size': resolve(__dirname, '../image-size'),
+        '@/napcat-image-size': resolve(__dirname, '../napcat-image-size'),
         '@/napcat-protocol': resolve(__dirname, '../napcat-protocol'),
       },
     },
