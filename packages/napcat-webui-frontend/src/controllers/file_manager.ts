@@ -218,4 +218,11 @@ export default class FileManager {
     );
     return data.data;
   }
+
+  public static async checkWebUIFontExists () {
+    const { data } = await serverRequest.get<ServerResponse<boolean>>(
+      '/File/font/exists/webui'
+    );
+    return data.data;
+  }
 }

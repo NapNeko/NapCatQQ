@@ -231,10 +231,13 @@ export async function InitWebUi (logger: ILogWrapper, pathWrapper: NapCatPathWra
     // 添加字体变量
     if (fontMode === 'aacute') {
       css += "--font-family-base: 'Aa偷吃可爱长大的', var(--font-family-fallbacks) !important;";
+      css += "--font-family-mono: 'Aa偷吃可爱长大的', var(--font-family-fallbacks) !important;";
     } else if (fontMode === 'custom') {
       css += "--font-family-base: 'CustomFont', var(--font-family-fallbacks) !important;";
+      css += "--font-family-mono: 'CustomFont', var(--font-family-fallbacks) !important;";
     } else {
       css += '--font-family-base: var(--font-family-fallbacks) !important;';
+      css += '--font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;';
     }
     css += '}';
 
@@ -245,10 +248,13 @@ export async function InitWebUi (logger: ILogWrapper, pathWrapper: NapCatPathWra
     // 添加字体变量
     if (fontMode === 'aacute') {
       css += "--font-family-base: 'Aa偷吃可爱长大的', var(--font-family-fallbacks) !important;";
+      css += "--font-family-mono: 'Aa偷吃可爱长大的', var(--font-family-fallbacks) !important;";
     } else if (fontMode === 'custom') {
       css += "--font-family-base: 'CustomFont', var(--font-family-fallbacks) !important;";
+      css += "--font-family-mono: 'CustomFont', var(--font-family-fallbacks) !important;";
     } else {
       css += '--font-family-base: var(--font-family-fallbacks) !important;';
+      css += '--font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;';
     }
     css += '}';
 
