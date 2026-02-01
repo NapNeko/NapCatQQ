@@ -72,6 +72,7 @@ export const GetPluginListHandler: RequestHandler = async (_req, res) => {
     version: string;
     description: string;
     author: string;
+    homepage?: string;
     status: string;
     hasConfig: boolean;
     hasPages: boolean;
@@ -109,6 +110,7 @@ export const GetPluginListHandler: RequestHandler = async (_req, res) => {
       version: p.version || '0.0.0',
       description: p.packageJson?.description || '',
       author: p.packageJson?.author || '',
+      homepage: p.packageJson?.homepage,
       status,
       hasConfig: !!(p.runtime.module?.plugin_config_schema || p.runtime.module?.plugin_config_ui),
       hasPages

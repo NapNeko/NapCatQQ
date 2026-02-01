@@ -4,7 +4,7 @@ import clsx from 'clsx';
 import key from '@/const/key';
 
 export interface ContainerProps {
-  title: React.ReactNode;
+  title: string;
   tag?: React.ReactNode;
   action: React.ReactNode;
   enableSwitch: React.ReactNode;
