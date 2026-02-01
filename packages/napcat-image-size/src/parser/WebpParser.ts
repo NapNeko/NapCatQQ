@@ -66,11 +66,11 @@ export class WebpParser implements ImageParser {
           } else if (this.isChunkType(buffer, 12, this.CHUNK_VP8X)) {
             // VP8X格式 - 扩展WebP
             // 24位宽度和高度(减去1)
-            if (!buffer[24] || !buffer[25] || !buffer[26] || !buffer[27] || !buffer[28] || !buffer[29]) {
+            if (buffer.length < 30) {
               return resolve(undefined);
             }
-            const width = 1 + ((buffer[24] | (buffer[25] << 8) | (buffer[26] << 16)) & 0xFFFFFF);
-            const height = 1 + ((buffer[27] | (buffer[28] << 8) | (buffer[29] << 16)) & 0xFFFFFF);
+            const width = 1 + ((buffer[24]! | (buffer[25]! << 8) | (buffer[26]! << 16)) & 0xFFFFFF);
+            const height = 1 + ((buffer[27]! | (buffer[28]! << 8) | (buffer[29]! << 16)) & 0xFFFFFF);
             return resolve({ width, height });
           } else {
             // 未知的WebP子格式
