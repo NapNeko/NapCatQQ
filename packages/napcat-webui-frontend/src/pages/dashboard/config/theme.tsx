@@ -500,10 +500,13 @@ const ThemeConfigCard = () => {
                             return (
                               <ColorPicker
                                 color={color}
-                                onChange={(result) => {
-                                  onChange(
-                                    `${result.hsl.h} ${result.hsl.s * 100}% ${result.hsl.l * 100}%`
-                                  );
+                                onChange={(hslString) => {
+                                  // ColorPicker returns hsl(h, s%, l%) string
+                                  // We need to parse it and convert to "h s% l%" format for theme config
+                                  const match = hslString.match(/hsl\((\d+(?:\.\d+)?),\s*(\d+(?:\.\d+)?)%,\s*(\d+(?:\.\d+)?)%\)/);
+                                  if (match) {
+                                    onChange(`${match[1]} ${match[2]}% ${match[3]}%`);
+                                  }
                                 }}
                               />
                             );
