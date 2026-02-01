@@ -180,11 +180,14 @@ export const applyFont = (mode: string) => {
 
   if (mode === 'aacute') {
     root.style.setProperty('--font-family-base', "'Aa偷吃可爱长大的', var(--font-family-fallbacks)", 'important');
+    root.style.setProperty('--font-family-mono', "'Aa偷吃可爱长大的', var(--font-family-fallbacks)", 'important');
   } else if (mode === 'custom') {
     root.style.setProperty('--font-family-base', "'CustomFont', var(--font-family-fallbacks)", 'important');
+    root.style.setProperty('--font-family-mono', "'CustomFont', var(--font-family-fallbacks)", 'important');
   } else {
     // system or default - restore default
     root.style.setProperty('--font-family-base', 'var(--font-family-fallbacks)', 'important');
+    root.style.setProperty('--font-family-mono', 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace', 'important');
   }
 };
 

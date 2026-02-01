@@ -653,3 +653,13 @@ export const DeleteWebUIFontHandler: RequestHandler = async (_req, res) => {
     return sendError(res, '删除字体文件失败');
   }
 };
+
+// 检查WebUI字体文件是否存在
+export const CheckWebUIFontExistHandler: RequestHandler = async (_req, res) => {
+  try {
+    const exists = await WebUiConfig.CheckWebUIFontExist();
+    return sendSuccess(res, exists);
+  } catch (_error) {
+    return sendError(res, '检查字体文件失败');
+  }
+};

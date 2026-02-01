@@ -9,15 +9,30 @@ const SUPPORTED_FONT_EXTENSIONS = ['.woff', '.woff2', '.ttf', '.otf'];
 
 // 清理旧的字体文件
 const cleanOldFontFiles = (fontsPath: string) => {
-  for (const ext of SUPPORTED_FONT_EXTENSIONS) {
-    const fontPath = path.join(fontsPath, `webui${ext}`);
-    try {
-      if (fs.existsSync(fontPath)) {
-        fs.unlinkSync(fontPath);
-      }
-    } catch {
-      // 忽略删除失败
+  try {
+    // 确保字体目录存在
+    if (!fs.existsSync(fontsPath)) {
+      return;
     }
+
+    // 遍历目录下所有文件
+    const files = fs.readdirSync(fontsPath);
+
+    for (const file of files) {
+      // 检查文件名是否以 webui 或 CustomFont 开头，且是支持的字体扩展名
+      const ext = path.extname(file).toLowerCase();
+      const name = path.basename(file, ext);
+
+      if (SUPPORTED_FONT_EXTENSIONS.includes(ext) && (name === 'webui' || name === 'CustomFont')) {
+        try {
+          fs.unlinkSync(path.join(fontsPath, file));
+        } catch (e) {
+          console.error(`Failed to delete old font file ${file}:`, e);
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Failed to clean old font files:', err);
   }
 };
 
@@ -36,9 +51,9 @@ export const webUIFontStorage = multer.diskStorage({
     }
   },
   filename: (_, file, cb) => {
-    // 保留原始扩展名，统一文件名为 webui
+    // 强制文件名为 CustomFont，保留原始扩展名
     const ext = path.extname(file.originalname).toLowerCase();
-    cb(null, `webui${ext}`);
+    cb(null, `CustomFont${ext}`);
   },
 });
 

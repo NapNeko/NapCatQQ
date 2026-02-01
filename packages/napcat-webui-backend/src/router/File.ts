@@ -16,6 +16,7 @@ import {
   UploadHandler,
   UploadWebUIFontHandler,
   DeleteWebUIFontHandler, // 添加上传处理器
+  CheckWebUIFontExistHandler, // Add this
 } from '../api/File';
 
 const router: Router = Router();
@@ -46,4 +47,5 @@ router.post('/upload', UploadHandler);
 
 router.post('/font/upload/webui', UploadWebUIFontHandler);
 router.post('/font/delete/webui', DeleteWebUIFontHandler);
+router.get('/font/exists/webui', CheckWebUIFontExistHandler); // Add this
 export { router as FileRouter };

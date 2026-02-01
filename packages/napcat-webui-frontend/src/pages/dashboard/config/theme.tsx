@@ -162,6 +162,7 @@ const ThemeConfigCard = () => {
 
   const [dataLoaded, setDataLoaded] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [customFontExists, setCustomFontExists] = useState(false);
 
   // 使用 useRef 存储 style 标签引用和状态
   const styleTagRef = useRef<HTMLStyleElement | null>(null);
@@ -213,6 +214,10 @@ const ThemeConfigCard = () => {
     }
     setDataLoaded(true);
     setHasUnsavedChanges(false);
+    // 检查自定义字体是否存在
+    FileManager.checkWebUIFontExists().then(exists => {
+      setCustomFontExists(exists);
+    }).catch(err => console.error('Failed to check custom font:', err));
   }, [data, setOnebotValue]);
 
   // 实时应用字体预设（预览）
@@ -354,7 +359,11 @@ const ThemeConfigCard = () => {
       </div>
 
       <div className='p-4'>
-        <Accordion variant='splitted' defaultExpandedKeys={['font', 'select']}>
+        <Accordion
+          variant='splitted'
+          defaultExpandedKeys={['font']}
+          selectionMode='single'
+        >
           <AccordionItem
             key='font'
             aria-label='Font Settings'
@@ -381,38 +390,55 @@ const ThemeConfigCard = () => {
                   </Select>
                 )}
               />
-              <div className='p-3 rounded-lg bg-default-100 dark:bg-default-50/30'>
-                <div className='text-sm text-default-500 mb-2'>
-                  上传自定义字体（仅在选择"自定义字体"时生效）
+              {theme.fontMode === 'custom' && (
+                <div className='p-3 rounded-lg bg-default-100 dark:bg-default-50/30'>
+                  <div className='text-sm text-default-500 mb-2'>
+                    上传自定义字体（仅在选择"自定义字体"时生效）
+                  </div>
+                  {customFontExists && (
+                    <div className='mb-2 flex items-center gap-2 text-sm text-primary'>
+                      <FaCheck /> 已上传自定义字体
+                    </div>
+                  )}
+                  <FileInput
+                    label='上传字体文件'
+                    placeholder='选择字体文件 (.woff/.woff2/.ttf/.otf)'
+                    accept='.ttf,.otf,.woff,.woff2'
+                    onChange={async (file) => {
+                      try {
+                        // 如果已存在自定义字体，先尝试删除
+                        if (customFontExists) {
+                          try {
+                            await FileManager.deleteWebUIFont();
+                          } catch (e) {
+                            console.warn('Failed to delete existing font before upload:', e);
+                            // 继续尝试上传，后端可能会覆盖或报错
+                          }
+                        }
+
+                        await FileManager.uploadWebUIFont(file);
+                        toast.success('上传成功，即将刷新页面');
+                        setTimeout(() => {
+                          window.location.reload();
+                        }, 1000);
+                      } catch (error) {
+                        toast.error('上传失败: ' + (error as Error).message);
+                      }
+                    }}
+                    onDelete={async () => {
+                      try {
+                        await FileManager.deleteWebUIFont();
+                        toast.success('删除成功，即将刷新页面');
+                        setTimeout(() => {
+                          window.location.reload();
+                        }, 1000);
+                      } catch (error) {
+                        toast.error('删除失败: ' + (error as Error).message);
+                      }
+                    }}
+                  />
                 </div>
-                <FileInput
-                  label='上传字体文件'
-                  placeholder='选择字体文件 (.woff/.woff2/.ttf/.otf)'
-                  accept='.ttf,.otf,.woff,.woff2'
-                  onChange={async (file) => {
-                    try {
-                      await FileManager.uploadWebUIFont(file);
-                      toast.success('上传成功，即将刷新页面');
-                      setTimeout(() => {
-                        window.location.reload();
-                      }, 1000);
-                    } catch (error) {
-                      toast.error('上传失败: ' + (error as Error).message);
-                    }
-                  }}
-                  onDelete={async () => {
-                    try {
-                      await FileManager.deleteWebUIFont();
-                      toast.success('删除成功，即将刷新页面');
-                      setTimeout(() => {
-                        window.location.reload();
-                      }, 1000);
-                    } catch (error) {
-                      toast.error('删除失败: ' + (error as Error).message);
-                    }
-                  }}
-                />
-              </div>
+              )}
             </div>
           </AccordionItem>
 

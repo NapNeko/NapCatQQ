@@ -5,8 +5,8 @@ import { ColorResult, SketchPicker } from 'react-color';
 // 假定 heroui 提供的 Popover组件
 
 interface ColorPickerProps {
-  color: string
-  onChange: (color: ColorResult) => void
+  color: string;
+  onChange: (color: ColorResult) => void;
 }
 
 const ColorPicker: React.FC<ColorPickerProps> = ({ color, onChange }) => {
@@ -22,7 +22,8 @@ const ColorPicker: React.FC<ColorPickerProps> = ({ color, onChange }) => {
           style={{ background: color }}
         />
       </PopoverTrigger>
-      <PopoverContent>
+      {/* 移除 PopoverContent 默认的事件阻止，允许鼠标拖动到外部 */}
+      <PopoverContent className='pointer-events-auto'>
         <SketchPicker
           color={color}
           onChange={handleChange}
