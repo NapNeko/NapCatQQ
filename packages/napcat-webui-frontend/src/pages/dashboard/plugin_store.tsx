@@ -51,10 +51,10 @@ export default function PluginStorePage () {
   const [pendingInstallPlugin, setPendingInstallPlugin] = useState<PluginStoreItem | null>(null);
   const [selectedDownloadMirror, setSelectedDownloadMirror] = useState<string | undefined>(undefined);
 
-  const loadPlugins = async () => {
+  const loadPlugins = async (forceRefresh: boolean = false) => {
     setLoading(true);
     try {
-      const data = await PluginManager.getPluginStoreList();
+      const data = await PluginManager.getPluginStoreList(forceRefresh);
       setPlugins(data.plugins);
 
       // 检查插件管理器是否已加载
@@ -238,7 +238,7 @@ export default function PluginStorePage () {
               isIconOnly
               className="bg-default-100/50 hover:bg-default-200/50 text-default-700 backdrop-blur-md"
               radius="full"
-              onPress={loadPlugins}
+              onPress={() => loadPlugins(true)}
               isLoading={loading}
             >
               <IoMdRefresh size={24} />
@@ -287,7 +287,7 @@ export default function PluginStorePage () {
               <Spinner size='lg' />
             </div>
           )}
-          
+
           <Tabs
             aria-label="Plugin Store Categories"
             className="max-w-full"

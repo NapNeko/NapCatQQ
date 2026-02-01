@@ -140,9 +140,11 @@ export default class PluginManager {
 
   /**
    * 获取插件商店列表
+   * @param forceRefresh 是否强制刷新（跳过服务端缓存）
    */
-  public static async getPluginStoreList (): Promise<PluginStoreList> {
-    const { data } = await serverRequest.get<ServerResponse<PluginStoreList>>('/Plugin/Store/List');
+  public static async getPluginStoreList (forceRefresh: boolean = false): Promise<PluginStoreList> {
+    const params = forceRefresh ? { forceRefresh: 'true' } : {};
+    const { data } = await serverRequest.get<ServerResponse<PluginStoreList>>('/Plugin/Store/List', { params });
     return data.data;
   }
 

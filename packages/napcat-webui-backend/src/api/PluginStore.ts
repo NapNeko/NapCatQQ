@@ -34,12 +34,12 @@ const CACHE_TTL = 10 * 60 * 1000; // 10分钟缓存
 
 /**
  * 从多个源获取插件列表，使用镜像系统
- * 带10分钟缓存
+ * 带10分钟缓存，支持强制刷新
  */
-async function fetchPluginList (): Promise<PluginStoreList> {
-  // 检查缓存
+async function fetchPluginList (forceRefresh: boolean = false): Promise<PluginStoreList> {
+  // 检查缓存（如果不是强制刷新）
   const now = Date.now();
-  if (pluginListCache && (now - cacheTimestamp) < CACHE_TTL) {
+  if (!forceRefresh && pluginListCache && (now - cacheTimestamp) < CACHE_TTL) {
     //console.log('Using cached plugin list');
     return pluginListCache;
   }
@@ -192,9 +192,11 @@ async function extractPlugin (zipPath: string, pluginId: string): Promise<void> 
 /**
  * 获取插件商店列表
  */
-export const GetPluginStoreListHandler: RequestHandler = async (_req, res) => {
+export const GetPluginStoreListHandler: RequestHandler = async (req, res) => {
   try {
-    const data = await fetchPluginList();
+    // 支持 forceRefresh 查询参数强制刷新缓存
+    const forceRefresh = req.query['forceRefresh'] === 'true';
+    const data = await fetchPluginList(forceRefresh);
     return sendSuccess(res, data);
   } catch (e: any) {
     return sendError(res, 'Failed to fetch plugin store list: ' + e.message);
