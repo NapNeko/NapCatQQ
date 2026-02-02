@@ -157,6 +157,8 @@ async function downloadFile (url: string, destPath: string, customMirror?: strin
 async function extractPlugin (zipPath: string, pluginId: string): Promise<void> {
   const PLUGINS_DIR = getPluginsDir();
   const pluginDir = path.join(PLUGINS_DIR, pluginId);
+  const dataDir = path.join(pluginDir, 'data');
+  const tempDataDir = path.join(PLUGINS_DIR, `${pluginId}.data.backup`);
 
   console.log(`[extractPlugin] PLUGINS_DIR: ${PLUGINS_DIR}`);
   console.log(`[extractPlugin] pluginId: ${pluginId}`);
@@ -169,8 +171,19 @@ async function extractPlugin (zipPath: string, pluginId: string): Promise<void> 
     console.log(`[extractPlugin] Created plugins root directory: ${PLUGINS_DIR}`);
   }
 
-  // 如果目录已存在，先删除
+  // 如果目录已存在，先备份 data 文件夹，再删除
+  let hasDataBackup = false;
   if (fs.existsSync(pluginDir)) {
+    // 备份 data 文件夹
+    if (fs.existsSync(dataDir)) {
+      console.log(`[extractPlugin] Backing up data directory: ${dataDir}`);
+      if (fs.existsSync(tempDataDir)) {
+        fs.rmSync(tempDataDir, { recursive: true, force: true });
+      }
+      fs.renameSync(dataDir, tempDataDir);
+      hasDataBackup = true;
+    }
+
     console.log(`[extractPlugin] Directory exists, removing: ${pluginDir}`);
     fs.rmSync(pluginDir, { recursive: true, force: true });
   }
@@ -179,10 +192,35 @@ async function extractPlugin (zipPath: string, pluginId: string): Promise<void> 
   fs.mkdirSync(pluginDir, { recursive: true });
   console.log(`[extractPlugin] Created directory: ${pluginDir}`);
 
-  // 解压
-  await compressing.zip.uncompress(zipPath, pluginDir);
+  try {
+    // 解压
+    await compressing.zip.uncompress(zipPath, pluginDir);
 
-  console.log(`[extractPlugin] Plugin extracted to: ${pluginDir}`);
+    console.log(`[extractPlugin] Plugin extracted to: ${pluginDir}`);
+
+    // 恢复 data 文件夹
+    if (hasDataBackup && fs.existsSync(tempDataDir)) {
+      // 如果新版本也有 data 文件夹，先删除
+      if (fs.existsSync(dataDir)) {
+        fs.rmSync(dataDir, { recursive: true, force: true });
+      }
+      console.log(`[extractPlugin] Restoring data directory: ${dataDir}`);
+      fs.renameSync(tempDataDir, dataDir);
+    }
+  } catch (e) {
+    // 解压失败时，尝试恢复 data 文件夹
+    if (hasDataBackup && fs.existsSync(tempDataDir)) {
+      console.log(`[extractPlugin] Extract failed, restoring data directory`);
+      if (!fs.existsSync(pluginDir)) {
+        fs.mkdirSync(pluginDir, { recursive: true });
+      }
+      if (fs.existsSync(dataDir)) {
+        fs.rmSync(dataDir, { recursive: true, force: true });
+      }
+      fs.renameSync(tempDataDir, dataDir);
+    }
+    throw e;
+  }
 
   // 列出解压后的文件
   const files = fs.readdirSync(pluginDir);
