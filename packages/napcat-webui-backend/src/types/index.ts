@@ -56,6 +56,7 @@ export interface LoginRuntimeType {
   OneBotContext: any | null; // OneBot 上下文，用于调试功能
   NapCatHelper: {
     onQuickLoginRequested: (uin: string) => Promise<{ result: boolean; message: string; }>;
+    onPasswordLoginRequested: (uin: string, passwordMd5: string) => Promise<{ result: boolean; message: string; }>;
     onOB11ConfigChanged: (ob11: OneBotConfig) => Promise<void>;
     onRestartProcessRequested: () => Promise<{ result: boolean; message: string; }>;
     QQLoginList: string[];

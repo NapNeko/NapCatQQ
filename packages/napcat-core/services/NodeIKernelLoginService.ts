@@ -21,7 +21,7 @@ export interface PasswordLoginRetType {
     jumpWord: string;
     tipsTitle: string;
     tipsContent: string;
-  }
+  };
 }
 
 export interface PasswordLoginArgType {
@@ -55,37 +55,37 @@ export interface QuickLoginResult {
     jumpUrl: string,
     jumpWord: string,
     tipsTitle: string,
-    tipsContent: string
+    tipsContent: string;
   };
 }
 
 export interface NodeIKernelLoginService {
   getMsfStatus: () => number;
 
-  setLoginMiscData(arg0: string, value: string): unknown;
+  setLoginMiscData (arg0: string, value: string): unknown;
 
-  getMachineGuid(): string;
+  getMachineGuid (): string;
 
-  get(): NodeIKernelLoginService;
+  get (): NodeIKernelLoginService;
 
-  connect(): boolean;
+  connect (): boolean;
 
-  addKernelLoginListener(listener: NodeIKernelLoginListener): number;
+  addKernelLoginListener (listener: NodeIKernelLoginListener): number;
 
-  removeKernelLoginListener(listener: number): void;
+  removeKernelLoginListener (listener: number): void;
 
-  initConfig(config: LoginInitConfig): void;
+  initConfig (config: LoginInitConfig): void;
 
-  getLoginMiscData(data: string): Promise<GeneralCallResult & { value: string }>;
+  getLoginMiscData (data: string): Promise<GeneralCallResult & { value: string; }>;
 
-  getLoginList(): Promise<{
+  getLoginList (): Promise<{
     result: number,  // 0是ok
-    LocalLoginInfoList: LoginListItem[]
+    LocalLoginInfoList: LoginListItem[];
   }>;
 
-  quickLoginWithUin(uin: string): Promise<QuickLoginResult>;
+  quickLoginWithUin (uin: string): Promise<QuickLoginResult>;
 
-  passwordLogin(param: PasswordLoginArgType): Promise<unknown>;
+  passwordLogin (param: PasswordLoginArgType): Promise<QuickLoginResult>;
 
-  getQRCodePicture(): boolean;
+  getQRCodePicture (): boolean;
 }

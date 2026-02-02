@@ -93,4 +93,11 @@ export default class QQManager {
       uin,
     });
   }
+
+  public static async passwordLogin (uin: string, passwordMd5: string) {
+    await serverRequest.post<ServerResponse<null>>('/QQLogin/PasswordLogin', {
+      uin,
+      passwordMd5,
+    });
+  }
 }

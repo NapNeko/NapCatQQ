@@ -33,6 +33,9 @@ const LoginRuntime: LoginRuntimeType = {
     onQuickLoginRequested: async () => {
       return { result: false, message: '' };
     },
+    onPasswordLoginRequested: async () => {
+      return { result: false, message: '密码登录功能未初始化' };
+    },
     onRestartProcessRequested: async () => {
       return { result: false, message: '重启功能未初始化' };
     },
@@ -135,6 +138,14 @@ export const WebUiDataRuntime = {
   requestQuickLogin: function (uin) {
     return LoginRuntime.NapCatHelper.onQuickLoginRequested(uin);
   } as LoginRuntimeType['NapCatHelper']['onQuickLoginRequested'],
+
+  setPasswordLoginCall (func: LoginRuntimeType['NapCatHelper']['onPasswordLoginRequested']): void {
+    LoginRuntime.NapCatHelper.onPasswordLoginRequested = func;
+  },
+
+  requestPasswordLogin: function (uin: string, passwordMd5: string) {
+    return LoginRuntime.NapCatHelper.onPasswordLoginRequested(uin, passwordMd5);
+  } as LoginRuntimeType['NapCatHelper']['onPasswordLoginRequested'],
 
   setOnOB11ConfigChanged (func: LoginRuntimeType['NapCatHelper']['onOB11ConfigChanged']): void {
     LoginRuntime.NapCatHelper.onOB11ConfigChanged = func;

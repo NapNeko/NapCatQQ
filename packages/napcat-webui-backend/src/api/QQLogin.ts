@@ -108,3 +108,29 @@ export const QQRefreshQRcodeHandler: RequestHandler = async (_, res) => {
   await WebUiDataRuntime.refreshQRCode();
   return sendSuccess(res, null);
 };
+
+// 密码登录
+export const QQPasswordLoginHandler: RequestHandler = async (req, res) => {
+  // 获取QQ号和密码MD5
+  const { uin, passwordMd5 } = req.body;
+  // 判断是否已经登录
+  const isLogin = WebUiDataRuntime.getQQLoginStatus();
+  if (isLogin) {
+    return sendError(res, 'QQ Is Logined');
+  }
+  // 判断QQ号是否为空
+  if (isEmpty(uin)) {
+    return sendError(res, 'uin is empty');
+  }
+  // 判断密码MD5是否为空
+  if (isEmpty(passwordMd5)) {
+    return sendError(res, 'passwordMd5 is empty');
+  }
+
+  // 执行密码登录
+  const { result, message } = await WebUiDataRuntime.requestPasswordLogin(uin, passwordMd5);
+  if (!result) {
+    return sendError(res, message);
+  }
+  return sendSuccess(res, null);
+};
