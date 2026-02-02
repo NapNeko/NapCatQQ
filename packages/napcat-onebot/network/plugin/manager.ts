@@ -195,7 +195,7 @@ export class OB11PluginManager extends IOB11NetworkAdapter<PluginConfig> impleme
     }
 
     // 创建获取其他插件导出的方法
-    const getPluginExports = <T = any>(pluginId: string): T | undefined => {
+    const getPluginExports = <T = any> (pluginId: string): T | undefined => {
       const targetEntry = this.plugins.get(pluginId);
       if (!targetEntry || !targetEntry.loaded || targetEntry.runtime.status !== 'loaded') {
         return undefined;

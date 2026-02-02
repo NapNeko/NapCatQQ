@@ -160,7 +160,7 @@ const plugin_init: PluginModule['plugin_init'] = async (ctx) => {
     });
   });
 
-  // 注册扩展页面
+  // 注册扩展页面（无需鉴权，可通过 /plugin/{pluginId}/page/dashboard 访问）
   ctx.router.page({
     path: 'dashboard',
     title: '插件仪表盘',
@@ -171,6 +171,7 @@ const plugin_init: PluginModule['plugin_init'] = async (ctx) => {
 
   logger.info('WebUI 路由已注册:');
   logger.info('  - API 路由: /api/Plugin/ext/' + ctx.pluginName + '/');
+  logger.info('  - 扩展页面: /plugin/' + ctx.pluginName + '/page/dashboard');
   logger.info('  - 静态资源: /plugin/' + ctx.pluginName + '/files/static/');
   logger.info('  - 内存资源: /plugin/' + ctx.pluginName + '/mem/dynamic/');
 };
