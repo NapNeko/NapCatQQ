@@ -41,7 +41,7 @@ interface TestObject {
     onError: (error: Error) => void
   ): void;
   getObject (): { id: number; name: string; };
-  createInstance: new (name: string) => { name: string; greet (): string; };
+  createInstance: new (name: string) => { name: string; greet (): string; getName (): string; };
   getData (): Map<string, number>;
   getSet (): Set<string>;
   getDate (): Date;
@@ -102,7 +102,10 @@ function createTestObject (): TestObject {
       greet () {
         return `Instance: ${this.name}`;
       }
-    } as unknown as new (name: string) => { name: string; greet (): string; },
+      getName () {
+        return this.name;
+      }
+    } as unknown as new (name: string) => { name: string; greet (): string; getName (): string; },
     getData () {
       return new Map([['a', 1], ['b', 2]]);
     },
@@ -364,7 +367,8 @@ describe('napcat-rpc RPC', () => {
       it('should proxy constructor calls', async () => {
         const Constructor = proxy.createInstance;
         const instance = await new Constructor('TestInstance');
-        expect(instance.name).toBe('TestInstance');
+        // 返回的是代理对象，需要 await 获取属性值
+        expect(await instance.getName()).toBe('TestInstance');
       });
     });
 
@@ -611,7 +615,10 @@ describe('napcat-rpc RPC', () => {
       });
 
       const result = await proxy.processAsync([1, 2, 3], processor);
-      expect(result).toEqual([10, 20, 30]);
+      // 数组返回代理，需 await 获取元素
+      expect(await result[0]).toBe(10);
+      expect(await result[1]).toBe(20);
+      expect(await result[2]).toBe(30);
       expect(processor).toHaveBeenCalledTimes(3);
     });
 
@@ -749,7 +756,10 @@ describe('napcat-rpc RPC', () => {
         format: async (x) => `value:${x}`,
       });
 
-      expect(result).toEqual(['value:6', 'value:8', 'value:10']);
+      // 数组返回代理
+      expect(await result[0]).toBe('value:6');
+      expect(await result[1]).toBe('value:8');
+      expect(await result[2]).toBe('value:10');
     });
   });
 
@@ -776,7 +786,9 @@ describe('napcat-rpc RPC', () => {
       });
 
       const user = await api.fetchUser(123);
-      expect(user).toEqual({ id: 123, name: 'User123' });
+      // 对象返回代理
+      expect(await user.id).toBe(123);
+      expect(await user.name).toBe('User123');
     });
   });
 
@@ -799,8 +811,13 @@ describe('napcat-rpc RPC', () => {
       await client1.add('from-client1');
       await client2.add('from-client2');
 
-      expect(await client1.getAll()).toEqual(['from-client1', 'from-client2']);
-      expect(await client2.getAll()).toEqual(['from-client1', 'from-client2']);
+      // 数组返回代理
+      const list1 = await client1.getAll();
+      const list2 = await client2.getAll();
+      expect(await list1[0]).toBe('from-client1');
+      expect(await list1[1]).toBe('from-client2');
+      expect(await list2[0]).toBe('from-client1');
+      expect(await list2[1]).toBe('from-client2');
     });
   });
 
@@ -849,12 +866,16 @@ describe('napcat-rpc RPC', () => {
       });
 
       const items = await client.getItems();
-      expect(items).toHaveLength(3);
-      expect(items[0]).toEqual({ id: 1, name: 'Item1', active: true });
-      expect(items[1]?.id).toBe(2);
+      // 数组返回代理
+      const item0 = await items[0];
+      const item1 = await items[1];
+      expect(await item0!.id).toBe(1);
+      expect(await item0!.name).toBe('Item1');
+      expect(await item1!.id).toBe(2);
 
       const item = await client.getItemById(2);
-      expect(item).toEqual({ id: 2, name: 'Item2' });
+      expect(await item!.id).toBe(2);
+      expect(await item!.name).toBe('Item2');
     });
 
     it('should handle Map and Set in nested structures', async () => {
@@ -995,7 +1016,12 @@ describe('napcat-rpc RPC', () => {
         return 'other';
       });
 
-      expect(result).toEqual(['undefined', 'null', 'zero', 'empty', 'false']);
+      // 数组返回代理
+      expect(await result[0]).toBe('undefined');
+      expect(await result[1]).toBe('null');
+      expect(await result[2]).toBe('zero');
+      expect(await result[3]).toBe('empty');
+      expect(await result[4]).toBe('false');
     });
 
     it('should handle errors in callbacks', async () => {
@@ -1034,6 +1060,409 @@ describe('napcat-rpc RPC', () => {
       const largeArray = Array.from({ length: 10000 }, (_, i) => i);
       const sum = await client.processLargeArray(largeArray);
       expect(sum).toBe(49995000); // sum of 0 to 9999
+    });
+  });
+
+  describe('Deep return value proxying (class instances)', () => {
+    it('should keep class instance as proxy and call methods remotely', async () => {
+      class User {
+        constructor (public name: string, public age: number) { }
+
+        greet () {
+          return `Hi, I am ${this.name}`;
+        }
+
+        getInfo () {
+          return { name: this.name, age: this.age };
+        }
+
+        updateAge (newAge: number) {
+          this.age = newAge;
+          return this.age;
+        }
+      }
+
+      const { client } = createRpcPair({
+        createUser (name: string, age: number) {
+          return new User(name, age);
+        },
+      });
+
+      const user = await client.createUser('Alice', 25);
+
+      // user 应该是代理，调用方法时发送 RPC 请求
+      const greeting = await user.greet();
+      expect(greeting).toBe('Hi, I am Alice');
+
+      const info = await user.getInfo();
+      // 对象返回代理
+      expect(await info.name).toBe('Alice');
+      expect(await info.age).toBe(25);
+
+      // 更新远程对象状态
+      const newAge = await user.updateAge(30);
+      expect(newAge).toBe(30);
+
+      // 验证状态被更新
+      const updatedInfo = await user.getInfo();
+      expect(await updatedInfo.age).toBe(30);
+    });
+
+    it('should support chained method calls on returned class instance', async () => {
+      class Counter {
+        value = 0;
+
+        increment () {
+          this.value++;
+          return this;
+        }
+
+        decrement () {
+          this.value--;
+          return this;
+        }
+
+        getValue () {
+          return this.value;
+        }
+      }
+
+      const { client } = createRpcPair({
+        createCounter () {
+          return new Counter();
+        },
+      });
+
+      const counter = await client.createCounter();
+
+      // 链式调用
+      await counter.increment();
+      await counter.increment();
+      await counter.increment();
+      await counter.decrement();
+
+      const value = await counter.getValue();
+      expect(value).toBe(2);
+    });
+
+    it('should handle nested class instances', async () => {
+      class Address {
+        constructor (public city: string, public country: string) { }
+
+        getFullAddress () {
+          return `${this.city}, ${this.country}`;
+        }
+      }
+
+      class Person {
+        constructor (public name: string, public address: Address) { }
+
+        getAddress () {
+          return this.address;
+        }
+
+        getFormattedInfo () {
+          return `${this.name} lives in ${this.address.city}`;
+        }
+      }
+
+      const { client } = createRpcPair({
+        createPerson (name: string, city: string, country: string) {
+          return new Person(name, new Address(city, country));
+        },
+      });
+
+      const person = await client.createPerson('Bob', 'Tokyo', 'Japan');
+
+      const info = await person.getFormattedInfo();
+      expect(info).toBe('Bob lives in Tokyo');
+
+      // 获取嵌套对象（如果 Address 也是类实例，也应该是代理）
+      const address = await person.getAddress();
+      const fullAddress = await address.getFullAddress();
+      expect(fullAddress).toBe('Tokyo, Japan');
+    });
+
+    it('should handle objects with methods (not class instances)', async () => {
+      // 这种对象有方法，应该也返回代理
+      const { client } = createRpcPair({
+        createApi () {
+          let data = 'initial';
+          return {
+            getData () {
+              return data;
+            },
+            setData (newData: string) {
+              data = newData;
+            },
+            processData (transformer: (d: string) => string) {
+              data = transformer(data);
+              return data;
+            },
+          };
+        },
+      });
+
+      const api = await client.createApi();
+
+      const initial = await api.getData();
+      expect(initial).toBe('initial');
+
+      await api.setData('updated');
+      const updated = await api.getData();
+      expect(updated).toBe('updated');
+
+      // 测试回调
+      const result = await api.processData((d: string) => d.toUpperCase());
+      expect(result).toBe('UPDATED');
+    });
+
+    it('should proxy simple objects and allow property access', async () => {
+      // 现在所有对象都返回代理，访问属性需要通过 RPC
+      const { client } = createRpcPair({
+        getSimpleData () {
+          return { id: 1, name: 'test', active: true };
+        },
+      });
+
+      const data = await client.getSimpleData();
+      // 对象现在也是代理，访问属性返回代理，await 后获取值
+      expect(await data.id).toBe(1);
+      expect(await data.name).toBe('test');
+      expect(await data.active).toBe(true);
+    });
+
+    it('should handle async methods in returned class', async () => {
+      class AsyncService {
+        private value = 0;
+
+        async fetchAndAdd (amount: number) {
+          await new Promise(resolve => setTimeout(resolve, 10));
+          this.value += amount;
+          return this.value;
+        }
+
+        async getValue () {
+          await new Promise(resolve => setTimeout(resolve, 5));
+          return this.value;
+        }
+      }
+
+      const { client } = createRpcPair({
+        createService () {
+          return new AsyncService();
+        },
+      });
+
+      const service = await client.createService();
+
+      const first = await service.fetchAndAdd(10);
+      expect(first).toBe(10);
+
+      const second = await service.fetchAndAdd(5);
+      expect(second).toBe(15);
+
+      const current = await service.getValue();
+      expect(current).toBe(15);
+    });
+
+    it('should handle constructor on returned proxy', async () => {
+      class Factory {
+        create (name: string): { name: string; } {
+          return { name };
+        }
+
+        Widget = class Widget {
+          constructor (public id: number) { }
+          getId () {
+            return this.id;
+          }
+        };
+      }
+
+      const { client } = createRpcPair({
+        getFactory () {
+          return new Factory();
+        },
+      });
+
+      const factory = await client.getFactory();
+
+      // 调用返回代理上的方法
+      const obj = await factory.create('widget1');
+      expect(await obj.name).toBe('widget1');
+
+      // 在返回代理上调用构造函数
+      const Widget = await factory.Widget;
+      const widget = await new Widget(123);
+      const id = await widget.getId();
+      expect(id).toBe(123);
+    });
+
+    it('should support getService().method({fn: callback}) pattern', async () => {
+      // 核心场景：链式调用 + 回调
+      const { client } = createRpcPair({
+        getService () {
+          return {
+            execute (options: { onProgress: (p: number) => void; onComplete: (r: string) => void; }) {
+              options.onProgress(25);
+              options.onProgress(50);
+              options.onProgress(100);
+              options.onComplete('done');
+              return 'success';
+            },
+            process (data: { transformer: (x: number) => number; }) {
+              return data.transformer(10);
+            },
+          };
+        },
+      });
+
+      const service = await client.getService();
+
+      const progressValues: number[] = [];
+      let completedWith = '';
+
+      const result = await service.execute({
+        onProgress: (p: number) => {
+          progressValues.push(p);
+        },
+        onComplete: (r: string) => {
+          completedWith = r;
+        },
+      });
+
+      expect(result).toBe('success');
+      expect(progressValues).toEqual([25, 50, 100]);
+      expect(completedWith).toBe('done');
+
+      // 测试返回值的回调
+      const transformed = await service.process({
+        transformer: (x: number) => x * 3,
+      });
+      expect(transformed).toBe(30);
+    });
+
+    it('should support deep chain call with callbacks at any level', async () => {
+      const { client } = createRpcPair({
+        getApi () {
+          return {
+            getModule () {
+              return {
+                getHandler () {
+                  return {
+                    handle (input: number, callbacks: { onSuccess: (r: number) => void; onError: (e: string) => void; }) {
+                      if (input > 0) {
+                        callbacks.onSuccess(input * 2);
+                      } else {
+                        callbacks.onError('negative input');
+                      }
+                      return input > 0;
+                    },
+                  };
+                },
+              };
+            },
+          };
+        },
+      });
+
+      const api = await client.getApi();
+      const module = await api.getModule();
+      const handler = await module.getHandler();
+
+      let successResult = 0;
+      const isSuccess = await handler.handle(5, {
+        onSuccess: (r: number) => { successResult = r; },
+        onError: () => { },
+      });
+
+      expect(isSuccess).toBe(true);
+      expect(successResult).toBe(10);
+
+      let errorMsg = '';
+      const isFailed = await handler.handle(-1, {
+        onSuccess: () => { },
+        onError: (e: string) => { errorMsg = e; },
+      });
+
+      expect(isFailed).toBe(false);
+      expect(errorMsg).toBe('negative input');
+    });
+
+    it('should support register pattern with multiple callbacks', async () => {
+      const { client } = createRpcPair({
+        createEventEmitter () {
+          const listeners: Map<string, Array<(...args: unknown[]) => void>> = new Map();
+          return {
+            register (events: Record<string, (...args: unknown[]) => void>) {
+              for (const [name, handler] of Object.entries(events)) {
+                if (!listeners.has(name)) listeners.set(name, []);
+                listeners.get(name)!.push(handler);
+              }
+            },
+            emit (name: string, ...args: unknown[]) {
+              const handlers = listeners.get(name) ?? [];
+              handlers.forEach(h => h(...args));
+            },
+          };
+        },
+      });
+
+      const emitter = await client.createEventEmitter();
+
+      const events: Array<{ type: string; data: unknown; }> = [];
+
+      await emitter.register({
+        data: (value: unknown) => events.push({ type: 'data', data: value }),
+        error: (err: unknown) => events.push({ type: 'error', data: err }),
+        complete: () => events.push({ type: 'complete', data: null }),
+      });
+
+      await emitter.emit('data', 'hello');
+      await emitter.emit('data', 'world');
+      await emitter.emit('error', 'oops');
+      await emitter.emit('complete');
+
+      expect(events).toEqual([
+        { type: 'data', data: 'hello' },
+        { type: 'data', data: 'world' },
+        { type: 'error', data: 'oops' },
+        { type: 'complete', data: null },
+      ]);
+    });
+
+    it('should handle array return values with proxy', async () => {
+      // 通过 getService 返回的类实例来测试数组代理
+      class ItemService {
+        getItems () {
+          return [
+            { id: 1, name: 'item1' },
+            { id: 2, name: 'item2' },
+          ];
+        }
+        getItem (index: number) {
+          return { id: index, getValue: () => `item${index}` };
+        }
+      }
+      const { client } = createRpcPair({
+        getItemService () {
+          return new ItemService();
+        },
+      });
+
+      const service = await client.getItemService();
+
+      // 通过代理的 service 调用方法获取数组
+      const items = await service.getItems();
+      expect(items).toEqual([
+        { id: 1, name: 'item1' },
+        { id: 2, name: 'item2' },
+      ]);
+
+      // 获取单个 item 作为代理（因为它有方法）
+      const item = await service.getItem(3);
+      expect(await item.getValue()).toBe('item3');
     });
   });
 });
