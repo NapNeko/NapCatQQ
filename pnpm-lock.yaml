@@ -302,6 +302,12 @@ importers:
         specifier: ^22.0.1
         version: 22.19.1
 
+  packages/napcat-rpc:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.0.1
+        version: 22.19.1
+
   packages/napcat-schema:
     dependencies:
       '@sinclair/typebox':
@@ -357,6 +363,9 @@ importers:
       napcat-image-size:
         specifier: workspace:*
         version: link:../napcat-image-size
+      napcat-rpc:
+        specifier: workspace:*
+        version: link:../napcat-rpc
     devDependencies:
       vitest:
         specifier: ^4.0.9

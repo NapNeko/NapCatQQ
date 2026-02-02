@@ -8,6 +8,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      '@/napcat-rpc': resolve(__dirname, '../napcat-rpc'),
       '@/napcat-image-size': resolve(__dirname, '../napcat-image-size'),
       '@/napcat-test': resolve(__dirname, '.'),
       '@/napcat-common': resolve(__dirname, '../napcat-common'),

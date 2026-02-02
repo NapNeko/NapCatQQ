@@ -15,6 +15,7 @@ export default defineConfig({
   resolve: {
     conditions: ['node', 'default'],
     alias: {
+      '@/napcat-rpc': resolve(__dirname, '../napcat-rpc'),
       '@/napcat-onebot': resolve(__dirname, '../napcat-onebot'),
       '@/napcat-common': resolve(__dirname, '../napcat-common'),
       '@/napcat-schema': resolve(__dirname, './src'),
