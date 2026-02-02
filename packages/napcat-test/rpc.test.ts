@@ -786,9 +786,9 @@ describe('napcat-rpc RPC', () => {
       });
 
       const user = await api.fetchUser(123);
-      // 对象返回代理
-      expect(await user.id).toBe(123);
-      expect(await user.name).toBe('User123');
+      // 对象返回代理，属性已缓存，可直接访问
+      expect(user.id).toBe(123);
+      expect(user.name).toBe('User123');
     });
   });
 
@@ -866,16 +866,15 @@ describe('napcat-rpc RPC', () => {
       });
 
       const items = await client.getItems();
-      // 数组返回代理
-      const item0 = await items[0];
-      const item1 = await items[1];
-      expect(await item0!.id).toBe(1);
-      expect(await item0!.name).toBe('Item1');
-      expect(await item1!.id).toBe(2);
+      // 数组直接序列化，元素可直接访问
+      expect(items[0]!.id).toBe(1);
+      expect(items[0]!.name).toBe('Item1');
+      expect(items[1]!.id).toBe(2);
 
       const item = await client.getItemById(2);
-      expect(await item!.id).toBe(2);
-      expect(await item!.name).toBe('Item2');
+      // 普通对象（无方法）直接序列化
+      expect(item!.id).toBe(2);
+      expect(item!.name).toBe('Item2');
     });
 
     it('should handle Map and Set in nested structures', async () => {
@@ -1095,9 +1094,9 @@ describe('napcat-rpc RPC', () => {
       expect(greeting).toBe('Hi, I am Alice');
 
       const info = await user.getInfo();
-      // 对象返回代理
-      expect(await info.name).toBe('Alice');
-      expect(await info.age).toBe(25);
+      // getInfo 返回普通对象，直接序列化，属性可直接访问
+      expect(info.name).toBe('Alice');
+      expect(info.age).toBe(25);
 
       // 更新远程对象状态
       const newAge = await user.updateAge(30);
@@ -1105,7 +1104,7 @@ describe('napcat-rpc RPC', () => {
 
       // 验证状态被更新
       const updatedInfo = await user.getInfo();
-      expect(await updatedInfo.age).toBe(30);
+      expect(updatedInfo.age).toBe(30);
     });
 
     it('should support chained method calls on returned class instance', async () => {
@@ -1218,7 +1217,7 @@ describe('napcat-rpc RPC', () => {
     });
 
     it('should proxy simple objects and allow property access', async () => {
-      // 现在所有对象都返回代理，访问属性需要通过 RPC
+      // 简单对象（无方法）直接序列化，属性可直接访问
       const { client } = createRpcPair({
         getSimpleData () {
           return { id: 1, name: 'test', active: true };
@@ -1226,10 +1225,10 @@ describe('napcat-rpc RPC', () => {
       });
 
       const data = await client.getSimpleData();
-      // 对象现在也是代理，访问属性返回代理，await 后获取值
-      expect(await data.id).toBe(1);
-      expect(await data.name).toBe('test');
-      expect(await data.active).toBe(true);
+      // 普通对象直接序列化，属性可直接访问
+      expect(data.id).toBe(1);
+      expect(data.name).toBe('test');
+      expect(data.active).toBe(true);
     });
 
     it('should handle async methods in returned class', async () => {
@@ -1288,9 +1287,10 @@ describe('napcat-rpc RPC', () => {
 
       const factory = await client.getFactory();
 
-      // 调用返回代理上的方法
+      // 调用返回代理上的方法，返回带方法的对象被代理
       const obj = await factory.create('widget1');
-      expect(await obj.name).toBe('widget1');
+      // 属性已缓存，可直接访问
+      expect(obj.name).toBe('widget1');
 
       // 在返回代理上调用构造函数
       const Widget = await factory.Widget;

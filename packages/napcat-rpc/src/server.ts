@@ -155,15 +155,36 @@ export class RpcServer {
 
   /**
    * 存储对象引用并返回序列化的引用
+   * 同时序列化可序列化的属性值，避免属性访问需要额外 RPC
    */
   private storeObjectRef (value: unknown): SerializedValue {
     const refId = generateRefId();
     this.objectRefs.set(refId, value);
     const className = value?.constructor?.name;
+
+    // 序列化非函数属性
+    const cachedProps: Record<string, SerializedValue> = {};
+    if (value && typeof value === 'object') {
+      for (const key of Object.keys(value)) {
+        const propValue = (value as Record<string, unknown>)[key];
+        // 跳过函数（方法需要远程调用）
+        if (typeof propValue === 'function') {
+          continue;
+        }
+        // 序列化属性值
+        try {
+          cachedProps[key] = serialize(propValue, { callbackRegistry: this.localCallbacks });
+        } catch {
+          // 序列化失败的属性跳过，让客户端通过 RPC 获取
+        }
+      }
+    }
+
     return {
       type: SerializedValueType.OBJECT_REF,
       refId,
       className: className !== 'Object' ? className : undefined,
+      cachedProps: Object.keys(cachedProps).length > 0 ? cachedProps : undefined,
     };
   }
 

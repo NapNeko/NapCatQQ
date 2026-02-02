@@ -48,7 +48,7 @@ export function createDeepProxy<T = unknown> (options: DeepProxyOptions): T {
           if (!cb) throw new Error(`Nested callback not found: ${id}`);
           return cb;
         },
-        proxyCreator: (path, proxyRefId) => createProxyAtPath(path, proxyRefId),
+        proxyCreator: (path, proxyRefId, cachedProps) => createProxyAtPath(path, proxyRefId, cachedProps),
       }));
       const result = await callback(...args);
       return serialize(result, { callbackRegistry });
@@ -57,8 +57,11 @@ export function createDeepProxy<T = unknown> (options: DeepProxyOptions): T {
 
   /**
    * 在指定路径创建代理
+   * @param path 路径
+   * @param refId 远程对象引用 ID
+   * @param cachedProps 缓存的属性值（避免属性访问需要 RPC）
    */
-  function createProxyAtPath (path: PropertyKey[], refId?: string): unknown {
+  function createProxyAtPath (path: PropertyKey[], refId?: string, cachedProps?: Record<string, unknown>): unknown {
     const proxyMeta: ProxyMeta = {
       path: [...path],
       isProxy: true,
@@ -80,7 +83,12 @@ export function createDeepProxy<T = unknown> (options: DeepProxyOptions): T {
           return undefined;
         }
 
-        // 返回新的子路径代理（继承 refId）
+        // 检查缓存属性（仅顶层代理，即 path 为空时）
+        if (path.length === 0 && cachedProps && typeof prop === 'string' && prop in cachedProps) {
+          return cachedProps[prop];
+        }
+
+        // 返回新的子路径代理（继承 refId，不继承 cachedProps）
         return createProxyAtPath([...path, prop], refId);
       },
 
@@ -203,7 +211,7 @@ export function createDeepProxy<T = unknown> (options: DeepProxyOptions): T {
                 if (!cb) throw new Error(`Callback not found: ${id}`);
                 return cb;
               },
-              proxyCreator: (proxyPath, proxyRefId) => createProxyAtPath(proxyPath, proxyRefId),
+              proxyCreator: (proxyPath, proxyRefId, cachedProps) => createProxyAtPath(proxyPath, proxyRefId, cachedProps),
             });
             return deserialized;
           }
@@ -214,7 +222,7 @@ export function createDeepProxy<T = unknown> (options: DeepProxyOptions): T {
               if (!cb) throw new Error(`Callback not found: ${id}`);
               return cb;
             },
-            proxyCreator: (proxyPath, proxyRefId) => createProxyAtPath(proxyPath, proxyRefId),
+            proxyCreator: (proxyPath, proxyRefId, cachedProps) => createProxyAtPath(proxyPath, proxyRefId, cachedProps),
           });
         })();
       }
