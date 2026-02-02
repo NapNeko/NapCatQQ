@@ -20,6 +20,7 @@ export default defineConfig({
       '@/napcat-schema': resolve(__dirname, './src'),
       '@/napcat-core': resolve(__dirname, '../napcat-core'),
       '@/napcat-webui-backend': resolve(__dirname, '../napcat-webui-backend'),
+      '@/napcat-image-size': resolve(__dirname, '../napcat-image-size'),
     },
   },
   plugins: [
