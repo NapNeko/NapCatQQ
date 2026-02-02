@@ -259,11 +259,14 @@
       </div>
       <div id="static-content">
         <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 12px;">
-          测试插件静态资源服务是否正常工作
+          测试插件静态资源服务是否正常工作（不需要鉴权）
         </p>
         <div class="actions" style="margin-top: 0;">
           <button class="btn btn-primary" onclick="testStaticResource()">
-            获取 test.txt
+            获取 test.txt（文件系统）
+          </button>
+          <button class="btn btn-primary" onclick="testMemoryResource()">
+            获取 info.json（内存生成）
           </button>
         </div>
         <div id="static-result" style="margin-top: 12px;"></div>
@@ -280,8 +283,12 @@
     const urlParams = new URLSearchParams(window.location.search);
     const webuiToken = urlParams.get('webui_token') || '';
 
-    // 插件自行管理 API 调用
+    // 插件 API 基础路径（需要鉴权）
     const apiBase = '/api/Plugin/ext/napcat-plugin-builtin';
+    // 插件静态资源基础路径（不需要鉴权）
+    const staticBase = '/plugin/napcat-plugin-builtin/files';
+    // 插件内存资源基础路径（不需要鉴权）
+    const memBase = '/plugin/napcat-plugin-builtin/mem';
 
     // 封装 fetch，自动携带认证
     async function authFetch (url, options = {}) {
@@ -392,13 +399,38 @@
       resultDiv.innerHTML = '<div class="loading">加载中</div>';
 
       try {
-        const response = await authFetch(`${apiBase}/static/test.txt`);
+        // 静态资源不需要鉴权，直接请求
+        const response = await fetch(`${staticBase}/static/test.txt`);
         if (response.ok) {
           const text = await response.text();
           resultDiv.innerHTML = `
             <div style="background: var(--bg-item); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px;">
-              <div style="font-size: 11px; color: var(--success-color); margin-bottom: 8px;">静态资源访问成功</div>
+              <div style="font-size: 11px; color: var(--success-color); margin-bottom: 8px;">文件系统静态资源访问成功</div>
               <pre style="font-family: Monaco, Consolas, monospace; font-size: 12px; color: var(--text-primary); white-space: pre-wrap; margin: 0;">${text}</pre>
+            </div>
+          `;
+        } else {
+          resultDiv.innerHTML = `<div class="error">请求失败: ${response.status} ${response.statusText}</div>`;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="error">请求失败: ${error.message}</div>`;
+      }
+    }
+
+    // 测试内存资源
+    async function testMemoryResource () {
+      const resultDiv = document.getElementById('static-result');
+      resultDiv.innerHTML = '<div class="loading">加载中</div>';
+
+      try {
+        // 内存资源不需要鉴权，直接请求
+        const response = await fetch(`${memBase}/dynamic/info.json`);
+        if (response.ok) {
+          const json = await response.json();
+          resultDiv.innerHTML = `
+            <div style="background: var(--bg-item); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px;">
+              <div style="font-size: 11px; color: var(--success-color); margin-bottom: 8px;">内存生成资源访问成功</div>
+              <pre style="font-family: Monaco, Consolas, monospace; font-size: 12px; color: var(--text-primary); white-space: pre-wrap; margin: 0;">${JSON.stringify(json, null, 2)}</pre>
             </div>
           `;
         } else {
