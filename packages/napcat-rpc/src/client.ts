@@ -28,6 +28,7 @@ export function createDeepProxy<T = unknown> (options: DeepProxyOptions): T {
   const {
     transport,
     rootPath = [],
+    refId: rootRefId,
     // callbackTimeout 可供未来扩展使用
   } = options;
   void options.callbackTimeout;
@@ -47,7 +48,7 @@ export function createDeepProxy<T = unknown> (options: DeepProxyOptions): T {
           if (!cb) throw new Error(`Nested callback not found: ${id}`);
           return cb;
         },
-        proxyCreator: (path) => createProxyAtPath(path),
+        proxyCreator: (path, proxyRefId) => createProxyAtPath(path, proxyRefId),
       }));
       const result = await callback(...args);
       return serialize(result, { callbackRegistry });
@@ -57,10 +58,11 @@ export function createDeepProxy<T = unknown> (options: DeepProxyOptions): T {
   /**
    * 在指定路径创建代理
    */
-  function createProxyAtPath (path: PropertyKey[]): unknown {
+  function createProxyAtPath (path: PropertyKey[], refId?: string): unknown {
     const proxyMeta: ProxyMeta = {
       path: [...path],
       isProxy: true,
+      refId,
     };
 
     // 创建一个函数目标，以支持 apply 和 construct
@@ -78,8 +80,8 @@ export function createDeepProxy<T = unknown> (options: DeepProxyOptions): T {
           return undefined;
         }
 
-        // 返回新的子路径代理
-        return createProxyAtPath([...path, prop]);
+        // 返回新的子路径代理（继承 refId）
+        return createProxyAtPath([...path, prop], refId);
       },
 
       set (_target, prop, value) {
@@ -88,6 +90,7 @@ export function createDeepProxy<T = unknown> (options: DeepProxyOptions): T {
           type: RpcOperationType.SET,
           path: [...path, prop],
           args: [serialize(value, { callbackRegistry })],
+          refId,
         };
 
         // 同步返回，但实际是异步操作
@@ -105,6 +108,7 @@ export function createDeepProxy<T = unknown> (options: DeepProxyOptions): T {
           path,
           args: serializedArgs,
           callbackIds: Object.keys(callbackIds).length > 0 ? callbackIds : undefined,
+          refId,
         };
 
         return createAsyncResultProxy(request);
@@ -120,6 +124,7 @@ export function createDeepProxy<T = unknown> (options: DeepProxyOptions): T {
           path,
           args: serializedArgs,
           callbackIds: Object.keys(callbackIds).length > 0 ? callbackIds : undefined,
+          refId,
         };
 
         return createAsyncResultProxy(request) as object;
@@ -152,6 +157,7 @@ export function createDeepProxy<T = unknown> (options: DeepProxyOptions): T {
           id: generateRequestId(),
           type: RpcOperationType.DELETE,
           path: [...path, prop],
+          refId,
         };
 
         transport.send(request).catch(() => { /* ignore */ });
@@ -197,7 +203,7 @@ export function createDeepProxy<T = unknown> (options: DeepProxyOptions): T {
                 if (!cb) throw new Error(`Callback not found: ${id}`);
                 return cb;
               },
-              proxyCreator: (proxyPath) => createProxyAtPath(proxyPath),
+              proxyCreator: (proxyPath, proxyRefId) => createProxyAtPath(proxyPath, proxyRefId),
             });
             return deserialized;
           }
@@ -208,7 +214,7 @@ export function createDeepProxy<T = unknown> (options: DeepProxyOptions): T {
               if (!cb) throw new Error(`Callback not found: ${id}`);
               return cb;
             },
-            proxyCreator: (proxyPath) => createProxyAtPath(proxyPath),
+            proxyCreator: (proxyPath, proxyRefId) => createProxyAtPath(proxyPath, proxyRefId),
           });
         })();
       }
@@ -323,7 +329,7 @@ export function createDeepProxy<T = unknown> (options: DeepProxyOptions): T {
     });
   }
 
-  return createProxyAtPath(rootPath) as T;
+  return createProxyAtPath(rootPath, rootRefId) as T;
 }
 
 /**

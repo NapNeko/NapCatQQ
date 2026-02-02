@@ -4,8 +4,57 @@ import {
   type RpcServerOptions,
   type SerializedValue,
   RpcOperationType,
+  SerializedValueType,
 } from './types.js';
 import { serialize, deserialize, SimpleCallbackRegistry } from './serializer.js';
+
+/**
+ * 生成唯一引用 ID
+ */
+function generateRefId (): string {
+  return `ref_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
+}
+
+/**
+ * 默认的代理判断函数
+ * 判断返回值是否应该保持代理引用（而非完全序列化）
+ * 策略：class 实例和有方法的对象保持代理，普通对象直接序列化
+ */
+function defaultShouldProxyResult (value: unknown): boolean {
+  if (value === null || value === undefined) {
+    return false;
+  }
+  if (typeof value !== 'object' && typeof value !== 'function') {
+    return false;
+  }
+  // 函数保持代理
+  if (typeof value === 'function') {
+    return true;
+  }
+  // 可安全序列化的内置类型不代理
+  if (value instanceof Date || value instanceof RegExp || value instanceof Error) {
+    return false;
+  }
+  if (value instanceof Map || value instanceof Set) {
+    return false;
+  }
+  if (ArrayBuffer.isView(value) || value instanceof ArrayBuffer) {
+    return false;
+  }
+  // 数组不代理
+  if (Array.isArray(value)) {
+    return false;
+  }
+  // 检查对象原型是否为 Object.prototype（普通对象）
+  const proto = Object.getPrototypeOf(value);
+  if (proto === Object.prototype || proto === null) {
+    // 普通对象检查是否有方法
+    const hasMethod = Object.values(value as object).some(v => typeof v === 'function');
+    return hasMethod;
+  }
+  // 非普通对象（class 实例）- 保持代理
+  return true;
+}
 
 /**
  * RPC 服务端
@@ -16,10 +65,15 @@ export class RpcServer {
   private target: unknown;
   private callbackInvoker?: (callbackId: string, args: unknown[]) => Promise<unknown>;
   private localCallbacks = new SimpleCallbackRegistry();
+  /** 对象引用存储 */
+  private objectRefs = new Map<string, unknown>();
+  /** 代理判断函数 */
+  private shouldProxyResult: (value: unknown) => boolean;
 
   constructor (options: RpcServerOptions) {
     this.target = options.target;
     this.callbackInvoker = options.callbackInvoker;
+    this.shouldProxyResult = options.shouldProxyResult ?? defaultShouldProxyResult;
   }
 
   /**
@@ -71,10 +125,16 @@ export class RpcServer {
   }
 
   /**
-   * 解析路径获取目标值
+   * 解析路径获取目标值，支持 refId
    */
-  private resolvePath (path: PropertyKey[]): { parent: unknown; key: PropertyKey | undefined; value: unknown; } {
-    let current = this.target;
+  private resolvePath (path: PropertyKey[], refId?: string): { parent: unknown; key: PropertyKey | undefined; value: unknown; } {
+    // 如果有 refId，从引用存储中获取根对象
+    let current = refId ? this.objectRefs.get(refId) : this.target;
+
+    if (refId && current === undefined) {
+      throw new Error(`Object reference not found: ${refId}`);
+    }
+
     let parent: unknown = null;
     let key: PropertyKey | undefined;
 
@@ -94,17 +154,53 @@ export class RpcServer {
   }
 
   /**
+   * 存储对象引用并返回序列化的引用
+   */
+  private storeObjectRef (value: unknown): SerializedValue {
+    const refId = generateRefId();
+    this.objectRefs.set(refId, value);
+    const className = value?.constructor?.name;
+    return {
+      type: SerializedValueType.OBJECT_REF,
+      refId,
+      className: className !== 'Object' ? className : undefined,
+    };
+  }
+
+  /**
+   * 序列化结果值，如果需要代理则存储引用
+   */
+  private serializeResult (value: unknown): { result: SerializedValue; isProxyable: boolean; refId?: string; } {
+    const shouldProxy = this.shouldProxyResult(value);
+
+    if (shouldProxy) {
+      const ref = this.storeObjectRef(value);
+      return {
+        result: ref,
+        isProxyable: true,
+        refId: ref.refId,
+      };
+    }
+
+    return {
+      result: serialize(value, { callbackRegistry: this.localCallbacks }),
+      isProxyable: false,
+    };
+  }
+
+  /**
    * 处理 GET 操作
    */
   private handleGet (request: RpcRequest): RpcResponse {
-    const { value } = this.resolvePath(request.path);
-    const isProxyable = this.isProxyable(value);
+    const { value } = this.resolvePath(request.path, request.refId);
+    const { result, isProxyable, refId } = this.serializeResult(value);
 
     return {
       id: request.id,
       success: true,
-      result: serialize(value, { callbackRegistry: this.localCallbacks }),
+      result,
       isProxyable,
+      refId,
     };
   }
 
@@ -113,13 +209,13 @@ export class RpcServer {
    */
   private handleSet (request: RpcRequest): RpcResponse {
     const path = request.path;
-    if (path.length === 0) {
+    if (path.length === 0 && !request.refId) {
       throw new Error('Cannot set root object');
     }
 
     const parentPath = path.slice(0, -1);
     const key = path[path.length - 1]!;
-    const { value: parent } = this.resolvePath(parentPath);
+    const { value: parent } = this.resolvePath(parentPath, request.refId);
 
     if (parent === null || parent === undefined) {
       throw new Error(`Cannot set property '${String(key)}' of ${parent}`);
@@ -128,6 +224,7 @@ export class RpcServer {
     const newValue = request.args?.[0]
       ? deserialize(request.args[0], {
         callbackResolver: this.createCallbackResolver(request),
+        refResolver: (refId) => this.objectRefs.get(refId),
       })
       : undefined;
 
@@ -144,13 +241,43 @@ export class RpcServer {
    */
   private async handleApply (request: RpcRequest): Promise<RpcResponse> {
     const path = request.path;
+
+    // 如果有 refId 且 path 为空，说明引用对象本身是函数
+    if (path.length === 0 && request.refId) {
+      const func = this.objectRefs.get(request.refId);
+      if (typeof func !== 'function') {
+        throw new Error('Referenced object is not callable');
+      }
+
+      const args = (request.args ?? []).map(arg =>
+        deserialize(arg, {
+          callbackResolver: this.createCallbackResolver(request),
+          refResolver: (refId) => this.objectRefs.get(refId),
+        })
+      );
+
+      let result = func(...args);
+      if (result instanceof Promise) {
+        result = await result;
+      }
+
+      const { result: serializedResult, isProxyable, refId } = this.serializeResult(result);
+      return {
+        id: request.id,
+        success: true,
+        result: serializedResult,
+        isProxyable,
+        refId,
+      };
+    }
+
     if (path.length === 0) {
       throw new Error('Cannot call root object');
     }
 
     const methodPath = path.slice(0, -1);
     const methodName = path[path.length - 1]!;
-    const { value: parent } = this.resolvePath(methodPath);
+    const { value: parent } = this.resolvePath(methodPath, request.refId);
 
     if (parent === null || parent === undefined) {
       throw new Error(`Cannot call method on ${parent}`);
@@ -164,6 +291,7 @@ export class RpcServer {
     const args = (request.args ?? []).map(arg =>
       deserialize(arg, {
         callbackResolver: this.createCallbackResolver(request),
+        refResolver: (refId) => this.objectRefs.get(refId),
       })
     );
 
@@ -174,13 +302,14 @@ export class RpcServer {
       result = await result;
     }
 
-    const isProxyable = this.isProxyable(result);
+    const { result: serializedResult, isProxyable, refId } = this.serializeResult(result);
 
     return {
       id: request.id,
       success: true,
-      result: serialize(result, { callbackRegistry: this.localCallbacks }),
+      result: serializedResult,
       isProxyable,
+      refId,
     };
   }
 
@@ -188,7 +317,7 @@ export class RpcServer {
    * 处理 CONSTRUCT 操作
    */
   private async handleConstruct (request: RpcRequest): Promise<RpcResponse> {
-    const { value: Constructor } = this.resolvePath(request.path);
+    const { value: Constructor } = this.resolvePath(request.path, request.refId);
 
     if (typeof Constructor !== 'function') {
       throw new Error('Target is not a constructor');
@@ -197,17 +326,19 @@ export class RpcServer {
     const args = (request.args ?? []).map(arg =>
       deserialize(arg, {
         callbackResolver: this.createCallbackResolver(request),
+        refResolver: (refId) => this.objectRefs.get(refId),
       })
     );
 
     const instance = new (Constructor as new (...args: unknown[]) => unknown)(...args);
-    const isProxyable = this.isProxyable(instance);
+    const { result, isProxyable, refId } = this.serializeResult(instance);
 
     return {
       id: request.id,
       success: true,
-      result: serialize(instance, { callbackRegistry: this.localCallbacks }),
+      result,
       isProxyable,
+      refId,
     };
   }
 
@@ -226,7 +357,7 @@ export class RpcServer {
 
     const parentPath = path.slice(0, -1);
     const key = path[path.length - 1]!;
-    const { value: parent } = this.resolvePath(parentPath);
+    const { value: parent } = this.resolvePath(parentPath, request.refId);
 
     const has = parent !== null && parent !== undefined && key in (parent as object);
 
@@ -241,7 +372,7 @@ export class RpcServer {
    * 处理 OWNKEYS 操作
    */
   private handleOwnKeys (request: RpcRequest): RpcResponse {
-    const { value } = this.resolvePath(request.path);
+    const { value } = this.resolvePath(request.path, request.refId);
 
     if (value === null || value === undefined) {
       return {
@@ -265,13 +396,13 @@ export class RpcServer {
    */
   private handleDelete (request: RpcRequest): RpcResponse {
     const path = request.path;
-    if (path.length === 0) {
+    if (path.length === 0 && !request.refId) {
       throw new Error('Cannot delete root object');
     }
 
     const parentPath = path.slice(0, -1);
     const key = path[path.length - 1]!;
-    const { value: parent } = this.resolvePath(parentPath);
+    const { value: parent } = this.resolvePath(parentPath, request.refId);
 
     if (parent === null || parent === undefined) {
       throw new Error(`Cannot delete property from ${parent}`);
@@ -301,7 +432,7 @@ export class RpcServer {
 
     const parentPath = path.slice(0, -1);
     const key = path[path.length - 1]!;
-    const { value: parent } = this.resolvePath(parentPath);
+    const { value: parent } = this.resolvePath(parentPath, request.refId);
 
     if (parent === null || parent === undefined) {
       return {
@@ -337,7 +468,7 @@ export class RpcServer {
    * 处理 GET_PROTOTYPE 操作
    */
   private handleGetPrototype (request: RpcRequest): RpcResponse {
-    const { value } = this.resolvePath(request.path);
+    const { value } = this.resolvePath(request.path, request.refId);
 
     if (value === null || value === undefined) {
       return {
@@ -361,7 +492,10 @@ export class RpcServer {
    * 处理 RELEASE 操作
    */
   private handleRelease (request: RpcRequest): RpcResponse {
-    // 清理与该路径相关的资源（如果有）
+    // 如果有 refId，释放该引用
+    if (request.refId) {
+      this.objectRefs.delete(request.refId);
+    }
     return {
       id: request.id,
       success: true,
@@ -381,17 +515,6 @@ export class RpcServer {
         return this.callbackInvoker(callbackId, args);
       };
     };
-  }
-
-  /**
-   * 判断值是否应该返回代理引用
-   */
-  private isProxyable (value: unknown): boolean {
-    if (value === null || value === undefined) {
-      return false;
-    }
-    const type = typeof value;
-    return type === 'object' || type === 'function';
   }
 
   /**

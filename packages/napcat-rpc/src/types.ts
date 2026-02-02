@@ -40,6 +40,8 @@ export interface RpcRequest {
   args?: SerializedValue[];
   /** 回调 ID 映射 (参数索引 -> 回调 ID) */
   callbackIds?: Record<number, string>;
+  /** 远程对象引用 ID（用于对引用对象的操作） */
+  refId?: string;
 }
 
 /**
@@ -58,6 +60,8 @@ export interface RpcResponse {
   stack?: string;
   /** 结果是否为可代理对象 */
   isProxyable?: boolean;
+  /** 远程对象引用 ID（用于深层对象代理） */
+  refId?: string;
 }
 
 /**
@@ -78,6 +82,8 @@ export interface SerializedValue {
   properties?: Record<string, SerializedValue>;
   /** 数组元素 */
   elements?: SerializedValue[];
+  /** 远程对象引用 ID（用于保持代理能力） */
+  refId?: string;
 }
 
 /**
@@ -102,6 +108,18 @@ export enum SerializedValueType {
   BUFFER = 'buffer',
   MAP = 'map',
   SET = 'set',
+  /** 远程对象引用 - 保持代理能力 */
+  OBJECT_REF = 'objectRef',
+}
+
+/**
+ * 对象引用信息
+ */
+export interface ObjectRef {
+  /** 引用 ID */
+  refId: string;
+  /** 对象类型名称 */
+  className?: string;
 }
 
 /**
@@ -138,6 +156,8 @@ export interface DeepProxyOptions {
   cacheProperties?: boolean;
   /** 回调超时时间 (ms) */
   callbackTimeout?: number;
+  /** 远程对象引用 ID（用于引用对象的代理） */
+  refId?: string;
 }
 
 /**
@@ -148,6 +168,11 @@ export interface RpcServerOptions {
   target: unknown;
   /** 回调调用器 */
   callbackInvoker?: (callbackId: string, args: unknown[]) => Promise<unknown>;
+  /**
+   * 判断返回值是否应保持代理引用（而非完全序列化）
+   * 默认对 class 实例和包含方法的对象返回 true
+   */
+  shouldProxyResult?: (value: unknown) => boolean;
 }
 
 /**
@@ -163,4 +188,6 @@ export interface ProxyMeta {
   path: PropertyKey[];
   /** 是否为代理 */
   isProxy: true;
+  /** 远程对象引用 ID */
+  refId?: string;
 }

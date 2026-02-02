@@ -61,7 +61,9 @@ export interface DeserializeContext {
   /** 回调解析器 */
   callbackResolver?: (id: string) => Function;
   /** 代理创建器 */
-  proxyCreator?: (path: PropertyKey[]) => unknown;
+  proxyCreator?: (path: PropertyKey[], refId?: string) => unknown;
+  /** 对象引用解析器 */
+  refResolver?: (refId: string) => unknown;
 }
 
 /**
@@ -263,7 +265,7 @@ export function serialize (value: unknown, context: SerializeContext = {}): Seri
  * 将序列化数据还原为值
  */
 export function deserialize (data: SerializedValue, context: DeserializeContext = {}): unknown {
-  const { callbackResolver, proxyCreator } = context;
+  const { callbackResolver, proxyCreator, refResolver } = context;
 
   switch (data.type) {
     case SerializedValueType.UNDEFINED:
@@ -354,6 +356,20 @@ export function deserialize (data: SerializedValue, context: DeserializeContext 
     case SerializedValueType.PROXY_REF:
       if (data.proxyPath && proxyCreator) {
         return proxyCreator(data.proxyPath);
+      }
+      return {};
+
+    case SerializedValueType.OBJECT_REF:
+      // 对象引用：在客户端创建代理，在服务端解析为实际对象
+      if (data.refId) {
+        // 优先使用 refResolver（服务端场景）
+        if (refResolver) {
+          return refResolver(data.refId);
+        }
+        // 否则创建代理（客户端场景）
+        if (proxyCreator) {
+          return proxyCreator([], data.refId);
+        }
       }
       return {};
 
