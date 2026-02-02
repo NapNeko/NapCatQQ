@@ -63,13 +63,12 @@ export default function ExtensionPage () {
   }, [extensionPages]);
 
   // 获取当前选中页面的 iframe URL
+  // 新路由格式不需要鉴权: /plugin/:pluginId/page/:pagePath
   const currentPageUrl = useMemo(() => {
     if (!selectedTab) return '';
     const [pluginId, ...pathParts] = selectedTab.split(':');
     const path = pathParts.join(':').replace(/^\//, '');
-    // 获取认证 token
-    const token = localStorage.getItem('token') || '';
-    return `/api/Plugin/page/${pluginId}/${path}?webui_token=${token}`;
+    return `/plugin/${pluginId}/page/${path}`;
   }, [selectedTab]);
 
   useEffect(() => {
@@ -86,11 +85,10 @@ export default function ExtensionPage () {
     setIframeLoading(false);
   };
 
-  // 在新窗口打开页面
+  // 在新窗口打开页面（新路由不需要鉴权）
   const openInNewWindow = (pluginId: string, path: string) => {
     const cleanPath = path.replace(/^\//, '');
-    const token = localStorage.getItem('token') || '';
-    const url = `/api/Plugin/page/${pluginId}/${cleanPath}?webui_token=${token}`;
+    const url = `/plugin/${pluginId}/page/${cleanPath}`;
     window.open(url, '_blank');
   };
 

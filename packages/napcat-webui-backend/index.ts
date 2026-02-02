@@ -332,6 +332,42 @@ export async function InitWebUi (logger: ILogWrapper, pathWrapper: NapCatPathWra
     return res.status(404).json({ code: -1, message: 'Memory file not found' });
   });
 
+  // 插件页面路由（不需要鉴权）
+  // 路径格式: /plugin/:pluginId/page/:pagePath
+  app.get('/plugin/:pluginId/page/:pagePath', (req, res) => {
+    const { pluginId, pagePath } = req.params;
+    if (!pluginId) return res.status(400).json({ code: -1, message: 'Plugin ID is required' });
+
+    const ob11 = WebUiDataRuntime.getOneBotContext() as NapCatOneBot11Adapter | null;
+    if (!ob11) return res.status(503).json({ code: -1, message: 'OneBot context not available' });
+
+    const pluginManager = ob11.networkManager.findSomeAdapter('plugin_manager') as OB11PluginMangerAdapter | undefined;
+    if (!pluginManager) return res.status(503).json({ code: -1, message: 'Plugin manager not available' });
+
+    const routerRegistry = pluginManager.getPluginRouter(pluginId);
+    if (!routerRegistry || !routerRegistry.hasPages()) {
+      return res.status(404).json({ code: -1, message: `Plugin '${pluginId}' has no registered pages` });
+    }
+
+    const pages = routerRegistry.getPages();
+    const page = pages.find(p => p.path === '/' + pagePath || p.path === pagePath);
+    if (!page) {
+      return res.status(404).json({ code: -1, message: `Page '${pagePath}' not found in plugin '${pluginId}'` });
+    }
+
+    const pluginPath = routerRegistry.getPluginPath();
+    if (!pluginPath) {
+      return res.status(500).json({ code: -1, message: 'Plugin path not available' });
+    }
+
+    const htmlFilePath = join(pluginPath, page.htmlFile);
+    if (!existsSync(htmlFilePath)) {
+      return res.status(404).json({ code: -1, message: `HTML file not found: ${page.htmlFile}` });
+    }
+
+    return res.sendFile(htmlFilePath);
+  });
+
   // 插件文件系统静态资源路由（不需要鉴权）
   // 路径格式: /plugin/:pluginId/files/*
   app.use('/plugin/:pluginId/files', (req, res, next) => {
