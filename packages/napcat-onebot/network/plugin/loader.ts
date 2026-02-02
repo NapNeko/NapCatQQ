@@ -1,5 +1,7 @@
 import fs from 'fs';
 import path from 'path';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 import { LogWrapper } from 'napcat-core/helper/log';
 import {
   PluginPackageJson,
@@ -294,5 +296,25 @@ export class PluginLoader {
     }
 
     return null;
+  }
+  /**
+   * 清除插件文件的 require 缓存
+   * 用于确保卸载插件时清理 CJS 模块缓存
+   */
+  clearCache (pluginPath: string): void {
+    try {
+      // 规范化路径以确保匹配正确
+      const normalizedPluginPath = path.resolve(pluginPath);
+
+      // 遍历缓存并删除属于该插件目录的模块
+      Object.keys(require.cache).forEach((id) => {
+        if (id.startsWith(normalizedPluginPath)) {
+          delete require.cache[id];
+          this.logger.logDebug(`[PluginLoader] Cleared cache for: ${id}`);
+        }
+      });
+    } catch (e) {
+      this.logger.logError('[PluginLoader] Error clearing module cache:', e);
+    }
   }
 }

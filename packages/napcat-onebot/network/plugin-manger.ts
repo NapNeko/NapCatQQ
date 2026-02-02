@@ -179,6 +179,9 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> i
       this.pluginRouters.delete(entry.id);
     }
 
+    // 清理模块缓存
+    this.loader.clearCache(entry.pluginPath);
+
     // 重置状态
     entry.loaded = false;
     entry.runtime = {
