@@ -125,6 +125,19 @@ export interface PluginPageDefinition {
   description?: string;
 }
 
+/** 内存文件生成器 - 用于动态生成静态文件内容 */
+export type MemoryFileGenerator = () => string | Buffer | Promise<string | Buffer>;
+
+/** 内存静态文件定义 */
+export interface MemoryStaticFile {
+  /** 文件路径（相对于 urlPath） */
+  path: string;
+  /** 文件内容或生成器 */
+  content: string | Buffer | MemoryFileGenerator;
+  /** 可选的 MIME 类型 */
+  contentType?: string;
+}
+
 /** 插件路由注册器 */
 export interface PluginRouterRegistry {
   // ==================== API 路由注册 ====================
@@ -167,6 +180,13 @@ export interface PluginRouterRegistry {
    * @param localPath 本地文件夹路径（相对于插件目录或绝对路径）
    */
   static (urlPath: string, localPath: string): void;
+
+  /**
+   * 提供内存生成的静态文件服务
+   * @param urlPath URL 路径
+   * @param files 内存文件列表
+   */
+  staticOnMem (urlPath: string, files: MemoryStaticFile[]): void;
 }
 
 // ==================== 插件管理器接口 ====================
@@ -247,8 +267,15 @@ export interface NapCatPluginContext {
   /** 
    * WebUI 路由注册器
    * 用于注册插件的 HTTP API 路由，路由将挂载到 /api/Plugin/ext/{pluginId}/
+   * 静态资源将挂载到 /plugin/{pluginId}/files/{urlPath}/
    */
   router: PluginRouterRegistry;
+  /**
+   * 获取其他插件的导出模块
+   * @param pluginId 目标插件 ID
+   * @returns 插件导出的模块，如果插件未加载则返回 undefined
+   */
+  getPluginExports: <T = PluginModule>(pluginId: string) => T | undefined;
 }
 
 // ==================== 插件模块接口 ====================

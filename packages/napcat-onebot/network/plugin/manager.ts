@@ -194,6 +194,15 @@ export class OB11PluginManager extends IOB11NetworkAdapter<PluginConfig> impleme
       this.pluginRouters.set(entry.id, router);
     }
 
+    // 创建获取其他插件导出的方法
+    const getPluginExports = <T = any>(pluginId: string): T | undefined => {
+      const targetEntry = this.plugins.get(pluginId);
+      if (!targetEntry || !targetEntry.loaded || targetEntry.runtime.status !== 'loaded') {
+        return undefined;
+      }
+      return targetEntry.runtime.module as T;
+    };
+
     return {
       core: this.core,
       oneBot: this.obContext,
@@ -207,6 +216,7 @@ export class OB11PluginManager extends IOB11NetworkAdapter<PluginConfig> impleme
       pluginManager: this,
       logger: pluginLogger,
       router,
+      getPluginExports,
     };
   }
 

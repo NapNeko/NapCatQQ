@@ -86,6 +86,14 @@ export default function ExtensionPage () {
     setIframeLoading(false);
   };
 
+  // 在新窗口打开页面
+  const openInNewWindow = (pluginId: string, path: string) => {
+    const cleanPath = path.replace(/^\//, '');
+    const token = localStorage.getItem('token') || '';
+    const url = `/api/Plugin/page/${pluginId}/${cleanPath}?webui_token=${token}`;
+    window.open(url, '_blank');
+  };
+
   return (
     <>
       <title>扩展页面 - NapCat WebUI</title>
@@ -125,7 +133,16 @@ export default function ExtensionPage () {
                   title={
                     <div className='flex items-center gap-2'>
                       {tab.icon && <span>{tab.icon}</span>}
-                      <span>{tab.title}</span>
+                      <span
+                        className='cursor-pointer hover:underline'
+                        title='点击在新窗口打开'
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openInNewWindow(tab.pluginId, tab.path);
+                        }}
+                      >
+                        {tab.title}
+                      </span>
                       <span className='text-xs text-default-400'>({tab.pluginName})</span>
                     </div>
                   }
