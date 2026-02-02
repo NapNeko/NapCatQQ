@@ -19,7 +19,7 @@ type ReturnType = Static<typeof ReturnSchema>;
 
 export class GetUnidirectionalFriendList extends OneBotAction<void, ReturnType> {
   override actionName = ActionName.GetUnidirectionalFriendList;
-  override payloadSchema = Type.Void();
+  override payloadSchema = Type.Object({});
   override returnSchema = ReturnSchema;
   override actionSummary = '获取单向好友列表';
   override actionTags = ['用户扩展'];

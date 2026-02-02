@@ -4,8 +4,8 @@ import { Type } from '@sinclair/typebox';
 
 export class BotExit extends OneBotAction<void, void> {
   override actionName = ActionName.Exit;
-  override payloadSchema = Type.Void();
-  override returnSchema = Type.Void();
+  override payloadSchema = Type.Object({});
+  override returnSchema = Type.Object({});
   override actionSummary = '退出登录';
   override actionTags = ['系统扩展'];
   override payloadExample = {};

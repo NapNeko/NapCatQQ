@@ -12,7 +12,7 @@ type ReturnType = Static<typeof ReturnSchema>;
 
 export class GetClientkey extends OneBotAction<void, ReturnType> {
   override actionName = ActionName.GetClientkey;
-  override payloadSchema = Type.Void();
+  override payloadSchema = Type.Object({});
   override returnSchema = ReturnSchema;
   override actionSummary = '获取ClientKey';
   override actionDescription = '获取当前登录帐号的ClientKey';
