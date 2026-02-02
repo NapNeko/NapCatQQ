@@ -254,11 +254,13 @@ export const InstallPluginFromStoreHandler: RequestHandler = async (req, res) =>
       // 删除临时文件
       fs.unlinkSync(tempZipPath);
 
-      // 如果 pluginManager 存在，立即注册插件
+      // 如果 pluginManager 存在，立即注册或重载插件
       const pluginManager = getPluginManager();
       if (pluginManager) {
-        // 检查是否已注册，避免重复注册
-        if (!pluginManager.getPluginInfo(id)) {
+        // 如果插件已存在，则重载以刷新版本信息；否则注册新插件
+        if (pluginManager.getPluginInfo(id)) {
+          await pluginManager.reloadPlugin(id);
+        } else {
           await pluginManager.loadPluginById(id);
         }
       }
@@ -336,11 +338,14 @@ export const InstallPluginFromStoreSSEHandler: RequestHandler = async (req, res)
       sendProgress('解压完成，正在清理...', 90);
       fs.unlinkSync(tempZipPath);
 
-      // 如果 pluginManager 存在，立即注册插件
+      // 如果 pluginManager 存在，立即注册或重载插件
       const pluginManager = getPluginManager();
       if (pluginManager) {
-        // 检查是否已注册，避免重复注册
-        if (!pluginManager.getPluginInfo(id)) {
+        // 如果插件已存在，则重载以刷新版本信息；否则注册新插件
+        if (pluginManager.getPluginInfo(id)) {
+          sendProgress('正在刷新插件信息...', 95);
+          await pluginManager.reloadPlugin(id);
+        } else {
           sendProgress('正在注册插件...', 95);
           await pluginManager.loadPluginById(id);
         }
