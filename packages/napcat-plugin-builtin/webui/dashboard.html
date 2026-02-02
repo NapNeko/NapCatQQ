@@ -279,9 +279,10 @@
   </div>
 
   <script>
-    // 从 URL 参数获取 webui_token
+    // 从 localStorage 获取 token（与父页面同源，可直接访问）
+    // 兼容旧版：如果 URL 有 webui_token 参数则优先使用
     const urlParams = new URLSearchParams(window.location.search);
-    const webuiToken = urlParams.get('webui_token') || '';
+    const webuiToken = localStorage.getItem('token') || '';
 
     // 插件 API 基础路径（需要鉴权）
     const apiBase = '/api/Plugin/ext/napcat-plugin-builtin';

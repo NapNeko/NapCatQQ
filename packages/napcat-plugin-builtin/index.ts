@@ -134,6 +134,14 @@ const plugin_init: PluginModule['plugin_init'] = async (ctx) => {
   ctx.router.get('/call-plugin/:pluginId', (req, res) => {
     const { pluginId } = req.params;
 
+    if (!pluginId) {
+      res.status(400).json({
+        code: -1,
+        message: 'Plugin ID is required'
+      });
+      return;
+    }
+
     // 使用 getPluginExports 获取其他插件的导出模块
     const targetPlugin = ctx.getPluginExports<PluginModule>(pluginId);
 
