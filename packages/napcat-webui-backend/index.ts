@@ -27,6 +27,8 @@ import compression from 'compression';
 import { napCatVersion } from 'napcat-common/src/version';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
+import { NapCatOneBot11Adapter } from '@/napcat-onebot/index';
+import { OB11PluginMangerAdapter } from '@/napcat-onebot/network/plugin-manger';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -294,6 +296,72 @@ export async function InitWebUi (logger: ILogWrapper, pathWrapper: NapCatPathWra
   app.use('/webui', express.static(pathWrapper.staticPath, {
     maxAge: '1d',
   }));
+
+  // 插件内存静态资源路由（不需要鉴权）
+  // 路径格式: /plugin/:pluginId/mem/:urlPath/*
+  app.use('/plugin/:pluginId/mem', async (req, res) => {
+    const { pluginId } = req.params;
+    if (!pluginId) return res.status(400).json({ code: -1, message: 'Plugin ID is required' });
+
+    const ob11 = WebUiDataRuntime.getOneBotContext() as NapCatOneBot11Adapter | null;
+    if (!ob11) return res.status(503).json({ code: -1, message: 'OneBot context not available' });
+
+    const pluginManager = ob11.networkManager.findSomeAdapter('plugin_manager') as OB11PluginMangerAdapter | undefined;
+    if (!pluginManager) return res.status(503).json({ code: -1, message: 'Plugin manager not available' });
+
+    const routerRegistry = pluginManager.getPluginRouter(pluginId);
+    const memoryRoutes = routerRegistry?.getMemoryStaticRoutes() || [];
+
+    for (const { urlPath, files } of memoryRoutes) {
+      const prefix = urlPath.startsWith('/') ? urlPath : '/' + urlPath;
+      if (req.path.startsWith(prefix)) {
+        const filePath = '/' + (req.path.substring(prefix.length).replace(/^\//, '') || '');
+        const memFile = files.find(f => ('/' + f.path.replace(/^\//, '')) === filePath);
+        if (memFile) {
+          try {
+            const content = typeof memFile.content === 'function' ? await memFile.content() : memFile.content;
+            res.setHeader('Content-Type', memFile.contentType || 'application/octet-stream');
+            return res.send(content);
+          } catch (err) {
+            console.error(`[Plugin: ${pluginId}] Error serving memory file:`, err);
+            return res.status(500).json({ code: -1, message: 'Error serving memory file' });
+          }
+        }
+      }
+    }
+    res.status(404).json({ code: -1, message: 'Memory file not found' });
+  });
+
+  // 插件文件系统静态资源路由（不需要鉴权）
+  // 路径格式: /plugin/:pluginId/files/*
+  app.use('/plugin/:pluginId/files', (req, res, next) => {
+    const { pluginId } = req.params;
+    if (!pluginId) return res.status(400).json({ code: -1, message: 'Plugin ID is required' });
+
+    const ob11 = WebUiDataRuntime.getOneBotContext() as NapCatOneBot11Adapter | null;
+    if (!ob11) return res.status(503).json({ code: -1, message: 'OneBot context not available' });
+
+    const pluginManager = ob11.networkManager.findSomeAdapter('plugin_manager') as OB11PluginMangerAdapter | undefined;
+    if (!pluginManager) return res.status(503).json({ code: -1, message: 'Plugin manager not available' });
+
+    const routerRegistry = pluginManager.getPluginRouter(pluginId);
+    const staticRoutes = routerRegistry?.getStaticRoutes() || [];
+
+    for (const { urlPath, localPath } of staticRoutes) {
+      const prefix = urlPath.startsWith('/') ? urlPath : '/' + urlPath;
+      if (req.path.startsWith(prefix) || req.path === prefix.slice(0, -1)) {
+        const staticMiddleware = express.static(localPath, { maxAge: '1d' });
+        const originalUrl = req.url;
+        req.url = '/' + (req.path.substring(prefix.length).replace(/^\//, '') || '');
+        return staticMiddleware(req, res, (err) => {
+          req.url = originalUrl;
+          err ? next(err) : next();
+        });
+      }
+    }
+    res.status(404).json({ code: -1, message: 'Static resource not found' });
+  });
+
   // 初始化WebSocket服务器
   const sslCerts = await checkCertificates(logger);
   const isHttps = !!sslCerts;

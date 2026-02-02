@@ -1,4 +1,4 @@
-import { Router, static as expressStatic, Request, Response, NextFunction } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import path from 'path';
 import {
   PluginRouterRegistry,
@@ -8,6 +8,7 @@ import {
   PluginHttpRequest,
   PluginHttpResponse,
   HttpMethod,
+  MemoryStaticFile,
 } from './types';
 
 /**
@@ -59,10 +60,17 @@ function wrapResponse (res: Response): PluginHttpResponse {
  * 插件路由注册器实现
  * 为每个插件创建独立的路由注册器，收集路由定义
  */
+/** 内存静态路由定义 */
+interface MemoryStaticRoute {
+  urlPath: string;
+  files: MemoryStaticFile[];
+}
+
 export class PluginRouterRegistryImpl implements PluginRouterRegistry {
   private apiRoutes: PluginApiRouteDefinition[] = [];
   private pageDefinitions: PluginPageDefinition[] = [];
   private staticRoutes: Array<{ urlPath: string; localPath: string; }> = [];
+  private memoryStaticRoutes: MemoryStaticRoute[] = [];
 
   constructor (
     private readonly pluginId: string,
@@ -111,18 +119,18 @@ export class PluginRouterRegistryImpl implements PluginRouterRegistry {
     this.staticRoutes.push({ urlPath, localPath: absolutePath });
   }
 
+  staticOnMem (urlPath: string, files: MemoryStaticFile[]): void {
+    this.memoryStaticRoutes.push({ urlPath, files });
+  }
+
   // ==================== 构建路由 ====================
 
   /**
    * 构建 Express Router（用于 API 路由）
+   * 注意：静态资源路由不在此处挂载，由 webui-backend 直接在不需要鉴权的路径下处理
    */
   buildApiRouter (): Router {
     const router = Router();
-
-    // 注册静态文件路由
-    for (const { urlPath, localPath } of this.staticRoutes) {
-      router.use(urlPath, expressStatic(localPath));
-    }
 
     // 注册 API 路由
     for (const route of this.apiRoutes) {
@@ -179,7 +187,14 @@ export class PluginRouterRegistryImpl implements PluginRouterRegistry {
    * 检查是否有注册的 API 路由
    */
   hasApiRoutes (): boolean {
-    return this.apiRoutes.length > 0 || this.staticRoutes.length > 0;
+    return this.apiRoutes.length > 0;
+  }
+
+  /**
+   * 检查是否有注册的静态资源路由
+   */
+  hasStaticRoutes (): boolean {
+    return this.staticRoutes.length > 0 || this.memoryStaticRoutes.length > 0;
   }
 
   /**
@@ -211,11 +226,26 @@ export class PluginRouterRegistryImpl implements PluginRouterRegistry {
   }
 
   /**
+   * 获取所有注册的静态路由
+   */
+  getStaticRoutes (): Array<{ urlPath: string; localPath: string; }> {
+    return [...this.staticRoutes];
+  }
+
+  /**
+   * 获取所有注册的内存静态路由
+   */
+  getMemoryStaticRoutes (): MemoryStaticRoute[] {
+    return [...this.memoryStaticRoutes];
+  }
+
+  /**
    * 清空路由（用于插件卸载）
    */
   clear (): void {
     this.apiRoutes = [];
     this.pageDefinitions = [];
     this.staticRoutes = [];
+    this.memoryStaticRoutes = [];
   }
 }

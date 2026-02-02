@@ -65,10 +65,32 @@ const plugin_init: PluginModule['plugin_init'] = async (ctx) => {
 
   // ==================== 注册 WebUI 路由示例 ====================
 
-  // 注册静态资源目录（webui 目录下的文件可通过 /api/Plugin/ext/{pluginId}/static/ 访问）
+  // 注册静态资源目录
+  // 静态资源可通过 /plugin/{pluginId}/files/static/ 访问（无需鉴权）
   ctx.router.static('/static', 'webui');
 
-  // 注册 API 路由
+  // 注册内存生成的静态资源（无需鉴权）
+  // 可通过 /plugin/{pluginId}/mem/dynamic/info.json 访问
+  ctx.router.staticOnMem('/dynamic', [
+    {
+      path: '/info.json',
+      contentType: 'application/json',
+      // 使用生成器函数动态生成内容
+      content: () => JSON.stringify({
+        pluginName: ctx.pluginName,
+        generatedAt: new Date().toISOString(),
+        uptime: Date.now() - startTime,
+        config: currentConfig
+      }, null, 2)
+    },
+    {
+      path: '/readme.txt',
+      contentType: 'text/plain',
+      content: `NapCat Builtin Plugin\n=====================\nThis is a demonstration of the staticOnMem feature.\nPlugin: ${ctx.pluginName}\nPath: ${ctx.pluginPath}`
+    }
+  ]);
+
+  // 注册 API 路由（需要鉴权，挂载到 /api/Plugin/ext/{pluginId}/）
   ctx.router.get('/status', (_req, res) => {
     const uptime = Date.now() - startTime;
     res.json({
@@ -107,6 +129,37 @@ const plugin_init: PluginModule['plugin_init'] = async (ctx) => {
     }
   });
 
+  // ==================== 插件互调用示例 ====================
+  // 演示如何调用其他插件的导出方法
+  ctx.router.get('/call-plugin/:pluginId', (req, res) => {
+    const { pluginId } = req.params;
+
+    // 使用 getPluginExports 获取其他插件的导出模块
+    const targetPlugin = ctx.getPluginExports<PluginModule>(pluginId);
+
+    if (!targetPlugin) {
+      res.status(404).json({
+        code: -1,
+        message: `Plugin '${pluginId}' not found or not loaded`
+      });
+      return;
+    }
+
+    // 返回目标插件的信息
+    res.json({
+      code: 0,
+      data: {
+        pluginId,
+        hasInit: typeof targetPlugin.plugin_init === 'function',
+        hasOnMessage: typeof targetPlugin.plugin_onmessage === 'function',
+        hasOnEvent: typeof targetPlugin.plugin_onevent === 'function',
+        hasCleanup: typeof targetPlugin.plugin_cleanup === 'function',
+        hasConfigSchema: Array.isArray(targetPlugin.plugin_config_schema),
+        hasConfigUI: Array.isArray(targetPlugin.plugin_config_ui),
+      }
+    });
+  });
+
   // 注册扩展页面
   ctx.router.page({
     path: 'dashboard',
@@ -116,7 +169,10 @@ const plugin_init: PluginModule['plugin_init'] = async (ctx) => {
     description: '查看内置插件的运行状态和配置'
   });
 
-  logger.info('WebUI 路由已注册: /api/Plugin/ext/' + ctx.pluginName);
+  logger.info('WebUI 路由已注册:');
+  logger.info('  - API 路由: /api/Plugin/ext/' + ctx.pluginName + '/');
+  logger.info('  - 静态资源: /plugin/' + ctx.pluginName + '/files/static/');
+  logger.info('  - 内存资源: /plugin/' + ctx.pluginName + '/mem/dynamic/');
 };
 
 export const plugin_get_config: PluginModule['plugin_get_config'] = async () => {

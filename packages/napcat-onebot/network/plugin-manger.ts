@@ -28,6 +28,7 @@ export { PluginModule } from './plugin/types';
 export { PluginStatusConfig } from './plugin/types';
 export { PluginRouterRegistry, PluginRequestHandler, PluginApiRouteDefinition, PluginPageDefinition, HttpMethod } from './plugin/types';
 export { PluginHttpRequest, PluginHttpResponse, PluginNextFunction } from './plugin/types';
+export { MemoryStaticFile, MemoryFileGenerator } from './plugin/types';
 export { PluginRouterRegistryImpl } from './plugin/router-registry';
 export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> implements IPluginManager {
   private readonly pluginPath: string;
@@ -214,6 +215,15 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> i
     // 保存到路由注册表
     this.pluginRouters.set(entry.id, routerRegistry);
 
+    // 创建获取其他插件导出的方法
+    const getPluginExports = <T = any>(pluginId: string): T | undefined => {
+      const targetEntry = this.plugins.get(pluginId);
+      if (!targetEntry || !targetEntry.loaded || targetEntry.runtime.status !== 'loaded') {
+        return undefined;
+      }
+      return targetEntry.runtime.module as T;
+    };
+
     return {
       core: this.core,
       oneBot: this.obContext,
@@ -227,6 +237,7 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> i
       pluginManager: this,
       logger: pluginLogger,
       router: routerRegistry,
+      getPluginExports,
     };
   }
 
