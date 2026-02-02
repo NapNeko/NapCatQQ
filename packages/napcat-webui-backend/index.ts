@@ -329,7 +329,7 @@ export async function InitWebUi (logger: ILogWrapper, pathWrapper: NapCatPathWra
         }
       }
     }
-    res.status(404).json({ code: -1, message: 'Memory file not found' });
+    return res.status(404).json({ code: -1, message: 'Memory file not found' });
   });
 
   // 插件文件系统静态资源路由（不需要鉴权）
