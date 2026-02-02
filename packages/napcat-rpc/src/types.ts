@@ -84,6 +84,8 @@ export interface SerializedValue {
   elements?: SerializedValue[];
   /** 远程对象引用 ID（用于保持代理能力） */
   refId?: string;
+  /** 缓存的属性值（OBJECT_REF 时使用，避免属性访问需要 RPC） */
+  cachedProps?: Record<string, SerializedValue>;
 }
 
 /**

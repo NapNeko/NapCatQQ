@@ -61,7 +61,7 @@ export interface DeserializeContext {
   /** 回调解析器 */
   callbackResolver?: (id: string) => Function;
   /** 代理创建器 */
-  proxyCreator?: (path: PropertyKey[], refId?: string) => unknown;
+  proxyCreator?: (path: PropertyKey[], refId?: string, cachedProps?: Record<string, unknown>) => unknown;
   /** 对象引用解析器 */
   refResolver?: (refId: string) => unknown;
 }
@@ -368,7 +368,15 @@ export function deserialize (data: SerializedValue, context: DeserializeContext 
         }
         // 否则创建代理（客户端场景）
         if (proxyCreator) {
-          return proxyCreator([], data.refId);
+          // 反序列化缓存的属性
+          let cachedValues: Record<string, unknown> | undefined;
+          if (data.cachedProps) {
+            cachedValues = {};
+            for (const [key, val] of Object.entries(data.cachedProps)) {
+              cachedValues[key] = deserialize(val, context);
+            }
+          }
+          return proxyCreator([], data.refId, cachedValues);
         }
       }
       return {};
