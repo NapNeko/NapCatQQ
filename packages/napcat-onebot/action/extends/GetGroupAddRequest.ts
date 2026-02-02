@@ -22,7 +22,7 @@ type ReturnType = Static<typeof ReturnSchema>;
 
 export default class GetGroupAddRequest extends OneBotAction<void, ReturnType> {
   override actionName = ActionName.GetGroupIgnoreAddRequest;
-  override payloadSchema = Type.Void();
+  override payloadSchema = Type.Object({});
   override returnSchema = ReturnSchema;
   override actionSummary = '获取群被忽略的加群请求';
   override actionTags = ['群组接口'];

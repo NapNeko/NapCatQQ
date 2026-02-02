@@ -8,7 +8,7 @@ type ReturnType = Static<typeof ReturnSchema>;
 
 export class GetRkey extends GetPacketStatusDepends<void, ReturnType> {
   override actionName = ActionName.GetRkey;
-  override payloadSchema = Type.Void();
+  override payloadSchema = Type.Object({});
   override returnSchema = ReturnSchema;
   override actionSummary = '获取 RKey';
   override actionTags = ['系统扩展'];

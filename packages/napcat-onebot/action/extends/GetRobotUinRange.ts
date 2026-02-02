@@ -14,7 +14,7 @@ export class GetRobotUinRange extends OneBotAction<void, ReturnType> {
   override returnExample = [
     { minUin: '12345678', maxUin: '87654321' }
   ];
-  override payloadSchema = Type.Void();
+  override payloadSchema = Type.Object({});
   override returnSchema = ReturnSchema;
 
   async _handle () {

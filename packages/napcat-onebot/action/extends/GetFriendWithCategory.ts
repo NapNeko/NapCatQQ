@@ -18,7 +18,7 @@ type ReturnType = Static<typeof ReturnSchema>;
 
 export class GetFriendWithCategory extends OneBotAction<void, ReturnType> {
   override actionName = ActionName.GetFriendsWithCategory;
-  override payloadSchema = Type.Void();
+  override payloadSchema = Type.Object({});
   override returnSchema = ReturnSchema;
   override actionSummary = '获取带分组的好友列表';
   override actionTags = ['用户扩展'];
