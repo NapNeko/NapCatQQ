@@ -5,11 +5,13 @@ import { Tab, Tabs } from '@heroui/tabs';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import CryptoJS from 'crypto-js';
 
 import logo from '@/assets/images/logo.png';
 
 import HoverEffectCard from '@/components/effect_card';
 import { title } from '@/components/primitives';
+import PasswordLogin from '@/components/password_login';
 import QrCodeLogin from '@/components/qr_code_login';
 import QuickLogin from '@/components/quick_login';
 import type { QQItem } from '@/components/quick_login';
@@ -51,6 +53,7 @@ export default function QQLoginPage () {
   const lastErrorRef = useRef<string>('');
   const [qqList, setQQList] = useState<(QQItem | LoginListItem)[]>([]);
   const [refresh, setRefresh] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<string>('shortcut');
   const firstLoad = useRef<boolean>(true);
   const onSubmit = async () => {
     if (!uinValue) {
@@ -69,6 +72,21 @@ export default function QQLoginPage () {
       setTimeout(() => {
         setIsLoading(false);
       }, 1000);
+    }
+  };
+
+  const onPasswordSubmit = async (uin: string, password: string) => {
+    setIsLoading(true);
+    try {
+      // 计算密码的MD5值
+      const passwordMd5 = CryptoJS.MD5(password).toString();
+      await QQManager.passwordLogin(uin, passwordMd5);
+      toast.success('密码登录请求已发送');
+    } catch (error) {
+      const msg = (error as Error).message;
+      toast.error(`密码登录失败: ${msg}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -91,11 +109,17 @@ export default function QQLoginPage () {
           setLoginError(data.loginError);
           const friendlyMsg = parseLoginError(data.loginError);
 
-          dialog.alert({
-            title: '登录失败',
-            content: friendlyMsg,
-            confirmText: '确定',
-          });
+          // 仅在扫码登录 Tab 下才弹窗，或者错误不是"二维码已过期"
+          // 如果是 "二维码已过期"，且不在 qrcode tab，则不弹窗
+          const isQrCodeExpired = friendlyMsg.includes('二维码') && (friendlyMsg.includes('过期') || friendlyMsg.includes('失效'));
+          
+          if (!isQrCodeExpired || activeTab === 'qrcode') {
+             dialog.alert({
+              title: '登录失败',
+              content: friendlyMsg,
+              confirmText: '确定',
+            });
+          }
         } else if (!data.loginError) {
           lastErrorRef.current = '';
           setLoginError('');
@@ -197,6 +221,8 @@ export default function QQLoginPage () {
                 }}
                 isDisabled={isLoading}
                 size='lg'
+                selectedKey={activeTab}
+                onSelectionChange={(key) => setActiveTab(key.toString())}
               >
                 <Tab key='shortcut' title='快速登录'>
                   <QuickLogin
@@ -207,6 +233,13 @@ export default function QQLoginPage () {
                     selectedQQ={uinValue}
                     onSubmit={onSubmit}
                     onUpdateQQList={onUpdateQQList}
+                  />
+                </Tab>
+                <Tab key='password' title='密码登录'>
+                  <PasswordLogin
+                    isLoading={isLoading}
+                    onSubmit={onPasswordSubmit}
+                    qqList={qqList}
                   />
                 </Tab>
                 <Tab key='qrcode' title='扫码登录'>

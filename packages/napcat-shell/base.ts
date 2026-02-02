@@ -220,6 +220,52 @@ async function handleLoginInner (context: { isLogined: boolean; }, logger: LogWr
       }
     });
   });
+
+  // 注册密码登录回调
+  WebUiDataRuntime.setPasswordLoginCall(async (uin: string, passwordMd5: string) => {
+    return await new Promise((resolve) => {
+      if (uin && passwordMd5) {
+        logger.log('正在密码登录 ', uin);
+        loginService.passwordLogin({
+          uin,
+          passwordMd5,
+          step: 0,
+          newDeviceLoginSig: '',
+          proofWaterSig: '',
+          proofWaterRand: '',
+          proofWaterSid: '',
+        }).then(res => {
+          if (res.result === '140022008') {
+            const errMsg = '需要验证码，暂不支持';
+            WebUiDataRuntime.setQQLoginError(errMsg);
+            loginService.getQRCodePicture();
+            resolve({ result: false, message: errMsg });
+          } else if (res.result === '140022010') {
+            const errMsg = '新设备需要扫码登录，暂不支持';
+            WebUiDataRuntime.setQQLoginError(errMsg);
+            loginService.getQRCodePicture();
+            resolve({ result: false, message: errMsg });
+          } else if (res.result !== '0') {
+            const errMsg = res.loginErrorInfo?.errMsg || '密码登录失败';
+            WebUiDataRuntime.setQQLoginError(errMsg);
+            loginService.getQRCodePicture();
+            resolve({ result: false, message: errMsg });
+          } else {
+            WebUiDataRuntime.setQQLoginStatus(true);
+            WebUiDataRuntime.setQQLoginError('');
+            resolve({ result: true, message: '' });
+          }
+        }).catch((e) => {
+          logger.logError(e);
+          WebUiDataRuntime.setQQLoginError('密码登录发生错误');
+          loginService.getQRCodePicture();
+          resolve({ result: false, message: '密码登录发生错误' });
+        });
+      } else {
+        resolve({ result: false, message: '密码登录失败：参数不完整' });
+      }
+    });
+  });
   if (quickLoginUin) {
     if (historyLoginList.some(u => u.uin === quickLoginUin)) {
       logger.log('正在快速登录 ', quickLoginUin);
