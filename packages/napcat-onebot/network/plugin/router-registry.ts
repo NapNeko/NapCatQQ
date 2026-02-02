@@ -68,6 +68,7 @@ interface MemoryStaticRoute {
 
 export class PluginRouterRegistryImpl implements PluginRouterRegistry {
   private apiRoutes: PluginApiRouteDefinition[] = [];
+  private apiNoAuthRoutes: PluginApiRouteDefinition[] = [];
   private pageDefinitions: PluginPageDefinition[] = [];
   private staticRoutes: Array<{ urlPath: string; localPath: string; }> = [];
   private memoryStaticRoutes: MemoryStaticRoute[] = [];
@@ -97,6 +98,28 @@ export class PluginRouterRegistryImpl implements PluginRouterRegistry {
 
   delete (routePath: string, handler: PluginRequestHandler): void {
     this.api('delete', routePath, handler);
+  }
+
+  // ==================== 无认证 API 路由注册 ====================
+
+  apiNoAuth (method: HttpMethod, routePath: string, handler: PluginRequestHandler): void {
+    this.apiNoAuthRoutes.push({ method, path: routePath, handler });
+  }
+
+  getNoAuth (routePath: string, handler: PluginRequestHandler): void {
+    this.apiNoAuth('get', routePath, handler);
+  }
+
+  postNoAuth (routePath: string, handler: PluginRequestHandler): void {
+    this.apiNoAuth('post', routePath, handler);
+  }
+
+  putNoAuth (routePath: string, handler: PluginRequestHandler): void {
+    this.apiNoAuth('put', routePath, handler);
+  }
+
+  deleteNoAuth (routePath: string, handler: PluginRequestHandler): void {
+    this.apiNoAuth('delete', routePath, handler);
   }
 
   // ==================== 页面注册 ====================
@@ -184,10 +207,50 @@ export class PluginRouterRegistryImpl implements PluginRouterRegistry {
   // ==================== 查询方法 ====================
 
   /**
-   * 检查是否有注册的 API 路由
+   * 检查是否有注册的 API 路由（需要认证）
    */
   hasApiRoutes (): boolean {
     return this.apiRoutes.length > 0;
+  }
+
+  /**
+   * 检查是否有注册的无认证 API 路由
+   */
+  hasApiNoAuthRoutes (): boolean {
+    return this.apiNoAuthRoutes.length > 0;
+  }
+
+  /**
+   * 构建无认证 Express Router（用于 /plugin/{pluginId}/api/ 路径）
+   */
+  buildApiNoAuthRouter (): Router {
+    const router = Router();
+
+    for (const route of this.apiNoAuthRoutes) {
+      const handler = this.wrapHandler(route.handler);
+      switch (route.method) {
+        case 'get':
+          router.get(route.path, handler);
+          break;
+        case 'post':
+          router.post(route.path, handler);
+          break;
+        case 'put':
+          router.put(route.path, handler);
+          break;
+        case 'delete':
+          router.delete(route.path, handler);
+          break;
+        case 'patch':
+          router.patch(route.path, handler);
+          break;
+        case 'all':
+          router.all(route.path, handler);
+          break;
+      }
+    }
+
+    return router;
   }
 
   /**
@@ -244,6 +307,7 @@ export class PluginRouterRegistryImpl implements PluginRouterRegistry {
    */
   clear (): void {
     this.apiRoutes = [];
+    this.apiNoAuthRoutes = [];
     this.pageDefinitions = [];
     this.staticRoutes = [];
     this.memoryStaticRoutes = [];

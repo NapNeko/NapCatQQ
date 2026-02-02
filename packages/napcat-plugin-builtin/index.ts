@@ -129,6 +129,34 @@ const plugin_init: PluginModule['plugin_init'] = async (ctx) => {
     }
   });
 
+  // ==================== 无认证 API 路由示例 ====================
+  // 路由挂载到 /plugin/{pluginId}/api/，无需 WebUI 登录即可访问
+
+  // 获取插件公开信息（无需鉴权）
+  ctx.router.getNoAuth('/public/info', (_req, res) => {
+    const uptime = Date.now() - startTime;
+    res.json({
+      code: 0,
+      data: {
+        pluginName: ctx.pluginName,
+        uptime,
+        uptimeFormatted: formatUptime(uptime),
+        platform: process.platform
+      }
+    });
+  });
+
+  // 健康检查接口（无需鉴权）
+  ctx.router.getNoAuth('/health', (_req, res) => {
+    res.json({
+      code: 0,
+      data: {
+        status: 'ok',
+        timestamp: new Date().toISOString()
+      }
+    });
+  });
+
   // ==================== 插件互调用示例 ====================
   // 演示如何调用其他插件的导出方法
   ctx.router.get('/call-plugin/:pluginId', (req, res) => {
@@ -178,7 +206,8 @@ const plugin_init: PluginModule['plugin_init'] = async (ctx) => {
   });
 
   logger.info('WebUI 路由已注册:');
-  logger.info('  - API 路由: /api/Plugin/ext/' + ctx.pluginName + '/');
+  logger.info('  - API 路由(需认证): /api/Plugin/ext/' + ctx.pluginName + '/');
+  logger.info('  - API 路由(无认证): /plugin/' + ctx.pluginName + '/api/');
   logger.info('  - 扩展页面: /plugin/' + ctx.pluginName + '/page/dashboard');
   logger.info('  - 静态资源: /plugin/' + ctx.pluginName + '/files/static/');
   logger.info('  - 内存资源: /plugin/' + ctx.pluginName + '/mem/dynamic/');

@@ -140,23 +140,41 @@ export interface MemoryStaticFile {
 
 /** 插件路由注册器 */
 export interface PluginRouterRegistry {
-  // ==================== API 路由注册 ====================
+  // ==================== API 路由注册（需要认证） ====================
 
   /** 
-   * 注册单个 API 路由
+   * 注册单个 API 路由（需要认证，挂载到 /api/Plugin/ext/{pluginId}/）
    * @param method HTTP 方法
    * @param path 路由路径
    * @param handler 请求处理器
    */
   api (method: HttpMethod, path: string, handler: PluginRequestHandler): void;
-  /** 注册 GET API */
+  /** 注册 GET API（需要认证） */
   get (path: string, handler: PluginRequestHandler): void;
-  /** 注册 POST API */
+  /** 注册 POST API（需要认证） */
   post (path: string, handler: PluginRequestHandler): void;
-  /** 注册 PUT API */
+  /** 注册 PUT API（需要认证） */
   put (path: string, handler: PluginRequestHandler): void;
-  /** 注册 DELETE API */
+  /** 注册 DELETE API（需要认证） */
   delete (path: string, handler: PluginRequestHandler): void;
+
+  // ==================== 无认证 API 路由注册 ====================
+
+  /**
+   * 注册单个无认证 API 路由（挂载到 /plugin/{pluginId}/api/）
+   * @param method HTTP 方法
+   * @param path 路由路径
+   * @param handler 请求处理器
+   */
+  apiNoAuth (method: HttpMethod, path: string, handler: PluginRequestHandler): void;
+  /** 注册 GET API（无认证） */
+  getNoAuth (path: string, handler: PluginRequestHandler): void;
+  /** 注册 POST API（无认证） */
+  postNoAuth (path: string, handler: PluginRequestHandler): void;
+  /** 注册 PUT API（无认证） */
+  putNoAuth (path: string, handler: PluginRequestHandler): void;
+  /** 注册 DELETE API（无认证） */
+  deleteNoAuth (path: string, handler: PluginRequestHandler): void;
 
   // ==================== 页面注册 ====================
 

@@ -332,6 +332,28 @@ export async function InitWebUi (logger: ILogWrapper, pathWrapper: NapCatPathWra
     return res.status(404).json({ code: -1, message: 'Memory file not found' });
   });
 
+  // 插件无认证 API 路由（不需要鉴权）
+  // 路径格式: /plugin/:pluginId/api/*
+  app.use('/plugin/:pluginId/api', (req, res, next) => {
+    const { pluginId } = req.params;
+    if (!pluginId) return res.status(400).json({ code: -1, message: 'Plugin ID is required' });
+
+    const ob11 = WebUiDataRuntime.getOneBotContext() as NapCatOneBot11Adapter | null;
+    if (!ob11) return res.status(503).json({ code: -1, message: 'OneBot context not available' });
+
+    const pluginManager = ob11.networkManager.findSomeAdapter('plugin_manager') as OB11PluginMangerAdapter | undefined;
+    if (!pluginManager) return res.status(503).json({ code: -1, message: 'Plugin manager not available' });
+
+    const routerRegistry = pluginManager.getPluginRouter(pluginId);
+    if (!routerRegistry || !routerRegistry.hasApiNoAuthRoutes()) {
+      return res.status(404).json({ code: -1, message: `Plugin '${pluginId}' has no registered no-auth API routes` });
+    }
+
+    // 构建并执行插件无认证 API 路由
+    const pluginRouter = routerRegistry.buildApiNoAuthRouter();
+    return pluginRouter(req, res, next);
+  });
+
   // 插件页面路由（不需要鉴权）
   // 路径格式: /plugin/:pluginId/page/:pagePath
   app.get('/plugin/:pluginId/page/:pagePath', (req, res) => {
