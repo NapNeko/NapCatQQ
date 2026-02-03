@@ -109,6 +109,7 @@ async function initializeLoginService (
     commonPath: dataPathGlobal,
     clientVer: basicInfoWrapper.getFullQQVersion(),
     hostName: hostname,
+    externalVersion: false,
   });
 }
 

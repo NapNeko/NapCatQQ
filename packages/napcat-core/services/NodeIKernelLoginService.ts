@@ -8,6 +8,7 @@ export interface LoginInitConfig {
   commonPath: string;
   clientVer: string;
   hostName: string;
+  externalVersion: boolean;
 }
 
 export interface PasswordLoginRetType {
