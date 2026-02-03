@@ -87,9 +87,9 @@ export interface NodeQQNTWrapperUtil {
 
   fullWordToHalfWord (word: string): unknown;
 
-  getNTUserDataInfoConfig (): unknown;
+  getNTUserDataInfoConfig (): Promise<string>;
 
-  pathIsReadableAndWriteable (path: string): unknown; // 直接的猜测
+  pathIsReadableAndWriteable (path: string, type: number): Promise<number>; // type 2 , result 0 成功
 
   resetUserDataSavePathToDocument (): unknown;
 
@@ -158,7 +158,7 @@ export interface NodeIQQNTStartupSessionWrapper {
   stop (): void;
   start (): void;
   createWithModuleList (uk: unknown): unknown;
-  getSessionIdList (): unknown;
+  getSessionIdList (): Promise<Map<unknown, unknown>>;
 }
 export interface NodeIQQNTWrapperSession {
   getNTWrapperSession (str: string): NodeIQQNTWrapperSession;
