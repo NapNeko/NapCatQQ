@@ -125,18 +125,54 @@ jobs:
           cd "$TMPDIR"
 
           # -----------------------------
-          # 1) 下载 QQ x64
+          # 1) 下载 QQ x64 (使用缓存)
           # -----------------------------
           # JS_URL="https://cdn-go.cn/qq-web/im.qq.com_new/latest/rainbow/windowsConfig.js"
           # JS_URL="https://slave.docadan488.workers.dev/proxy?url=https://cdn-go.cn/qq-web/im.qq.com_new/latest/rainbow/windowsConfig.js"
           # NT_URL=$(curl -fsSL "$JS_URL" | grep -oP '"ntDownloadX64Url"\s*:\s*"\K[^"]+')
-          NT_URL="https://dldir1v6.qq.com/qqfile/qq/QQNT/eb263b35/QQ9.9.23.42086_x64.exe"
+          NT_URL="https://dldir1v6.qq.com/qqfile/qq/QQNT/32876254/QQ9.9.27.45627_x64.exe"
           QQ_ZIP="$(basename "$NT_URL")"
-          aria2c -x16 -s16 -k1M -o "$QQ_ZIP" "$NT_URL"
+          # 根据 URL 生成缓存键
+          QQ_CACHE_KEY="qq-x64-$(echo "$NT_URL" | md5sum | cut -d' ' -f1)"
+          echo "QQ_CACHE_KEY=$QQ_CACHE_KEY" >> $GITHUB_ENV
+          echo "QQ_ZIP=$QQ_ZIP" >> $GITHUB_ENV
+          echo "NT_URL=$NT_URL" >> $GITHUB_ENV
+
+      - name: Cache QQ x64 Installer
+        id: cache-qq
+        uses: actions/cache@v4
+        with:
+          path: ~/qq-cache
+          key: ${{ env.QQ_CACHE_KEY }}
+
+      - name: Download and Extract QQ x64
+        run: |
+          set -euo pipefail
+          TMPDIR=$(mktemp -d)
+          cd "$TMPDIR"
+
+          QQ_CACHE_DIR="$HOME/qq-cache"
+          mkdir -p "$QQ_CACHE_DIR"
+          
+          if [ -f "$QQ_CACHE_DIR/$QQ_ZIP" ]; then
+            echo "Using cached QQ installer: $QQ_ZIP"
+            cp "$QQ_CACHE_DIR/$QQ_ZIP" "$QQ_ZIP"
+          else
+            echo "Downloading QQ installer: $QQ_ZIP"
+            aria2c -x16 -s16 -k1M -o "$QQ_ZIP" "$NT_URL"
+            cp "$QQ_ZIP" "$QQ_CACHE_DIR/$QQ_ZIP"
+          fi
 
           QQ_EXTRACT="$TMPDIR/qq_extracted"
           mkdir -p "$QQ_EXTRACT"
           7z x -y -o"$QQ_EXTRACT" "$QQ_ZIP" >/dev/null
+          echo "QQ_EXTRACT=$QQ_EXTRACT" >> $GITHUB_ENV
+          echo "WORK_TMPDIR=$TMPDIR" >> $GITHUB_ENV
+
+      - name: Download Node.js and Assemble NapCat.Shell.Windows.Node.zip
+        run: |
+          set -euo pipefail
+          cd "$WORK_TMPDIR"
 
           # -----------------------------
           # 2) 下载 Node.js Windows x64 zip 22.11.0
@@ -146,7 +182,7 @@ jobs:
           NODE_ZIP="node-v$NODE_VER-win-x64.zip"
           aria2c -x1 -s1 -k1M -o "$NODE_ZIP" "$NODE_URL"
 
-          NODE_EXTRACT="$TMPDIR/node_extracted"
+          NODE_EXTRACT="$WORK_TMPDIR/node_extracted"
           mkdir -p "$NODE_EXTRACT"
           unzip -q "$NODE_ZIP" -d "$NODE_EXTRACT"
 
@@ -164,10 +200,17 @@ jobs:
           # -----------------------------
           # 5) 拷贝 QQ 文件到 NapCat.Shell.Windows.Node
           # -----------------------------
-          QQ_TARGETS=("avif_convert.dll" "broadcast_ipc.dll" "config.json" "libglib-2.0-0.dll" "libgobject-2.0-0.dll" "libvips-42.dll" "ncnn.dll" "opencv.dll" "package.json" "QBar.dll" "wrapper.node")
+          QQ_TARGETS=("avif_convert.dll" "broadcast_ipc.dll" "config.json" "libglib-2.0-0.dll" "libgobject-2.0-0.dll" "libvips-42.dll" "ncnn.dll" "opencv.dll" "package.json" "QBar.dll" "wrapper.node" "LightQuic.dll")
           for name in "${QQ_TARGETS[@]}"; do
             find "$QQ_EXTRACT" -iname "$name" -exec cp -a {} "$OUT_DIR" \; || true
           done
+
+          # -----------------------------
+          # 5.1) 拷贝 win64 目录下的文件
+          # -----------------------------
+          mkdir -p "$OUT_DIR/win64"
+          find "$QQ_EXTRACT" -ipath "*/win64/SSOShareInfoHelper64.dll" -exec cp -a {} "$OUT_DIR/win64/" \; || true
+          find "$QQ_EXTRACT" -ipath "*/win64/parent-ipc-core-x64.dll" -exec cp -a {} "$OUT_DIR/win64/" \; || true
 
           # -----------------------------
           # 6) 拷贝仓库文件 napcat.bat 和 index.js
@@ -178,6 +221,7 @@ jobs:
           # -----------------------------
           # 7) 拷贝 Node.exe 到 NapCat.Shell.Windows.Node
           # -----------------------------
+          NODE_VER="22.11.0"
           cp -a "$NODE_EXTRACT/node-v$NODE_VER-win-x64/node.exe" "$OUT_DIR/" || true
 
       - name: Upload Artifact

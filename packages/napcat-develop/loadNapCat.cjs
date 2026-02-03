@@ -32,6 +32,7 @@ if (versionFolders.length === 0) {
 const BASE_DIR = path.join(versionsDir, selectedFolder, 'resources', 'app');
 console.log(`BASE_DIR: ${BASE_DIR}`);
 const TARGET_DIR = path.join(__dirname, 'dist');
+const TARGET_WIN64_DIR = path.join(__dirname, 'dist', 'win64');
 const QQNT_FILE = path.join(__dirname, 'QQNT.dll');
 const NAPCAT_MJS_PATH = path.join(__dirname, '..', 'napcat-shell', 'dist', 'napcat.mjs');
 
@@ -46,6 +47,12 @@ const itemsToCopy = [
   'package.json',
   'QBar.dll',
   'wrapper.node',
+  'LightQuic.dll'
+];
+
+const win64ItemsToCopy = [
+  'SSOShareInfoHelper64.dll',
+  'parent-ipc-core-x64.dll'
 ];
 
 async function copyAll () {
@@ -53,13 +60,23 @@ async function copyAll () {
   const configPath = path.join(TARGET_DIR, 'config.json');
   const allItemsExist = await fs.pathExists(qqntDllPath) &&
     await fs.pathExists(configPath) &&
-    (await Promise.all(itemsToCopy.map(item => fs.pathExists(path.join(TARGET_DIR, item))))).every(exists => exists);
+    (await Promise.all(itemsToCopy.map(item => fs.pathExists(path.join(TARGET_DIR, item))))).every(exists => exists) &&
+    (await Promise.all(win64ItemsToCopy.map(item => fs.pathExists(path.join(TARGET_WIN64_DIR, item))))).every(exists => exists);
 
   if (!allItemsExist) {
     console.log('Copying required files...');
     await fs.ensureDir(TARGET_DIR);
+    await fs.ensureDir(TARGET_WIN64_DIR);
     await fs.copy(QQNT_FILE, qqntDllPath, { overwrite: true });
     await fs.copy(path.join(versionsDir, 'config.json'), configPath, { overwrite: true });
+
+    // 复制 win64 目录下的文件
+    await Promise.all(win64ItemsToCopy.map(async (item) => {
+      await fs.copy(path.join(BASE_DIR, 'win64', item), path.join(TARGET_WIN64_DIR, item), { overwrite: true });
+      console.log(`Copied ${item} to win64`);
+    }));
+
+    // 复制根目录下的文件
     await Promise.all(itemsToCopy.map(async (item) => {
       await fs.copy(path.join(BASE_DIR, item), path.join(TARGET_DIR, item), { overwrite: true });
       console.log(`Copied ${item}`);
