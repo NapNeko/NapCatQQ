@@ -132,8 +132,8 @@ export default function ExtensionPage () {
                     <div className='flex items-center gap-2'>
                       {tab.icon && <span>{tab.icon}</span>}
                       <span
-                        className='cursor-pointer hover:underline'
-                        title='点击在新窗口打开'
+                        className='cursor-pointer hover:underline truncate max-w-[6rem] md:max-w-none'
+                        title={`插件：${tab.pluginName}\n点击在新窗口打开`}
                         onClick={(e) => {
                           e.stopPropagation();
                           openInNewWindow(tab.pluginId, tab.path);
@@ -141,7 +141,7 @@ export default function ExtensionPage () {
                       >
                         {tab.title}
                       </span>
-                      <span className='text-xs text-default-400'>({tab.pluginName})</span>
+                      <span className='text-xs text-default-400 hidden md:inline'>({tab.pluginName})</span>
                     </div>
                   }
                 />
