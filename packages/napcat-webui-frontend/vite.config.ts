@@ -30,6 +30,7 @@ export default defineConfig(({ mode }) => {
         },
         '/api': backendDebugUrl,
         '/files': backendDebugUrl,
+        '/plugin': backendDebugUrl,
         '/webui/fonts/CustomFont.woff': backendDebugUrl,
         '/webui/sw.js': backendDebugUrl,
       },
