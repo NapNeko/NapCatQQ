@@ -112,9 +112,9 @@ export default function QQLoginPage () {
           // 仅在扫码登录 Tab 下才弹窗，或者错误不是"二维码已过期"
           // 如果是 "二维码已过期"，且不在 qrcode tab，则不弹窗
           const isQrCodeExpired = friendlyMsg.includes('二维码') && (friendlyMsg.includes('过期') || friendlyMsg.includes('失效'));
-          
+
           if (!isQrCodeExpired || activeTab === 'qrcode') {
-             dialog.alert({
+            dialog.alert({
               title: '登录失败',
               content: friendlyMsg,
               confirmText: '确定',
@@ -222,7 +222,7 @@ export default function QQLoginPage () {
                 isDisabled={isLoading}
                 size='lg'
                 selectedKey={activeTab}
-                onSelectionChange={(key) => setActiveTab(key.toString())}
+                onSelectionChange={(key) => key !== null && setActiveTab(key.toString())}
               >
                 <Tab key='shortcut' title='快速登录'>
                   <QuickLogin
