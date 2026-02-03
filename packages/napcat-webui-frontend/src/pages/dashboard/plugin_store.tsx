@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 import { IoMdRefresh, IoMdSearch, IoMdSettings } from 'react-icons/io';
 import clsx from 'clsx';
 import { EventSourcePolyfill } from 'event-source-polyfill';
+import { useLocalStorage } from '@uidotdev/usehooks';
 
 import PluginStoreCard, { InstallStatus } from '@/components/display_card/plugin_store_card';
 import PluginManager, { PluginItem } from '@/controllers/plugin_manager';
@@ -226,68 +227,70 @@ export default function PluginStorePage () {
     }
   };
 
+  const [backgroundImage] = useLocalStorage<string>(key.backgroundImage, '');
+  const hasBackground = !!backgroundImage;
+
   return (
     <>
       <title>插件商店 - NapCat WebUI</title>
       <div className="p-2 md:p-4 relative">
-        {/* 头部 */}
-        <div className="flex mb-6 items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-bold">插件商店</h1>
-            <Button
-              isIconOnly
-              className="bg-default-100/50 hover:bg-default-200/50 text-default-700 backdrop-blur-md"
-              radius="full"
-              onPress={() => loadPlugins(true)}
-              isLoading={loading}
-            >
-              <IoMdRefresh size={24} />
-            </Button>
+        {/* 固定头部区域 */}
+        <div className={clsx(
+          'sticky top-14 z-10 backdrop-blur-sm py-4 px-4 rounded-sm mb-4 -mx-2 md:-mx-4 -mt-2 md:-mt-4 transition-colors',
+          hasBackground
+            ? 'bg-white/20 dark:bg-black/10'
+            : 'bg-transparent'
+        )}>
+          {/* 头部 */}
+          <div className="flex mb-4 items-center justify-between flex-wrap gap-4">
+            <div className="flex items-center gap-4">
+              <h1 className="text-2xl font-bold">插件商店</h1>
+              <Button
+                isIconOnly
+                className="bg-default-100/50 hover:bg-default-200/50 text-default-700 backdrop-blur-md"
+                radius="full"
+                onPress={() => loadPlugins(true)}
+                isLoading={loading}
+              >
+                <IoMdRefresh size={24} />
+              </Button>
+            </div>
+
+            {/* 商店列表源卡片 */}
+            <Card className="bg-default-100/50 backdrop-blur-md shadow-sm">
+              <CardBody className="py-2 px-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-default-500">列表源:</span>
+                    <span className="text-sm font-medium">{getStoreSourceDisplayName()}</span>
+                  </div>
+                  <Tooltip content="切换列表源">
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      variant="light"
+                      onPress={() => setStoreSourceModalOpen(true)}
+                    >
+                      <IoMdSettings size={16} />
+                    </Button>
+                  </Tooltip>
+                </div>
+              </CardBody>
+            </Card>
           </div>
 
-          {/* 商店列表源卡片 */}
-          <Card className="bg-default-100/50 backdrop-blur-md shadow-sm">
-            <CardBody className="py-2 px-3">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-default-500">列表源:</span>
-                  <span className="text-sm font-medium">{getStoreSourceDisplayName()}</span>
-                </div>
-                <Tooltip content="切换列表源">
-                  <Button
-                    isIconOnly
-                    size="sm"
-                    variant="light"
-                    onPress={() => setStoreSourceModalOpen(true)}
-                  >
-                    <IoMdSettings size={16} />
-                  </Button>
-                </Tooltip>
-              </div>
-            </CardBody>
-          </Card>
-        </div>
+          {/* 搜索框 */}
+          <div className="mb-4">
+            <Input
+              placeholder="搜索插件名称、描述、作者或标签..."
+              startContent={<IoMdSearch className="text-default-400" />}
+              value={searchQuery}
+              onValueChange={setSearchQuery}
+              className="max-w-md"
+            />
+          </div>
 
-        {/* 搜索框 */}
-        <div className="mb-6">
-          <Input
-            placeholder="搜索插件名称、描述、作者或标签..."
-            startContent={<IoMdSearch className="text-default-400" />}
-            value={searchQuery}
-            onValueChange={setSearchQuery}
-            className="max-w-md"
-          />
-        </div>
-
-        {/* 标签页 */}
-        <div className="relative">
-          {/* 加载遮罩 - 只遮住插件列表区域 */}
-          {loading && (
-            <div className="absolute inset-0 bg-zinc-500/10 z-30 flex justify-center items-center backdrop-blur-sm rounded-lg">
-              <Spinner size='lg' />
-            </div>
-          )}
-
+          {/* 标签页导航 */}
           <Tabs
             aria-label="Plugin Store Categories"
             className="max-w-full"
@@ -296,31 +299,42 @@ export default function PluginStorePage () {
             classNames={{
               tabList: 'bg-white/40 dark:bg-black/20 backdrop-blur-md',
               cursor: 'bg-white/80 dark:bg-white/10 backdrop-blur-md shadow-sm',
+              panel: 'hidden',
             }}
           >
             {tabs.map((tab) => (
               <Tab
                 key={tab.key}
                 title={`${tab.title} (${tab.count})`}
-              >
-                <EmptySection isEmpty={!categorizedPlugins[tab.key]?.length} />
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 justify-start items-stretch gap-x-2 gap-y-4">
-                  {categorizedPlugins[tab.key]?.map((plugin) => {
-                    const installInfo = getPluginInstallInfo(plugin);
-                    return (
-                      <PluginStoreCard
-                        key={plugin.id}
-                        data={plugin}
-                        installStatus={installInfo.status}
-                        installedVersion={installInfo.installedVersion}
-                        onInstall={() => handleInstall(plugin)}
-                      />
-                    );
-                  })}
-                </div>
-              </Tab>
+              />
             ))}
           </Tabs>
+        </div>
+
+        {/* 插件列表区域 */}
+        <div className="relative">
+          {/* 加载遮罩 - 只遮住插件列表区域 */}
+          {loading && (
+            <div className="absolute inset-0 bg-zinc-500/10 z-30 flex justify-center items-center backdrop-blur-sm rounded-lg">
+              <Spinner size='lg' />
+            </div>
+          )}
+
+          <EmptySection isEmpty={!categorizedPlugins[activeTab]?.length} />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 justify-start items-stretch gap-x-2 gap-y-4">
+            {categorizedPlugins[activeTab]?.map((plugin) => {
+              const installInfo = getPluginInstallInfo(plugin);
+              return (
+                <PluginStoreCard
+                  key={plugin.id}
+                  data={plugin}
+                  installStatus={installInfo.status}
+                  installedVersion={installInfo.installedVersion}
+                  onInstall={() => handleInstall(plugin)}
+                />
+              );
+            })}
+          </div>
         </div>
       </div>
 
