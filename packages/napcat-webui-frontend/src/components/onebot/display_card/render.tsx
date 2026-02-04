@@ -121,6 +121,7 @@ const OneBotItemRender = ({ data, index, style }: OneBotItemRenderProps) => {
                 <PopoverContent>
                   <Snippet
                     hideSymbol
+                    codeString={JSON.stringify(msg, null, 2)}
                     tooltipProps={{
                       content: '点击复制',
                     }}

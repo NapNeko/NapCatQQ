@@ -10,6 +10,7 @@ const ShowStructedMessage = ({ messages }: ShowStructedMessageProps) => {
   return (
     <Snippet
       hideSymbol
+      codeString={JSON.stringify(messages, null, 2)}
       tooltipProps={{
         content: '点击复制',
       }}

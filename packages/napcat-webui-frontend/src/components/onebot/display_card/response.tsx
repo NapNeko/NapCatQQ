@@ -41,6 +41,7 @@ const OneBotDisplayResponse: React.FC<OneBotDisplayResponseProps> = ({
           <PopoverContent>
             <Snippet
               hideSymbol
+              codeString={JSON.stringify(data.data, null, 2)}
               tooltipProps={{
                 content: '点击复制',
               }}
