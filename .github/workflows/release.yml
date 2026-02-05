@@ -10,7 +10,7 @@ permissions: write-all
 
 env:
   OPENROUTER_API_URL: https://91vip.futureppo.top/v1/chat/completions
-  OPENROUTER_MODEL: "copilot/gemini-3-flash-preview"
+  OPENROUTER_MODEL: "gemini-3-flash-preview"
   RELEASE_NAME: "NapCat"
 
 jobs:
@@ -118,61 +118,23 @@ jobs:
           sudo apt update
           sudo apt install -y aria2 unzip zip p7zip-full curl jq
 
-      - name: Download QQ x64, Node.js and Assemble NapCat.Shell.Windows.Node.zip
+      - name: Download and Assemble NapCat.Shell.Windows.Node.zip
         run: |
           set -euo pipefail
           TMPDIR=$(mktemp -d)
           cd "$TMPDIR"
 
           # -----------------------------
-          # 1) 下载 QQ x64 (使用缓存)
+          # 1) 下载 QQ x64
           # -----------------------------
-          # JS_URL="https://cdn-go.cn/qq-web/im.qq.com_new/latest/rainbow/windowsConfig.js"
-          # JS_URL="https://slave.docadan488.workers.dev/proxy?url=https://cdn-go.cn/qq-web/im.qq.com_new/latest/rainbow/windowsConfig.js"
-          # NT_URL=$(curl -fsSL "$JS_URL" | grep -oP '"ntDownloadX64Url"\s*:\s*"\K[^"]+')
           NT_URL="https://dldir1v6.qq.com/qqfile/qq/QQNT/32876254/QQ9.9.27.45627_x64.exe"
           QQ_ZIP="$(basename "$NT_URL")"
-          # 根据 URL 生成缓存键
-          QQ_CACHE_KEY="qq-x64-$(echo "$NT_URL" | md5sum | cut -d' ' -f1)"
-          echo "QQ_CACHE_KEY=$QQ_CACHE_KEY" >> $GITHUB_ENV
-          echo "QQ_ZIP=$QQ_ZIP" >> $GITHUB_ENV
-          echo "NT_URL=$NT_URL" >> $GITHUB_ENV
-
-      - name: Cache QQ x64 Installer
-        id: cache-qq
-        uses: actions/cache@v4
-        with:
-          path: ~/qq-cache
-          key: ${{ env.QQ_CACHE_KEY }}
-
-      - name: Download and Extract QQ x64
-        run: |
-          set -euo pipefail
-          TMPDIR=$(mktemp -d)
-          cd "$TMPDIR"
-
-          QQ_CACHE_DIR="$HOME/qq-cache"
-          mkdir -p "$QQ_CACHE_DIR"
+          echo "Downloading QQ installer: $QQ_ZIP"
+          aria2c -x16 -s16 -k1M -o "$QQ_ZIP" "$NT_URL"
           
-          if [ -f "$QQ_CACHE_DIR/$QQ_ZIP" ]; then
-            echo "Using cached QQ installer: $QQ_ZIP"
-            cp "$QQ_CACHE_DIR/$QQ_ZIP" "$QQ_ZIP"
-          else
-            echo "Downloading QQ installer: $QQ_ZIP"
-            aria2c -x16 -s16 -k1M -o "$QQ_ZIP" "$NT_URL"
-            cp "$QQ_ZIP" "$QQ_CACHE_DIR/$QQ_ZIP"
-          fi
-
           QQ_EXTRACT="$TMPDIR/qq_extracted"
           mkdir -p "$QQ_EXTRACT"
           7z x -y -o"$QQ_EXTRACT" "$QQ_ZIP" >/dev/null
-          echo "QQ_EXTRACT=$QQ_EXTRACT" >> $GITHUB_ENV
-          echo "WORK_TMPDIR=$TMPDIR" >> $GITHUB_ENV
-
-      - name: Download Node.js and Assemble NapCat.Shell.Windows.Node.zip
-        run: |
-          set -euo pipefail
-          cd "$WORK_TMPDIR"
 
           # -----------------------------
           # 2) 下载 Node.js Windows x64 zip 22.11.0
@@ -182,7 +144,7 @@ jobs:
           NODE_ZIP="node-v$NODE_VER-win-x64.zip"
           aria2c -x1 -s1 -k1M -o "$NODE_ZIP" "$NODE_URL"
 
-          NODE_EXTRACT="$WORK_TMPDIR/node_extracted"
+          NODE_EXTRACT="$TMPDIR/node_extracted"
           mkdir -p "$NODE_EXTRACT"
           unzip -q "$NODE_ZIP" -d "$NODE_EXTRACT"
 
