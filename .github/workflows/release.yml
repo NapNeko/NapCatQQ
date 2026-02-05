@@ -459,7 +459,7 @@ jobs:
           pnpm run build:openapi
 
           # 读取并压缩 openapi.json 内容
-          OPENAPI_CONTENT=$(cat packages/napcat-schema/openapi.json | tr -d '\n\r\t' | sed 's/  */ /g' | sed 's/"/\\"/g')
+          OPENAPI_CONTENT=$(cat packages/napcat-schema/dist/openapi.json | tr -d '\n\r\t' | sed 's/  */ /g' | sed 's/"/\\"/g')
 
           # 构建 JSON 数据
           JSON_DATA=$(printf '{
@@ -475,7 +475,7 @@ jobs:
 
           curl --location -g --request POST 'https://api.apifox.com/v1/projects/5348325/import-openapi?locale=zh-CN' \
           --header 'X-Apifox-Api-Version: 2024-03-28' \
-          --header 'Authorization: Bearer $APIFOX_TOKEN' \
+          --header "Authorization: Bearer $APIFOX_TOKEN" \
           --header 'Content-Type: application/json' \
           --data-raw "$JSON_DATA"
 
