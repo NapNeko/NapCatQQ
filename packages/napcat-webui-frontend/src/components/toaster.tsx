@@ -12,6 +12,8 @@ export const Toaster = () => {
           borderRadius: '20px',
           background: isDark ? '#333' : '#fff',
           color: isDark ? '#fff' : '#333',
+          maxWidth: '400px',
+          wordBreak: 'break-word',
         },
       }}
     />

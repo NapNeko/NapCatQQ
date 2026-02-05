@@ -4,7 +4,7 @@ import { Input } from '@heroui/input';
 import { Select, SelectItem } from '@heroui/select';
 import { Switch } from '@heroui/switch';
 import { useEffect, useState, useRef, useCallback } from 'react';
-import toast from 'react-hot-toast';
+import toast from '@/utils/toast';
 import { EventSourcePolyfill } from 'event-source-polyfill';
 import PluginManager, { PluginConfigSchemaItem } from '@/controllers/plugin_manager';
 import key from '@/const/key';
