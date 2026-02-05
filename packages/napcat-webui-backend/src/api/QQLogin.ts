@@ -34,8 +34,11 @@ export const QQCheckLoginStatusHandler: RequestHandler = async (_, res) => {
   const qqLoginStatus = WebUiDataRuntime.getQQLoginStatus();
   // 必须同时满足：已登录且在线（online 必须明确为 true）
   const isLogin = qqLoginStatus && isOnline === true;
+  // 检测掉线状态：已登录但不在线
+  const isOffline = qqLoginStatus && isOnline === false;
   const data = {
     isLogin,
+    isOffline,
     qrcodeurl: WebUiDataRuntime.getQQLoginQrcodeURL(),
     loginError: WebUiDataRuntime.getQQLoginError(),
   };
@@ -80,7 +83,17 @@ export const QQGetLoginListNewHandler: RequestHandler = async (_, res) => {
 
 // 获取登录的QQ的信息
 export const getQQLoginInfoHandler: RequestHandler = async (_, res) => {
-  const data = WebUiDataRuntime.getQQLoginInfo();
+  const basicInfo = WebUiDataRuntime.getQQLoginInfo();
+  // 从 OneBot 上下文获取实时的 selfInfo.online 状态
+  const oneBotContext = WebUiDataRuntime.getOneBotContext();
+  const selfInfo = oneBotContext?.core?.selfInfo;
+  const online = selfInfo?.online ?? undefined;
+  const avatarUrl = selfInfo?.avatarUrl;
+  const data = {
+    ...basicInfo,
+    online,
+    avatarUrl,
+  };
   return sendSuccess(res, data);
 };
 
