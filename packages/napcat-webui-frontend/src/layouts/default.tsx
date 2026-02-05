@@ -68,8 +68,8 @@ const Layout: React.FC<{ children: React.ReactNode; }> = ({ children }) => {
           isOnlineRef.current = false;
           dialog.confirm({
             title: '账号已离线',
-            content: '您的 QQ 账号已下线，请重新登录。',
-            confirmText: '重新登陆',
+            content: '您的 QQ 账号已掉线，是否重启进程以重新登录？',
+            confirmText: '重启进程',
             cancelText: '退出账户',
             onConfirm: async () => {
               setIsRestarting(true);
@@ -115,7 +115,12 @@ const Layout: React.FC<{ children: React.ReactNode; }> = ({ children }) => {
   const checkIsQQLogin = async () => {
     try {
       const result = await QQManager.checkQQLoginStatus();
-      if (!result.isLogin) {
+      // 掉线状态由 checkOnlineStatus 定期检测并弹窗处理，这里只处理未登录
+      if (result.isOffline) {
+        // 已登录但掉线，标记状态，等待 checkOnlineStatus 弹窗
+        isOnlineRef.current = false;
+      } else if (!result.isLogin) {
+        // 未登录状态：跳转到登录页面
         if (isAuth) {
           navigate('/qq_login', { replace: true });
         } else {
