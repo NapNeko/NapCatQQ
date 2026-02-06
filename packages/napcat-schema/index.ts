@@ -108,6 +108,51 @@ function registerMessageSegmentComponents (openapi: JsonObject) {
   console.log(`Registered message segment components: ${rootAnyOfRefs.length} segments + 1 root`);
 }
 
+/**
+ * 在 schema 生成结束后，仅遍历 paths：
+ * - 若节点含 x-schema-id，且 components.schemas 中存在同名定义
+ * - 则将该内联 schema 替换为 $ref
+ */
+function replacePathInlineSchemasWithRefs (openapi: JsonObject) {
+  const paths = openapi['paths'];
+  const components = openapi['components'] as JsonObject | undefined;
+  const schemas = components?.['schemas'] as JsonObject | undefined;
+
+  if (!paths || typeof paths !== 'object' || !schemas || typeof schemas !== 'object') {
+    return;
+  }
+
+  const availableSchemaIds = new Set(Object.keys(schemas));
+  let replacedCount = 0;
+
+  const walk = (value: unknown): unknown => {
+    if (Array.isArray(value)) {
+      return value.map(walk);
+    }
+
+    if (value && typeof value === 'object') {
+      const obj = value as JsonObject;
+      const schemaId = obj['x-schema-id'];
+
+      if (typeof schemaId === 'string' && availableSchemaIds.has(schemaId)) {
+        replacedCount += 1;
+        return { $ref: `#/components/schemas/${schemaId}` };
+      }
+
+      const next: JsonObject = {};
+      for (const [key, child] of Object.entries(obj)) {
+        next[key] = walk(child);
+      }
+      return next;
+    }
+
+    return value;
+  };
+
+  openapi['paths'] = walk(paths) as JsonObject;
+  console.log(`Replaced inline schemas in paths with $ref: ${replacedCount}`);
+}
+
 export function initSchemas () {
   const handlers = getAllHandlers(null as any, null as any);
   handlers.forEach(handler => {
@@ -280,6 +325,9 @@ export function generateOpenAPI () {
       }
     };
   }
+
+  // 生成完成后，统一将 paths 中可命中的 x-schema-id 内联定义替换为 components 引用
+  replacePathInlineSchemasWithRefs(openapi as JsonObject);
 
   const outputPath = resolve(__dirname, 'openapi.json');
   writeFileSync(outputPath, JSON.stringify(openapi, null, 2));
