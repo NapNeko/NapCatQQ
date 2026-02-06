@@ -6,7 +6,7 @@ import { TSchema } from '@sinclair/typebox';
 import { fileURLToPath } from 'node:url';
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { napCatVersion } from 'napcat-common/src/version';
-import { OB11MessageDataSchema } from '@/napcat-onebot/types/message';
+import * as MessageSchemas from '@/napcat-onebot/types/message';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -67,45 +67,90 @@ function sanitizeSchemaForOpenAPI<T> (schema: T): T {
 }
 
 /**
- * 仅提取“消息段定义”到 components.schemas：
- * - 根：OB11MessageData（anyOf）
- * - 分支：OB11MessageText / OB11MessageImage / ...
- *
- * 不提取 OB11PostSendMsg / OB11Message / OB11MessageMixType / TS interface 等其它定义。
+ * 提取 message.ts 导出的所有含 $id 的 TypeBox Schema 到 components.schemas。
  */
-function registerMessageSegmentComponents (openapi: JsonObject) {
+function registerMessageSchemaComponents (openapi: JsonObject) {
   const components = ((openapi['components'] as JsonObject)['schemas'] as JsonObject);
+  let registeredCount = 0;
+  let duplicatedCount = 0;
 
-  const messageData = cloneSchema(OB11MessageDataSchema) as JsonObject;
-  const rootId = typeof messageData['$id'] === 'string' && messageData['$id'].length > 0
-    ? messageData['$id']
-    : 'OB11MessageData';
-
-  const branches = Array.isArray(messageData['anyOf']) ? messageData['anyOf'] : [];
-  const rootAnyOfRefs: Array<{ $ref: string; }> = [];
-
-  for (const branch of branches) {
-    const segmentSchema = cloneSchema(branch) as JsonObject;
-    const segId = typeof segmentSchema['$id'] === 'string' && segmentSchema['$id'].length > 0
-      ? segmentSchema['$id']
-      : '';
-
-    if (!segId) {
-      // 没有 $id 的分支跳过，不纳入 components
+  for (const exportedValue of Object.values(MessageSchemas)) {
+    if (!exportedValue || typeof exportedValue !== 'object') {
       continue;
     }
 
-    components[segId] = sanitizeSchemaForOpenAPI(segmentSchema);
-    rootAnyOfRefs.push({ $ref: `#/components/schemas/${segId}` });
+    const schema = cloneSchema(exportedValue) as JsonObject;
+    const schemaId = typeof schema['$id'] === 'string' && schema['$id'].length > 0
+      ? schema['$id']
+      : '';
+
+    if (!schemaId) {
+      continue;
+    }
+
+    if (components[schemaId]) {
+      duplicatedCount += 1;
+      console.warn(`Duplicate schema id detected in message schemas: ${schemaId}, overriding previous definition`);
+    }
+
+    components[schemaId] = sanitizeSchemaForOpenAPI(schema);
+    registeredCount += 1;
   }
 
-  // 根定义保留为 anyOf，但改为引用 components 中已注册的消息段
-  components[rootId] = sanitizeSchemaForOpenAPI({
-    ...messageData,
-    anyOf: rootAnyOfRefs
-  });
+  console.log(`Registered message schema components: ${registeredCount}, duplicated ids: ${duplicatedCount}`);
+}
 
-  console.log(`Registered message segment components: ${rootAnyOfRefs.length} segments + 1 root`);
+/**
+ * 在 path 后处理前，先对 components.schemas 做一次去内联：
+ * - 若子节点含 x-schema-id，且 components.schemas 中存在同名定义
+ * - 则将该子节点替换为 $ref
+ *
+ * 注意：不会把“组件根节点”替换为自己，避免出现自引用根替换。
+ */
+function replaceComponentInlineSchemasWithRefs (openapi: JsonObject) {
+  const components = openapi['components'] as JsonObject | undefined;
+  const schemas = components?.['schemas'] as JsonObject | undefined;
+
+  if (!schemas || typeof schemas !== 'object') {
+    return;
+  }
+
+  const availableSchemaIds = new Set(Object.keys(schemas));
+  let replacedCount = 0;
+
+  const walk = (value: unknown, ownerSchemaId: string): unknown => {
+    if (Array.isArray(value)) {
+      return value.map(item => walk(item, ownerSchemaId));
+    }
+
+    if (value && typeof value === 'object') {
+      const obj = value as JsonObject;
+      const schemaId = obj['x-schema-id'];
+
+      if (
+        typeof schemaId === 'string'
+        && schemaId !== ownerSchemaId
+        && availableSchemaIds.has(schemaId)
+      ) {
+        replacedCount += 1;
+        return { $ref: `#/components/schemas/${schemaId}` };
+      }
+
+      const next: JsonObject = {};
+      for (const [key, child] of Object.entries(obj)) {
+        next[key] = walk(child, ownerSchemaId);
+      }
+      return next;
+    }
+
+    return value;
+  };
+
+  for (const [schemaId, schema] of Object.entries(schemas)) {
+    schemas[schemaId] = walk(schema, schemaId);
+  }
+
+  console.log(`Replaced inline schemas in components with $ref: ${replacedCount}`);
 }
 
 /**
@@ -219,8 +264,11 @@ export function generateOpenAPI () {
     security: []
   };
 
-  // 只把消息段定义写入 components，不改 action path 的内联 schema 逻辑
-  registerMessageSegmentComponents(openapi as JsonObject);
+  // 将 message.ts 中所有含 $id 的 schema 写入 components
+  registerMessageSchemaComponents(openapi as JsonObject);
+
+  // 在处理 paths 之前，先对 components 内联 schema 做统一引用化
+  replaceComponentInlineSchemasWithRefs(openapi as JsonObject);
 
   for (const [actionName, schemas] of Object.entries(actionSchemas)) {
     if (!schemas.payload && !schemas.summary) continue;
