@@ -6,6 +6,7 @@ import { TSchema } from '@sinclair/typebox';
 import { fileURLToPath } from 'node:url';
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { napCatVersion } from 'napcat-common/src/version';
+import { OB11MessageDataSchema } from '@/napcat-onebot/types/message';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -21,7 +22,91 @@ interface ActionSchemaInfo {
   errorExamples?: Array<{ code: number, description: string; }>;
 }
 
+type JsonObject = Record<string, any>;
+
 export const actionSchemas: Record<string, ActionSchemaInfo> = {};
+
+function cloneSchema<T> (schema: T): T {
+  if (typeof globalThis.structuredClone === 'function') {
+    try {
+      return globalThis.structuredClone(schema);
+    } catch {
+      // fallback to JSON serialization
+    }
+  }
+  return JSON.parse(JSON.stringify(schema)) as T;
+}
+
+function sanitizeSchemaForOpenAPI<T> (schema: T): T {
+  const walk = (value: unknown): unknown => {
+    if (Array.isArray(value)) {
+      return value.map(walk);
+    }
+
+    if (value && typeof value === 'object') {
+      const obj = value as Record<string, unknown>;
+      const next: Record<string, unknown> = {};
+
+      for (const [key, child] of Object.entries(obj)) {
+        if (key === '$id') {
+          if (typeof child === 'string' && child.length > 0) {
+            next['x-schema-id'] = child;
+          }
+          continue;
+        }
+        next[key] = walk(child);
+      }
+
+      return next;
+    }
+
+    return value;
+  };
+
+  return walk(schema) as T;
+}
+
+/**
+ * 仅提取“消息段定义”到 components.schemas：
+ * - 根：OB11MessageData（anyOf）
+ * - 分支：OB11MessageText / OB11MessageImage / ...
+ *
+ * 不提取 OB11PostSendMsg / OB11Message / OB11MessageMixType / TS interface 等其它定义。
+ */
+function registerMessageSegmentComponents (openapi: JsonObject) {
+  const components = ((openapi['components'] as JsonObject)['schemas'] as JsonObject);
+
+  const messageData = cloneSchema(OB11MessageDataSchema) as JsonObject;
+  const rootId = typeof messageData['$id'] === 'string' && messageData['$id'].length > 0
+    ? messageData['$id']
+    : 'OB11MessageData';
+
+  const branches = Array.isArray(messageData['anyOf']) ? messageData['anyOf'] : [];
+  const rootAnyOfRefs: Array<{ $ref: string; }> = [];
+
+  for (const branch of branches) {
+    const segmentSchema = cloneSchema(branch) as JsonObject;
+    const segId = typeof segmentSchema['$id'] === 'string' && segmentSchema['$id'].length > 0
+      ? segmentSchema['$id']
+      : '';
+
+    if (!segId) {
+      // 没有 $id 的分支跳过，不纳入 components
+      continue;
+    }
+
+    components[segId] = sanitizeSchemaForOpenAPI(segmentSchema);
+    rootAnyOfRefs.push({ $ref: `#/components/schemas/${segId}` });
+  }
+
+  // 根定义保留为 anyOf，但改为引用 components 中已注册的消息段
+  components[rootId] = sanitizeSchemaForOpenAPI({
+    ...messageData,
+    anyOf: rootAnyOfRefs
+  });
+
+  console.log(`Registered message segment components: ${rootAnyOfRefs.length} segments + 1 root`);
+}
 
 export function initSchemas () {
   const handlers = getAllHandlers(null as any, null as any);
@@ -89,12 +174,19 @@ export function generateOpenAPI () {
     security: []
   };
 
+  // 只把消息段定义写入 components，不改 action path 的内联 schema 逻辑
+  registerMessageSegmentComponents(openapi as JsonObject);
+
   for (const [actionName, schemas] of Object.entries(actionSchemas)) {
     if (!schemas.payload && !schemas.summary) continue;
 
     const path = '/' + actionName;
-    const cleanPayload = schemas.payload ? JSON.parse(JSON.stringify(schemas.payload)) : { type: 'object', properties: {} };
-    const cleanReturn = schemas.return ? JSON.parse(JSON.stringify(schemas.return)) : { type: 'object', properties: {} };
+    const cleanPayload = schemas.payload
+      ? sanitizeSchemaForOpenAPI(cloneSchema(schemas.payload))
+      : { type: 'object', properties: {} };
+    const cleanReturn = schemas.return
+      ? sanitizeSchemaForOpenAPI(cloneSchema(schemas.return))
+      : { type: 'object', properties: {} };
 
     // 构造响应示例
     const responseExamples: Record<string, any> = {
