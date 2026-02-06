@@ -4,7 +4,7 @@ import { writeFileSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { TSchema } from '@sinclair/typebox';
-import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
+import { OneBotAction, ActionExamples } from '@/napcat-onebot/action/OneBotAction';
 import { napCatVersion } from 'napcat-common/src/version';
 import * as MessageSchemas from '@/napcat-onebot/types/message';
 import * as ActionSchemas from '@/napcat-onebot/action/schemas';
@@ -84,6 +84,42 @@ const EmptyDataSchema: JsonObject = {
   description: '无数据',
   type: 'null'
 };
+
+const DEFAULT_SUCCESS_EXAMPLE_VALUE = {
+  status: 'ok',
+  retcode: 0,
+  data: {},
+  message: '',
+  wording: '',
+  stream: 'normal-action'
+} as const;
+
+const DEFAULT_ERROR_EXAMPLE_DEFINITIONS = ActionExamples.Common.errors;
+
+const SUCCESS_DEFAULT_EXAMPLE_KEY = 'Success_Default';
+
+function isObjectRecord (value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === 'object' && !Array.isArray(value);
+}
+
+function isEmptyObject (value: unknown): value is Record<string, never> {
+  return isObjectRecord(value) && Object.keys(value).length === 0;
+}
+
+function isEmptyArray (value: unknown): value is [] {
+  return Array.isArray(value) && value.length === 0;
+}
+
+function isMeaninglessSuccessExampleData (value: unknown): boolean {
+  return value === null || isEmptyObject(value) || isEmptyArray(value);
+}
+
+function resolveCommonErrorExampleKey (error: { code: number, description: string; }): string | null {
+  const matched = DEFAULT_ERROR_EXAMPLE_DEFINITIONS.find(
+    item => item.code === error.code && item.description === error.description
+  );
+  return matched ? `Error_${matched.code}` : null;
+}
 
 /* -------------------------------------------------------------------------- */
 /*                                 通用工具函数                                */
@@ -472,6 +508,27 @@ export function initSchemas () {
 /* -------------------------------------------------------------------------- */
 
 function createOpenAPIDocument (): Record<string, unknown> {
+  const componentExamples: Record<string, unknown> = {
+    [SUCCESS_DEFAULT_EXAMPLE_KEY]: {
+      summary: '成功响应',
+      value: DEFAULT_SUCCESS_EXAMPLE_VALUE
+    }
+  };
+
+  DEFAULT_ERROR_EXAMPLE_DEFINITIONS.forEach(error => {
+    componentExamples[`Error_${error.code}`] = {
+      summary: error.description,
+      value: {
+        status: 'failed',
+        retcode: error.code,
+        data: null,
+        message: error.description,
+        wording: error.description,
+        stream: 'normal-action'
+      }
+    };
+  });
+
   return {
     openapi: '3.1.0',
     info: {
@@ -492,6 +549,7 @@ function createOpenAPIDocument (): Record<string, unknown> {
         BaseResponse: BaseResponseSchema,
         EmptyData: EmptyDataSchema
       },
+      examples: componentExamples,
       responses: {},
       securitySchemes: {}
     },
@@ -501,47 +559,45 @@ function createOpenAPIDocument (): Record<string, unknown> {
 }
 
 function buildResponseExamples (schemas: ActionSchemaInfo): Record<string, unknown> {
+  const successData = schemas.returnExample ?? {};
   const examples: Record<string, any> = {
-    Success: {
-      summary: '成功响应',
-      value: {
-        status: 'ok',
-        retcode: 0,
-        data: schemas.returnExample || {},
-        message: '',
-        wording: '',
-        stream: 'normal-action'
+    Success: isMeaninglessSuccessExampleData(successData)
+      ? { $ref: `#/components/examples/${SUCCESS_DEFAULT_EXAMPLE_KEY}` }
+      : {
+        summary: '成功响应',
+        value: {
+          status: 'ok',
+          retcode: 0,
+          data: successData,
+          message: '',
+          wording: '',
+          stream: 'normal-action'
+        }
       }
-    }
   };
 
   if (schemas.errorExamples) {
     schemas.errorExamples.forEach(error => {
-      examples[`Error_${error.code}`] = {
-        summary: error.description,
-        value: {
-          status: 'failed',
-          retcode: error.code,
-          data: null,
-          message: error.description,
-          wording: error.description,
-          stream: 'normal-action'
-        }
-      };
+      const commonErrorKey = resolveCommonErrorExampleKey(error);
+      examples[`Error_${error.code}`] = commonErrorKey
+        ? { $ref: `#/components/examples/${commonErrorKey}` }
+        : {
+          summary: error.description,
+          value: {
+            status: 'failed',
+            retcode: error.code,
+            data: null,
+            message: error.description,
+            wording: error.description,
+            stream: 'normal-action'
+          }
+        };
     });
     return examples;
   }
 
   examples['Generic_Error'] = {
-    summary: '通用错误',
-    value: {
-      status: 'failed',
-      retcode: 1400,
-      data: null,
-      message: '请求参数错误或业务逻辑执行失败',
-      wording: '请求参数错误或业务逻辑执行失败',
-      stream: 'normal-action'
-    }
+    $ref: '#/components/examples/Error_1400'
   };
 
   return examples;
