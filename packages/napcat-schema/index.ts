@@ -215,6 +215,16 @@ function sanitizeSchemaForOpenAPI<T> (schema: T): T {
       const next: Record<string, unknown> = {};
 
       for (const [key, child] of Object.entries(obj)) {
+        // 特殊处理 properties 容器：只遍历每个属性的 schema，避免将容器对象误判为 schema 元对象
+        if (key === 'properties' && child && typeof child === 'object' && !Array.isArray(child)) {
+          const cleanProps: Record<string, unknown> = {};
+          for (const [propName, propSchema] of Object.entries(child as Record<string, unknown>)) {
+            cleanProps[propName] = walk(propSchema);
+          }
+          next[key] = cleanProps;
+          continue;
+        }
+
         if (key === '$id') {
           if (typeof child === 'string' && child.length > 0) {
             next['x-schema-id'] = child;
