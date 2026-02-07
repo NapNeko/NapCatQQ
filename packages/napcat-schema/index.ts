@@ -69,6 +69,7 @@ const BaseResponseSchema: JsonObject = {
   properties: {
     status: { type: 'string', description: '状态 (ok/failed)' },
     retcode: { type: 'number', description: '返回码' },
+    data: { description: '业务数据（具体结构由各接口定义）' },
     message: { type: 'string', description: '消息' },
     wording: { type: 'string', description: '提示' },
     stream: {
