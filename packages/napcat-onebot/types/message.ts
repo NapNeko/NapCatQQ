@@ -4,6 +4,7 @@ export enum OB11MessageDataType {
   text = 'text',
   image = 'image',
   music = 'music',
+  custom_music = 'custom_music',
   video = 'video',
   voice = 'record',
   file = 'file',
@@ -160,7 +161,7 @@ export const OB11MessageIdMusicSchema = Type.Object({
 
 // 自定义音乐消息段
 export const OB11MessageCustomMusicSchema = Type.Object({
-  type: Type.Literal(OB11MessageDataType.music),
+  type: Type.Literal(OB11MessageDataType.custom_music),
   data: CustomMusicDataSchema,
 }, { $id: 'OB11MessageCustomMusic', description: '自定义音乐消息段' });
 
