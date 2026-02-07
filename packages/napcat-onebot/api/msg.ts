@@ -86,6 +86,10 @@ function keyCanBeParsed (key: string, parser: RawToOb11Converters): key is keyof
   return key in parser;
 }
 
+// Music platform constants
+const SUPPORTED_MUSIC_PLATFORMS = ['qq', '163', 'kugou', 'kuwo', 'migu'] as const;
+const CUSTOM_MUSIC_TYPE = 'custom';
+
 export class OneBotMsgApi {
   obContext: NapCatOneBot11Adapter;
   core: NapCatCore;
@@ -799,11 +803,9 @@ export class OneBotMsgApi {
 
     [OB11MessageDataType.music]: async ({ data }, context) => {
       // ID音乐消息段处理
-      const supportedPlatforms = ['qq', '163', 'kugou', 'kuwo', 'migu'];
-
       // 验证音乐类型
-      if (!supportedPlatforms.includes(data.type)) {
-        this.core.context.logger.logError(`[音乐卡片] type参数错误: "${data.type}"，仅支持: ${supportedPlatforms.join('、')}`);
+      if (!SUPPORTED_MUSIC_PLATFORMS.includes(data.type as any)) {
+        this.core.context.logger.logError(`[音乐卡片] type参数错误: "${data.type}"，仅支持: ${SUPPORTED_MUSIC_PLATFORMS.join('、')}`);
         return undefined;
       }
 
@@ -835,7 +837,7 @@ export class OneBotMsgApi {
 
     [OB11MessageDataType.custom_music]: async ({ data }, context) => {
       // 自定义音乐消息段处理
-      const supportedPlatformsWithCustom = ['qq', '163', 'kugou', 'kuwo', 'migu', 'custom'];
+      const supportedPlatformsWithCustom = [...SUPPORTED_MUSIC_PLATFORMS, CUSTOM_MUSIC_TYPE];
 
       // 验证音乐类型
       if (!supportedPlatformsWithCustom.includes(data.type)) {
