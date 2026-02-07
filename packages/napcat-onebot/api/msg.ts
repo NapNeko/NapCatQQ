@@ -8,7 +8,6 @@ import {
   FaceType,
   GrayTipElement,
   GroupNotify,
-  IdMusicSignPostData,
   MessageElement,
   NapCatCore,
   NTGrayTipElementSubTypeV2,
@@ -812,7 +811,7 @@ export class OneBotMsgApi {
       // 获取签名服务地址
       let signUrl = this.obContext.configLoader.configData.musicSignUrl;
       if (!signUrl) {
-        signUrl = 'https://ss.xingzhige.com/music_card/card';// 感谢思思！已获思思许可 其余地方使用请自行询问
+        signUrl = 'https://ss.xingzhige.com/music_card/card'; // 感谢思思！已获思思许可 其余地方使用请自行询问
       }
 
       // 请求签名服务
@@ -855,7 +854,7 @@ export class OneBotMsgApi {
 
       // 构建请求数据
       // 注意: 自定义音乐消息段不包含 id 字段，只处理 content 到 singer 的映射
-      let postData: IdMusicSignPostData | CustomMusicSignPostData;
+      let postData: CustomMusicSignPostData;
       if (data.content) {
         const { content, ...others } = data;
         postData = { singer: content, ...others };
@@ -866,7 +865,7 @@ export class OneBotMsgApi {
       // 获取签名服务地址
       let signUrl = this.obContext.configLoader.configData.musicSignUrl;
       if (!signUrl) {
-        signUrl = 'https://ss.xingzhige.com/music_card/card';// 感谢思思！已获思思许可 其余地方使用请自行询问
+        signUrl = 'https://ss.xingzhige.com/music_card/card'; // 感谢思思！已获思思许可 其余地方使用请自行询问
       }
 
       // 请求签名服务
