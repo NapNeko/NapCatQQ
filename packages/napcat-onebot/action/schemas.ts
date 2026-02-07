@@ -17,7 +17,7 @@ export const OB11UserSchema = Type.Object({
   login_days: Type.Optional(Type.Number({ description: '登录天数' })),
   categoryName: Type.Optional(Type.String({ description: '分组名称' })),
   categoryId: Type.Optional(Type.Number({ description: '分组ID' })),
-}, { description: 'OneBot 11 用户信息' });
+}, { $id: 'OB11User', description: 'OneBot 11 用户信息' });
 
 export const OB11GroupSchema = Type.Object({
   group_all_shut: Type.Number({ description: '是否全员禁言' }),
@@ -26,7 +26,7 @@ export const OB11GroupSchema = Type.Object({
   group_name: Type.String({ description: '群名称' }),
   member_count: Type.Optional(Type.Number({ description: '成员人数' })),
   max_member_count: Type.Optional(Type.Number({ description: '最大成员人数' })),
-}, { description: 'OneBot 11 群信息' });
+}, { $id: 'OB11Group', description: 'OneBot 11 群信息' });
 
 export const OB11GroupMemberSchema = Type.Object({
   group_id: Type.Number({ description: '群号' }),
@@ -48,7 +48,7 @@ export const OB11GroupMemberSchema = Type.Object({
   shut_up_timestamp: Type.Optional(Type.Number({ description: '禁言截止时间戳' })),
   is_robot: Type.Optional(Type.Boolean({ description: '是否为机器人' })),
   qage: Type.Optional(Type.Number({ description: 'Q龄' })),
-}, { description: 'OneBot 11 群成员信息' });
+}, { $id: 'OB11GroupMember', description: 'OneBot 11 群成员信息' });
 
 export const OB11NotifySchema = Type.Object({
   request_id: Type.Number({ description: '请求ID' }),
@@ -60,7 +60,7 @@ export const OB11NotifySchema = Type.Object({
   checked: Type.Boolean({ description: '是否已处理' }),
   actor: Type.Number({ description: '操作者QQ' }),
   requester_nick: Type.String({ description: '申请者昵称' }),
-}, { description: 'OneBot 11 通知信息' });
+}, { $id: 'OB11Notify', description: 'OneBot 11 通知信息' });
 
 export const lastestMessageSchema = Type.Object({
   self_id: Type.Number({ description: '发送者QQ号' }),
@@ -82,7 +82,7 @@ export const lastestMessageSchema = Type.Object({
   post_type: Type.String({ description: '发布类型' }),
   group_id: Type.Number({ description: '群号' }),
   group_name: Type.String({ description: '群名称' }),
-}, { description: '最后一条消息' });
+}, { $id: 'OB11LatestMessage', description: '最后一条消息' });
 
 export const OB11MessageSchema = Type.Intersect([
   lastestMessageSchema,
@@ -95,4 +95,4 @@ export const OB11MessageSchema = Type.Intersect([
       likes_cnt: Type.String({ description: '点赞数' }),
     })),
   }, { description: 'OneBot 11 消息信息' })
-]);
+], { $id: 'OB11ActionMessage', description: 'OneBot 11 消息信息' });
