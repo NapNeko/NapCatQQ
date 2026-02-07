@@ -804,7 +804,7 @@ export class OneBotMsgApi {
     [OB11MessageDataType.music]: async ({ data }, context) => {
       // ID音乐消息段处理
       // 验证音乐类型
-      if (!SUPPORTED_MUSIC_PLATFORMS.includes(data.type as any)) {
+      if (!(SUPPORTED_MUSIC_PLATFORMS as readonly string[]).includes(data.type)) {
         this.core.context.logger.logError(`[音乐卡片] type参数错误: "${data.type}"，仅支持: ${SUPPORTED_MUSIC_PLATFORMS.join('、')}`);
         return undefined;
       }
@@ -854,6 +854,7 @@ export class OneBotMsgApi {
       }
 
       // 构建请求数据
+      // 注意: 自定义音乐消息段不包含 id 字段，只处理 content 到 singer 的映射
       let postData: IdMusicSignPostData | CustomMusicSignPostData;
       if (data.content) {
         const { content, ...others } = data;
