@@ -660,6 +660,7 @@ function appendActionPaths (openapi: Record<string, unknown>) {
                     { $ref: '#/components/schemas/BaseResponse' },
                     {
                       type: 'object',
+                      required: ['data'],
                       properties: {
                         data: {
                           ...(typeof cleanReturn === 'object' && cleanReturn ? cleanReturn : {}),
