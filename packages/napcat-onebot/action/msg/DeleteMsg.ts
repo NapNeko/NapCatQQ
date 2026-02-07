@@ -4,7 +4,7 @@ import { MessageUnique } from 'napcat-common/src/message-unique';
 import { Static, Type } from '@sinclair/typebox';
 
 const PayloadSchema = Type.Object({
-  message_id: Type.Union([Type.Number(), Type.String()], { description: '消息ID' }),
+  message_id: Type.Union([Type.Integer(), Type.String()], { description: '消息ID' }),
 });
 
 type PayloadType = Static<typeof PayloadSchema>;

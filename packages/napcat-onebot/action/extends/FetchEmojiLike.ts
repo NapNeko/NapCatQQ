@@ -4,10 +4,10 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { MessageUnique } from 'napcat-common/src/message-unique';
 
 const PayloadSchema = Type.Object({
-  message_id: Type.Union([Type.Number(), Type.String()], { description: '消息ID' }),
-  emojiId: Type.Union([Type.Number(), Type.String()], { description: '表情ID' }),
-  emojiType: Type.Union([Type.Number(), Type.String()], { description: '表情类型' }),
-  count: Type.Union([Type.Number(), Type.String()], { default: 20, description: '获取数量' }),
+  message_id: Type.Union([Type.Integer(), Type.String()], { description: '消息ID' }),
+  emojiId: Type.Union([Type.Integer(), Type.String()], { description: '表情ID' }),
+  emojiType: Type.Union([Type.Integer(), Type.String()], { description: '表情类型' }),
+  count: Type.Union([Type.Integer(), Type.String()], { default: 20, description: '获取数量' }),
   cookie: Type.String({ default: '', description: '分页Cookie' })
 });
 
@@ -22,7 +22,7 @@ const ReturnSchema = Type.Object({
   cookie: Type.String({ description: '分页Cookie' }),
   isLastPage: Type.Boolean({ description: '是否最后一页' }),
   isFirstPage: Type.Boolean({ description: '是否第一页' }),
-  result: Type.Number({ description: '结果状态码' }),
+  result: Type.Integer({ description: '结果状态码' }),
   errMsg: Type.String({ description: '错 误信息' }),
 }, { description: '表情回应详情' });
 

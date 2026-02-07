@@ -4,8 +4,8 @@ import { Static, Type } from '@sinclair/typebox';
 
 const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
-  robot_member_switch: Type.Optional(Type.Number({ description: '机器人成员开关' })),
-  robot_member_examine: Type.Optional(Type.Number({ description: '机器人成员审核' })),
+  robot_member_switch: Type.Optional(Type.Integer({ description: '机器人成员开关' })),
+  robot_member_examine: Type.Optional(Type.Integer({ description: '机器人成员审核' })),
 });
 
 type PayloadType = Static<typeof PayloadSchema>;

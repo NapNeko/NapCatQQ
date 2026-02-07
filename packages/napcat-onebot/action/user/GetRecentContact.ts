@@ -4,7 +4,7 @@ import { NetworkAdapterConfig } from '@/napcat-onebot/config/config';
 import { Static, Type } from '@sinclair/typebox';
 
 export const GetRecentContactPayloadSchema = Type.Object({
-  count: Type.Union([Type.Number(), Type.String()], { default: 10, description: '获取的数量' }),
+  count: Type.Union([Type.Integer(), Type.String()], { default: 10, description: '获取的数量' }),
 });
 
 export type GetRecentContactPayload = Static<typeof GetRecentContactPayloadSchema>;
@@ -14,7 +14,7 @@ export const GetRecentContactReturnSchema = Type.Array(Type.Object({
   peerUin: Type.String({ description: '对象QQ' }),
   remark: Type.String({ description: '备注' }),
   msgTime: Type.String({ description: '消息时间' }),
-  chatType: Type.Number({ description: '聊天类型' }),
+  chatType: Type.Integer({ description: '聊天类型' }),
   msgId: Type.String({ description: '消息ID' }),
   sendNickName: Type.String({ description: '发送者昵称' }),
   sendMemberName: Type.String({ description: '发送者群名片' }),

@@ -41,7 +41,7 @@ export const OB11MessageFaceSchema = Type.Object({
   data: Type.Object({
     id: Type.String({ description: '表情ID' }),
     resultId: Type.Optional(Type.String({ description: '结果ID' })),
-    chainCount: Type.Optional(Type.Number({ description: '连击数' })),
+    chainCount: Type.Optional(Type.Integer({ description: '连击数' })),
   }),
 }, { $id: 'OB11MessageFace', description: 'QQ表情消息段' });
 
@@ -49,7 +49,7 @@ export const OB11MessageFaceSchema = Type.Object({
 export const OB11MessageMFaceSchema = Type.Object({
   type: Type.Literal(OB11MessageDataType.mface),
   data: Type.Object({
-    emoji_package_id: Type.Number({ description: '表情包ID' }),
+    emoji_package_id: Type.Integer({ description: '表情包ID' }),
     emoji_id: Type.String({ description: '表情ID' }),
     key: Type.String({ description: '表情key' }),
     summary: Type.String({ description: '表情摘要' }),
@@ -70,7 +70,7 @@ export const OB11MessageReplySchema = Type.Object({
   type: Type.Literal(OB11MessageDataType.reply),
   data: Type.Object({
     id: Type.Optional(Type.String({ description: '消息ID的短ID映射' })),
-    seq: Type.Optional(Type.Number({ description: '消息序列号，优先使用' })),
+    seq: Type.Optional(Type.Integer({ description: '消息序列号，优先使用' })),
   }),
 }, { $id: 'OB11MessageReply', description: '回复消息段' });
 
@@ -97,7 +97,7 @@ export const OB11MessageImageSchema = Type.Object({
     FileBaseDataSchema,
     Type.Object({
       summary: Type.Optional(Type.String({ description: '图片摘要' })),
-      sub_type: Type.Optional(Type.Number({ description: '图片子类型' })),
+      sub_type: Type.Optional(Type.Integer({ description: '图片子类型' })),
     }),
   ]),
 }, { $id: 'OB11MessageImage', description: '图片消息段' });
@@ -131,7 +131,7 @@ const IdMusicDataSchema = Type.Object({
     Type.Literal('migu'),
     Type.Literal('kuwo'),
   ], { description: '音乐平台类型' }),
-  id: Type.Union([Type.String(), Type.Number()], { description: '音乐ID' }),
+  id: Type.Union([Type.String(), Type.Integer()], { description: '音乐ID' }),
 });
 
 // 自定义音乐消息段数据
@@ -179,7 +179,7 @@ export const OB11MessagePokeSchema = Type.Object({
 export const OB11MessageDiceSchema = Type.Object({
   type: Type.Literal(OB11MessageDataType.dice),
   data: Type.Object({
-    result: Type.Union([Type.Number(), Type.String()], { description: '骰子结果' }),
+    result: Type.Union([Type.Integer(), Type.String()], { description: '骰子结果' }),
   }),
 }, { $id: 'OB11MessageDice', description: '骰子消息段' });
 
@@ -187,7 +187,7 @@ export const OB11MessageDiceSchema = Type.Object({
 export const OB11MessageRPSSchema = Type.Object({
   type: Type.Literal(OB11MessageDataType.rps),
   data: Type.Object({
-    result: Type.Union([Type.Number(), Type.String()], { description: '猜拳结果' }),
+    result: Type.Union([Type.Integer(), Type.String()], { description: '猜拳结果' }),
   }),
 }, { $id: 'OB11MessageRPS', description: '猜拳消息段' });
 
@@ -280,8 +280,8 @@ export const OB11MessageNodeSchema = Type.Object({
   type: Type.Literal(OB11MessageDataType.node),
   data: Type.Object({
     id: Type.Optional(Type.String({ description: '转发消息ID' })),
-    user_id: Type.Optional(Type.Union([Type.Number(), Type.String()], { description: '发送者QQ号' })),
-    uin: Type.Optional(Type.Union([Type.Number(), Type.String()], { description: '发送者QQ号(兼容go-cqhttp)' })),
+    user_id: Type.Optional(Type.Union([Type.Integer(), Type.String()], { description: '发送者QQ号' })),
+    uin: Type.Optional(Type.Union([Type.Integer(), Type.String()], { description: '发送者QQ号(兼容go-cqhttp)' })),
     nickname: Type.String({ description: '发送者昵称' }),
     name: Type.Optional(Type.String({ description: '发送者昵称(兼容go-cqhttp)' })),
     // content 使用 Any 以支持循环引用，实际类型是 OB11MessageMixType
@@ -366,12 +366,12 @@ export const OB11PostSendMsgSchema = Type.Object({
 
 // 发送者信息 Schema（注意：OB11Sender 类型已在 data.ts 中定义，这里只提供 Schema）
 export const OB11SenderSchema = Type.Object({
-  user_id: Type.Union([Type.Number(), Type.String()], { description: '发送者QQ号' }),
+  user_id: Type.Union([Type.Integer(), Type.String()], { description: '发送者QQ号' }),
   nickname: Type.String({ description: '发送者昵称' }),
   card: Type.Optional(Type.String({ description: '群名片' })),
   role: Type.Optional(Type.String({ description: '角色' })),
   sex: Type.Optional(Type.String({ description: '性别' })),
-  age: Type.Optional(Type.Number({ description: '年龄' })),
+  age: Type.Optional(Type.Integer({ description: '年龄' })),
   area: Type.Optional(Type.String({ description: '地区' })),
   level: Type.Optional(Type.String({ description: '等级' })),
   title: Type.Optional(Type.String({ description: '头衔' })),
@@ -380,16 +380,16 @@ export const OB11SenderSchema = Type.Object({
 // 完整消息对象
 export const OB11MessageSchema = Type.Object({
   real_seq: Type.Optional(Type.String({ description: '真实序列号' })),
-  temp_source: Type.Optional(Type.Number({ description: '临时会话来源' })),
+  temp_source: Type.Optional(Type.Integer({ description: '临时会话来源' })),
   message_sent_type: Type.Optional(Type.String({ description: '消息发送类型' })),
-  target_id: Type.Optional(Type.Number({ description: '目标ID' })),
-  self_id: Type.Optional(Type.Number({ description: '机器人QQ号' })),
-  time: Type.Number({ description: '消息时间戳' }),
-  message_id: Type.Number({ description: '消息ID' }),
-  message_seq: Type.Number({ description: '消息序列号' }),
-  real_id: Type.Number({ description: '真实ID' }),
-  user_id: Type.Union([Type.Number(), Type.String()], { description: '发送者QQ号' }),
-  group_id: Type.Optional(Type.Union([Type.Number(), Type.String()], { description: '群号' })),
+  target_id: Type.Optional(Type.Integer({ description: '目标ID' })),
+  self_id: Type.Optional(Type.Integer({ description: '机器人QQ号' })),
+  time: Type.Integer({ description: '消息时间戳' }),
+  message_id: Type.Integer({ description: '消息ID' }),
+  message_seq: Type.Integer({ description: '消息序列号' }),
+  real_id: Type.Integer({ description: '真实ID' }),
+  user_id: Type.Union([Type.Integer(), Type.String()], { description: '发送者QQ号' }),
+  group_id: Type.Optional(Type.Union([Type.Integer(), Type.String()], { description: '群号' })),
   group_name: Type.Optional(Type.String({ description: '群名称' })),
   message_type: Type.Union([Type.Literal('private'), Type.Literal('group')], { description: '消息类型' }),
   sub_type: Type.Optional(Type.Union([
@@ -401,7 +401,7 @@ export const OB11MessageSchema = Type.Object({
   message: Type.Union([Type.Array(OB11MessageDataSchema), Type.String()], { description: '消息内容' }),
   message_format: Type.Union([Type.Literal('array'), Type.Literal('string')], { description: '消息格式' }),
   raw_message: Type.String({ description: '原始消息' }),
-  font: Type.Number({ description: '字体' }),
+  font: Type.Integer({ description: '字体' }),
   post_type: Type.Optional(Type.String({ description: '上报类型' })),
   raw: Type.Optional(Type.Unknown({ description: '原始消息对象' })),
   emoji_likes_list: Type.Optional(Type.Array(Type.Object({

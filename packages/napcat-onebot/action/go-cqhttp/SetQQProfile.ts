@@ -6,7 +6,7 @@ import { GoCQHTTPActionsExamples } from '../example/GoCQHTTPActionsExamples';
 export const SetQQProfilePayloadSchema = Type.Object({
   nickname: Type.String({ description: '昵称' }),
   personal_note: Type.Optional(Type.String({ description: '个性签名' })),
-  sex: Type.Optional(Type.Union([Type.Number(), Type.String()], { description: '性别 (0: 未知, 1: 男, 2: 女)' })), // 传Sex值？建议传0
+  sex: Type.Optional(Type.Union([Type.Integer(), Type.String()], { description: '性别 (0: 未知, 1: 男, 2: 女)' })), // 传Sex值？建议传0
 });
 
 export type SetQQProfilePayload = Static<typeof SetQQProfilePayloadSchema>;

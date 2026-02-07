@@ -10,10 +10,10 @@ const PayloadSchema = Type.Object({
 type PayloadType = Static<typeof PayloadSchema>;
 
 const ReturnSchema = Type.Object({
-  file_count: Type.Number({ description: '文件总数' }),
-  limit_count: Type.Number({ description: '文件上限' }),
-  used_space: Type.Number({ description: '已使用空间' }),
-  total_space: Type.Number({ description: '总空间' }),
+  file_count: Type.Integer({ description: '文件总数' }),
+  limit_count: Type.Integer({ description: '文件上限' }),
+  used_space: Type.Integer({ description: '已使用空间' }),
+  total_space: Type.Integer({ description: '总空间' }),
 }, { description: '群文件系统信息' });
 
 type ReturnType = Static<typeof ReturnSchema>;

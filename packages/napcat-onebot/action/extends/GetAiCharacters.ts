@@ -6,7 +6,7 @@ import { ExtendsActionsExamples } from '../example/ExtendsActionsExamples';
 
 const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
-  chat_type: Type.Union([Type.Number(), Type.String()], { default: 1, description: '聊天类型' }),
+  chat_type: Type.Union([Type.Integer(), Type.String()], { default: 1, description: '聊天类型' }),
 });
 
 type PayloadType = Static<typeof PayloadSchema>;

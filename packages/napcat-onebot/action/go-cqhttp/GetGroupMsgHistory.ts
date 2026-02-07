@@ -10,7 +10,7 @@ import { GoCQHTTPActionsExamples } from '../example/GoCQHTTPActionsExamples';
 const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
   message_seq: Type.Optional(Type.String({ description: '起始消息序号' })),
-  count: Type.Number({ default: 20, description: '获取消息数量' }),
+  count: Type.Integer({ default: 20, description: '获取消息数量' }),
   reverse_order: Type.Boolean({ default: false, description: '是否反向排序' }),
   disable_get_url: Type.Boolean({ default: false, description: '是否禁用获取URL' }),
   parse_mult_msg: Type.Boolean({ default: true, description: '是否解析合并消息' }),

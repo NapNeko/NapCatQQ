@@ -9,8 +9,8 @@ const PayloadSchema = Type.Object({
 type PayloadType = Static<typeof PayloadSchema>;
 
 const ReturnSchema = Type.Object({
-  status: Type.Number({ description: '在线状态' }),
-  ext_status: Type.Number({ description: '扩展状态' }),
+  status: Type.Integer({ description: '在线状态' }),
+  ext_status: Type.Integer({ description: '扩展状态' }),
 }, { description: '用户状态' });
 
 type ReturnType = Static<typeof ReturnSchema>;

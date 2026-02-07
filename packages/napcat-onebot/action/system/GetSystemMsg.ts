@@ -5,7 +5,7 @@ import { Static, Type } from '@sinclair/typebox';
 import { OB11NotifySchema } from '../schemas';
 
 export const GetGroupSystemMsgPayloadSchema = Type.Object({
-  count: Type.Union([Type.Number(), Type.String()], { default: 50, description: '获取的消息数量' }),
+  count: Type.Union([Type.Integer(), Type.String()], { default: 50, description: '获取的消息数量' }),
 });
 
 export type GetGroupSystemMsgPayload = Static<typeof GetGroupSystemMsgPayloadSchema>;

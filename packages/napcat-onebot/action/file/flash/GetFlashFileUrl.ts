@@ -5,7 +5,7 @@ import { Static, Type } from '@sinclair/typebox';
 export const GetFlashFileUrlPayloadSchema = Type.Object({
   fileset_id: Type.String({ description: '文件集 ID' }),
   file_name: Type.Optional(Type.String({ description: '文件名' })),
-  file_index: Type.Optional(Type.Number({ description: '文件索引' })),
+  file_index: Type.Optional(Type.Integer({ description: '文件索引' })),
 });
 
 export type GetFlashFileUrlPayload = Static<typeof GetFlashFileUrlPayloadSchema>;

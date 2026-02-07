@@ -3,8 +3,8 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
 const PayloadSchema = Type.Object({
-  face_id: Type.Union([Type.Number(), Type.String()], { description: '图标ID' }), // 参考 face_config.json 的 QSid
-  face_type: Type.Union([Type.Number(), Type.String()], { default: '1', description: '图标类型' }),
+  face_id: Type.Union([Type.Integer(), Type.String()], { description: '图标ID' }), // 参考 face_config.json 的 QSid
+  face_type: Type.Union([Type.Integer(), Type.String()], { default: '1', description: '图标类型' }),
   wording: Type.String({ default: ' ', description: '状态文字内容' }),
 });
 

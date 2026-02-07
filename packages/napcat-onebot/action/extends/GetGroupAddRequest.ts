@@ -5,14 +5,14 @@ import { Type, Static } from '@sinclair/typebox';
 
 const ReturnSchema = Type.Array(
   Type.Object({
-    request_id: Type.Number({ description: '请求ID' }),
-    invitor_uin: Type.Number({ description: '邀请者QQ' }),
+    request_id: Type.Integer({ description: '请求ID' }),
+    invitor_uin: Type.Integer({ description: '邀请者QQ' }),
     invitor_nick: Type.Optional(Type.String({ description: '邀请者昵称' })),
-    group_id: Type.Number({ description: '群号' }),
+    group_id: Type.Integer({ description: '群号' }),
     message: Type.Optional(Type.String({ description: '验证信息' })),
     group_name: Type.Optional(Type.String({ description: '群名称' })),
     checked: Type.Boolean({ description: '是否已处理' }),
-    actor: Type.Number({ description: '处理者QQ' }),
+    actor: Type.Integer({ description: '处理者QQ' }),
     requester_nick: Type.Optional(Type.String({ description: '请求者昵称' })),
   }),
   { description: '群通知列表' }

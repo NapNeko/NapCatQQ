@@ -9,7 +9,7 @@ const PayloadSchema = Type.Object({
   flag: Type.String({ description: '请求flag' }),
   approve: Type.Optional(Type.Union([Type.Boolean(), Type.String()], { description: '是否同意' })),
   reason: Type.Optional(Type.Union([Type.String({ default: ' ' }), Type.Null()], { description: '拒绝理由' })),
-  count: Type.Optional(Type.Number({ default: 100, description: '搜索通知数量' })),
+  count: Type.Optional(Type.Integer({ default: 100, description: '搜索通知数量' })),
 });
 
 type PayloadType = Static<typeof PayloadSchema>;

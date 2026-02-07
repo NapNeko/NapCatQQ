@@ -8,7 +8,7 @@ import { BaseDownloadStream, DownloadResult } from './BaseDownloadStream';
 const DownloadFileStreamPayloadSchema = Type.Object({
   file: Type.Optional(Type.String({ description: '文件路径或 URL' })),
   file_id: Type.Optional(Type.String({ description: '文件 ID' })),
-  chunk_size: Type.Optional(Type.Number({ default: 64 * 1024, description: '分块大小 (字节)' })), // 默认64KB分块
+  chunk_size: Type.Optional(Type.Integer({ default: 64 * 1024, description: '分块大小 (字节)' })), // 默认64KB分块
 });
 
 export type DownloadFileStreamPayload = Static<typeof DownloadFileStreamPayloadSchema>;

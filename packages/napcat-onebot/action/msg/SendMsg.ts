@@ -35,7 +35,7 @@ export const SendMsgPayloadSchema = Type.Object({
 export type SendMsgPayload = Static<typeof SendMsgPayloadSchema>;
 
 export const SendMsgReturnSchema = Type.Object({
-  message_id: Type.Number({ description: '消息ID' }),
+  message_id: Type.Integer({ description: '消息ID' }),
   res_id: Type.Optional(Type.String({ description: '转发消息的 res_id' })),
   forward_id: Type.Optional(Type.String({ description: '转发消息的 forward_id' })),
 });

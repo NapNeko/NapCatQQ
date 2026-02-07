@@ -4,7 +4,7 @@ import { Static, Type } from '@sinclair/typebox';
 
 const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
-  add_type: Type.Number({ description: '加群方式' }),
+  add_type: Type.Integer({ description: '加群方式' }),
   group_question: Type.Optional(Type.String({ description: '加群问题' })),
   group_answer: Type.Optional(Type.String({ description: '加群答案' })),
 });

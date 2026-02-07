@@ -12,7 +12,7 @@ const PayloadSchema = Type.Object({
 type PayloadType = Static<typeof PayloadSchema>;
 
 const ReturnSchema = Type.Object({
-  group_id: Type.Number({ description: '群号' }),
+  group_id: Type.Integer({ description: '群号' }),
   current_talkative: Type.Record(Type.String(), Type.Unknown(), { description: '当前龙王' }),
   talkative_list: Type.Array(Type.Unknown(), { description: '龙王列表' }),
   performer_list: Type.Array(Type.Unknown(), { description: '群聊之火列表' }),

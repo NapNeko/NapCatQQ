@@ -4,8 +4,8 @@ import { Type, Static } from '@sinclair/typebox';
 
 const PayloadSchema = Type.Object({
   user_id: Type.Optional(Type.String({ description: 'QQ号' })),
-  start: Type.Union([Type.Number(), Type.String()], { default: 0, description: '起始位置' }),
-  count: Type.Union([Type.Number(), Type.String()], { default: 10, description: '获取数量' }),
+  start: Type.Union([Type.Integer(), Type.String()], { default: 0, description: '起始位置' }),
+  count: Type.Union([Type.Integer(), Type.String()], { default: 10, description: '获取数量' }),
 });
 
 type PayloadType = Static<typeof PayloadSchema>;
@@ -15,15 +15,15 @@ const ReturnSchema = Type.Object({
   time: Type.String({ description: '时间' }),
   favoriteInfo: Type.Object({
     userInfos: Type.Array(Type.Any(), { description: '点赞用户信息' }),
-    total_count: Type.Number({ description: '总点赞数' }),
-    last_time: Type.Number({ description: '最后点赞时间' }),
-    today_count: Type.Number({ description: '今日点赞数' }),
+    total_count: Type.Integer({ description: '总点赞数' }),
+    last_time: Type.Integer({ description: '最后点赞时间' }),
+    today_count: Type.Integer({ description: '今日点赞数' }),
   }),
   voteInfo: Type.Object({
-    total_count: Type.Number({ description: '总点赞数' }),
-    new_count: Type.Number({ description: '新增点赞数' }),
-    new_nearby_count: Type.Number({ description: '新增附近点赞数' }),
-    last_visit_time: Type.Number({ description: '最后访问时间' }),
+    total_count: Type.Integer({ description: '总点赞数' }),
+    new_count: Type.Integer({ description: '新增点赞数' }),
+    new_nearby_count: Type.Integer({ description: '新增附近点赞数' }),
+    last_visit_time: Type.Integer({ description: '最后访问时间' }),
     userInfos: Type.Array(Type.Any(), { description: '点赞用户信息' }),
   }),
 }, { description: '点赞详情' });

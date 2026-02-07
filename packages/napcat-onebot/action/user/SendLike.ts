@@ -3,7 +3,7 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 export const SendLikePayloadSchema = Type.Object({
   user_id: Type.String({ description: '对方 QQ 号' }),
-  times: Type.Union([Type.Number(), Type.String()], { default: 1, description: '点赞次数' }),
+  times: Type.Union([Type.Integer(), Type.String()], { default: 1, description: '点赞次数' }),
 });
 
 export type SendLikePayload = Static<typeof SendLikePayloadSchema>;

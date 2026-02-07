@@ -14,21 +14,21 @@ const PayloadSchema = Type.Object({
 type PayloadType = Static<typeof PayloadSchema>;
 
 const ReturnSchema = Type.Object({
-  user_id: Type.Number({ description: '用户QQ' }),
+  user_id: Type.Integer({ description: '用户QQ' }),
   uid: Type.String({ description: 'UID' }),
   nickname: Type.String({ description: '昵称' }),
-  age: Type.Number({ description: '年龄' }),
+  age: Type.Integer({ description: '年龄' }),
   qid: Type.String({ description: 'QID' }),
-  qqLevel: Type.Number({ description: 'QQ等级' }),
+  qqLevel: Type.Integer({ description: 'QQ等级' }),
   sex: Type.String({ description: '性别' }),
   long_nick: Type.String({ description: '个性签名' }),
-  reg_time: Type.Number({ description: '注册时间' }),
+  reg_time: Type.Integer({ description: '注册时间' }),
   is_vip: Type.Boolean({ description: '是否VIP' }),
   is_years_vip: Type.Boolean({ description: '是否年费VIP' }),
-  vip_level: Type.Number({ description: 'VIP等级' }),
+  vip_level: Type.Integer({ description: 'VIP等级' }),
   remark: Type.String({ description: '备注' }),
-  status: Type.Number({ description: '状态' }),
-  login_days: Type.Number({ description: '登录天数' }),
+  status: Type.Integer({ description: '状态' }),
+  login_days: Type.Integer({ description: '登录天数' }),
 }, { description: '陌生人信息' });
 
 type ReturnType = Static<typeof ReturnSchema>;

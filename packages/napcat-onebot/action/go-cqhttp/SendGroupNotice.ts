@@ -9,11 +9,11 @@ export const SendGroupNoticePayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
   content: Type.String({ description: '公告内容' }),
   image: Type.Optional(Type.String({ description: '公告图片路径或 URL' })),
-  pinned: Type.Union([Type.Number(), Type.String()], { default: 0, description: '是否置顶 (0/1)' }),
-  type: Type.Union([Type.Number(), Type.String()], { default: 1, description: '类型 (默认为 1)' }),
-  confirm_required: Type.Union([Type.Number(), Type.String()], { default: 1, description: '是否需要确认 (0/1)' }),
-  is_show_edit_card: Type.Union([Type.Number(), Type.String()], { default: 0, description: '是否显示修改群名片引导 (0/1)' }),
-  tip_window_type: Type.Union([Type.Number(), Type.String()], { default: 0, description: '弹窗类型 (默认为 0)' }),
+  pinned: Type.Union([Type.Integer(), Type.String()], { default: 0, description: '是否置顶 (0/1)' }),
+  type: Type.Union([Type.Integer(), Type.String()], { default: 1, description: '类型 (默认为 1)' }),
+  confirm_required: Type.Union([Type.Integer(), Type.String()], { default: 1, description: '是否需要确认 (0/1)' }),
+  is_show_edit_card: Type.Union([Type.Integer(), Type.String()], { default: 0, description: '是否显示修改群名片引导 (0/1)' }),
+  tip_window_type: Type.Union([Type.Integer(), Type.String()], { default: 0, description: '弹窗类型 (默认为 0)' }),
 });
 
 export type SendGroupNoticePayload = Static<typeof SendGroupNoticePayloadSchema>;

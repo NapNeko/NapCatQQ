@@ -6,7 +6,7 @@ import { Static, Type } from '@sinclair/typebox';
 import { GroupActionsExamples } from '../example/GroupActionsExamples';
 
 const PayloadSchema = Type.Object({
-  message_id: Type.Optional(Type.Union([Type.Number(), Type.String()], { description: '消息ID' })),
+  message_id: Type.Optional(Type.Union([Type.Integer(), Type.String()], { description: '消息ID' })),
   msg_seq: Type.Optional(Type.String({ description: '消息序号' })),
   msg_random: Type.Optional(Type.String({ description: '消息随机数' })),
   group_id: Type.Optional(Type.String({ description: '群号' })),

@@ -8,7 +8,7 @@ const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
   folder_id: Type.Optional(Type.String({ description: '文件夹ID' })),
   folder: Type.Optional(Type.String({ description: '文件夹ID' })),
-  file_count: Type.Union([Type.Number(), Type.String()], { default: 50, description: '文件数量' }),
+  file_count: Type.Union([Type.Integer(), Type.String()], { default: 50, description: '文件数量' }),
 });
 
 type PayloadType = Static<typeof PayloadSchema>;

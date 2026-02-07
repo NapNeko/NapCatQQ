@@ -5,7 +5,7 @@ import { Type, Static } from '@sinclair/typebox';
 export const GetRkeyServerReturnSchema = Type.Object({
   private_rkey: Type.Optional(Type.String({ description: '私聊 RKey' })),
   group_rkey: Type.Optional(Type.String({ description: '群聊 RKey' })),
-  expired_time: Type.Optional(Type.Number({ description: '过期时间' })),
+  expired_time: Type.Optional(Type.Integer({ description: '过期时间' })),
   name: Type.String({ description: '名称' }),
 });
 

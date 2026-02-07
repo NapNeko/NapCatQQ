@@ -11,11 +11,11 @@ const PayloadSchema = Type.Object({
 type PayloadType = Static<typeof PayloadSchema>;
 
 const ReturnSchema = Type.Object({
-  group_id: Type.Number({ description: '群号' }),
+  group_id: Type.Integer({ description: '群号' }),
   group_name: Type.String({ description: '群名称' }),
-  member_count: Type.Number({ description: '成员数量' }),
-  max_member_count: Type.Number({ description: '最大成员数量' }),
-  group_all_shut: Type.Number({ description: '全员禁言状态' }),
+  member_count: Type.Integer({ description: '成员数量' }),
+  max_member_count: Type.Integer({ description: '最大成员数量' }),
+  group_all_shut: Type.Integer({ description: '全员禁言状态' }),
   group_remark: Type.String({ description: '群备注' }),
 }, { description: '群详细信息' });
 

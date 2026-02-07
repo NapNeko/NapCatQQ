@@ -3,7 +3,7 @@ import Ajv from 'ajv';
 const HttpServerConfigSchema = Type.Object({
   name: Type.String({ default: 'http-server' }),
   enable: Type.Boolean({ default: false }),
-  port: Type.Number({ default: 3000 }),
+  port: Type.Integer({ default: 3000 }),
   host: Type.String({ default: '127.0.0.1' }),
   enableCors: Type.Boolean({ default: true }),
   enableWebsocket: Type.Boolean({ default: false }),
@@ -15,7 +15,7 @@ const HttpServerConfigSchema = Type.Object({
 const HttpSseServerConfigSchema = Type.Object({
   name: Type.String({ default: 'http-sse-server' }),
   enable: Type.Boolean({ default: false }),
-  port: Type.Number({ default: 3000 }),
+  port: Type.Integer({ default: 3000 }),
   host: Type.String({ default: '127.0.0.1' }),
   enableCors: Type.Boolean({ default: true }),
   enableWebsocket: Type.Boolean({ default: false }),
@@ -39,13 +39,13 @@ const WebsocketServerConfigSchema = Type.Object({
   name: Type.String({ default: 'websocket-server' }),
   enable: Type.Boolean({ default: false }),
   host: Type.String({ default: '127.0.0.1' }),
-  port: Type.Number({ default: 3001 }),
+  port: Type.Integer({ default: 3001 }),
   messagePostFormat: Type.String({ default: 'array' }),
   reportSelfMessage: Type.Boolean({ default: false }),
   token: Type.String({ default: '' }),
   enableForcePushEvent: Type.Boolean({ default: true }),
   debug: Type.Boolean({ default: false }),
-  heartInterval: Type.Number({ default: 30000 }),
+  heartInterval: Type.Integer({ default: 30000 }),
 });
 
 const WebsocketClientConfigSchema = Type.Object({
@@ -54,10 +54,10 @@ const WebsocketClientConfigSchema = Type.Object({
   url: Type.String({ default: 'ws://localhost:8082' }),
   messagePostFormat: Type.String({ default: 'array' }),
   reportSelfMessage: Type.Boolean({ default: false }),
-  reconnectInterval: Type.Number({ default: 5000 }),
+  reconnectInterval: Type.Integer({ default: 5000 }),
   token: Type.String({ default: '' }),
   debug: Type.Boolean({ default: false }),
-  heartInterval: Type.Number({ default: 30000 }),
+  heartInterval: Type.Integer({ default: 30000 }),
 });
 
 const PluginConfigSchema = Type.Object({

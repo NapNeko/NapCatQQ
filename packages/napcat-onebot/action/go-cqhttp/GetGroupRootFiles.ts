@@ -6,7 +6,7 @@ import { GoCQHTTPActionsExamples } from '../example/GoCQHTTPActionsExamples';
 
 const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
-  file_count: Type.Union([Type.Number(), Type.String()], { default: 50, description: '文件数量' }),
+  file_count: Type.Union([Type.Integer(), Type.String()], { default: 50, description: '文件数量' }),
 });
 
 type PayloadType = Static<typeof PayloadSchema>;

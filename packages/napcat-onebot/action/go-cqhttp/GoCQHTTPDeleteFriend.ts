@@ -4,8 +4,8 @@ import { Static, Type } from '@sinclair/typebox';
 import { GoCQHTTPActionsExamples } from '../example/GoCQHTTPActionsExamples';
 
 export const GoCQHTTPDeleteFriendPayloadSchema = Type.Object({
-  friend_id: Type.Optional(Type.Union([Type.String(), Type.Number()], { description: '好友 QQ 号' })),
-  user_id: Type.Optional(Type.Union([Type.String(), Type.Number()], { description: '用户 QQ 号' })),
+  friend_id: Type.Optional(Type.Union([Type.String(), Type.Integer()], { description: '好友 QQ 号' })),
+  user_id: Type.Optional(Type.Union([Type.String(), Type.Integer()], { description: '用户 QQ 号' })),
   temp_block: Type.Optional(Type.Boolean({ description: '是否加入黑名单' })),
   temp_both_del: Type.Optional(Type.Boolean({ description: '是否双向删除' })),
 });

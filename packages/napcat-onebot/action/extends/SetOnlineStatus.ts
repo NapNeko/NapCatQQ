@@ -3,9 +3,9 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
 const PayloadSchema = Type.Object({
-  status: Type.Union([Type.Number(), Type.String()], { description: '在线状态' }),
-  ext_status: Type.Union([Type.Number(), Type.String()], { description: '扩展状态' }),
-  battery_status: Type.Union([Type.Number(), Type.String()], { description: '电量状态' }),
+  status: Type.Union([Type.Integer(), Type.String()], { description: '在线状态' }),
+  ext_status: Type.Union([Type.Integer(), Type.String()], { description: '扩展状态' }),
+  battery_status: Type.Union([Type.Integer(), Type.String()], { description: '电量状态' }),
 });
 
 type PayloadType = Static<typeof PayloadSchema>;

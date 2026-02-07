@@ -5,7 +5,7 @@ import { MessageUnique } from 'napcat-common/src/message-unique';
 import { Static, Type } from '@sinclair/typebox';
 
 const PayloadSchema = Type.Object({
-  user_id: Type.Optional(Type.Union([Type.String(), Type.Number()], { description: '用户QQ' })),
+  user_id: Type.Optional(Type.Union([Type.String(), Type.Integer()], { description: '用户QQ' })),
   group_id: Type.Optional(Type.String({ description: '群号' })),
   message_id: Type.Optional(Type.String({ description: '消息ID' })),
 });

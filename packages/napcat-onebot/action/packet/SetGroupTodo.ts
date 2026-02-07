@@ -7,7 +7,7 @@ import { ActionName } from '../router';
 import { PacketActionsExamples } from '../example/PacketActionsExamples';
 
 export const SetGroupTodoPayloadSchema = Type.Object({
-  group_id: Type.Union([Type.String(), Type.Number()], { description: '群号' }),
+  group_id: Type.Union([Type.String(), Type.Integer()], { description: '群号' }),
   message_id: Type.Optional(Type.String({ description: '消息ID' })),
   message_seq: Type.Optional(Type.String({ description: '消息Seq (可选)' })),
 });

@@ -6,10 +6,10 @@ import { Type, Static } from '@sinclair/typebox';
 
 const ReturnSchema = Type.Array(
   Type.Object({
-    uin: Type.Number({ description: 'QQ号' }),
+    uin: Type.Integer({ description: 'QQ号' }),
     uid: Type.String({ description: '用户UID' }),
     nick_name: Type.String({ description: '昵称' }),
-    age: Type.Number({ description: '年龄' }),
+    age: Type.Integer({ description: '年龄' }),
     source: Type.String({ description: '来源' }),
   }),
   { description: '单向好友列表' }

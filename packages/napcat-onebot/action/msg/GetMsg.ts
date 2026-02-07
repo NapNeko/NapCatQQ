@@ -7,23 +7,23 @@ import { NetworkAdapterConfig } from '@/napcat-onebot/config/config';
 import { MsgActionsExamples } from './examples';
 
 const PayloadSchema = Type.Object({
-  message_id: Type.Union([Type.Number(), Type.String()], { description: '消息ID' }),
+  message_id: Type.Union([Type.Integer(), Type.String()], { description: '消息ID' }),
 });
 
 type PayloadType = Static<typeof PayloadSchema>;
 
 const ReturnSchema = Type.Object({
-  time: Type.Number({ description: '发送时间' }),
+  time: Type.Integer({ description: '发送时间' }),
   message_type: Type.String({ description: '消息类型' }),
-  message_id: Type.Number({ description: '消息ID' }),
-  real_id: Type.Number({ description: '真实ID' }),
-  message_seq: Type.Number({ description: '消息序号' }),
+  message_id: Type.Integer({ description: '消息ID' }),
+  real_id: Type.Integer({ description: '真实ID' }),
+  message_seq: Type.Integer({ description: '消息序号' }),
   sender: Type.Any({ description: '发送者' }),
   message: Type.Any({ description: '消息内容' }),
   raw_message: Type.String({ description: '原始消息内容' }),
-  font: Type.Number({ description: '字体' }),
-  group_id: Type.Optional(Type.Union([Type.Number(), Type.String()], { description: '群号' })),
-  user_id: Type.Union([Type.Number(), Type.String()], { description: '发送者QQ号' }),
+  font: Type.Integer({ description: '字体' }),
+  group_id: Type.Optional(Type.Union([Type.Integer(), Type.String()], { description: '群号' })),
+  user_id: Type.Union([Type.Integer(), Type.String()], { description: '发送者QQ号' }),
   emoji_likes_list: Type.Optional(Type.Array(Type.Any(), { description: '表情回应列表' })),
 }, { description: 'OneBot 11 消息' });
 

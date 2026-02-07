@@ -12,7 +12,7 @@ const PayloadSchema = Type.Object({
 type PayloadType = Static<typeof PayloadSchema>;
 
 const ReturnSchema = Type.Object({
-  message_id: Type.Number({ description: '消息ID' }),
+  message_id: Type.Integer({ description: '消息ID' }),
 }, { description: '发送结果' });
 
 type ReturnType = Static<typeof ReturnSchema>;

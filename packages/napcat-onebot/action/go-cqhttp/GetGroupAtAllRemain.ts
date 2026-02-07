@@ -11,8 +11,8 @@ type PayloadType = Static<typeof PayloadSchema>;
 
 const ReturnSchema = Type.Object({
   can_at_all: Type.Boolean({ description: '是否可以艾特全体' }),
-  remain_at_all_count_for_group: Type.Number({ description: '群艾特全体剩余次数' }),
-  remain_at_all_count_for_uin: Type.Number({ description: '个人艾特全体剩余次数' }),
+  remain_at_all_count_for_group: Type.Integer({ description: '群艾特全体剩余次数' }),
+  remain_at_all_count_for_uin: Type.Integer({ description: '个人艾特全体剩余次数' }),
 }, { description: '群艾特全体剩余次数' });
 
 type ReturnType = Static<typeof ReturnSchema>;

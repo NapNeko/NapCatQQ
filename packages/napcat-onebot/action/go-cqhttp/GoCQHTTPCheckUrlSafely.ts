@@ -10,7 +10,7 @@ export const GoCQHTTPCheckUrlSafelyPayloadSchema = Type.Object({
 export type GoCQHTTPCheckUrlSafelyPayload = Static<typeof GoCQHTTPCheckUrlSafelyPayloadSchema>;
 
 export const GoCQHTTPCheckUrlSafelyReturnSchema = Type.Object({
-  level: Type.Number({ description: '安全等级 (1: 安全, 2: 未知, 3: 危险)' }),
+  level: Type.Integer({ description: '安全等级 (1: 安全, 2: 未知, 3: 危险)' }),
 });
 
 export type GoCQHTTPCheckUrlSafelyReturn = Static<typeof GoCQHTTPCheckUrlSafelyReturnSchema>;

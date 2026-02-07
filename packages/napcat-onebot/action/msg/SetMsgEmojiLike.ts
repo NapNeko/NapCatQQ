@@ -4,8 +4,8 @@ import { MessageUnique } from 'napcat-common/src/message-unique';
 import { Static, Type } from '@sinclair/typebox';
 
 const PayloadSchema = Type.Object({
-  message_id: Type.Union([Type.Number(), Type.String()], { description: '消息ID' }),
-  emoji_id: Type.Union([Type.Number(), Type.String()], { description: '表情ID' }),
+  message_id: Type.Union([Type.Integer(), Type.String()], { description: '消息ID' }),
+  emoji_id: Type.Union([Type.Integer(), Type.String()], { description: '表情ID' }),
   set: Type.Optional(Type.Union([Type.Boolean(), Type.String()], { description: '是否设置' })),
 });
 

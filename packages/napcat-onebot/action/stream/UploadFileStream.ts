@@ -19,15 +19,15 @@ const CONFIG = {
 export const UploadFileStreamPayloadSchema = Type.Object({
   stream_id: Type.String({ description: '流 ID' }),
   chunk_data: Type.Optional(Type.String({ description: '分块数据 (Base64)' })),
-  chunk_index: Type.Optional(Type.Number({ description: '分块索引' })),
-  total_chunks: Type.Optional(Type.Number({ description: '总分块数' })),
-  file_size: Type.Optional(Type.Number({ description: '文件总大小' })),
+  chunk_index: Type.Optional(Type.Integer({ description: '分块索引' })),
+  total_chunks: Type.Optional(Type.Integer({ description: '总分块数' })),
+  file_size: Type.Optional(Type.Integer({ description: '文件总大小' })),
   expected_sha256: Type.Optional(Type.String({ description: '期望的 SHA256' })),
   is_complete: Type.Optional(Type.Boolean({ description: '是否完成' })),
   filename: Type.Optional(Type.String({ description: '文件名' })),
   reset: Type.Optional(Type.Boolean({ description: '是否重置' })),
   verify_only: Type.Optional(Type.Boolean({ description: '是否仅验证' })),
-  file_retention: Type.Number({ default: 5 * 60 * 1000, description: '文件保留时间 (毫秒)' }), // 默认5分钟 回收 不设置或0为不回收
+  file_retention: Type.Integer({ default: 5 * 60 * 1000, description: '文件保留时间 (毫秒)' }), // 默认5分钟 回收 不设置或0为不回收
 });
 
 export type UploadFileStreamPayload = Static<typeof UploadFileStreamPayloadSchema>;

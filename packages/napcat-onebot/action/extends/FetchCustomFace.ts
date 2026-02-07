@@ -3,7 +3,7 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 
 const PayloadSchema = Type.Object({
-  count: Type.Union([Type.Number(), Type.String()], { default: 48, description: '获取数量' }),
+  count: Type.Union([Type.Integer(), Type.String()], { default: 48, description: '获取数量' }),
 });
 
 type PayloadType = Static<typeof PayloadSchema>;

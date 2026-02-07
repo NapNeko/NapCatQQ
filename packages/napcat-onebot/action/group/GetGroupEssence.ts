@@ -16,14 +16,14 @@ const PayloadSchema = Type.Object({
 type PayloadType = Static<typeof PayloadSchema>;
 
 const ReturnSchema = Type.Array(Type.Object({
-  msg_seq: Type.Number({ description: '消息序号' }),
-  msg_random: Type.Number({ description: '消息随机数' }),
-  sender_id: Type.Number({ description: '发送者QQ' }),
+  msg_seq: Type.Integer({ description: '消息序号' }),
+  msg_random: Type.Integer({ description: '消息随机数' }),
+  sender_id: Type.Integer({ description: '发送者QQ' }),
   sender_nick: Type.String({ description: '发送者昵称' }),
-  operator_id: Type.Number({ description: '操作者QQ' }),
+  operator_id: Type.Integer({ description: '操作者QQ' }),
   operator_nick: Type.String({ description: '操作者昵称' }),
-  message_id: Type.Number({ description: '消息ID' }),
-  operator_time: Type.Number({ description: '操作时间' }),
+  message_id: Type.Integer({ description: '消息ID' }),
+  operator_time: Type.Integer({ description: '操作时间' }),
   content: Type.Array(Type.Any(), { description: '消息内容' }),
 }), { description: '精华消息列表' });
 

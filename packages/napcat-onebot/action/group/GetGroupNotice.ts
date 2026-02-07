@@ -11,8 +11,8 @@ const PayloadSchema = Type.Object({
 type PayloadType = Static<typeof PayloadSchema>;
 
 const ReturnSchema = Type.Array(Type.Object({
-  sender_id: Type.Number({ description: '发送者QQ' }),
-  publish_time: Type.Number({ description: '发布时间' }),
+  sender_id: Type.Integer({ description: '发送者QQ' }),
+  publish_time: Type.Integer({ description: '发布时间' }),
   notice_id: Type.String({ description: '公告ID' }),
   message: Type.Object({
     text: Type.String({ description: '文本内容' }),
@@ -20,7 +20,7 @@ const ReturnSchema = Type.Array(Type.Object({
     images: Type.Array(Type.Any(), { description: '图片列表' }),
   }, { description: '公告内容' }),
   settings: Type.Optional(Type.Any({ description: '设置项' })),
-  read_num: Type.Optional(Type.Number({ description: '阅读数' })),
+  read_num: Type.Optional(Type.Integer({ description: '阅读数' })),
 }), { description: '群公告列表' });
 
 type ReturnType = Static<typeof ReturnSchema>;

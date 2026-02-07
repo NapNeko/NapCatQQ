@@ -6,9 +6,9 @@ import { OB11UserSchema } from '../schemas';
 
 const ReturnSchema = Type.Array(
   Type.Object({
-    categoryId: Type.Number({ description: '分组ID' }),
+    categoryId: Type.Integer({ description: '分组ID' }),
     categoryName: Type.String({ description: '分组名称' }),
-    categoryMbCount: Type.Number({ description: '分组内好友数量' }),
+    categoryMbCount: Type.Integer({ description: '分组内好友数量' }),
     buddyList: Type.Array(OB11UserSchema, { description: '好友列表' }),
   }),
   { description: '带分组的好友列表' }

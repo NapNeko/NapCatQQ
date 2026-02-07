@@ -9,7 +9,7 @@ const PayloadSchema = Type.Object({
   message_id: Type.String({ description: '消息ID，可以传递长ID或短ID' }),
   emoji_id: Type.String({ description: '表情ID' }),
   emoji_type: Type.Optional(Type.String({ description: '表情类型' })),
-  count: Type.Number({ default: 0, description: '数量，0代表全部' }),
+  count: Type.Integer({ default: 0, description: '数量，0代表全部' }),
 });
 type PayloadType = Static<typeof PayloadSchema>;
 

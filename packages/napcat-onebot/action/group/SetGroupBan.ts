@@ -7,7 +7,7 @@ import { GroupActionsExamples } from '../example/GroupActionsExamples';
 const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
   user_id: Type.String({ description: '用户QQ' }),
-  duration: Type.Union([Type.Number(), Type.String()], { default: 0, description: '禁言时长(秒)' }),
+  duration: Type.Union([Type.Integer(), Type.String()], { default: 0, description: '禁言时长(秒)' }),
 });
 
 type PayloadType = Static<typeof PayloadSchema>;

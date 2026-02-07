@@ -13,7 +13,7 @@ export const SetGroupPortraitPayloadSchema = Type.Object({
 export type SetGroupPortraitPayload = Static<typeof SetGroupPortraitPayloadSchema>;
 
 const ReturnSchema = Type.Object({
-  result: Type.Number(),
+  result: Type.Integer(),
   errMsg: Type.String(),
 }, { description: '设置结果' });
 

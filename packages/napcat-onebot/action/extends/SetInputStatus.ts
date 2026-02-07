@@ -5,7 +5,7 @@ import { Static, Type } from '@sinclair/typebox';
 
 const PayloadSchema = Type.Object({
   user_id: Type.String({ description: 'QQ号' }),
-  event_type: Type.Number({ description: '事件类型' }),
+  event_type: Type.Integer({ description: '事件类型' }),
 });
 
 type PayloadType = Static<typeof PayloadSchema>;

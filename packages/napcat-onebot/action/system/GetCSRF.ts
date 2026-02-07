@@ -3,7 +3,7 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { Type, Static } from '@sinclair/typebox';
 
 export const GetCSRFReturnSchema = Type.Object({
-  token: Type.Number({ description: 'CSRF Token' }),
+  token: Type.Integer({ description: 'CSRF Token' }),
 });
 
 export type GetCSRFReturnType = Static<typeof GetCSRFReturnSchema>;

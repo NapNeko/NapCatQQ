@@ -4,7 +4,7 @@ import { Static, Type } from '@sinclair/typebox';
 import { NewActionsExamples } from '../example/NewActionsExamples';
 
 export const GetDoubtFriendsAddRequestPayloadSchema = Type.Object({
-  count: Type.Number({ default: 50, description: '获取数量' }),
+  count: Type.Integer({ default: 50, description: '获取数量' }),
 });
 
 export type GetDoubtFriendsAddRequestPayload = Static<typeof GetDoubtFriendsAddRequestPayloadSchema>;

@@ -5,8 +5,8 @@ import { Type, Static } from '@sinclair/typebox';
 export const GetRkeyExReturnSchema = Type.Array(Type.Object({
   type: Type.String({ description: '类型 (private/group)' }),
   rkey: Type.String({ description: 'RKey' }),
-  created_at: Type.Number({ description: '创建时间' }),
-  ttl: Type.Number({ description: '有效期' }),
+  created_at: Type.Integer({ description: '创建时间' }),
+  ttl: Type.Integer({ description: '有效期' }),
 }), { description: 'RKey 列表' });
 
 export type GetRkeyExReturn = Static<typeof GetRkeyExReturnSchema>;

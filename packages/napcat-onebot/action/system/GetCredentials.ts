@@ -10,7 +10,7 @@ export type GetCredentialsPayload = Static<typeof GetCredentialsPayloadSchema>;
 
 export const GetCredentialsReturnSchema = Type.Object({
   cookies: Type.String({ description: 'Cookies' }),
-  token: Type.Number({ description: 'CSRF Token' }),
+  token: Type.Integer({ description: 'CSRF Token' }),
 });
 
 export type GetCredentialsResponse = Static<typeof GetCredentialsReturnSchema>;
