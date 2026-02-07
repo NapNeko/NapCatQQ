@@ -111,7 +111,11 @@ export const GetPluginListHandler: RequestHandler = async (_req, res) => {
       author: p.packageJson?.author || '',
       status,
       hasConfig: !!(p.runtime.module?.plugin_config_schema || p.runtime.module?.plugin_config_ui),
-      hasPages
+      hasPages,
+      homepage: p.packageJson?.homepage,
+      repository: typeof p.packageJson?.repository === 'string'
+        ? p.packageJson.repository
+        : p.packageJson?.repository?.url
     });
 
     // 收集插件的扩展页面

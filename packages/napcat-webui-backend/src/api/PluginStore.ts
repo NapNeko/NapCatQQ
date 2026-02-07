@@ -40,7 +40,7 @@ async function fetchPluginList (forceRefresh: boolean = false): Promise<PluginSt
   // 检查缓存（如果不是强制刷新）
   const now = Date.now();
   if (!forceRefresh && pluginListCache && (now - cacheTimestamp) < CACHE_TTL) {
-    //console.log('Using cached plugin list');
+    // console.log('Using cached plugin list');
     return pluginListCache;
   }
 
@@ -64,7 +64,7 @@ async function fetchPluginList (forceRefresh: boolean = false): Promise<PluginSt
         }
 
         const data = await response.json();
-        //console.log(`Successfully fetched plugin list from: ${url}`);
+        // console.log(`Successfully fetched plugin list from: ${url}`);
 
         // 更新缓存
         pluginListCache = data as PluginStoreList;
@@ -86,7 +86,13 @@ async function fetchPluginList (forceRefresh: boolean = false): Promise<PluginSt
  * 下载文件，使用镜像系统
  * 自动识别 GitHub Release URL 并使用镜像加速
  */
-async function downloadFile (url: string, destPath: string, customMirror?: string): Promise<void> {
+async function downloadFile (
+  url: string,
+  destPath: string,
+  customMirror?: string,
+  onProgress?: (percent: number, downloaded: number, total: number, speed: number) => void,
+  timeout: number = 120000 // 默认120秒超时
+): Promise<void> {
   try {
     let downloadUrl: string;
 
@@ -126,7 +132,7 @@ async function downloadFile (url: string, destPath: string, customMirror?: strin
       headers: {
         'User-Agent': 'NapCat-WebUI',
       },
-      signal: AbortSignal.timeout(120000), // 实际下载120秒超时
+      signal: AbortSignal.timeout(timeout), // 使用传入的超时时间
     });
 
     if (!response.ok) {
@@ -137,9 +143,45 @@ async function downloadFile (url: string, destPath: string, customMirror?: strin
       throw new Error('Response body is null');
     }
 
+    const totalLength = Number(response.headers.get('content-length')) || 0;
+
+    // 初始进度通知
+    if (onProgress) {
+      onProgress(0, 0, totalLength, 0);
+    }
+
+    let downloaded = 0;
+    let lastTime = Date.now();
+    let lastDownloaded = 0;
+
+    // 进度监控流
+    // eslint-disable-next-line @stylistic/generator-star-spacing
+    const progressMonitor = async function* (source: any) {
+      for await (const chunk of source) {
+        downloaded += chunk.length;
+        const now = Date.now();
+        const elapsedSinceLast = now - lastTime;
+
+        // 每隔 500ms 或完成时计算一次速度并更新进度
+        if (elapsedSinceLast >= 500 || (totalLength && downloaded === totalLength)) {
+          const percent = totalLength ? Math.round((downloaded / totalLength) * 100) : 0;
+          const speed = (downloaded - lastDownloaded) / (elapsedSinceLast / 1000); // bytes/s
+
+          if (onProgress) {
+            onProgress(percent, downloaded, totalLength, speed);
+          }
+
+          lastTime = now;
+          lastDownloaded = downloaded;
+        }
+
+        yield chunk;
+      }
+    };
+
     // 写入文件
     const fileStream = createWriteStream(destPath);
-    await pipeline(response.body as any, fileStream);
+    await pipeline(progressMonitor(response.body), fileStream);
 
     console.log(`Successfully downloaded to: ${destPath}`);
   } catch (e: any) {
@@ -210,7 +252,7 @@ async function extractPlugin (zipPath: string, pluginId: string): Promise<void> 
   } catch (e) {
     // 解压失败时，尝试恢复 data 文件夹
     if (hasDataBackup && fs.existsSync(tempDataDir)) {
-      console.log(`[extractPlugin] Extract failed, restoring data directory`);
+      console.log('[extractPlugin] Extract failed, restoring data directory');
       if (!fs.existsSync(pluginDir)) {
         fs.mkdirSync(pluginDir, { recursive: true });
       }
@@ -224,7 +266,7 @@ async function extractPlugin (zipPath: string, pluginId: string): Promise<void> 
 
   // 列出解压后的文件
   const files = fs.readdirSync(pluginDir);
-  console.log(`[extractPlugin] Extracted files:`, files);
+  console.log('[extractPlugin] Extracted files:', files);
 }
 
 /**
@@ -279,12 +321,21 @@ export const InstallPluginFromStoreHandler: RequestHandler = async (req, res) =>
       return sendError(res, 'Plugin not found in store');
     }
 
+    // 检查是否已安装相同版本
+    const pm = getPluginManager();
+    if (pm) {
+      const installedInfo = pm.getPluginInfo(id);
+      if (installedInfo && installedInfo.version === plugin.version) {
+        return sendError(res, '该插件已安装且版本相同，无需重复安装');
+      }
+    }
+
     // 下载插件
     const PLUGINS_DIR = getPluginsDir();
     const tempZipPath = path.join(PLUGINS_DIR, `${id}.temp.zip`);
 
     try {
-      await downloadFile(plugin.downloadUrl, tempZipPath, mirror);
+      await downloadFile(plugin.downloadUrl, tempZipPath, mirror, undefined, 300000);
 
       // 解压插件
       await extractPlugin(tempZipPath, id);
@@ -305,7 +356,7 @@ export const InstallPluginFromStoreHandler: RequestHandler = async (req, res) =>
 
       return sendSuccess(res, {
         message: 'Plugin installed successfully',
-        plugin: plugin,
+        plugin,
         installPath: path.join(PLUGINS_DIR, id),
       });
     } catch (downloadError: any) {
@@ -337,8 +388,8 @@ export const InstallPluginFromStoreSSEHandler: RequestHandler = async (req, res)
   res.setHeader('Connection', 'keep-alive');
   res.flushHeaders();
 
-  const sendProgress = (message: string, progress?: number) => {
-    res.write(`data: ${JSON.stringify({ message, progress })}\n\n`);
+  const sendProgress = (message: string, progress?: number, detail?: any) => {
+    res.write(`data: ${JSON.stringify({ message, progress, ...detail })}\n\n`);
   };
 
   try {
@@ -355,6 +406,18 @@ export const InstallPluginFromStoreSSEHandler: RequestHandler = async (req, res)
       return;
     }
 
+    // 检查是否已安装相同版本
+    const pm = getPluginManager();
+    if (pm) {
+      const installedInfo = pm.getPluginInfo(id);
+      if (installedInfo && installedInfo.version === plugin.version) {
+        sendProgress('错误: 该插件已安装且版本相同', 0);
+        res.write(`data: ${JSON.stringify({ error: '该插件已安装且版本相同，无需重复安装' })}\n\n`);
+        res.end();
+        return;
+      }
+    }
+
     sendProgress(`找到插件: ${plugin.name} v${plugin.version}`, 20);
     sendProgress(`下载地址: ${plugin.downloadUrl}`, 25);
 
@@ -368,12 +431,28 @@ export const InstallPluginFromStoreSSEHandler: RequestHandler = async (req, res)
 
     try {
       sendProgress('正在下载插件...', 30);
-      await downloadFile(plugin.downloadUrl, tempZipPath, mirror as string | undefined);
+      await downloadFile(plugin.downloadUrl, tempZipPath, mirror as string | undefined, (percent, downloaded, total, speed) => {
+        const overallProgress = 30 + Math.round(percent * 0.5);
+        const downloadedMb = (downloaded / 1024 / 1024).toFixed(1);
+        const totalMb = total ? (total / 1024 / 1024).toFixed(1) : '?';
+        const speedMb = (speed / 1024 / 1024).toFixed(2);
+        const eta = (total > 0 && speed > 0) ? Math.round((total - downloaded) / speed) : -1;
 
-      sendProgress('下载完成，正在解压...', 70);
+        sendProgress(`正在下载插件... ${percent}%`, overallProgress, {
+          downloaded,
+          total,
+          speed,
+          eta,
+          downloadedStr: `${downloadedMb}MB`,
+          totalStr: `${totalMb}MB`,
+          speedStr: `${speedMb}MB/s`,
+        });
+      }, 300000);
+
+      sendProgress('下载完成，正在解压...', 85);
       await extractPlugin(tempZipPath, id);
 
-      sendProgress('解压完成，正在清理...', 90);
+      sendProgress('解压完成，正在清理...', 95);
       fs.unlinkSync(tempZipPath);
 
       // 如果 pluginManager 存在，立即注册或重载插件
@@ -393,7 +472,7 @@ export const InstallPluginFromStoreSSEHandler: RequestHandler = async (req, res)
       res.write(`data: ${JSON.stringify({
         success: true,
         message: 'Plugin installed successfully',
-        plugin: plugin,
+        plugin,
         installPath: path.join(PLUGINS_DIR, id),
       })}\n\n`);
       res.end();

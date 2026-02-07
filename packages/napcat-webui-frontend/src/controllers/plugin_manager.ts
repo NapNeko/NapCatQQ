@@ -22,6 +22,10 @@ export interface PluginItem {
   hasConfig?: boolean;
   /** 是否有扩展页面 */
   hasPages?: boolean;
+  /** 主页链接 */
+  homepage?: string;
+  /** 仓库链接 */
+  repository?: string;
 }
 
 /** 扩展页面信息 */

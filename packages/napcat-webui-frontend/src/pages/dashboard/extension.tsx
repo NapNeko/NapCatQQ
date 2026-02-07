@@ -18,6 +18,7 @@ interface ExtensionPage {
   description?: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-redeclare
 export default function ExtensionPage () {
   const [loading, setLoading] = useState(true);
   const [extensionPages, setExtensionPages] = useState<ExtensionPage[]>([]);
@@ -150,28 +151,30 @@ export default function ExtensionPage () {
           )}
         </div>
 
-        {extensionPages.length === 0 && !loading ? (
-          <div className='flex-1 flex flex-col items-center justify-center text-default-400'>
-            <MdExtension size={64} className='mb-4 opacity-50' />
-            <p className='text-lg'>暂无插件扩展页面</p>
-            <p className='text-sm mt-2'>插件可以通过注册页面来扩展 WebUI 功能</p>
-          </div>
-        ) : (
-          <div className='flex-1 min-h-0 bg-white/40 dark:bg-black/20 backdrop-blur-md rounded-lg overflow-hidden relative'>
-            {iframeLoading && (
-              <div className='absolute inset-0 flex items-center justify-center bg-default-100/50 z-10'>
-                <Spinner size='lg' />
-              </div>
-            )}
-            <iframe
-              src={currentPageUrl}
-              className='w-full h-full border-0'
-              onLoad={handleIframeLoad}
-              title='extension-page'
-              sandbox='allow-scripts allow-same-origin allow-forms allow-popups'
-            />
-          </div>
-        )}
+        {extensionPages.length === 0 && !loading
+          ? (
+            <div className='flex-1 flex flex-col items-center justify-center text-default-400'>
+              <MdExtension size={64} className='mb-4 opacity-50' />
+              <p className='text-lg'>暂无插件扩展页面</p>
+              <p className='text-sm mt-2'>插件可以通过注册页面来扩展 WebUI 功能</p>
+            </div>
+          )
+          : (
+            <div className='flex-1 min-h-0 bg-white/40 dark:bg-black/20 backdrop-blur-md rounded-lg overflow-hidden relative'>
+              {iframeLoading && (
+                <div className='absolute inset-0 flex items-center justify-center bg-default-100/50 z-10'>
+                  <Spinner size='lg' />
+                </div>
+              )}
+              <iframe
+                src={currentPageUrl}
+                className='w-full h-full border-0'
+                onLoad={handleIframeLoad}
+                title='extension-page'
+                sandbox='allow-scripts allow-same-origin allow-forms allow-popups'
+              />
+            </div>
+          )}
       </div>
     </>
   );
