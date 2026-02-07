@@ -27,6 +27,22 @@ const PLUGIN_STORE_SOURCES = [
 // 插件目录 - 使用 pathWrapper
 const getPluginsDir = () => webUiPathWrapper.pluginPath;
 
+/**
+ * 验证插件 ID，防止路径注入攻击
+ */
+function validatePluginId (id: any): string {
+  if (typeof id !== 'string') {
+    throw new Error('Invalid plugin ID');
+  }
+  // 仅允许字母、数字、点、下划线、连字符，禁止路径遍历字符
+  // 通过 path.basename 进一步确保不包含路径分隔符
+  const safeId = path.basename(id);
+  if (!/^[a-zA-Z0-9._-]+$/.test(safeId) || safeId !== id) {
+    throw new Error('Invalid plugin ID format');
+  }
+  return safeId;
+}
+
 // 插件列表缓存
 let pluginListCache: PluginStoreList | null = null;
 let cacheTimestamp: number = 0;
@@ -197,13 +213,15 @@ async function downloadFile (
  * 解压插件到指定目录
  */
 async function extractPlugin (zipPath: string, pluginId: string): Promise<void> {
+  // 验证 pluginId 确保安全
+  const safeId = validatePluginId(pluginId);
   const PLUGINS_DIR = getPluginsDir();
-  const pluginDir = path.join(PLUGINS_DIR, pluginId);
+  const pluginDir = path.join(PLUGINS_DIR, safeId);
   const dataDir = path.join(pluginDir, 'data');
-  const tempDataDir = path.join(PLUGINS_DIR, `${pluginId}.data.backup`);
+  const tempDataDir = path.join(PLUGINS_DIR, `${safeId}.data.backup`);
 
   console.log(`[extractPlugin] PLUGINS_DIR: ${PLUGINS_DIR}`);
-  console.log(`[extractPlugin] pluginId: ${pluginId}`);
+  console.log(`[extractPlugin] pluginId: ${safeId}`);
   console.log(`[extractPlugin] Target directory: ${pluginDir}`);
   console.log(`[extractPlugin] Zip file: ${zipPath}`);
 
@@ -288,7 +306,7 @@ export const GetPluginStoreListHandler: RequestHandler = async (req, res) => {
  */
 export const GetPluginStoreDetailHandler: RequestHandler = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = validatePluginId(req.params['id']);
     const data = await fetchPluginList();
     const plugin = data.plugins.find(p => p.id === id);
 
@@ -307,11 +325,13 @@ export const GetPluginStoreDetailHandler: RequestHandler = async (req, res) => {
  */
 export const InstallPluginFromStoreHandler: RequestHandler = async (req, res) => {
   try {
-    const { id, mirror } = req.body;
+    const { id: rawId, mirror } = req.body;
 
-    if (!id) {
+    if (!rawId) {
       return sendError(res, 'Plugin ID is required');
     }
+
+    const id = validatePluginId(rawId);
 
     // 获取插件信息
     const data = await fetchPluginList();
@@ -375,10 +395,18 @@ export const InstallPluginFromStoreHandler: RequestHandler = async (req, res) =>
  * 安装插件（从商店）- SSE 版本，实时推送进度
  */
 export const InstallPluginFromStoreSSEHandler: RequestHandler = async (req, res) => {
-  const { id, mirror } = req.query;
+  const { id: rawId, mirror } = req.query;
 
-  if (!id || typeof id !== 'string') {
+  if (!rawId || typeof rawId !== 'string') {
     res.status(400).json({ error: 'Plugin ID is required' });
+    return;
+  }
+
+  let id: string;
+  try {
+    id = validatePluginId(rawId);
+  } catch (err: any) {
+    res.status(400).json({ error: err.message });
     return;
   }
 
