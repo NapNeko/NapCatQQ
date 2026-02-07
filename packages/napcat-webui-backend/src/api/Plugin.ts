@@ -75,6 +75,8 @@ export const GetPluginListHandler: RequestHandler = async (_req, res) => {
     status: string;
     hasConfig: boolean;
     hasPages: boolean;
+    homepage?: string;
+    repository?: string;
   }> = new Array();
 
   // 收集所有插件的扩展页面
