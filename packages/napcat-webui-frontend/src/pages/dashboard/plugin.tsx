@@ -1,15 +1,17 @@
 import { Button } from '@heroui/button';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { IoMdRefresh } from 'react-icons/io';
 import { FiUpload } from 'react-icons/fi';
 import { useDisclosure } from '@heroui/modal';
+import { EventSourcePolyfill } from 'event-source-polyfill';
 
 import PageLoading from '@/components/page_loading';
 import PluginDisplayCard from '@/components/display_card/plugin_card';
 import PluginManager, { PluginItem } from '@/controllers/plugin_manager';
 import useDialog from '@/hooks/use-dialog';
 import PluginConfigModal from '@/pages/dashboard/plugin_config_modal';
+import key from '@/const/key';
 
 export default function PluginPage () {
   const [plugins, setPlugins] = useState<PluginItem[]>([]);
@@ -40,9 +42,66 @@ export default function PluginPage () {
     }
   };
 
+  const loadPluginsQuiet = useCallback(async () => {
+    try {
+      const listResult = await PluginManager.getPluginList();
+      if (listResult.pluginManagerNotFound) {
+        setPluginManagerNotFound(true);
+        setPlugins([]);
+      } else {
+        setPluginManagerNotFound(false);
+        setPlugins(listResult.plugins);
+      }
+    } catch {
+      // 静默刷新失败不弹 toast
+    }
+  }, []);
+
   useEffect(() => {
     loadPlugins();
   }, []);
+
+  // 连接 SSE 监听插件列表变更，自动刷新
+  // 同时定期轮询以发现文件夹中直接添加的新插件（HMR 未启动时）
+  useEffect(() => {
+    const token = localStorage.getItem(key.token);
+    if (!token) return;
+
+    let _token: string;
+    try {
+      _token = JSON.parse(token);
+    } catch {
+      return;
+    }
+
+    // SSE 实时推送
+    const url = PluginManager.getPluginEventsSSEUrl();
+    const es = new EventSourcePolyfill(url, {
+      headers: {
+        Authorization: `Bearer ${_token}`,
+        Accept: 'text/event-stream',
+      },
+      withCredentials: true,
+    });
+
+    es.addEventListener('plugin-list-changed', () => {
+      loadPluginsQuiet();
+    });
+
+    es.onerror = () => {
+      // SSE 连接出错时不处理，浏览器会自动重连
+    };
+
+    // 定期轮询兜底（每 5 秒），用于发现文件夹中直接添加的新插件
+    const pollTimer = setInterval(() => {
+      loadPluginsQuiet();
+    }, 5000);
+
+    return () => {
+      es.close();
+      clearInterval(pollTimer);
+    };
+  }, [loadPluginsQuiet]);
 
 
 
