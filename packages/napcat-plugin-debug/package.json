@@ -1,0 +1,24 @@
+{
+  "name": "napcat-plugin-debug",
+  "plugin": "插件调试服务",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.mjs",
+  "description": "NapCat 插件调试服务 — 通过 WS 暴露接口，配合 CLI 实现热重载",
+  "author": "NapNeko",
+  "bin": {
+    "napcat-plugin-debug": "./cli/index.ts"
+  },
+  "dependencies": {
+    "napcat-types": "0.0.16"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.1",
+    "@types/ws": "^8.18.3",
+    "ws": "^8.18.3",
+    "chokidar": "^4.0.3"
+  },
+  "scripts": {
+    "build": "vite build"
+  }
+}
