@@ -7,7 +7,7 @@
   "description": "NapCat 插件调试服务 — 通过 WS 暴露接口，配合 CLI 实现热重载",
   "author": "NapNeko",
   "bin": {
-    "napcat-plugin-debug": "./cli/index.ts"
+    "napcat-plugin-debug": "./dist/cli.mjs"
   },
   "dependencies": {
     "napcat-types": "0.0.16"
@@ -16,9 +16,11 @@
     "@types/node": "^22.0.1",
     "@types/ws": "^8.18.3",
     "ws": "^8.18.3",
-    "chokidar": "^4.0.3"
+    "napcat-rpc": "workspace:*"
   },
   "scripts": {
-    "build": "vite build"
+    "build": "vite build && vite build -c vite.cli.config.ts",
+    "build:plugin": "vite build",
+    "build:cli": "vite build -c vite.cli.config.ts"
   }
 }

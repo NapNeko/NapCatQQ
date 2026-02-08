@@ -21,26 +21,16 @@ function copyToShellPlugin () {
           console.log(`[copy-to-shell] Created directory: ${targetDir}`);
         }
 
-        const files = fs.readdirSync(sourceDir);
-        let copiedCount = 0;
-
-        files.forEach(file => {
-          const sourcePath = resolve(sourceDir, file);
-          const targetPath = resolve(targetDir, file);
-
-          if (fs.statSync(sourcePath).isFile()) {
-            fs.copyFileSync(sourcePath, targetPath);
-            copiedCount++;
-          }
-        });
-
-        if (fs.existsSync(packageJsonSource)) {
-          const packageJsonTarget = resolve(targetDir, 'package.json');
-          fs.copyFileSync(packageJsonSource, packageJsonTarget);
-          copiedCount++;
+        const pluginFile = resolve(sourceDir, 'index.mjs');
+        if (fs.existsSync(pluginFile)) {
+          fs.copyFileSync(pluginFile, resolve(targetDir, 'index.mjs'));
         }
 
-        console.log(`[copy-to-shell] Successfully copied ${copiedCount} file(s) to ${targetDir}`);
+        if (fs.existsSync(packageJsonSource)) {
+          fs.copyFileSync(packageJsonSource, resolve(targetDir, 'package.json'));
+        }
+
+        console.log(`[copy-to-shell] Copied plugin to ${targetDir}`);
       } catch (error) {
         console.error('[copy-to-shell] Failed to copy files:', error);
         throw error;
@@ -49,6 +39,10 @@ function copyToShellPlugin () {
   };
 }
 
+/**
+ * 插件构建配置
+ * 产出 dist/index.mjs，ws/napcat-rpc 作为 external（由宿主环境提供）
+ */
 export default defineConfig({
   resolve: {
     conditions: ['node', 'default'],
