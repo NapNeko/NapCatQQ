@@ -184,6 +184,35 @@ export function stringifyWithBigInt (obj: any) {
   );
 }
 
+export function parseAppidFromMajorV2 (nodeMajor: string): string | undefined {
+  const marker = Buffer.from('QQAppId/', 'utf-8');
+  const filePath = path.resolve(nodeMajor);
+  const fileContent = fs.readFileSync(filePath);
+
+  let searchPosition = 0;
+  while (true) {
+    const index = fileContent.indexOf(marker, searchPosition);
+    if (index === -1) {
+      break;
+    }
+
+    const start = index + marker.length;
+    const end = fileContent.indexOf(0x00, start);
+    if (end === -1) {
+      break;
+    }
+    const content = fileContent.subarray(start, end);
+    const str = content.toString('utf-8');
+    if (/^\d+$/.test(str)) {
+      return str;
+    }
+
+    searchPosition = end + 1;
+  }
+
+  return undefined;
+}
+
 export function parseAppidFromMajor (nodeMajor: string): string | undefined {
   const hexSequence = 'A4 09 00 00 00 35';
   const sequenceBytes = Buffer.from(hexSequence.replace(/ /g, ''), 'hex');

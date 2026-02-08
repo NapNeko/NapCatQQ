@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import { systemPlatform } from 'napcat-common/src/system';
-import { getDefaultQQVersionConfigInfo, getQQPackageInfoPath, getQQVersionConfigPath, parseAppidFromMajor } from 'napcat-common/src/helper';
+import { getDefaultQQVersionConfigInfo, getQQPackageInfoPath, getQQVersionConfigPath, parseAppidFromMajor, parseAppidFromMajorV2 } from 'napcat-common/src/helper';
 import AppidTable from '@/napcat-core/external/appid.json';
 import { LogWrapper } from './log';
 import { getMajorPath } from '@/napcat-core/index';
@@ -107,7 +107,13 @@ export class QQBasicInfoWrapper {
     if (!this.QQMainPath) {
       throw new Error('QQMainPath未定义 无法通过Major获取Appid');
     }
-    const majorPath = getMajorPath(QQVersion, this.QQMainPath);
+    const majorPath = getMajorPath(this.QQMainPath, QQVersion);
+    // 优先通过 QQAppId/ 标记搜索
+    const appidV2 = parseAppidFromMajorV2(majorPath);
+    if (appidV2) {
+      return appidV2;
+    }
+    // 回落到旧方式
     const appid = parseAppidFromMajor(majorPath);
     return appid;
   }
