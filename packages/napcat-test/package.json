@@ -13,7 +13,6 @@
   "dependencies": {
     "napcat-core": "workspace:*",
     "napcat-rpc": "workspace:*",
-    "napcat-image-size": "workspace:*",
-    "napcat-onebot": "workspace:*"
+    "napcat-image-size": "workspace:*"
   }
 }

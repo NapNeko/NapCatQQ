@@ -1,7 +1,0 @@
-{
-  "name": "napcat-hmr-test-plugin",
-  "version": "1.0.0",
-  "description": "热重载测试插件 — 修改此插件的 index.ts 后观察 HMR 是否生效",
-  "plugin": "HMR 测试插件",
-  "main": "index.ts"
-}

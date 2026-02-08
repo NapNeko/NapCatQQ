@@ -419,57 +419,6 @@ export class OB11PluginManager extends IOB11NetworkAdapter<PluginConfig> impleme
   }
 
   /**
-   * 从注册表中移除插件条目
-   */
-  public removePluginEntry (pluginId: string): void {
-    this.plugins.delete(pluginId);
-  }
-
-  /**
-   * 刷新插件列表（OB11PluginManager 中为空实现）
-   */
-  public refreshPluginList (): void {
-    // 简单实现：不做额外操作
-  }
-
-  // ===== 进程隔离插件管理（OB11PluginManager 不支持，提供空实现） =====
-
-  public async loadPluginIsolated (_pluginId: string, _autoRestart?: boolean): Promise<boolean> {
-    this.logger.logWarn('[PluginManager] Isolated plugin loading is not supported in OB11PluginManager');
-    return false;
-  }
-
-  public async reloadPluginIsolated (_pluginId: string): Promise<boolean> {
-    this.logger.logWarn('[PluginManager] Isolated plugin reloading is not supported in OB11PluginManager');
-    return false;
-  }
-
-  public async stopIsolatedPlugin (_pluginId: string): Promise<void> {
-    // Not supported
-  }
-
-  public async healthCheckIsolatedPlugin (_pluginId: string): Promise<boolean> {
-    return false;
-  }
-
-  // ===== 文件监听热重载（OB11PluginManager 不支持，提供空实现） =====
-
-  public startHotReload (_useIsolation?: boolean): void {
-    this.logger.logWarn('[PluginManager] HMR is not supported in OB11PluginManager');
-  }
-
-  public stopHotReload (): void {
-    // Not supported
-  }
-
-  // ===== 插件列表变更事件 =====
-
-  public onPluginListChange (_listener: (reason: string) => void): () => void {
-    // OB11PluginManager 不支持插件列表变更通知
-    return () => { /* noop */ };
-  }
-
-  /**
    * 获取插件路由注册器
    */
   public getPluginRouter (pluginId: string): PluginRouterRegistryImpl | undefined {

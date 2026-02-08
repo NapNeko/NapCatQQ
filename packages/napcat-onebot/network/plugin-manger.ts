@@ -16,8 +16,6 @@ import {
   IPluginManager,
 } from './plugin/types';
 import { PluginRouterRegistryImpl } from './plugin/router-registry';
-import { PluginProcessRunner, type IsolatedPluginStatus } from './plugin/plugin-process';
-import { PluginFileWatcher } from './plugin/plugin-watcher';
 
 export { PluginPackageJson } from './plugin/types';
 export { PluginConfigItem } from './plugin/types';
@@ -32,10 +30,6 @@ export { PluginRouterRegistry, PluginRequestHandler, PluginApiRouteDefinition, P
 export { PluginHttpRequest, PluginHttpResponse, PluginNextFunction } from './plugin/types';
 export { MemoryStaticFile, MemoryFileGenerator } from './plugin/types';
 export { PluginRouterRegistryImpl } from './plugin/router-registry';
-export { PluginProcessRunner } from './plugin/plugin-process';
-export type { IsolatedPluginStatus, PluginProcessOptions } from './plugin/plugin-process';
-export { PluginFileWatcher } from './plugin/plugin-watcher';
-export type { FileChangeEvent, FileChangeAction } from './plugin/plugin-watcher';
 export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> implements IPluginManager {
   private readonly pluginPath: string;
   private readonly configPath: string;
@@ -46,15 +40,6 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> i
 
   /** 插件路由注册表: ID -> 路由注册器 */
   private pluginRouters: Map<string, PluginRouterRegistryImpl> = new Map();
-
-  /** 隔离运行的插件进程: ID -> PluginProcessRunner */
-  private isolatedPlugins: Map<string, PluginProcessRunner> = new Map();
-
-  /** 插件文件监听器（用于 HMR） */
-  private fileWatcher: PluginFileWatcher | null = null;
-
-  /** 插件列表变更监听器 */
-  private pluginListChangeListeners: Set<(reason: string) => void> = new Set();
 
   declare config: PluginConfig;
   public NapCatConfig = NapCatConfig;
@@ -258,32 +243,6 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> i
 
   // ==================== 公共 API ====================
 
-  // ==================== 插件列表变更通知 ====================
-
-  /**
-   * 注册插件列表变更监听器
-   * 当插件被加载/卸载/重载/新增/删除时触发回调
-   */
-  public onPluginListChange (listener: (reason: string) => void): () => void {
-    this.pluginListChangeListeners.add(listener);
-    return () => {
-      this.pluginListChangeListeners.delete(listener);
-    };
-  }
-
-  /**
-   * 通知所有监听器插件列表已变更
-   */
-  private notifyPluginListChange (reason: string): void {
-    for (const listener of this.pluginListChangeListeners) {
-      try {
-        listener(reason);
-      } catch {
-        // 忽略监听器错误
-      }
-    }
-  }
-
   /**
    * 获取插件目录路径
    */
@@ -345,8 +304,6 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> i
         // 禁用插件
         await this.unloadPlugin(entry);
       }
-
-      this.notifyPluginListChange(`status_changed:${pluginId}`);
     }
   }
 
@@ -354,33 +311,31 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> i
    * 通过 ID 加载插件
    */
   public async loadPluginById (pluginId: string): Promise<boolean> {
-    // 始终重新扫描以获取最新的 package.json 数据（版本号、描述等）
-    const existingEntry = this.plugins.get(pluginId);
-    const dirname = existingEntry?.fileId ?? this.loader.findPluginDirById(pluginId);
+    let entry = this.plugins.get(pluginId);
 
-    if (!dirname) {
-      this.logger.logWarn(`[PluginManager] Plugin ${pluginId} not found in filesystem`);
-      return false;
+    if (!entry) {
+      // 尝试查找并扫描
+      const dirname = this.loader.findPluginDirById(pluginId);
+      if (!dirname) {
+        this.logger.logWarn(`[PluginManager] Plugin ${pluginId} not found in filesystem`);
+        return false;
+      }
+
+      const newEntry = this.loader.rescanPlugin(dirname);
+      if (!newEntry) {
+        return false;
+      }
+
+      this.plugins.set(newEntry.id, newEntry);
+      entry = newEntry;
     }
 
-    const newEntry = this.loader.rescanPlugin(dirname);
-    if (!newEntry) {
-      return false;
-    }
-
-    // 更新注册表（覆盖旧的 entry，确保版本号等元数据为最新）
-    this.plugins.set(newEntry.id, newEntry);
-
-    if (!newEntry.enable) {
+    if (!entry.enable) {
       this.logger.log(`[PluginManager] Skipping loading disabled plugin: ${pluginId}`);
       return false;
     }
 
-    const result = await this.loadPlugin(newEntry);
-    if (result) {
-      this.notifyPluginListChange(`loaded:${pluginId}`);
-    }
-    return result;
+    return await this.loadPlugin(entry);
   }
 
   /**
@@ -391,14 +346,6 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> i
     if (entry) {
       await this.unloadPlugin(entry);
     }
-  }
-
-  /**
-   * 从注册表中移除插件条目（不触发卸载逻辑）
-   * 用于导入新版本前清理旧条目，确保后续 loadPluginById 会重新扫描
-   */
-  public removePluginEntry (pluginId: string): void {
-    this.plugins.delete(pluginId);
   }
 
   /**
@@ -429,8 +376,6 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> i
     if (cleanData && fs.existsSync(dataPath)) {
       fs.rmSync(dataPath, { recursive: true, force: true });
     }
-
-    this.notifyPluginListChange(`uninstalled:${pluginId}`);
   }
 
   /**
@@ -462,7 +407,6 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> i
       }
 
       this.logger.log(`[PluginManager] Plugin ${pluginId} reloaded successfully`);
-      this.notifyPluginListChange(`reloaded:${pluginId}`);
       return true;
     } catch (error) {
       this.logger.logError(`[PluginManager] Error reloading plugin ${pluginId}:`, error);
@@ -472,7 +416,6 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> i
 
   /**
    * 加载目录插件（用于新安装的插件）
-   * 如果插件已存在，将重新扫描并更新元数据
    */
   public async loadDirectoryPlugin (dirname: string): Promise<void> {
     const entry = this.loader.rescanPlugin(dirname);
@@ -480,109 +423,16 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> i
       return;
     }
 
-    // 如果已存在且已加载，先卸载再更新
-    const existingEntry = this.plugins.get(entry.id);
-    if (existingEntry && existingEntry.loaded) {
-      await this.unloadPlugin(existingEntry);
+    // 检查是否已存在
+    if (this.plugins.has(entry.id)) {
+      this.logger.logWarn(`[PluginManager] Plugin ${entry.id} already exists`);
+      return;
     }
 
-    // 始终更新注册表（确保版本号等元数据为最新）
     this.plugins.set(entry.id, entry);
 
     if (entry.enable && entry.runtime.status !== 'error') {
       await this.loadPlugin(entry);
-    }
-
-    this.notifyPluginListChange(`directory_loaded:${entry.id}`);
-  }
-
-  /**
-   * 刷新插件列表 — 扫描文件系统中新增/删除的插件目录
-   * 不影响已加载的插件，仅更新注册表中的条目
-   */
-  public refreshPluginList (): void {
-    if (!fs.existsSync(this.pluginPath)) {
-      return;
-    }
-
-    const items = fs.readdirSync(this.pluginPath, { withFileTypes: true });
-    const currentDirNames = new Set<string>();
-    let hasChanges = false;
-
-    for (const item of items) {
-      if (!item.isDirectory()) continue;
-      currentDirNames.add(item.name);
-
-      // 检查该目录是否已在注册表中
-      const existingEntry = this.findPluginByFileId(item.name);
-      if (!existingEntry) {
-        // 新插件目录，扫描并注册
-        const newEntry = this.loader.rescanPlugin(item.name);
-        if (newEntry && newEntry.entryPath) {
-          this.plugins.set(newEntry.id, newEntry);
-          this.logger.log(`[PluginManager] Discovered new plugin: ${newEntry.id}`);
-          hasChanges = true;
-        }
-      } else {
-        // 已存在的插件，更新其 package.json 元数据（版本号等）
-        // 只更新未加载的插件的元信息，避免影响运行时状态
-        if (!existingEntry.loaded) {
-          const refreshedEntry = this.loader.rescanPlugin(item.name);
-          if (refreshedEntry) {
-            this.plugins.set(refreshedEntry.id, refreshedEntry);
-          }
-        } else {
-          // 即使已加载，也刷新 package.json 中的只读元数据
-          this.refreshPluginMetadata(existingEntry);
-        }
-      }
-    }
-
-    // 清理已不存在于文件系统的插件
-    for (const [id, entry] of this.plugins) {
-      if (!currentDirNames.has(entry.fileId)) {
-        if (!entry.loaded) {
-          this.plugins.delete(id);
-          this.logger.log(`[PluginManager] Removed stale plugin: ${id}`);
-          hasChanges = true;
-        }
-      }
-    }
-
-    if (hasChanges) {
-      this.notifyPluginListChange('refresh');
-    }
-  }
-
-  /**
-   * 通过 fileId（目录名）查找插件
-   */
-  private findPluginByFileId (fileId: string): PluginEntry | undefined {
-    for (const entry of this.plugins.values()) {
-      if (entry.fileId === fileId) {
-        return entry;
-      }
-    }
-    return undefined;
-  }
-
-  /**
-   * 刷新已加载插件的只读元数据（版本号、描述等）
-   * 不影响运行时状态和模块引用
-   */
-  private refreshPluginMetadata (entry: PluginEntry): void {
-    try {
-      const packageJsonPath = path.join(entry.pluginPath, 'package.json');
-      if (fs.existsSync(packageJsonPath)) {
-        const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-        entry.version = packageJson.version;
-        entry.description = packageJson.description;
-        entry.author = packageJson.author;
-        entry.name = packageJson.name;
-        entry.packageJson = packageJson;
-      }
-    } catch {
-      // 忽略读取错误
     }
   }
 
@@ -604,245 +454,6 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> i
     return path.join(this.getPluginDataPath(pluginId), 'config.json');
   }
 
-  // ==================== 进程隔离插件管理 ====================
-
-  /**
-   * 以进程隔离模式加载插件
-   *
-   * 插件运行在独立的 worker_thread 中，通过 napcat-rpc 通信。
-   * 热重载时直接终止 worker 并重新创建，彻底清除所有状态。
-   *
-   * @param pluginId 插件 ID
-   * @param autoRestart 崩溃后是否自动重启
-   * @returns 是否成功启动
-   */
-  public async loadPluginIsolated (pluginId: string, autoRestart = true): Promise<boolean> {
-    const entry = this.plugins.get(pluginId);
-    if (!entry) {
-      this.logger.logWarn(`[PluginManager] Plugin ${pluginId} not found for isolated loading`);
-      return false;
-    }
-
-    if (!entry.entryPath) {
-      this.logger.logWarn(`[PluginManager] Plugin ${pluginId} has no entry path`);
-      return false;
-    }
-
-    // 如果已有隔离实例在运行，先停止
-    const existing = this.isolatedPlugins.get(pluginId);
-    if (existing && existing.status !== 'stopped') {
-      await existing.stop();
-    }
-
-    // 创建进程隔离运行器
-    const runner = new PluginProcessRunner({
-      entry,
-      logger: this.logger,
-      autoRestart,
-      maxRestartCount: 3,
-      heartbeatInterval: 60000,
-      heartbeatTimeout: 10000,
-      contextData: {
-        pluginName: entry.id,
-        pluginPath: entry.pluginPath,
-        configPath: path.join(entry.pluginPath, 'data', 'config.json'),
-        dataPath: path.join(entry.pluginPath, 'data'),
-        adapterName: this.name,
-      },
-    });
-
-    // 监听运行器事件
-    runner.on('crashed', () => {
-      this.logger.logWarn(`[PluginManager] Isolated plugin ${pluginId} crashed`);
-      entry.runtime = { status: 'error', error: 'Plugin worker crashed' };
-      entry.loaded = false;
-    });
-
-    runner.on('started', () => {
-      entry.loaded = true;
-      entry.runtime = { status: 'loaded' };
-    });
-
-    runner.on('stopped', () => {
-      entry.loaded = false;
-      entry.runtime = { status: 'unloaded' };
-    });
-
-    try {
-      await runner.start();
-      this.isolatedPlugins.set(pluginId, runner);
-
-      this.logger.log(`[PluginManager] Plugin ${pluginId} loaded in isolated mode`);
-      this.notifyPluginListChange(`isolated_loaded:${pluginId}`);
-      return true;
-    } catch (error) {
-      this.logger.logError(`[PluginManager] Failed to load plugin ${pluginId} in isolated mode:`, error);
-      return false;
-    }
-  }
-
-  /**
-   * 热重载隔离插件
-   *
-   * 核心方法 — 参考 Karin 的 HMR 机制但使用进程隔离：
-   * - Karin: chokidar 监听 → pkgRemoveModule → pkgLoadModule → pkgCache
-   * - NapCat: 终止旧 worker → 启动新 worker → RPC 初始化
-   *
-   * 优势：
-   * 1. 无需手动清除 require.cache
-   * 2. 无需 ?t=timestamp hack
-   * 3. 完全清除旧插件的内存和状态
-   * 4. 插件间互不影响
-   */
-  public async reloadPluginIsolated (pluginId: string): Promise<boolean> {
-    const runner = this.isolatedPlugins.get(pluginId);
-    if (!runner) {
-      // 如果没有隔离运行中，作为新的隔离插件加载
-      this.logger.log(`[PluginManager] No isolated runner found for ${pluginId}, starting new one`);
-      return this.loadPluginIsolated(pluginId);
-    }
-
-    try {
-      // 重新扫描插件信息（可能有版本更新等）
-      const entry = this.plugins.get(pluginId);
-      if (entry) {
-        const newEntry = this.loader.rescanPlugin(entry.fileId);
-        if (newEntry) {
-          this.plugins.set(newEntry.id, newEntry);
-        }
-      }
-
-      // 调用 runner.restart() — 内部会终止旧 worker 并创建新 worker
-      await runner.restart();
-
-      this.logger.log(`[PluginManager] Plugin ${pluginId} hot-reloaded successfully (isolated)`);
-      this.notifyPluginListChange(`isolated_reloaded:${pluginId}`);
-      return true;
-    } catch (error) {
-      this.logger.logError(`[PluginManager] Failed to hot-reload plugin ${pluginId}:`, error);
-      return false;
-    }
-  }
-
-  /**
-   * 停止隔离运行的插件
-   */
-  public async stopIsolatedPlugin (pluginId: string): Promise<void> {
-    const runner = this.isolatedPlugins.get(pluginId);
-    if (runner) {
-      await runner.stop();
-      this.isolatedPlugins.delete(pluginId);
-    }
-  }
-
-  /**
-   * 获取隔离插件状态
-   */
-  public getIsolatedPluginStatus (pluginId: string): IsolatedPluginStatus | null {
-    return this.isolatedPlugins.get(pluginId)?.status ?? null;
-  }
-
-  /**
-   * 获取所有隔离运行的插件 ID 和状态
-   */
-  public getAllIsolatedPlugins (): Map<string, IsolatedPluginStatus> {
-    const result = new Map<string, IsolatedPluginStatus>();
-    for (const [id, runner] of this.isolatedPlugins) {
-      result.set(id, runner.status);
-    }
-    return result;
-  }
-
-  /**
-   * 对隔离插件进行健康检查
-   */
-  public async healthCheckIsolatedPlugin (pluginId: string): Promise<boolean> {
-    const runner = this.isolatedPlugins.get(pluginId);
-    if (!runner) return false;
-    return runner.healthCheck();
-  }
-
-  // ==================== 文件监听热重载 (HMR) ====================
-
-  /**
-   * 启动文件监听热重载
-   *
-   * 参考 Karin 的 initPluginHmr()，监听插件目录变化并自动重载。
-   * 与 Karin 不同的是，NapCat 可以选择两种重载方式：
-   * - 同进程重载（现有的 reloadPlugin）
-   * - 进程隔离重载（reloadPluginIsolated）
-   *
-   * @param useIsolation 是否使用进程隔离模式重载
-   */
-  public startHotReload (useIsolation = false): void {
-    if (this.fileWatcher?.isWatching) {
-      this.logger.logWarn('[PluginManager] HMR is already running');
-      return;
-    }
-
-    this.fileWatcher = new PluginFileWatcher({
-      pluginPath: this.pluginPath,
-      logger: this.logger,
-      debounceDelay: 500,
-      onPluginChange: async (event) => {
-        const pluginId = event.pluginId ?? event.pluginDirName;
-
-        this.logger.log(
-          `[HMR] Detected ${event.action} in ${pluginId}: ${path.basename(event.filePath)}`
-        );
-
-        // 处理新插件目录添加
-        if (event.action === 'add') {
-          const entry = this.plugins.get(pluginId);
-          if (!entry) {
-            // 新插件 — 扫描并注册（但不自动加载，需手动启用）
-            this.logger.log(`[HMR] New plugin detected: ${pluginId}, scanning...`);
-            this.refreshPluginList();
-            return;
-          }
-        }
-
-        const entry = this.plugins.get(pluginId);
-        if (!entry || !entry.enable) {
-          this.logger.logDebug(`[HMR] Skipping disabled/unknown plugin: ${pluginId}`);
-          return;
-        }
-
-        if (event.action === 'unlink') {
-          // 文件删除 — 不自动卸载，只记录日志
-          this.logger.logWarn(`[HMR] File deleted in ${pluginId}, manual reload may be needed`);
-          return;
-        }
-
-        // 文件变更或新增 — 触发热重载
-        try {
-          if (useIsolation || this.isolatedPlugins.has(pluginId)) {
-            await this.reloadPluginIsolated(pluginId);
-          } else {
-            await this.reloadPlugin(pluginId);
-          }
-          this.logger.log(`[HMR] Plugin ${pluginId} reloaded successfully`);
-        } catch (error) {
-          this.logger.logError(`[HMR] Failed to reload plugin ${pluginId}:`, error);
-        }
-      },
-    });
-
-    this.fileWatcher.start();
-    this.logger.log(`[PluginManager] HMR started (isolation: ${useIsolation})`);
-  }
-
-  /**
-   * 停止文件监听热重载
-   */
-  public stopHotReload (): void {
-    if (this.fileWatcher) {
-      this.fileWatcher.stop();
-      this.fileWatcher = null;
-      this.logger.log('[PluginManager] HMR stopped');
-    }
-  }
-
   // ==================== 事件处理 ====================
 
   async onEvent<T extends OB11EmitEventContent> (event: T): Promise<void> {
@@ -851,28 +462,10 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> i
     }
 
     try {
-      // 分发给同进程插件
       await Promise.allSettled(
         this.getLoadedPlugins().map((entry) =>
           this.callPluginEventHandler(entry, event)
         )
-      );
-
-      // 分发给隔离进程插件
-      await Promise.allSettled(
-        Array.from(this.isolatedPlugins.entries()).map(async ([pluginId, runner]) => {
-          try {
-            if ((event as any).message_type) {
-              await runner.dispatchMessage(event);
-            } else {
-              await runner.dispatchEvent(event);
-            }
-          } catch (error) {
-            this.logger.logError(
-              `[PluginManager] Error dispatching event to isolated plugin ${pluginId}:`, error
-            );
-          }
-        })
       );
     } catch (error) {
       this.logger.logError('[PluginManager] Error handling event:', error);
@@ -934,20 +527,7 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> i
     this.logger.log('[PluginManager] Closing plugin manager...');
     this.isEnable = false;
 
-    // 停止文件监听
-    this.stopHotReload();
-
-    // 停止所有隔离插件
-    for (const [pluginId, runner] of this.isolatedPlugins) {
-      try {
-        await runner.stop();
-      } catch (error) {
-        this.logger.logError(`[PluginManager] Error stopping isolated plugin ${pluginId}:`, error);
-      }
-    }
-    this.isolatedPlugins.clear();
-
-    // 卸载所有已加载的同进程插件
+    // 卸载所有已加载的插件
     for (const entry of this.plugins.values()) {
       if (entry.loaded) {
         await this.unloadPlugin(entry);

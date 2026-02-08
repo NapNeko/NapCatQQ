@@ -1,48 +1,47 @@
 {
-  "name": "napcat-onebot",
-  "version": "0.0.1",
-  "private": true,
-  "type": "module",
-  "main": "index.ts",
-  "scripts": {
-    "typecheck": "tsc --noEmit --skipLibCheck -p tsconfig.json"
-  },
-  "exports": {
-    ".": {
-      "import": "./index.ts"
+    "name": "napcat-onebot",
+    "version": "0.0.1",
+    "private": true,
+    "type": "module",
+    "main": "index.ts",
+    "scripts": {
+        "typecheck": "tsc --noEmit --skipLibCheck -p tsconfig.json"
     },
-    "./*": {
-      "import": "./*"
+    "exports": {
+        ".": {
+            "import": "./index.ts"
+        },
+        "./*": {
+            "import": "./*"
+        }
+    },
+    "dependencies": {
+        "napcat.protobuf": "^1.1.4",
+        "fast-xml-parser": "^4.3.6",
+        "type-is": "^1.6.7",
+        "on-finished": "^2.3.5",
+        "ajv": "^8.13.0",
+        "@sinclair/typebox": "^0.34.38",
+        "cors": "^2.8.5",
+        "express": "^5.0.0",
+        "ws": "^8.18.3",
+        "file-type": "^21.0.0",
+        "async-mutex": "^0.5.0",
+        "napcat-protobuf": "workspace:*",
+        "json5": "^2.2.3",
+        "napcat-core": "workspace:*",
+        "napcat-webui-backend": "workspace:*",
+        "napcat-image-size": "workspace:*",
+        "napcat-common": "workspace:*"
+    },
+    "devDependencies": {
+        "@types/cors": "^2.8.17",
+        "@types/type-is": "^1.6.7",
+        "@types/on-finished": "^2.3.4",
+        "@types/express": "^5.0.0",
+        "@types/node": "^22.0.1"
+    },
+    "engines": {
+        "node": ">=18.0.0"
     }
-  },
-  "dependencies": {
-    "napcat.protobuf": "^1.1.4",
-    "fast-xml-parser": "^4.3.6",
-    "type-is": "^1.6.7",
-    "on-finished": "^2.3.5",
-    "ajv": "^8.13.0",
-    "@sinclair/typebox": "^0.34.38",
-    "cors": "^2.8.5",
-    "express": "^5.0.0",
-    "ws": "^8.18.3",
-    "file-type": "^21.0.0",
-    "async-mutex": "^0.5.0",
-    "napcat-protobuf": "workspace:*",
-    "json5": "^2.2.3",
-    "napcat-core": "workspace:*",
-    "napcat-rpc": "workspace:*",
-    "napcat-webui-backend": "workspace:*",
-    "napcat-image-size": "workspace:*",
-    "napcat-common": "workspace:*"
-  },
-  "devDependencies": {
-    "@types/cors": "^2.8.17",
-    "@types/type-is": "^1.6.7",
-    "@types/on-finished": "^2.3.4",
-    "@types/express": "^5.0.0",
-    "@types/node": "^22.0.1"
-  },
-  "engines": {
-    "node": ">=18.0.0"
-  }
 }

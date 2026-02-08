@@ -227,30 +227,6 @@ export interface IPluginManager {
   loadDirectoryPlugin (dirname: string): Promise<void>;
   getPluginDataPath (pluginId: string): string;
   getPluginConfigPath (pluginId: string): string;
-  /** 从注册表中移除插件条目 */
-  removePluginEntry (pluginId: string): void;
-  /** 刷新插件列表，扫描文件系统中新增/删除的插件 */
-  refreshPluginList (): void;
-
-  // ===== 进程隔离插件管理 =====
-  /** 以进程隔离模式加载插件 */
-  loadPluginIsolated (pluginId: string, autoRestart?: boolean): Promise<boolean>;
-  /** 热重载隔离插件（终止旧 worker + 启动新 worker） */
-  reloadPluginIsolated (pluginId: string): Promise<boolean>;
-  /** 停止隔离插件 */
-  stopIsolatedPlugin (pluginId: string): Promise<void>;
-  /** 检查隔离插件健康状态 */
-  healthCheckIsolatedPlugin (pluginId: string): Promise<boolean>;
-
-  // ===== 文件监听热重载 (HMR) =====
-  /** 启动文件监听热重载 */
-  startHotReload (useIsolation?: boolean): void;
-  /** 停止文件监听热重载 */
-  stopHotReload (): void;
-
-  // ===== 插件列表变更事件 =====
-  /** 注册插件列表变更监听器，返回取消注册函数 */
-  onPluginListChange (listener: (reason: string) => void): () => void;
 }
 
 // ==================== 插件配置 UI 控制器 ====================

@@ -221,13 +221,6 @@ export default class PluginManager {
   }
 
   /**
-   * 获取插件列表变更事件 SSE URL
-   */
-  public static getPluginEventsSSEUrl (): string {
-    return '/api/Plugin/Events';
-  }
-
-  /**
    * 获取配置 SSE URL
    * @param id 插件包名
    * @param config 初始配置

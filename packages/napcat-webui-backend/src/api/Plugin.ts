@@ -7,7 +7,6 @@ import { webUiPathWrapper } from '@/napcat-webui-backend/index';
 import path from 'path';
 import fs from 'fs';
 import compressing from 'compressing';
-import type { IsolatedPluginStatus } from '@/napcat-onebot/network/plugin/plugin-process';
 
 // Helper to get the plugin manager adapter
 const getPluginManager = (): OB11PluginMangerAdapter | null => {
@@ -66,9 +65,6 @@ export const GetPluginListHandler: RequestHandler = async (_req, res) => {
     return sendSuccess(res, { plugins: [], pluginManagerNotFound: true, extensionPages: [] });
   }
 
-  // 刷新插件列表，发现文件系统中新增/删除的插件并更新元数据
-  pluginManager.refreshPluginList();
-
   const loadedPlugins = pluginManager.getAllPlugins();
   const AllPlugins: Array<{
     name: string;
@@ -81,8 +77,6 @@ export const GetPluginListHandler: RequestHandler = async (_req, res) => {
     hasPages: boolean;
     homepage?: string;
     repository?: string;
-    isolated?: boolean;
-    isolatedStatus?: IsolatedPluginStatus;
   }> = new Array();
 
   // 收集所有插件的扩展页面
@@ -123,9 +117,7 @@ export const GetPluginListHandler: RequestHandler = async (_req, res) => {
       homepage: p.packageJson?.homepage,
       repository: typeof p.packageJson?.repository === 'string'
         ? p.packageJson.repository
-        : p.packageJson?.repository?.url,
-      isolated: pluginManager.getIsolatedPluginStatus(p.id) !== null,
-      isolatedStatus: pluginManager.getIsolatedPluginStatus(p.id) ?? undefined,
+        : p.packageJson?.repository?.url
     });
 
     // 收集插件的扩展页面
@@ -560,14 +552,10 @@ export const ImportLocalPluginHandler: RequestHandler = async (req, res) => {
 
     // 如果目标目录已存在，先删除
     if (fs.existsSync(targetPluginDir)) {
-      // 先卸载已存在的插件并从注册表中移除
+      // 先卸载已存在的插件
       const existingPlugin = pluginManager.getPluginInfo(pluginId);
-      if (existingPlugin) {
-        if (existingPlugin.loaded) {
-          await pluginManager.unregisterPlugin(pluginId);
-        }
-        // 从注册表中删除旧的 entry，确保重新扫描时获取最新元数据
-        pluginManager.removePluginEntry(pluginId);
+      if (existingPlugin && existingPlugin.loaded) {
+        await pluginManager.unregisterPlugin(pluginId);
       }
       fs.rmSync(targetPluginDir, { recursive: true, force: true });
     }
@@ -611,197 +599,4 @@ export const ImportLocalPluginHandler: RequestHandler = async (req, res) => {
     }
     return sendError(res, 'Failed to import plugin: ' + e.message);
   }
-};
-
-// ==================== 插件重载 & 热重载 API ====================
-
-/**
- * 重载插件（同进程模式）
- * POST /Plugin/Reload { id: string }
- */
-export const ReloadPluginHandler: RequestHandler = async (req, res) => {
-  const { id } = req.body;
-  if (!id) return sendError(res, 'Plugin id is required');
-
-  const pluginManager = getPluginManager();
-  if (!pluginManager) return sendError(res, 'Plugin Manager not found');
-
-  try {
-    const success = await pluginManager.reloadPlugin(id);
-    if (success) {
-      return sendSuccess(res, { message: `Plugin ${id} reloaded successfully` });
-    } else {
-      return sendError(res, `Failed to reload plugin ${id}`);
-    }
-  } catch (e: any) {
-    return sendError(res, 'Reload failed: ' + e.message);
-  }
-};
-
-/**
- * 以进程隔离模式加载插件
- * POST /Plugin/Isolate/Load { id: string, autoRestart?: boolean }
- */
-export const LoadIsolatedPluginHandler: RequestHandler = async (req, res) => {
-  const { id, autoRestart = true } = req.body;
-  if (!id) return sendError(res, 'Plugin id is required');
-
-  const pluginManager = getPluginManager();
-  if (!pluginManager) return sendError(res, 'Plugin Manager not found');
-
-  try {
-    const success = await pluginManager.loadPluginIsolated(id, autoRestart);
-    if (success) {
-      return sendSuccess(res, {
-        message: `Plugin ${id} loaded in isolated mode`,
-        isolated: true,
-        status: pluginManager.getIsolatedPluginStatus(id),
-      });
-    } else {
-      return sendError(res, `Failed to load plugin ${id} in isolated mode`);
-    }
-  } catch (e: any) {
-    return sendError(res, 'Isolated load failed: ' + e.message);
-  }
-};
-
-/**
- * 热重载隔离插件（终止旧 worker + 启动新 worker）
- * POST /Plugin/Isolate/Reload { id: string }
- */
-export const ReloadIsolatedPluginHandler: RequestHandler = async (req, res) => {
-  const { id } = req.body;
-  if (!id) return sendError(res, 'Plugin id is required');
-
-  const pluginManager = getPluginManager();
-  if (!pluginManager) return sendError(res, 'Plugin Manager not found');
-
-  try {
-    const success = await pluginManager.reloadPluginIsolated(id);
-    if (success) {
-      return sendSuccess(res, {
-        message: `Plugin ${id} hot-reloaded (isolated)`,
-        status: pluginManager.getIsolatedPluginStatus(id),
-      });
-    } else {
-      return sendError(res, `Failed to hot-reload plugin ${id}`);
-    }
-  } catch (e: any) {
-    return sendError(res, 'Isolated reload failed: ' + e.message);
-  }
-};
-
-/**
- * 停止隔离运行的插件
- * POST /Plugin/Isolate/Stop { id: string }
- */
-export const StopIsolatedPluginHandler: RequestHandler = async (req, res) => {
-  const { id } = req.body;
-  if (!id) return sendError(res, 'Plugin id is required');
-
-  const pluginManager = getPluginManager();
-  if (!pluginManager) return sendError(res, 'Plugin Manager not found');
-
-  try {
-    await pluginManager.stopIsolatedPlugin(id);
-    return sendSuccess(res, { message: `Isolated plugin ${id} stopped` });
-  } catch (e: any) {
-    return sendError(res, 'Stop failed: ' + e.message);
-  }
-};
-
-/**
- * 获取隔离插件的健康状态
- * GET /Plugin/Isolate/Health?id=xxx
- */
-export const HealthCheckIsolatedPluginHandler: RequestHandler = async (req, res) => {
-  const id = req.query['id'] as string;
-  if (!id) return sendError(res, 'Plugin id is required');
-
-  const pluginManager = getPluginManager();
-  if (!pluginManager) return sendError(res, 'Plugin Manager not found');
-
-  try {
-    const healthy = await pluginManager.healthCheckIsolatedPlugin(id);
-    const status = pluginManager.getIsolatedPluginStatus(id);
-    return sendSuccess(res, { healthy, status });
-  } catch (e: any) {
-    return sendError(res, 'Health check failed: ' + e.message);
-  }
-};
-
-/**
- * 启动/停止文件监听热重载 (HMR)
- * POST /Plugin/HMR { action: 'start' | 'stop', useIsolation?: boolean }
- */
-export const HMRControlHandler: RequestHandler = async (req, res) => {
-  const { action, useIsolation = false } = req.body;
-
-  const pluginManager = getPluginManager();
-  if (!pluginManager) return sendError(res, 'Plugin Manager not found');
-
-  try {
-    if (action === 'start') {
-      pluginManager.startHotReload(useIsolation);
-      return sendSuccess(res, { message: `HMR started (isolation: ${useIsolation})` });
-    } else if (action === 'stop') {
-      pluginManager.stopHotReload();
-      return sendSuccess(res, { message: 'HMR stopped' });
-    } else {
-      return sendError(res, 'Invalid action, use "start" or "stop"');
-    }
-  } catch (e: any) {
-    return sendError(res, 'HMR control failed: ' + e.message);
-  }
-};
-
-// ==================== 插件列表实时更新 SSE ====================
-
-/**
- * 插件列表变更事件 SSE
- * GET /Plugin/Events
- *
- * 前端连接此 SSE 端点后，当插件被加载/卸载/重载/新增/删除时，
- * 会收到 'plugin-list-changed' 事件，前端据此自动刷新插件列表。
- */
-export const PluginEventsSSEHandler: RequestHandler = (req, res): void => {
-  const pluginManager = getPluginManager();
-  if (!pluginManager) {
-    res.status(503).json({ code: -1, message: 'Plugin Manager not available' });
-    return;
-  }
-
-  // 设置 SSE 头
-  res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache');
-  res.setHeader('Connection', 'keep-alive');
-  res.setHeader('X-Accel-Buffering', 'no');
-  res.flushHeaders();
-
-  // 发送连接成功
-  res.write(`event: connected\ndata: ${JSON.stringify({ time: Date.now() })}\n\n`);
-
-  // 注册插件列表变更监听器
-  const unsubscribe = pluginManager.onPluginListChange((reason: string) => {
-    try {
-      res.write(`event: plugin-list-changed\ndata: ${JSON.stringify({ reason, time: Date.now() })}\n\n`);
-    } catch {
-      // 连接可能已关闭
-    }
-  });
-
-  // 心跳保持连接
-  const heartbeat = setInterval(() => {
-    try {
-      res.write(`event: ping\ndata: ${JSON.stringify({ time: Date.now() })}\n\n`);
-    } catch {
-      clearInterval(heartbeat);
-    }
-  }, 30000);
-
-  // 连接关闭时清理
-  req.on('close', () => {
-    clearInterval(heartbeat);
-    unsubscribe();
-  });
 };
