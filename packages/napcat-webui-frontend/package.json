@@ -91,7 +91,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@react-types/shared": "^3.26.0",
+    "@react-types/shared": "^3.33.0",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/crypto-js": "^4.2.2",
     "@types/event-source-polyfill": "^1.0.5",
