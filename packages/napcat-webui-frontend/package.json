@@ -82,7 +82,7 @@
     "react-markdown": "^9.0.3",
     "react-photo-view": "^1.2.7",
     "react-redux": "^9.2.0",
-    "react-router-dom": "^7.1.4",
+    "react-router-dom": "^7.13.0",
     "react-use-websocket": "^4.11.1",
     "react-window": "^1.8.11",
     "remark-gfm": "^4.0.0",
