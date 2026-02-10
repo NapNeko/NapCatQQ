@@ -55,6 +55,7 @@ function getAuthorAvatar (homepage?: string, downloadUrl?: string): string | und
 export interface PluginStoreCardProps {
   data: PluginStoreItem;
   onInstall: () => void;
+  onViewDetail?: () => void;
   installStatus?: InstallStatus;
   installedVersion?: string;
 }
@@ -62,6 +63,7 @@ export interface PluginStoreCardProps {
 const PluginStoreCard: React.FC<PluginStoreCardProps> = ({
   data,
   onInstall,
+  onViewDetail,
   installStatus = 'not-installed',
   installedVersion,
 }) => {
@@ -91,7 +93,10 @@ const PluginStoreCard: React.FC<PluginStoreCardProps> = ({
       )}
       shadow='sm'
     >
-      <CardBody className='p-4 flex flex-col gap-3'>
+      <CardBody
+        className={clsx('p-4 flex flex-col gap-3', onViewDetail && 'cursor-pointer')}
+        onClick={onViewDetail}
+      >
         {/* Header: Avatar + Name + Author */}
         <div className='flex items-start gap-3'>
           <Avatar
@@ -258,7 +263,10 @@ const PluginStoreCard: React.FC<PluginStoreCardProps> = ({
                 variant='shadow'
                 className='font-medium text-white shadow-warning/30 hover:shadow-warning/50 transition-shadow'
                 startContent={<MdUpdate size={18} />}
-                onPress={onInstall}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  onInstall();
+                }}
               >
                 更新到 v{version}
               </Button>
@@ -272,7 +280,10 @@ const PluginStoreCard: React.FC<PluginStoreCardProps> = ({
                 variant='bordered'
                 className='font-medium bg-white dark:bg-zinc-900 border hover:bg-primary hover:text-white transition-all shadow-sm group/btn'
                 startContent={<MdOutlineGetApp size={20} className='transition-transform group-hover/btn:translate-y-0.5' />}
-                onPress={onInstall}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  onInstall();
+                }}
               >
                 立即安装
               </Button>
