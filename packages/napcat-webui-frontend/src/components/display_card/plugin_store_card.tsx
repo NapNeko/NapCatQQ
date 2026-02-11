@@ -237,7 +237,10 @@ const PluginStoreCard: React.FC<PluginStoreCardProps> = ({
         </div>
       </CardBody>
 
-      <CardFooter className='px-4 pb-4 pt-0'>
+      <CardFooter
+        className='px-4 pb-4 pt-0'
+        onClick={(e) => e.stopPropagation()}
+      >
         {installStatus === 'installed'
           ? (
             <Button
@@ -263,10 +266,7 @@ const PluginStoreCard: React.FC<PluginStoreCardProps> = ({
                 variant='shadow'
                 className='font-medium text-white shadow-warning/30 hover:shadow-warning/50 transition-shadow'
                 startContent={<MdUpdate size={18} />}
-                onPress={(e) => {
-                  e.stopPropagation();
-                  onInstall();
-                }}
+                onPress={onInstall}
               >
                 更新到 v{version}
               </Button>
@@ -280,10 +280,7 @@ const PluginStoreCard: React.FC<PluginStoreCardProps> = ({
                 variant='bordered'
                 className='font-medium bg-white dark:bg-zinc-900 border hover:bg-primary hover:text-white transition-all shadow-sm group/btn'
                 startContent={<MdOutlineGetApp size={20} className='transition-transform group-hover/btn:translate-y-0.5' />}
-                onPress={(e) => {
-                  e.stopPropagation();
-                  onInstall();
-                }}
+                onPress={onInstall}
               >
                 立即安装
               </Button>
