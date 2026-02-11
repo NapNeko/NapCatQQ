@@ -10,6 +10,9 @@ devconfig/*
 !.vscode/extensions.json
 .idea/*
 
+# macOS
+.DS_Store
+
 # Build
 *.db
 checkVersion.sh

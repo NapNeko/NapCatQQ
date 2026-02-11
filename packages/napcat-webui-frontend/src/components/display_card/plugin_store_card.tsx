@@ -55,6 +55,7 @@ function getAuthorAvatar (homepage?: string, downloadUrl?: string): string | und
 export interface PluginStoreCardProps {
   data: PluginStoreItem;
   onInstall: () => void;
+  onViewDetail?: () => void;
   installStatus?: InstallStatus;
   installedVersion?: string;
 }
@@ -62,6 +63,7 @@ export interface PluginStoreCardProps {
 const PluginStoreCard: React.FC<PluginStoreCardProps> = ({
   data,
   onInstall,
+  onViewDetail,
   installStatus = 'not-installed',
   installedVersion,
 }) => {
@@ -91,7 +93,10 @@ const PluginStoreCard: React.FC<PluginStoreCardProps> = ({
       )}
       shadow='sm'
     >
-      <CardBody className='p-4 flex flex-col gap-3'>
+      <CardBody
+        className={clsx('p-4 flex flex-col gap-3', onViewDetail && 'cursor-pointer')}
+        onClick={onViewDetail}
+      >
         {/* Header: Avatar + Name + Author */}
         <div className='flex items-start gap-3'>
           <Avatar
@@ -232,7 +237,10 @@ const PluginStoreCard: React.FC<PluginStoreCardProps> = ({
         </div>
       </CardBody>
 
-      <CardFooter className='px-4 pb-4 pt-0'>
+      <CardFooter
+        className='px-4 pb-4 pt-0'
+        onClick={(e) => e.stopPropagation()}
+      >
         {installStatus === 'installed'
           ? (
             <Button

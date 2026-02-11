@@ -9,10 +9,12 @@ import { IoMdRefresh, IoMdSearch, IoMdSettings } from 'react-icons/io';
 import clsx from 'clsx';
 import { EventSourcePolyfill } from 'event-source-polyfill';
 import { useLocalStorage } from '@uidotdev/usehooks';
+import { useSearchParams } from 'react-router-dom';
 
 import PluginStoreCard, { InstallStatus } from '@/components/display_card/plugin_store_card';
 import PluginManager, { PluginItem } from '@/controllers/plugin_manager';
 import MirrorSelectorModal from '@/components/mirror_selector_modal';
+import PluginDetailModal from '@/pages/dashboard/plugin_detail_modal';
 import { PluginStoreItem } from '@/types/plugin-store';
 import useDialog from '@/hooks/use-dialog';
 import key from '@/const/key';
@@ -42,6 +44,7 @@ export default function PluginStorePage () {
   const [pluginManagerNotFound, setPluginManagerNotFound] = useState(false);
   const dialog = useDialog();
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // 快捷键支持: Ctrl+F 聚焦搜索框
   useEffect(() => {
@@ -79,6 +82,10 @@ export default function PluginStorePage () {
   const [pendingInstallPlugin, setPendingInstallPlugin] = useState<PluginStoreItem | null>(null);
   const [selectedDownloadMirror, setSelectedDownloadMirror] = useState<string | undefined>(undefined);
 
+  // 插件详情弹窗状态
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [selectedPlugin, setSelectedPlugin] = useState<PluginStoreItem | null>(null);
+
   const loadPlugins = async (forceRefresh: boolean = false) => {
     setLoading(true);
     try {
@@ -99,6 +106,22 @@ export default function PluginStorePage () {
   useEffect(() => {
     loadPlugins();
   }, [currentStoreSource]);
+
+  // 处理 URL 参数中的插件 ID，自动打开详情
+  useEffect(() => {
+    const pluginId = searchParams.get('pluginId');
+    if (pluginId && plugins.length > 0 && !detailModalOpen) {
+      // 查找对应的插件
+      const targetPlugin = plugins.find(p => p.id === pluginId);
+      if (targetPlugin) {
+        setSelectedPlugin(targetPlugin);
+        setDetailModalOpen(true);
+        // 移除 URL 参数（可选）
+        // searchParams.delete('pluginId');
+        // setSearchParams(searchParams);
+      }
+    }
+  }, [plugins, searchParams, detailModalOpen]);
 
   // 按标签分类和搜索
   const categorizedPlugins = useMemo(() => {
@@ -383,6 +406,10 @@ export default function PluginStorePage () {
                   installStatus={installInfo.status}
                   installedVersion={installInfo.installedVersion}
                   onInstall={() => { handleInstall(plugin); }}
+                  onViewDetail={() => {
+                    setSelectedPlugin(plugin);
+                    setDetailModalOpen(true);
+                  }}
                 />
               );
             })}
@@ -419,6 +446,28 @@ export default function PluginStorePage () {
         }}
         currentMirror={selectedDownloadMirror}
         type='file'
+      />
+
+      {/* 插件详情弹窗 */}
+      <PluginDetailModal
+        isOpen={detailModalOpen}
+        onClose={() => {
+          setDetailModalOpen(false);
+          setSelectedPlugin(null);
+          // 清除 URL 参数
+          if (searchParams.has('pluginId')) {
+            searchParams.delete('pluginId');
+            setSearchParams(searchParams);
+          }
+        }}
+        plugin={selectedPlugin}
+        installStatus={selectedPlugin ? getPluginInstallInfo(selectedPlugin).status : 'not-installed'}
+        installedVersion={selectedPlugin ? getPluginInstallInfo(selectedPlugin).installedVersion : undefined}
+        onInstall={() => {
+          if (selectedPlugin) {
+            handleInstall(selectedPlugin);
+          }
+        }}
       />
 
       {/* 插件下载进度条全局居中样式 */}
