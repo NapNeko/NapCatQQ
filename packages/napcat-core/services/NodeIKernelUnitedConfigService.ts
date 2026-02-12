@@ -1,17 +1,17 @@
 export interface NodeIKernelUnitedConfigService {
 
-  addKernelUnitedConfigListener(listener:unknown): number;
+  addKernelUnitedConfigListener (listener: unknown): number;
 
-  removeKernelUnitedConfigListener(listenerId:number): void;
+  removeKernelUnitedConfigListener (listenerId: number): void;
 
-  fetchUnitedSwitchConfig(...args: unknown[]): unknown;// needs 1 arguments
+  fetchUnitedSwitchConfig (configIds: string[]): void;
 
-  isUnitedConfigSwitchOn(...args: unknown[]): unknown;// needs 1 arguments
+  isUnitedConfigSwitchOn (configId: string): boolean;
 
-  registerUnitedConfigPushGroupList(...args: unknown[]): unknown;// needs 1 arguments
+  registerUnitedConfigPushGroupList (groupList: string[]): void;
 
-  fetchUnitedCommendConfig(ids: `${string}`[]): void
+  fetchUnitedCommendConfig (ids: string[]): void;
 
-  loadUnitedConfig(id: string): Promise<unknown>
+  loadUnitedConfig (id: string): Promise<unknown>;
 
 }

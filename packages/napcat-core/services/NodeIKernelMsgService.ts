@@ -1,7 +1,7 @@
-import { ElementType, MessageElement, Peer, RawMessage, FileElement, SendMessageElement } from '@/napcat-core/types';
+import { ElementType, MessageElement, Peer, RawMessage, FileElement, SendMessageElement, AvRecordElement, TofuRecordElement } from '@/napcat-core/types';
 import { NodeIKernelMsgListener } from '@/napcat-core/listeners/NodeIKernelMsgListener';
 import { GeneralCallResult } from '@/napcat-core/services/common';
-import { MsgReqType, QueryMsgsParams, TmpChatInfoApi } from '@/napcat-core/types/msg';
+import { MsgReqType, QueryMsgsParams, TmpChatInfoApi, MsgTypeFilter, MsgIdentity, SgrpStreamParams, GrayTipJsonInfo, ForwardFileInfo, LocalGrayTipInfo, TokenInfo, BackGroundInfo } from '@/napcat-core/types/msg';
 
 export interface NodeIKernelMsgService {
   buildMultiForwardMsg (req: { srcMsgIds: Array<string>, srcContact: Peer; }): Promise<GeneralCallResult & { rspInfo: { elements: unknown; }; }>;
@@ -10,21 +10,21 @@ export interface NodeIKernelMsgService {
 
   addKernelMsgListener (nodeIKernelMsgListener: NodeIKernelMsgListener): number;
 
-  sendMsg (msgId: string, peer: Peer, msgElements: SendMessageElement[], map: Map<unknown, unknown>): Promise<GeneralCallResult>;
+  sendMsg (msgId: string, peer: Peer, msgElements: SendMessageElement[], map: Map<number, unknown>): Promise<GeneralCallResult>;
 
   recallMsg (peer: Peer, msgIds: string[]): Promise<GeneralCallResult>;
 
-  addKernelMsgImportToolListener (arg: unknown): unknown;
+  addKernelMsgImportToolListener (listener: unknown): string;
 
-  removeKernelMsgListener (args: unknown): unknown;
+  removeKernelMsgListener (listenerId: string): void;
 
-  addKernelTempChatSigListener (...args: unknown[]): unknown;
+  addKernelTempChatSigListener (listener: unknown): string;
 
-  removeKernelTempChatSigListener (...args: unknown[]): unknown;
+  removeKernelTempChatSigListener (listenerId: string): void;
 
   setAutoReplyTextList (AutoReplyText: Array<unknown>, i2: number): unknown;
 
-  getAutoReplyTextList (...args: unknown[]): unknown;
+  getAutoReplyTextList (): unknown;
 
   getOnLineDev (): void;
 
@@ -52,85 +52,85 @@ export interface NodeIKernelMsgService {
 
   downloadOnlineStatusCommonByUrl (arg0: string, arg1: string): unknown;
 
-  setToken (arg: unknown): unknown;
+  setToken (tokenInfo: TokenInfo): Promise<GeneralCallResult>;
 
   switchForeGround (): unknown;
 
-  switchBackGround (arg: unknown): unknown;
+  switchBackGround (info: BackGroundInfo): Promise<GeneralCallResult>;
 
   setTokenForMqq (token: string): unknown;
 
-  switchForeGroundForMqq (...args: unknown[]): unknown;
+  switchForeGroundForMqq (data: string | Uint8Array): Promise<GeneralCallResult>;
 
-  switchBackGroundForMqq (...args: unknown[]): unknown;
+  switchBackGroundForMqq (data: string | Uint8Array): Promise<GeneralCallResult>;
 
-  getMsgSetting (...args: unknown[]): unknown;
+  getMsgSetting (): unknown;
 
-  setMsgSetting (...args: unknown[]): unknown;
+  setMsgSetting (setting: unknown): unknown;
 
-  addSendMsg (...args: unknown[]): unknown;
+  addSendMsg (msgId: string, peer: Peer, msgElements: SendMessageElement[], map: Map<number, unknown>): unknown;
 
   cancelSendMsg (peer: Peer, msgId: string): Promise<void>;
 
   switchToOfflineSendMsg (peer: Peer, MsgId: string): unknown;
 
-  reqToOfflineSendMsg (...args: unknown[]): unknown;
+  reqToOfflineSendMsg (peer: Peer, msgId: string): unknown;
 
   refuseReceiveOnlineFileMsg (peer: Peer, MsgId: string): unknown;
 
   resendMsg (peer: Peer, msgId: string): Promise<void>;
 
-  recallMsg (...args: unknown[]): unknown;
+  reeditRecallMsg (peer: Peer, msgId: string): unknown;
 
-  reeditRecallMsg (...args: unknown[]): unknown;
+  forwardMsg (msgIds: string[], peer: Peer, dstPeers: Peer[], commentElements: unknown): Promise<GeneralCallResult>;
 
-  forwardMsg (...args: unknown[]): Promise<GeneralCallResult>;
+  forwardMsgWithComment (msgIds: string[], srcContact: Peer, dstContacts: Peer[], commentElements: Array<unknown>, arg5: unknown): unknown;
 
-  forwardMsgWithComment (...args: unknown[]): unknown;
+  forwardSubMsgWithComment (msgIds: string[], subMsgIds: string[], srcContact: Peer, dstContacts: Peer[], commentElements: Array<unknown>, arg6: unknown): unknown;
 
-  forwardSubMsgWithComment (...args: unknown[]): unknown;
+  forwardRichMsgInVist (richMsgInfos: Array<unknown>, dstContacts: Peer[]): unknown;
 
-  forwardRichMsgInVist (...args: unknown[]): unknown;
+  forwardFile (fileInfo: ForwardFileInfo, peer: Peer): unknown;
 
-  forwardFile (...args: unknown[]): unknown;
+  multiForwardMsg (peer: Peer, srcContact: Peer, msgIds: string[]): unknown;
 
-  multiForwardMsg (...args: unknown[]): unknown;
+  multiForwardMsgWithComment (msgInfos: Array<unknown>, srcContact: Peer, dstContact: Peer, commentElements: Array<unknown>, arg5: unknown): unknown;
 
-  multiForwardMsgWithComment (...args: unknown[]): unknown;
+  deleteRecallMsg (peer: Peer, msgId: string): unknown;
 
-  deleteRecallMsg (...args: unknown[]): unknown;
+  deleteRecallMsgForLocal (peer: Peer, msgId: string): unknown;
 
-  deleteRecallMsgForLocal (...args: unknown[]): unknown;
+  addLocalGrayTipMsg (peer: Peer, grayTipInfo: LocalGrayTipInfo, isUnread: boolean): unknown;
 
-  addLocalGrayTipMsg (...args: unknown[]): unknown;
+  addLocalJsonGrayTipMsg (arg1: Peer, arg2: GrayTipJsonInfo, arg3: boolean, arg4: boolean): unknown;
 
-  addLocalJsonGrayTipMsg (...args: unknown[]): unknown;
+  addLocalJsonGrayTipMsgExt (arg1: Peer, arg2: MsgIdentity, arg3: GrayTipJsonInfo, arg4: boolean, arg5: boolean): unknown;
 
-  addLocalJsonGrayTipMsgExt (...args: unknown[]): unknown;
+  IsLocalJsonTipValid (tipType: number): boolean;
 
-  IsLocalJsonTipValid (...args: unknown[]): unknown;
+  addLocalAVRecordMsg (peer: Peer, avRecord: AvRecordElement): unknown;
 
-  addLocalAVRecordMsg (...args: unknown[]): unknown;
-
-  addLocalTofuRecordMsg (...args: unknown[]): unknown;
+  addLocalTofuRecordMsg (peer: Peer, tofuRecord: TofuRecordElement): unknown;
 
   addLocalRecordMsg (Peer: Peer, msgId: string, ele: MessageElement, attr: Array<unknown> | number, front: boolean): Promise<unknown>;
 
+  addLocalRecordMsgWithExtInfos (peer: Peer, msgId: string, extInfos: unknown): unknown;
+
   deleteMsg (Peer: Peer, msgIds: Array<string>): Promise<unknown>;
 
-  updateElementExtBufForUI (...args: unknown[]): unknown;
+  updateElementExtBufForUI (arg1: Peer, arg2: string, arg3: string, arg4: string | Uint8Array): unknown;
 
-  updateMsgRecordExtPbBufForUI (...args: unknown[]): unknown;
+  updateMsgRecordExtPbBufForUI (arg1: Peer, arg2: string, arg3: unknown): unknown;
 
-  startMsgSync (...args: unknown[]): unknown;
+  startMsgSync (): unknown;
 
-  startGuildMsgSync (...args: unknown[]): unknown;
+  startGuildMsgSync (): unknown;
 
-  isGuildChannelSync (...args: unknown[]): unknown;
+  isGuildChannelSync (): unknown;
 
   getMsgUniqueId (UniqueId: string): string;
 
-  isMsgMatched (...args: unknown[]): unknown;
+  isMsgMatched (matchInfo: unknown): unknown;
 
   getOnlineFileMsgs (peer: Peer): Promise<GeneralCallResult & {
     msgList: {
@@ -147,7 +147,7 @@ export interface NodeIKernelMsgService {
     }[];  // 一大坨，懒得写
   }>;
 
-  getAllOnlineFileMsgs (...args: unknown[]): unknown;
+  getAllOnlineFileMsgs (): unknown;
 
   getLatestDbMsgs (peer: Peer, cnt: number): Promise<GeneralCallResult & {
     msgList: RawMessage[];
@@ -171,7 +171,7 @@ export interface NodeIKernelMsgService {
   }>;
 
   // @deprecated
-  getMsgsWithMsgTimeAndClientSeqForC2C (...args: unknown[]): Promise<GeneralCallResult & { msgList: RawMessage[]; }>;
+  getMsgsWithMsgTimeAndClientSeqForC2C (peer: Peer, arg2: string, arg3: string, arg4: number, arg5: boolean, arg6: boolean, arg7: boolean): Promise<GeneralCallResult & { msgList: RawMessage[]; }>;
 
   getMsgsWithStatus (params: {
     peer: Peer;
@@ -186,6 +186,7 @@ export interface NodeIKernelMsgService {
   getMsgsBySeqRange (peer: Peer, startSeq: string, endSeq: string): Promise<GeneralCallResult & {
     msgList: RawMessage[];
   }>;
+
   // @deprecated
   getMsgsBySeqAndCount (peer: Peer, seq: string, count: number, desc: boolean, isReverseOrder: boolean): Promise<GeneralCallResult & {
     msgList: RawMessage[];
@@ -211,19 +212,19 @@ export interface NodeIKernelMsgService {
 
   getSourceOfReplyMsgByClientSeqAndTime (peer: Peer, clientSeq: string, time: string, replyMsgId: string): Promise<GeneralCallResult & { msgList: RawMessage[]; }>;
 
-  getMsgsByTypeFilter (peer: Peer, msgId: string, cnt: unknown, queryOrder: boolean, typeFilter: {
+  getMsgsByTypeFilter (peer: Peer, msgId: string, cnt: Array<unknown>, queryOrder: boolean, typeFilter: {
     type: number,
     subtype: Array<number>;
   }): Promise<GeneralCallResult & { msgList: RawMessage[]; }>;
 
-  getMsgsByTypeFilters (peer: Peer, msgId: string, cnt: unknown, queryOrder: boolean, typeFilters: Array<{
+  getMsgsByTypeFilters (peer: Peer, msgId: string, cnt: number, queryOrder: boolean, typeFilters: Array<{
     type: number,
     subtype: Array<number>;
   }>): Promise<GeneralCallResult & { msgList: RawMessage[]; }>;
 
-  getMsgWithAbstractByFilterParam (...args: unknown[]): Promise<GeneralCallResult & { msgList: RawMessage[]; }>;
+  getMsgWithAbstractByFilterParam (arg1: Peer, arg2: string, arg3: string, arg4: number, arg5: MsgTypeFilter): Promise<GeneralCallResult & { msgList: RawMessage[]; }>;
 
-  queryMsgsWithFilter (...args: unknown[]): Promise<GeneralCallResult & { msgList: RawMessage[]; }>;
+  queryMsgsWithFilter (msgId: string, msgTime: string, param: QueryMsgsParams): Promise<GeneralCallResult & { msgList: RawMessage[]; }>;
 
   // queryMsgsWithFilterVer2(MsgId: string, MsgTime: string, param: QueryMsgsParams): Promise<unknown>;
 
@@ -235,11 +236,11 @@ export interface NodeIKernelMsgService {
     msgList: RawMessage[];
   }>;
 
-  setMsgRichInfoFlag (...args: unknown[]): unknown;
+  setMsgRichInfoFlag (flag: boolean): void;
 
   queryPicOrVideoMsgs (msgId: string, msgTime: string, megSeq: string, param: QueryMsgsParams): Promise<unknown>;
 
-  queryPicOrVideoMsgsDesktop (...args: unknown[]): unknown;
+  queryPicOrVideoMsgsDesktop (msgId: string, msgTime: string, msgSeq: string, param: QueryMsgsParams): unknown;
 
   queryEmoticonMsgs (msgId: string, msgTime: string, msgSeq: string, Params: QueryMsgsParams): Promise<unknown>;
 
@@ -247,81 +248,81 @@ export interface NodeIKernelMsgService {
 
   queryMsgsAndAbstractsWithFilter (msgId: string, msgTime: string, megSeq: string, param: QueryMsgsParams): unknown;
 
-  setFocusOnGuild (...args: unknown[]): unknown;
+  setFocusOnGuild (arg: unknown): unknown;
 
-  setFocusSession (...args: unknown[]): unknown;
+  setFocusSession (arg: unknown): unknown;
 
-  enableFilterUnreadInfoNotify (...args: unknown[]): unknown;
+  enableFilterUnreadInfoNotify (arg: unknown): unknown;
 
-  enableFilterMsgAbstractNotify (...args: unknown[]): unknown;
+  enableFilterMsgAbstractNotify (arg: unknown): unknown;
 
-  onScenesChangeForSilenceMode (...args: unknown[]): unknown;
+  onScenesChangeForSilenceMode (arg: unknown): unknown;
 
-  getContactUnreadCnt (...args: unknown[]): unknown;
+  getContactUnreadCnt (peers: Peer[]): unknown;
 
-  getUnreadCntInfo (...args: unknown[]): unknown;
+  getUnreadCntInfo (arg: unknown): unknown;
 
-  getGuildUnreadCntInfo (...args: unknown[]): unknown;
+  getGuildUnreadCntInfo (arg: unknown): unknown;
 
-  getGuildUnreadCntTabInfo (...args: unknown[]): unknown;
+  getGuildUnreadCntTabInfo (arg: unknown): unknown;
 
-  getAllGuildUnreadCntInfo (...args: unknown[]): unknown;
+  getAllGuildUnreadCntInfo (arg: unknown): unknown;
 
-  getAllJoinGuildCnt (...args: unknown[]): unknown;
+  getAllJoinGuildCnt (arg: unknown): unknown;
 
-  getAllDirectSessionUnreadCntInfo (...args: unknown[]): unknown;
+  getAllDirectSessionUnreadCntInfo (arg: unknown): unknown;
 
-  getCategoryUnreadCntInfo (...args: unknown[]): unknown;
+  getCategoryUnreadCntInfo (arg: unknown): unknown;
 
-  getGuildFeedsUnreadCntInfo (...args: unknown[]): unknown;
+  getGuildFeedsUnreadCntInfo (arg: unknown): unknown;
 
-  setUnVisibleChannelCntInfo (...args: unknown[]): unknown;
+  setUnVisibleChannelCntInfo (arg: unknown): unknown;
 
-  setUnVisibleChannelTypeCntInfo (...args: unknown[]): unknown;
+  setUnVisibleChannelTypeCntInfo (arg: unknown): unknown;
 
-  setVisibleGuildCntInfo (...args: unknown[]): unknown;
+  setVisibleGuildCntInfo (arg: unknown): unknown;
 
   setMsgRead (peer: Peer): Promise<GeneralCallResult>;
 
   setAllC2CAndGroupMsgRead (): Promise<unknown>;
 
-  setGuildMsgRead (...args: unknown[]): unknown;
+  setGuildMsgRead (arg: unknown): unknown;
 
-  setAllGuildMsgRead (...args: unknown[]): unknown;
+  setAllGuildMsgRead (arg: unknown): unknown;
 
-  setMsgReadAndReport (...args: unknown[]): unknown;
+  setMsgReadAndReport (peer: Peer, msg: RawMessage): unknown;
 
-  setSpecificMsgReadAndReport (...args: unknown[]): unknown;
+  setSpecificMsgReadAndReport (arg1: Peer, arg2: string): unknown;
 
-  setLocalMsgRead (...args: unknown[]): unknown;
+  setLocalMsgRead (peer: Peer): unknown;
 
-  setGroupGuildMsgRead (...args: unknown[]): unknown;
+  setGroupGuildMsgRead (arg: unknown): unknown;
 
-  getGuildGroupTransData (...args: unknown[]): unknown;
+  getGuildGroupTransData (arg: unknown): unknown;
 
-  setGroupGuildBubbleRead (...args: unknown[]): unknown;
+  setGroupGuildBubbleRead (arg: unknown): unknown;
 
-  getGuildGroupBubble (...args: unknown[]): unknown;
+  getGuildGroupBubble (arg: unknown): unknown;
 
-  fetchGroupGuildUnread (...args: unknown[]): unknown;
+  fetchGroupGuildUnread (arg: unknown): unknown;
 
-  setGroupGuildFlag (...args: unknown[]): unknown;
+  setGroupGuildFlag (arg: unknown): unknown;
 
-  setGuildUDCFlag (...args: unknown[]): unknown;
+  setGuildUDCFlag (arg: unknown): unknown;
 
-  setGuildTabUserFlag (...args: unknown[]): unknown;
+  setGuildTabUserFlag (arg: unknown): unknown;
 
   setBuildMode (flag: number/* 0 1 3 */): unknown;
 
-  setConfigurationServiceData (...args: unknown[]): unknown;
+  setConfigurationServiceData (arg: unknown): unknown;
 
-  setMarkUnreadFlag (...args: unknown[]): unknown;
+  setMarkUnreadFlag (peer: Peer, unread: boolean): unknown;
 
-  getChannelEventFlow (...args: unknown[]): unknown;
+  getChannelEventFlow (arg: unknown): unknown;
 
-  getMsgEventFlow (...args: unknown[]): unknown;
+  getMsgEventFlow (arg: unknown): unknown;
 
-  getRichMediaFilePathForMobileQQSend (...args: unknown[]): unknown;
+  getRichMediaFilePathForMobileQQSend (arg: unknown): unknown;
 
   getRichMediaFilePathForGuild (arg: {
     md5HexStr: string,
@@ -334,15 +335,15 @@ export interface NodeIKernelMsgService {
     file_uuid: '';
   }): string;
 
-  assembleMobileQQRichMediaFilePath (...args: unknown[]): unknown;
+  assembleMobileQQRichMediaFilePath (arg: unknown): unknown;
 
   getFileThumbSavePathForSend (thumbSize: number, createNeed: boolean): string;
 
-  getFileThumbSavePath (...args: unknown[]): unknown;
+  getFileThumbSavePath (arg1: string, arg2: number, arg3: boolean): unknown;
 
   translatePtt2Text (msgId: string, peer: Peer, msgElement: MessageElement): unknown;
 
-  setPttPlayedState (...args: unknown[]): unknown;
+  setPttPlayedState (arg1: string, arg2: Peer, arg3: string): unknown;
 
   fetchFavEmojiList (str: string, num: number, backward: boolean, forceRefresh: boolean): Promise<GeneralCallResult & {
     emojiInfoList: Array<{
@@ -368,49 +369,49 @@ export interface NodeIKernelMsgService {
     }>;
   }>;
 
-  addFavEmoji (...args: unknown[]): unknown;
+  addFavEmoji (arg: unknown): unknown;
 
-  fetchMarketEmoticonList (...args: unknown[]): unknown;
+  fetchMarketEmoticonList (arg1: number, arg2: number): unknown;
 
-  fetchMarketEmoticonShowImage (...args: unknown[]): unknown;
+  fetchMarketEmoticonShowImage (arg: unknown): unknown;
 
-  fetchMarketEmoticonAioImage (...args: unknown[]): unknown;
+  fetchMarketEmoticonAioImage (arg: unknown): unknown;
 
-  fetchMarketEmotionJsonFile (...args: unknown[]): unknown;
+  fetchMarketEmotionJsonFile (arg: unknown): unknown;
 
-  getMarketEmoticonPath (...args: unknown[]): unknown;
+  getMarketEmoticonPath (arg1: number, arg2: Array<unknown>[], arg3: number): unknown;
 
-  getMarketEmoticonPathBySync (...args: unknown[]): unknown;
+  getMarketEmoticonPathBySync (arg1: number, arg2: Array<unknown>[], arg3: number): unknown;
 
-  fetchMarketEmoticonFaceImages (...args: unknown[]): unknown;
+  fetchMarketEmoticonFaceImages (arg: unknown): unknown;
 
-  fetchMarketEmoticonAuthDetail (...args: unknown[]): unknown;
+  fetchMarketEmoticonAuthDetail (arg: unknown): unknown;
 
-  getFavMarketEmoticonInfo (...args: unknown[]): unknown;
+  getFavMarketEmoticonInfo (tabId: number, emojiId: string): unknown;
 
-  addRecentUsedFace (...args: unknown[]): unknown;
+  addRecentUsedFace (arg: unknown): unknown;
 
-  getRecentUsedFaceList (...args: unknown[]): unknown;
+  getRecentUsedFaceList (arg: unknown): unknown;
 
-  getMarketEmoticonEncryptKeys (...args: unknown[]): unknown;
+  getMarketEmoticonEncryptKeys (arg1: number, arg2: Array<unknown>[]): unknown;
 
-  downloadEmojiPic (...args: unknown[]): unknown;
+  downloadEmojiPic (arg1: number, arg2: Array<unknown>[], arg3: number, arg4: Map<unknown, unknown>): unknown;
 
-  deleteFavEmoji (...args: unknown[]): unknown;
+  deleteFavEmoji (arg: unknown): unknown;
 
-  modifyFavEmojiDesc (...args: unknown[]): unknown;
+  modifyFavEmojiDesc (arg: unknown): unknown;
 
-  queryFavEmojiByDesc (...args: unknown[]): unknown;
+  queryFavEmojiByDesc (arg: unknown): unknown;
 
-  getHotPicInfoListSearchString (...args: unknown[]): unknown;
+  getHotPicInfoListSearchString (arg1: string, arg2: string, arg3: number, arg4: number, arg5: boolean): unknown;
 
-  getHotPicSearchResult (...args: unknown[]): unknown;
+  getHotPicSearchResult (arg: unknown): unknown;
 
-  getHotPicHotWords (...args: unknown[]): unknown;
+  getHotPicHotWords (arg: unknown): unknown;
 
-  getHotPicJumpInfo (...args: unknown[]): unknown;
+  getHotPicJumpInfo (arg: unknown): unknown;
 
-  getEmojiResourcePath (...args: unknown[]): unknown;
+  getEmojiResourcePath (arg: unknown): unknown;
 
   JoinDragonGroupEmoji (JoinDragonGroupEmojiReq: {
     latestMsgSeq: string,
@@ -419,17 +420,17 @@ export interface NodeIKernelMsgService {
     peerContact: Peer;
   }): Promise<unknown>;
 
-  getMsgAbstracts (...args: unknown[]): unknown;
+  getMsgAbstracts (arg: unknown): unknown;
 
-  getMsgAbstract (...args: unknown[]): unknown;
+  getMsgAbstract (arg1: Peer, arg2: string): unknown;
 
-  getMsgAbstractList (...args: unknown[]): unknown;
+  getMsgAbstractList (arg: unknown): unknown;
 
-  getMsgAbstractListBySeqRange (...args: unknown[]): unknown;
+  getMsgAbstractListBySeqRange (arg: unknown): unknown;
 
-  refreshMsgAbstracts (...args: unknown[]): unknown;
+  refreshMsgAbstracts (arg: unknown): unknown;
 
-  refreshMsgAbstractsByGuildIds (...args: unknown[]): unknown;
+  refreshMsgAbstractsByGuildIds (arg: unknown): unknown;
 
   getRichMediaElement (arg: {
     msgId: string,
@@ -440,7 +441,7 @@ export interface NodeIKernelMsgService {
     downloadType: number,
   }): Promise<any>;
 
-  cancelGetRichMediaElement (...args: unknown[]): unknown;
+  cancelGetRichMediaElement (arg: unknown): unknown;
 
   refuseGetRichMediaElement (args: {
     msgId: string,
@@ -451,7 +452,7 @@ export interface NodeIKernelMsgService {
     downSourceType: number, // 1
   }): Promise<void>;
 
-  switchToOfflineGetRichMediaElement (...args: unknown[]): unknown;
+  switchToOfflineGetRichMediaElement (arg: unknown): unknown;
 
   downloadRichMedia (args: {
     fileModelId: string,
@@ -473,21 +474,21 @@ export interface NodeIKernelMsgService {
     guildId: string;
   }): Promise<unknown>;
 
-  getFirstUnreadCommonMsg (...args: unknown[]): unknown;
+  getFirstUnreadCommonMsg (arg: unknown): unknown;
 
-  getFirstUnreadAtmeMsg (...args: unknown[]): unknown;
+  getFirstUnreadAtmeMsg (peer: Peer): unknown;
 
-  getFirstUnreadAtallMsg (...args: unknown[]): unknown;
+  getFirstUnreadAtallMsg (peer: Peer): unknown;
 
-  getNavigateInfo (...args: unknown[]): unknown;
+  getNavigateInfo (arg: unknown): unknown;
 
-  getChannelFreqLimitInfo (...args: unknown[]): unknown;
+  getChannelFreqLimitInfo (arg: unknown): unknown;
 
-  getRecentUseEmojiList (...args: unknown[]): unknown;
+  getRecentUseEmojiList (): unknown;
 
-  getRecentEmojiList (...args: unknown[]): unknown;
+  getRecentEmojiList (arg: unknown): unknown;
 
-  setMsgEmojiLikes (...args: unknown[]): unknown;
+  setMsgEmojiLikes (peer: Peer, msgSeq: string, emojiId: string, emojiType: string, setOrCancel: boolean): unknown;
 
   getMsgEmojiLikesList (peer: Peer, msgSeq: string, emojiId: string, emojiType: string, cookie: string, bForward: boolean, number: number): Promise<{
     result: number,
@@ -503,7 +504,7 @@ export interface NodeIKernelMsgService {
     isFirstPage: boolean;
   }>;
 
-  setMsgEmojiLikesForRole (...args: unknown[]): unknown;
+  setMsgEmojiLikesForRole (arg1: Peer, arg2: string, arg3: string, arg4: string, arg5: string, arg6: string, arg7: boolean, arg8: boolean, arg9: SgrpStreamParams): unknown;
 
   clickInlineKeyboardButton (params: {
     guildId?: string,
@@ -516,7 +517,7 @@ export interface NodeIKernelMsgService {
     chatType: number; // 1私聊 2群
   }): Promise<GeneralCallResult & { status: number, promptText: string, promptType: number, promptIcon: number; }>;
 
-  setCurOnScreenMsg (...args: unknown[]): unknown;
+  setCurOnScreenMsg (arg: unknown): unknown;
 
   setCurOnScreenMsgForMsgEvent (peer: Peer, msgRegList: Map<string, Uint8Array>): void;
 
@@ -524,91 +525,91 @@ export interface NodeIKernelMsgService {
 
   setMiscData (key: string, value: string): unknown;
 
-  getBookmarkData (...args: unknown[]): unknown;
+  getBookmarkData (key: string): unknown;
 
-  setBookmarkData (...args: unknown[]): unknown;
+  setBookmarkData (key: string, value: string): unknown;
 
   sendShowInputStatusReq (ChatType: number, EventType: number, toUid: string): Promise<unknown>;
 
-  queryCalendar (...args: unknown[]): unknown;
+  queryCalendar (peer: Peer, msgTime: number): unknown;
 
-  queryFirstMsgSeq (peer: Peer, ...args: unknown[]): unknown;
+  queryFirstMsgSeq (peer: Peer, msgTime: number): unknown;
 
-  queryRoamCalendar (...args: unknown[]): unknown;
+  queryRoamCalendar (peer: Peer, msgTime: number): unknown;
 
-  queryFirstRoamMsg (...args: unknown[]): unknown;
+  queryFirstRoamMsg (peer: Peer, msgTime: number): unknown;
 
   fetchLongMsg (peer: Peer, msgId: string): unknown;
 
-  fetchLongMsgWithCb (...args: unknown[]): unknown;
+  fetchLongMsgWithCb (peer: Peer, msgId: number): unknown;
 
-  setIsStopKernelFetchLongMsg (...args: unknown[]): unknown;
+  setIsStopKernelFetchLongMsg (arg: unknown): unknown;
 
-  insertGameResultAsMsgToDb (...args: unknown[]): unknown;
+  insertGameResultAsMsgToDb (arg: unknown): unknown;
 
-  getMultiMsg (...args: unknown[]): Promise<GeneralCallResult & {
+  getMultiMsg (arg1: Peer, arg2: string, arg3: string): Promise<GeneralCallResult & {
     msgList: RawMessage[];
   }>;
 
-  setDraft (...args: unknown[]): unknown;
+  setDraft (arg1: Peer, arg2: Array<unknown>[]): unknown;
 
-  getDraft (...args: unknown[]): unknown;
+  getDraft (peer: Peer): unknown;
 
-  deleteDraft (...args: unknown[]): unknown;
+  deleteDraft (peer: Peer): unknown;
 
-  getRecentHiddenSesionList (...args: unknown[]): unknown;
+  getRecentHiddenSesionList (): unknown;
 
-  setRecentHiddenSession (...args: unknown[]): unknown;
+  setRecentHiddenSession (arg: unknown): unknown;
 
-  delRecentHiddenSession (...args: unknown[]): unknown;
+  delRecentHiddenSession (arg: unknown): unknown;
 
-  getCurHiddenSession (...args: unknown[]): unknown;
+  getCurHiddenSession (): unknown;
 
-  setCurHiddenSession (...args: unknown[]): unknown;
+  setCurHiddenSession (arg: unknown): unknown;
 
-  setReplyDraft (...args: unknown[]): unknown;
+  setReplyDraft (arg1: Peer, arg2: string, arg3: Array<unknown>[]): unknown;
 
-  getReplyDraft (...args: unknown[]): unknown;
+  getReplyDraft (arg1: Peer, arg2: string): unknown;
 
-  deleteReplyDraft (...args: unknown[]): unknown;
+  deleteReplyDraft (arg1: Peer, arg2: string): unknown;
 
   getFirstUnreadAtMsg (peer: Peer): unknown;
 
-  clearMsgRecords (...args: unknown[]): unknown;
+  clearMsgRecords (peer: Peer): unknown;
 
-  IsExistOldDb (...args: unknown[]): unknown;
+  IsExistOldDb (): unknown;
 
-  canImportOldDbMsg (...args: unknown[]): unknown;
+  canImportOldDbMsg (): unknown;
 
   setPowerStatus (isPowerOn: boolean): unknown;
 
-  canProcessDataMigration (...args: unknown[]): unknown;
+  canProcessDataMigration (): unknown;
 
-  importOldDbMsg (...args: unknown[]): unknown;
+  importOldDbMsg (): unknown;
 
-  stopImportOldDbMsgAndroid (...args: unknown[]): unknown;
+  stopImportOldDbMsgAndroid (): unknown;
 
-  isMqqDataImportFinished (...args: unknown[]): unknown;
+  isMqqDataImportFinished (): unknown;
 
-  getMqqDataImportTableNames (...args: unknown[]): unknown;
+  getMqqDataImportTableNames (): unknown;
 
-  getCurChatImportStatusByUin (...args: unknown[]): unknown;
+  getCurChatImportStatusByUin (arg1: unknown, arg2: unknown): unknown;
 
   getDataImportUserLevel (): unknown;
 
-  getMsgQRCode (...args: unknown[]): unknown;
+  getMsgQRCode (): unknown;
 
-  getGuestMsgAbstracts (...args: unknown[]): unknown;
+  getGuestMsgAbstracts (arg: unknown): unknown;
 
-  getGuestMsgByRange (...args: unknown[]): unknown;
+  getGuestMsgByRange (arg: unknown): unknown;
 
-  getGuestMsgAbstractByRange (...args: unknown[]): unknown;
+  getGuestMsgAbstractByRange (arg: unknown): unknown;
 
-  registerSysMsgNotification (...args: unknown[]): unknown;
+  registerSysMsgNotification (arg1: number, arg2: string, arg3: Array<unknown>[]): unknown;
 
-  unregisterSysMsgNotification (...args: unknown[]): unknown;
+  unregisterSysMsgNotification (arg1: number, arg2: string, arg3: Array<unknown>[]): unknown;
 
-  enterOrExitAio (...args: unknown[]): unknown;
+  enterOrExitAio (arg: unknown): unknown;
 
   prepareTempChat (args: unknown): unknown;
 
@@ -616,66 +617,66 @@ export interface NodeIKernelMsgService {
 
   getTempChatInfo (ChatType: number, Uid: string): Promise<TmpChatInfoApi>;
 
-  setContactLocalTop (...args: unknown[]): unknown;
+  setContactLocalTop (peer: Peer, isTop: boolean): unknown;
 
-  switchAnonymousChat (...args: unknown[]): unknown;
+  switchAnonymousChat (arg1: string, arg2: boolean): unknown;
 
-  renameAnonyChatNick (...args: unknown[]): unknown;
+  renameAnonyChatNick (arg: unknown): unknown;
 
-  getAnonymousInfo (...args: unknown[]): unknown;
+  getAnonymousInfo (peer: Peer): unknown;
 
-  updateAnonymousInfo (...args: unknown[]): unknown;
+  updateAnonymousInfo (peer: Peer, arg2: unknown): unknown;
 
   sendSummonMsg (peer: Peer, MsgElement: unknown, MsgAttributeInfo: unknown): Promise<unknown>;// 频道的东西
 
-  outputGuildUnreadInfo (...args: unknown[]): unknown;
+  outputGuildUnreadInfo (arg: unknown): unknown;
 
-  checkMsgWithUrl (...args: unknown[]): unknown;
+  checkMsgWithUrl (arg: unknown): unknown;
 
-  checkTabListStatus (...args: unknown[]): unknown;
+  checkTabListStatus (): unknown;
 
-  getABatchOfContactMsgBoxInfo (...args: unknown[]): unknown;
+  getABatchOfContactMsgBoxInfo (arg: unknown): unknown;
 
   insertMsgToMsgBox (peer: Peer, msgId: string, arg: 2006): unknown;
 
-  isHitEmojiKeyword (...args: unknown[]): unknown;
+  isHitEmojiKeyword (arg: unknown): unknown;
 
-  getKeyWordRelatedEmoji (...args: unknown[]): unknown;
+  getKeyWordRelatedEmoji (arg: unknown): unknown;
 
-  recordEmoji (...args: unknown[]): unknown;
+  recordEmoji (type: number, emojiList: Array<unknown>): unknown;
 
   fetchGetHitEmotionsByWord (args: unknown): Promise<unknown>;// 表情推荐？
 
-  deleteAllRoamMsgs (...args: unknown[]): unknown;// 漫游消息？
+  deleteAllRoamMsgs (arg1: number, arg2: string): unknown;// 漫游消息？
 
-  packRedBag (...args: unknown[]): unknown;
+  packRedBag (arg: unknown): unknown;
 
-  grabRedBag (...args: unknown[]): unknown;
+  grabRedBag (arg: unknown): unknown;
 
-  pullDetail (...args: unknown[]): unknown;
+  pullDetail (arg: unknown): unknown;
 
-  selectPasswordRedBag (...args: unknown[]): unknown;
+  selectPasswordRedBag (arg: unknown): unknown;
 
-  pullRedBagPasswordList (...args: unknown[]): unknown;
+  pullRedBagPasswordList (): unknown;
 
-  requestTianshuAdv (...args: unknown[]): unknown;
+  requestTianshuAdv (arg: unknown): unknown;
 
-  tianshuReport (...args: unknown[]): unknown;
+  tianshuReport (arg: unknown): unknown;
 
-  tianshuMultiReport (...args: unknown[]): unknown;
+  tianshuMultiReport (arg: unknown): unknown;
 
   GetMsgSubType (a0: number, a1: number): unknown;
 
-  setIKernelPublicAccountAdapter (...args: unknown[]): unknown;
+  setIKernelPublicAccountAdapter (arg: unknown): unknown;
 
   // tempChatGameSession有关
   createUidFromTinyId (fromTinyId: string, toTinyId: string): string;
 
-  dataMigrationGetDataAvaiableContactList (...args: unknown[]): unknown;
+  dataMigrationGetDataAvaiableContactList (): unknown;
 
-  dataMigrationGetMsgList (...args: unknown[]): unknown;
+  dataMigrationGetMsgList (arg1: unknown, arg2: unknown): unknown;
 
-  dataMigrationStopOperation (...args: unknown[]): unknown;
+  dataMigrationStopOperation (arg: unknown): unknown;
 
   dataMigrationImportMsgPbRecord (DataMigrationMsgInfo: Array<{
     extensionData: string;// "Hex"
@@ -696,38 +697,37 @@ export interface NodeIKernelMsgService {
     msgType: number;
   }): unknown;
 
-  dataMigrationGetResourceLocalDestinyPath (...args: unknown[]): unknown;
+  dataMigrationGetResourceLocalDestinyPath (arg: unknown): unknown;
 
-  dataMigrationSetIOSPathPrefix (...args: unknown[]): unknown;
+  dataMigrationSetIOSPathPrefix (arg: unknown): unknown;
 
-  getServiceAssistantSwitch (...args: unknown[]): unknown;
+  getServiceAssistantSwitch (arg: unknown): unknown;
 
-  setServiceAssistantSwitch (...args: unknown[]): unknown;
+  setServiceAssistantSwitch (arg: unknown): unknown;
 
-  setSubscribeFolderUsingSmallRedPoint (...args: unknown[]): unknown;
+  setSubscribeFolderUsingSmallRedPoint (arg: unknown): unknown;
 
-  clearGuildNoticeRedPoint (...args: unknown[]): unknown;
+  clearGuildNoticeRedPoint (arg: unknown): unknown;
 
-  clearFeedNoticeRedPoint (...args: unknown[]): unknown;
+  clearFeedNoticeRedPoint (arg: unknown): unknown;
 
-  clearFeedSquareRead (...args: unknown[]): unknown;
+  clearFeedSquareRead (arg: unknown): unknown;
 
-  IsC2CStyleChatType (...args: unknown[]): unknown;
+  IsC2CStyleChatType (chatType: unknown): unknown;
 
   IsTempChatType (uin: number): unknown;// 猜的
 
-  getGuildInteractiveNotification (...args: unknown[]): unknown;
+  getGuildInteractiveNotification (arg: unknown): unknown;
 
-  getGuildNotificationAbstract (...args: unknown[]): unknown;
+  getGuildNotificationAbstract (arg: unknown): unknown;
 
-  setFocusOnBase (...args: unknown[]): unknown;
+  setFocusOnBase (arg: unknown): unknown;
 
-  queryArkInfo (...args: unknown[]): unknown;
+  queryArkInfo (arg: unknown): unknown;
 
-  queryUserSecQuality (...args: unknown[]): unknown;
+  queryUserSecQuality (): unknown;
 
-  getGuildMsgAbFlag (...args: unknown[]): unknown;
+  getGuildMsgAbFlag (arg: unknown): unknown;
 
   getGroupMsgStorageTime (): unknown;
-
 }

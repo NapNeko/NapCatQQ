@@ -4,17 +4,19 @@ import { GeneralCallResult } from '@/napcat-core/services/common';
 import { FSABRecentContactParams } from '@/napcat-core/types/contact';
 
 export interface NodeIKernelRecentContactService {
-  setGuildDisplayStatus(...args: unknown[]): unknown; // 2 arguments
+  setGuildDisplayStatus (arg1: unknown, arg2: unknown): unknown;
 
-  setContactListTop(...args: unknown[]): unknown; // 2 arguments
+  setContactListTop (peer: Peer, isTop: boolean): unknown;
 
-  updateRecentContactExtBufForUI(...args: unknown[]): unknown; // 2 arguments
+  updateRecentContactExtBufForUI (peer: Peer, extBuf: unknown): unknown;
 
-  upsertRecentContactManually(...args: unknown[]): unknown; // 1 arguments
+  upsertRecentContactManually (arg: unknown): unknown;
 
-  enterOrExitMsgList(...args: unknown[]): unknown; // 1 arguments
+  manageContactMergeWindow (arg: unknown): unknown;
 
-  getRecentContactListSnapShot(count: number): Promise<GeneralCallResult & {
+  enterOrExitMsgList (arg: unknown): unknown;
+
+  getRecentContactListSnapShot (count: number): Promise<GeneralCallResult & {
     info: {
       errCode: number,
       errMsg: string,
@@ -28,56 +30,56 @@ export interface NodeIKernelRecentContactService {
         peerUin: string,
         msgTime: string,
         chatType: ChatType,
-        msgId: string
-      }>
-    }
-  }>; // 1 arguments
+        msgId: string;
+      }>;
+    };
+  }>;
 
-  clearMsgUnreadCount(...args: unknown[]): unknown; // 1 arguments
+  clearMsgUnreadCount (peer: Peer): unknown;
 
-  getRecentContactListSyncLimit(count: number): unknown;
+  getRecentContactListSyncLimit (count: number): unknown;
 
-  jumpToSpecifyRecentContact(...args: unknown[]): unknown; // 1 arguments
+  jumpToSpecifyRecentContact (arg: unknown): unknown;
 
-  fetchAndSubscribeABatchOfRecentContact(params: FSABRecentContactParams): unknown; // 1 arguments
+  fetchAndSubscribeABatchOfRecentContact (params: FSABRecentContactParams): unknown;
 
-  addRecentContact(peer: Peer): unknown;
+  addRecentContact (peer: Peer): unknown;
 
-  deleteRecentContacts(peer: Peer): unknown; // 猜测
+  deleteRecentContacts (peer: Peer): unknown;
 
-  getContacts(peers: Peer[]): Promise<unknown>;
+  getContacts (peers: Peer[]): Promise<unknown>;
 
-  setThirdPartyBusinessInfos(...args: unknown[]): unknown; // 1 arguments
+  setThirdPartyBusinessInfos (arg: unknown): unknown;
 
-  updateGameMsgConfigs(...args: unknown[]): unknown; // 1 arguments
+  updateGameMsgConfigs (arg: unknown): unknown;
 
-  removeKernelRecentContactListener(listenerid: number): unknown; // 1 arguments
+  removeKernelRecentContactListener (listenerId: number): unknown;
 
-  addKernelRecentContactListener(listener: NodeIKernelRecentContactListener): void;
+  addKernelRecentContactListener (listener: NodeIKernelRecentContactListener): void;
 
-  clearRecentContactsByChatType(...args: unknown[]): unknown; // 1 arguments
+  clearRecentContactsByChatType (chatType: ChatType): unknown;
 
-  upInsertModule(...args: unknown[]): unknown; // 1 arguments
+  upInsertModule (arg: unknown): unknown;
 
-  jumpToSpecifyRecentContactVer2(...args: unknown[]): unknown; // 1 arguments
+  jumpToSpecifyRecentContactVer2 (arg: unknown): unknown;
 
-  deleteRecentContactsVer2(...args: unknown[]): unknown; // 1 arguments
+  deleteRecentContactsVer2 (arg: unknown): unknown;
 
-  getRecentContactList(): Promise<unknown>;
+  getRecentContactList (): Promise<unknown>;
 
-  getMsgUnreadCount(): unknown;
+  getMsgUnreadCount (): unknown;
 
-  clearRecentContacts(): unknown;
+  clearRecentContacts (): unknown;
 
-  getServiceAssistantRecentContactInfos(): unknown;
+  getServiceAssistantRecentContactInfos (): unknown;
 
-  getRecentContactInfos(): unknown;
+  getRecentContactInfos (): unknown;
 
-  getUnreadDetailsInfos(): unknown;
+  getUnreadDetailsInfos (): unknown;
 
-  cleanAllModule(): unknown;
+  cleanAllModule (): unknown;
 
-  setAllGameMsgRead(): unknown;
+  setAllGameMsgRead (): unknown;
 
-  getRecentContactListSync(): unknown;
+  getRecentContactListSync (): unknown;
 }
