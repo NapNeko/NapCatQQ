@@ -1,91 +1,91 @@
 import { GeneralCallResult } from './common';
 
 export interface NodeIKernelCollectionService {
-  addKernelCollectionListener(...args: unknown[]): void;// needs 1 arguments
+  addKernelCollectionListener (listener: unknown): void;// needs 1 arguments
 
-  removeKernelCollectionListener(listenerId: number): void;
+  removeKernelCollectionListener (listenerId: number): void;
 
-  getCollectionItemList(param: {
+  getCollectionItemList (param: {
     category: number,
     groupId: number,
     forceSync: boolean,
     forceFromDb: boolean,
     timeStamp: string,
     count: number,
-    searchDown: boolean
+    searchDown: boolean;
   }): Promise<GeneralCallResult &
-    {
-      collectionSearchList: {
-        collectionItemList: Array<
-                {
-                  cid: string,
-                  type: number,
-                  status: number,
-                  author: {
-                    type: number,
-                    numId: string,
-                    strId: string,
-                    groupId: string,
-                    groupName: string,
-                    uid: string
-                  },
-                  bid: number,
-                  category: number,
-                  createTime: string,
-                  collectTime: string,
-                  modifyTime: string,
-                  sequence: string,
-                  shareUrl: string,
-                  customGroupId: number,
-                  securityBeat: boolean,
-                  summary: {
-                    textSummary: unknown,
-                    linkSummary: unknown,
-                    gallerySummary: unknown,
-                    audioSummary: unknown,
-                    videoSummary: unknown,
-                    fileSummary: unknown,
-                    locationSummary: unknown,
-                    richMediaSummary: unknown,
-                  }
-                }>,
-        hasMore: boolean,
-        bottomTimeStamp: string
-      }
-    }
-    >;
+  {
+    collectionSearchList: {
+      collectionItemList: Array<
+        {
+          cid: string,
+          type: number,
+          status: number,
+          author: {
+            type: number,
+            numId: string,
+            strId: string,
+            groupId: string,
+            groupName: string,
+            uid: string;
+          },
+          bid: number,
+          category: number,
+          createTime: string,
+          collectTime: string,
+          modifyTime: string,
+          sequence: string,
+          shareUrl: string,
+          customGroupId: number,
+          securityBeat: boolean,
+          summary: {
+            textSummary: unknown,
+            linkSummary: unknown,
+            gallerySummary: unknown,
+            audioSummary: unknown,
+            videoSummary: unknown,
+            fileSummary: unknown,
+            locationSummary: unknown,
+            richMediaSummary: unknown,
+          };
+        }>,
+      hasMore: boolean,
+      bottomTimeStamp: string;
+    };
+  }
+  >;
 
-  getCollectionContent(...args: unknown[]): unknown;// needs 5 arguments
+  getCollectionContent (arg1: string, arg2: number, arg3: string, arg4: string, arg5: boolean): unknown;// needs 5 arguments
 
-  getCollectionCustomGroupList(...args: unknown[]): unknown;// needs 0 arguments
+  getCollectionCustomGroupList (): unknown;// needs 0 arguments
 
-  getCollectionUserInfo(...args: unknown[]): unknown;// needs 0 arguments
+  getCollectionUserInfo (): unknown;// needs 0 arguments
 
-  searchCollectionItemList(...args: unknown[]): unknown;// needs 2 arguments
+  searchCollectionItemList (arg1: string, arg2: unknown): unknown;// needs 2 arguments
 
-  addMsgToCollection(...args: unknown[]): unknown;// needs 2 arguments
+  addMsgToCollection (arg1: unknown, arg2: unknown): unknown;// needs 2 arguments
 
-  collectionArkShare(...args: unknown[]): unknown;// needs 1 arguments
+  collectionArkShare (arg: unknown): unknown;// needs 1 arguments
 
-  collectionFileForward(...args: unknown[]): unknown;// needs 3 arguments
+  collectionFileForward (arg1: number, arg2: string, arg3: unknown): unknown;// needs 3 arguments
 
-  downloadCollectionFile(...args: unknown[]): unknown;// needs 4 arguments
+  downloadCollectionFile (arg1: string, arg2: string, arg3: unknown, arg4: string): unknown;// needs 4 arguments
 
-  downloadCollectionFileThumbPic(...args: unknown[]): unknown;// needs 4 arguments
+  downloadCollectionFileThumbPic (arg1: string, arg2: string, arg3: unknown, arg4: number): unknown;// needs 4 arguments
 
-  downloadCollectionPic(...args: unknown[]): unknown;// needs 3 arguments
+  downloadCollectionPic (arg1: string, arg2: string, arg3: unknown): unknown;// needs 3 arguments
 
-  cancelDownloadCollectionFile(...args: unknown[]): unknown;// needs 1 arguments
+  cancelDownloadCollectionFile (arg: unknown): unknown;// needs 1 arguments
 
-  deleteCollectionItemList(...args: unknown[]): unknown;// needs 1 arguments
+  deleteCollectionItemList (arg: unknown): unknown;// needs 1 arguments
 
-  editCollectionItem(...args: unknown[]): unknown;// needs 2 arguments
+  editCollectionItem (arg1: unknown, arg2: unknown): unknown;// needs 2 arguments
 
-  getEditPicInfoByPath(...args: unknown[]): unknown;// needs 1 arguments
+  getEditPicInfoByPath (arg: unknown): unknown;// needs 1 arguments
 
-  collectionFastUpload(...args: unknown[]): unknown;// needs 1 arguments
+  collectionFastUpload (arg: unknown): unknown;// needs 1 arguments
 
-  editCollectionItemAfterFastUpload(...args: unknown[]): unknown;// needs 2 arguments
+  editCollectionItemAfterFastUpload (arg1: unknown, arg2: unknown): unknown;// needs 2 arguments
 
-  createNewCollectionItem(...args: unknown[]): unknown;// needs 1 arguments
+  createNewCollectionItem (arg: unknown): unknown;// needs 1 arguments
 }

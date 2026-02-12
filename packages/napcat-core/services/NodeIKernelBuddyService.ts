@@ -130,5 +130,21 @@ export interface NodeIKernelBuddyService {
 
   getBuddyRecommendContactArkJson (uid: string, phoneNumber: string): Promise<GeneralCallResult & { arkMsg: string; }>;
 
+  checkIsBuddyAsync (uid: string): Promise<unknown>;
+
+  areBuddies (callFrom: string, uids: string[]): unknown;
+
+  getCategoryById (id: number): unknown;
+
+  addCategoryV2 (name: string, buddyUids?: unknown): Promise<unknown>;
+
   isNull (): boolean;
+
+  getAddFriendBlockedList (): unknown;
+
+  getAddFriendBlockedRedPoint (): unknown;
+
+  reportAddFriendBlocked (): unknown;
+
+  setWXMsgNotify (arg: unknown): unknown;
 }

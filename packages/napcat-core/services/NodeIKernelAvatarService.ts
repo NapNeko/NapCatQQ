@@ -13,13 +13,13 @@ export interface NodeIKernelAvatarService {
 
   forceDownloadGroupAvatar(arg1: unknown, arg2: unknown): unknown;
 
-  getGroupPortraitPath(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
+  getGroupPortraitPath(arg1: string, arg2: number, arg3: number): unknown;
 
-  forceDownloadGroupPortrait(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
+  forceDownloadGroupPortrait(arg1: string, arg2: number, arg3: number): unknown;
 
-  getAvatarPaths(arg1: unknown, arg2: unknown): unknown;
+  getAvatarPaths(arg1: Array<unknown>[], arg2: number): unknown;
 
-  getGroupAvatarPaths(arg1: unknown, arg2: unknown): unknown;
+  getGroupAvatarPaths(arg1: Array<unknown>[], arg2: string): unknown;
 
   getConfGroupAvatarPaths(arg: unknown): unknown;
 
