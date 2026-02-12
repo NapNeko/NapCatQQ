@@ -132,5 +132,51 @@ export default class QQManager {
     const data = await serverRequest.post<ServerResponse<{ path: string; }>>('/QQLogin/CreateGUIDBackup');
     return data.data.data;
   }
+
+  // ============================================================
+  // 平台信息 & Linux GUID 管理
+  // ============================================================
+
+  public static async getPlatformInfo () {
+    const data = await serverRequest.post<ServerResponse<{ platform: string; }>>('/QQLogin/GetPlatformInfo');
+    return data.data.data;
+  }
+
+  public static async getLinuxMAC () {
+    const data = await serverRequest.post<ServerResponse<{ mac: string; }>>('/QQLogin/GetLinuxMAC');
+    return data.data.data;
+  }
+
+  public static async setLinuxMAC (mac: string) {
+    await serverRequest.post<ServerResponse<null>>('/QQLogin/SetLinuxMAC', { mac });
+  }
+
+  public static async getLinuxMachineId () {
+    const data = await serverRequest.post<ServerResponse<{ machineId: string; }>>('/QQLogin/GetLinuxMachineId');
+    return data.data.data;
+  }
+
+  public static async computeLinuxGUID (mac?: string, machineId?: string) {
+    const data = await serverRequest.post<ServerResponse<{ guid: string; machineId: string; mac: string; }>>('/QQLogin/ComputeLinuxGUID', { mac, machineId });
+    return data.data.data;
+  }
+
+  public static async getLinuxMachineInfoBackups () {
+    const data = await serverRequest.post<ServerResponse<string[]>>('/QQLogin/GetLinuxMachineInfoBackups');
+    return data.data.data;
+  }
+
+  public static async createLinuxMachineInfoBackup () {
+    const data = await serverRequest.post<ServerResponse<{ path: string; }>>('/QQLogin/CreateLinuxMachineInfoBackup');
+    return data.data.data;
+  }
+
+  public static async restoreLinuxMachineInfoBackup (backupName: string) {
+    await serverRequest.post<ServerResponse<null>>('/QQLogin/RestoreLinuxMachineInfoBackup', { backupName });
+  }
+
+  public static async resetLinuxDeviceID () {
+    await serverRequest.post<ServerResponse<null>>('/QQLogin/ResetLinuxDeviceID');
+  }
 }
 

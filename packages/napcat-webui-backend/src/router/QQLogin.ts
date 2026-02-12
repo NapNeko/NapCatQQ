@@ -18,6 +18,15 @@ import {
   QQGetGUIDBackupsHandler,
   QQRestoreGUIDBackupHandler,
   QQCreateGUIDBackupHandler,
+  QQGetPlatformInfoHandler,
+  QQGetLinuxMACHandler,
+  QQSetLinuxMACHandler,
+  QQGetLinuxMachineIdHandler,
+  QQComputeLinuxGUIDHandler,
+  QQGetLinuxMachineInfoBackupsHandler,
+  QQCreateLinuxMachineInfoBackupHandler,
+  QQRestoreLinuxMachineInfoBackupHandler,
+  QQResetLinuxDeviceIDHandler,
 } from '@/napcat-webui-backend/src/api/QQLogin';
 
 const router: Router = Router();
@@ -55,5 +64,27 @@ router.post('/GetGUIDBackups', QQGetGUIDBackupsHandler);
 router.post('/RestoreGUIDBackup', QQRestoreGUIDBackupHandler);
 // router:创建GUID备份
 router.post('/CreateGUIDBackup', QQCreateGUIDBackupHandler);
+
+// ============================================================
+// 平台信息 & Linux GUID 管理
+// ============================================================
+// router:获取平台信息
+router.post('/GetPlatformInfo', QQGetPlatformInfoHandler);
+// router:获取Linux MAC地址
+router.post('/GetLinuxMAC', QQGetLinuxMACHandler);
+// router:设置Linux MAC地址
+router.post('/SetLinuxMAC', QQSetLinuxMACHandler);
+// router:获取Linux machine-id
+router.post('/GetLinuxMachineId', QQGetLinuxMachineIdHandler);
+// router:计算Linux GUID
+router.post('/ComputeLinuxGUID', QQComputeLinuxGUIDHandler);
+// router:获取Linux machine-info备份列表
+router.post('/GetLinuxMachineInfoBackups', QQGetLinuxMachineInfoBackupsHandler);
+// router:创建Linux machine-info备份
+router.post('/CreateLinuxMachineInfoBackup', QQCreateLinuxMachineInfoBackupHandler);
+// router:恢复Linux machine-info备份
+router.post('/RestoreLinuxMachineInfoBackup', QQRestoreLinuxMachineInfoBackupHandler);
+// router:重置Linux设备信息
+router.post('/ResetLinuxDeviceID', QQResetLinuxDeviceIDHandler);
 
 export { router as QQLoginRouter };
