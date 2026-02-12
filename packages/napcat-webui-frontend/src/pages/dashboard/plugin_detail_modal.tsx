@@ -6,11 +6,13 @@ import { Tooltip } from '@heroui/tooltip';
 import { Spinner } from '@heroui/spinner';
 import { IoMdCheckmarkCircle, IoMdOpen, IoMdDownload } from 'react-icons/io';
 import { MdUpdate } from 'react-icons/md';
+import { FaNpm } from 'react-icons/fa';
 import { useState, useEffect } from 'react';
 
 import { PluginStoreItem } from '@/types/plugin-store';
 import { InstallStatus } from '@/components/display_card/plugin_store_card';
 import TailwindMarkdown from '@/components/tailwind_markdown';
+import PluginManagerController from '@/controllers/plugin_manager';
 
 interface PluginDetailModalProps {
   isOpen: boolean;
@@ -124,12 +126,15 @@ export default function PluginDetailModal ({
   const [readmeLoading, setReadmeLoading] = useState(false);
   const [readmeError, setReadmeError] = useState(false);
 
+  // 判断插件来源
+  const isNpmSource = plugin?.source === 'npm';
+
   // 获取 GitHub 仓库信息（需要在 hooks 之前计算）
   const githubRepo = plugin ? extractGitHubRepo(plugin.homepage) : null;
 
-  // 当模态框打开且有 GitHub 链接时，获取 README
+  // 当模态框打开时，获取 README（npm 或 GitHub）
   useEffect(() => {
-    if (!isOpen || !githubRepo) {
+    if (!isOpen || !plugin) {
       setReadme('');
       setReadmeError(false);
       return;
@@ -139,9 +144,22 @@ export default function PluginDetailModal ({
       setReadmeLoading(true);
       setReadmeError(false);
       try {
-        const content = await fetchGitHubReadme(githubRepo.owner, githubRepo.repo);
-        // 清理 HTML 标签后再设置
-        setReadme(cleanReadmeHtml(content));
+        if (isNpmSource && plugin.npmPackage) {
+          // npm 来源：从后端获取 npm 包详情中的 README
+          const detail = await PluginManagerController.getNpmPluginDetail(plugin.npmPackage);
+          if (detail?.readme) {
+            setReadme(cleanReadmeHtml(detail.readme));
+          } else {
+            setReadmeError(true);
+          }
+        } else if (githubRepo) {
+          // GitHub 来源：从 GitHub API 获取 README
+          const content = await fetchGitHubReadme(githubRepo.owner, githubRepo.repo);
+          setReadme(cleanReadmeHtml(content));
+        } else {
+          // 无可用的 README 来源
+          setReadme('');
+        }
       } catch (error) {
         console.error('Failed to fetch README:', error);
         setReadmeError(true);
@@ -151,11 +169,11 @@ export default function PluginDetailModal ({
     };
 
     loadReadme();
-  }, [isOpen, githubRepo?.owner, githubRepo?.repo]);
+  }, [isOpen, plugin?.id, isNpmSource, plugin?.npmPackage, githubRepo?.owner, githubRepo?.repo]);
 
   if (!plugin) return null;
 
-  const { name, version, author, description, tags, homepage, downloadUrl, minVersion } = plugin;
+  const { name, version, author, description, tags, homepage, downloadUrl, minVersion, npmPackage } = plugin;
   const avatarUrl = getAuthorAvatar(homepage, downloadUrl) || `https://avatar.vercel.sh/${encodeURIComponent(name)}`;
 
   return (
@@ -213,6 +231,16 @@ export default function PluginDetailModal ({
                     <Chip size='sm' color='primary' variant='flat'>
                       v{version}
                     </Chip>
+                    {isNpmSource && (
+                      <Chip
+                        size='sm'
+                        color='danger'
+                        variant='flat'
+                        startContent={<FaNpm size={14} />}
+                      >
+                        npm
+                      </Chip>
+                    )}
                     {tags?.map((tag) => (
                       <Chip
                         key={tag}
@@ -281,6 +309,23 @@ export default function PluginDetailModal ({
                     <span className='text-default-500'>插件 ID:</span>
                     <span className='font-mono text-xs text-default-900'>{plugin.id}</span>
                   </div>
+                  {npmPackage && (
+                    <div className='flex justify-between items-center'>
+                      <span className='text-default-500'>npm 包名:</span>
+                      <Button
+                        size='sm'
+                        variant='flat'
+                        color='danger'
+                        as='a'
+                        href={`https://www.npmjs.com/package/${npmPackage}`}
+                        target='_blank'
+                        rel='noreferrer'
+                        startContent={<FaNpm size={14} />}
+                      >
+                        {npmPackage}
+                      </Button>
+                    </div>
+                  )}
                   {downloadUrl && (
                     <div className='flex justify-between items-center'>
                       <span className='text-default-500'>下载地址:</span>
@@ -301,8 +346,8 @@ export default function PluginDetailModal ({
                 </div>
               </div>
 
-              {/* GitHub README 显示 */}
-              {githubRepo && (
+              {/* README 显示（支持 npm 和 GitHub） */}
+              {(githubRepo || isNpmSource) && (
                 <>
                   <div className='mt-2'>
                     <h3 className='text-sm font-semibold text-default-700 mb-3'>详情</h3>
@@ -316,17 +361,19 @@ export default function PluginDetailModal ({
                         <p className='text-sm text-default-500 mb-3'>
                           无法加载 README
                         </p>
-                        <Button
-                          color='primary'
-                          variant='flat'
-                          as='a'
-                          href={homepage}
-                          target='_blank'
-                          rel='noreferrer'
-                          startContent={<IoMdOpen />}
-                        >
-                          在 GitHub 查看
-                        </Button>
+                        {homepage && (
+                          <Button
+                            color='primary'
+                            variant='flat'
+                            as='a'
+                            href={homepage}
+                            target='_blank'
+                            rel='noreferrer'
+                            startContent={<IoMdOpen />}
+                          >
+                            {isNpmSource ? '在 npm 查看' : '在 GitHub 查看'}
+                          </Button>
+                        )}
                       </div>
                     )}
                     {!readmeLoading && !readmeError && readme && (

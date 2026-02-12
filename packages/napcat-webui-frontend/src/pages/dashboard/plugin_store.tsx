@@ -3,9 +3,11 @@ import { Input } from '@heroui/input';
 import { Tab, Tabs } from '@heroui/tabs';
 import { Tooltip } from '@heroui/tooltip';
 import { Spinner } from '@heroui/spinner';
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@heroui/modal';
 import { useEffect, useMemo, useState, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { IoMdRefresh, IoMdSearch, IoMdSettings } from 'react-icons/io';
+import { MdOutlineGetApp } from 'react-icons/md';
 import clsx from 'clsx';
 import { EventSourcePolyfill } from 'event-source-polyfill';
 import { useLocalStorage } from '@uidotdev/usehooks';
@@ -81,6 +83,13 @@ export default function PluginStorePage () {
   const [downloadMirrorModalOpen, setDownloadMirrorModalOpen] = useState(false);
   const [pendingInstallPlugin, setPendingInstallPlugin] = useState<PluginStoreItem | null>(null);
   const [selectedDownloadMirror, setSelectedDownloadMirror] = useState<string | undefined>(undefined);
+
+  // npm 注册表镜像弹窗状态
+  const [npmRegistryModalOpen, setNpmRegistryModalOpen] = useState(false);
+  const [selectedNpmRegistry, setSelectedNpmRegistry] = useState<string | undefined>(undefined);
+
+  // npm 直接安装弹窗状态
+  const [npmInstallModalOpen, setNpmInstallModalOpen] = useState(false);
 
   // 插件详情弹窗状态
   const [detailModalOpen, setDetailModalOpen] = useState(false);
@@ -179,12 +188,19 @@ export default function PluginStorePage () {
   }, [categorizedPlugins]);
 
   const handleInstall = async (plugin: PluginStoreItem) => {
-    // 弹窗选择下载镜像
-    setPendingInstallPlugin(plugin);
-    setDownloadMirrorModalOpen(true);
+    const isNpmSource = plugin.source === 'npm' && plugin.npmPackage;
+    if (isNpmSource) {
+      // npm 源 → 选择 npm registry 镜像
+      setPendingInstallPlugin(plugin);
+      setNpmRegistryModalOpen(true);
+    } else {
+      // GitHub 源（默认/向后兼容）→ 选择 GitHub 下载镜像
+      setPendingInstallPlugin(plugin);
+      setDownloadMirrorModalOpen(true);
+    }
   };
 
-  const installPluginWithSSE = async (pluginId: string, mirror?: string) => {
+  const installPluginWithSSE = async (pluginId: string, mirror?: string, registry?: string) => {
     const loadingToast = toast.loading('正在准备安装...');
 
     try {
@@ -199,6 +215,9 @@ export default function PluginStorePage () {
       const params = new URLSearchParams({ id: pluginId });
       if (mirror) {
         params.append('mirror', mirror);
+      }
+      if (registry) {
+        params.append('registry', registry);
       }
 
       const eventSource = new EventSourcePolyfill(
@@ -288,6 +307,74 @@ export default function PluginStorePage () {
     }
   };
 
+  const installNpmPackageWithSSE = async (packageName: string, registry?: string) => {
+    const loadingToast = toast.loading('正在从 npm 安装...');
+
+    try {
+      const token = localStorage.getItem(key.token);
+      if (!token) {
+        toast.error('未登录，请先登录', { id: loadingToast });
+        return;
+      }
+      const _token = JSON.parse(token);
+
+      const params = new URLSearchParams({ packageName });
+      if (registry) params.append('registry', registry);
+
+      const eventSource = new EventSourcePolyfill(
+        `/api/Plugin/Npm/Install/SSE?${params.toString()}`,
+        {
+          headers: {
+            Authorization: `Bearer ${_token}`,
+            Accept: 'text/event-stream',
+          },
+          withCredentials: true,
+        }
+      );
+
+      eventSource.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.error) {
+            toast.error(`安装失败: ${data.error}`, { id: loadingToast });
+            setInstallProgress(prev => ({ ...prev, show: false }));
+            eventSource.close();
+          } else if (data.success) {
+            toast.success('从 npm 安装成功！', { id: loadingToast });
+            setInstallProgress(prev => ({ ...prev, show: false }));
+            eventSource.close();
+            loadPlugins();
+          } else if (data.message) {
+            if (typeof data.progress === 'number' && data.progress >= 0 && data.progress <= 100) {
+              setInstallProgress((prev) => ({
+                ...prev,
+                show: true,
+                message: data.message,
+                progress: data.progress,
+                speedStr: data.speedStr || (data.message.includes('下载') ? prev.speedStr : undefined),
+                eta: data.eta !== undefined ? data.eta : (data.message.includes('下载') ? prev.eta : undefined),
+                downloadedStr: data.downloadedStr || (data.message.includes('下载') ? prev.downloadedStr : undefined),
+                totalStr: data.totalStr || (data.message.includes('下载') ? prev.totalStr : undefined),
+              }));
+            } else {
+              toast.loading(data.message, { id: loadingToast });
+            }
+          }
+        } catch (e) {
+          console.error('Failed to parse SSE message:', e);
+        }
+      };
+
+      eventSource.onerror = () => {
+        toast.error('连接中断，安装失败', { id: loadingToast });
+        setInstallProgress(prev => ({ ...prev, show: false }));
+        eventSource.close();
+      };
+    } catch (error: any) {
+      toast.error(`安装失败: ${error.message || '未知错误'}`, { id: loadingToast });
+    }
+  };
+
   const getStoreSourceDisplayName = () => {
     if (!currentStoreSource) return '默认源';
     try {
@@ -327,6 +414,18 @@ export default function PluginStorePage () {
                   isLoading={loading}
                 >
                   <IoMdRefresh size={20} />
+                </Button>
+              </Tooltip>
+              <Tooltip content='从 npm 包名安装插件'>
+                <Button
+                  size='sm'
+                  variant='flat'
+                  className='bg-default-100/50 hover:bg-default-200/50 text-default-700 backdrop-blur-md'
+                  radius='full'
+                  startContent={<MdOutlineGetApp size={18} />}
+                  onPress={() => setNpmInstallModalOpen(true)}
+                >
+                  npm 安装
                 </Button>
               </Tooltip>
             </div>
@@ -428,7 +527,7 @@ export default function PluginStorePage () {
         type='raw'
       />
 
-      {/* 下载镜像选择弹窗 */}
+      {/* 下载镜像选择弹窗（GitHub 源插件使用） */}
       <MirrorSelectorModal
         isOpen={downloadMirrorModalOpen}
         onClose={() => {
@@ -440,12 +539,30 @@ export default function PluginStorePage () {
           // 选择后立即开始安装
           if (pendingInstallPlugin) {
             setDownloadMirrorModalOpen(false);
-            installPluginWithSSE(pendingInstallPlugin.id, mirror);
+            installPluginWithSSE(pendingInstallPlugin.id, mirror, undefined);
             setPendingInstallPlugin(null);
           }
         }}
         currentMirror={selectedDownloadMirror}
         type='file'
+      />
+
+      {/* npm Registry 选择弹窗（npm 源插件使用） */}
+      <NpmRegistrySelectorModal
+        isOpen={npmRegistryModalOpen}
+        onClose={() => {
+          setNpmRegistryModalOpen(false);
+          setPendingInstallPlugin(null);
+        }}
+        onSelect={(registry) => {
+          setSelectedNpmRegistry(registry);
+          if (pendingInstallPlugin) {
+            setNpmRegistryModalOpen(false);
+            installPluginWithSSE(pendingInstallPlugin.id, undefined, registry);
+            setPendingInstallPlugin(null);
+          }
+        }}
+        currentRegistry={selectedNpmRegistry}
       />
 
       {/* 插件详情弹窗 */}
@@ -467,6 +584,17 @@ export default function PluginStorePage () {
           if (selectedPlugin) {
             handleInstall(selectedPlugin);
           }
+        }}
+      />
+
+      {/* npm 直接安装弹窗 */}
+      <NpmDirectInstallModal
+        isOpen={npmInstallModalOpen}
+        onClose={() => setNpmInstallModalOpen(false)}
+        onInstall={(packageName, registry) => {
+          setNpmInstallModalOpen(false);
+          // 使用 SSE 安装 npm 包
+          installNpmPackageWithSSE(packageName, registry);
         }}
       />
 
@@ -527,5 +655,251 @@ export default function PluginStorePage () {
         </div>
       )}
     </>
+  );
+}
+
+// ============== npm Registry 选择弹窗 ==============
+
+const NPM_REGISTRIES = [
+  { label: '淘宝镜像（推荐）', value: 'https://registry.npmmirror.com', recommended: true },
+  { label: 'npm 官方', value: 'https://registry.npmjs.org' },
+];
+
+interface NpmRegistrySelectorModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSelect: (registry: string | undefined) => void;
+  currentRegistry?: string;
+}
+
+function NpmRegistrySelectorModal ({
+  isOpen,
+  onClose,
+  onSelect,
+  currentRegistry,
+}: NpmRegistrySelectorModalProps) {
+  const [selected, setSelected] = useState<string>(currentRegistry || NPM_REGISTRIES[0]?.value || '');
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      size='md'
+      classNames={{
+        backdrop: 'z-[200]',
+        wrapper: 'z-[200]',
+      }}
+    >
+      <ModalContent>
+        <ModalHeader>选择 npm 镜像源</ModalHeader>
+        <ModalBody>
+          <div className='flex flex-col gap-2'>
+            {NPM_REGISTRIES.map((reg) => (
+              <div
+                key={reg.value}
+                className={clsx(
+                  'flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all',
+                  'bg-content1 hover:bg-content2 border-2',
+                  selected === reg.value ? 'border-primary' : 'border-transparent',
+                )}
+                onClick={() => setSelected(reg.value)}
+              >
+                <div>
+                  <p className='font-medium'>{reg.label}</p>
+                  <p className='text-xs text-default-500'>{reg.value}</p>
+                </div>
+                {reg.recommended && (
+                  <span className='text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full'>推荐</span>
+                )}
+              </div>
+            ))}
+          </div>
+        </ModalBody>
+        <ModalFooter>
+          <Button variant='light' onPress={onClose}>取消</Button>
+          <Button color='primary' onPress={() => { onSelect(selected); onClose(); }}>
+            确认并安装
+          </Button>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
+  );
+}
+
+// ============== npm 直接安装弹窗 ==============
+
+interface NpmDirectInstallModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onInstall: (packageName: string, registry?: string) => void;
+}
+
+function NpmDirectInstallModal ({
+  isOpen,
+  onClose,
+  onInstall,
+}: NpmDirectInstallModalProps) {
+  const [packageName, setPackageName] = useState('');
+  const [registry, setRegistry] = useState(NPM_REGISTRIES[0]?.value || '');
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [searchResults, setSearchResults] = useState<PluginStoreItem[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>('search');
+
+  const handleInstall = () => {
+    if (!packageName.trim()) {
+      toast.error('请输入 npm 包名');
+      return;
+    }
+    onInstall(packageName.trim(), registry);
+    setPackageName('');
+  };
+
+  const handleSearch = async () => {
+    const keyword = searchKeyword.trim() || 'napcat-plugin';
+    setSearching(true);
+    try {
+      const result = await PluginManager.searchNpmPlugins(keyword, registry);
+      setSearchResults(result.plugins || []);
+      if (result.plugins.length === 0) {
+        toast('未找到相关插件', { icon: '🔍' });
+      }
+    } catch (error: any) {
+      toast.error('搜索失败: ' + (error?.message || '未知错误'));
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      size='2xl'
+      scrollBehavior='inside'
+      classNames={{
+        backdrop: 'z-[200]',
+        wrapper: 'z-[200]',
+      }}
+    >
+      <ModalContent>
+        <ModalHeader>从 npm 安装插件</ModalHeader>
+        <ModalBody>
+          <div className='flex flex-col gap-4'>
+            {/* npm 镜像源选择 */}
+            <div className='flex flex-col gap-2'>
+              <p className='text-sm font-medium'>npm 镜像源</p>
+              <div className='flex gap-2'>
+                {NPM_REGISTRIES.map((reg) => (
+                  <div
+                    key={reg.value}
+                    className={clsx(
+                      'flex-1 flex items-center justify-center p-2 rounded-lg cursor-pointer transition-all text-sm',
+                      'bg-content1 hover:bg-content2 border-2',
+                      registry === reg.value ? 'border-primary' : 'border-transparent',
+                    )}
+                    onClick={() => setRegistry(reg.value)}
+                  >
+                    <span>{reg.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 搜索 / 手动输入 切换 */}
+            <Tabs
+              selectedKey={activeTab}
+              onSelectionChange={(key) => setActiveTab(key as string)}
+              variant='underlined'
+              color='primary'
+            >
+              <Tab key='search' title='搜索插件'>
+                <div className='flex flex-col gap-3'>
+                  <div className='flex gap-2'>
+                    <Input
+                      placeholder='搜索 napcat 插件...'
+                      value={searchKeyword}
+                      onValueChange={setSearchKeyword}
+                      onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
+                      startContent={<IoMdSearch className='text-default-400' />}
+                      size='sm'
+                    />
+                    <Button
+                      color='primary'
+                      size='sm'
+                      onPress={handleSearch}
+                      isLoading={searching}
+                      className='flex-shrink-0'
+                    >
+                      搜索
+                    </Button>
+                  </div>
+                  {/* 搜索结果列表 */}
+                  {searchResults.length > 0 && (
+                    <div className='flex flex-col gap-2 max-h-64 overflow-y-auto'>
+                      {searchResults.map((pkg) => (
+                        <div
+                          key={pkg.id}
+                          className='flex items-center justify-between p-3 rounded-lg bg-content1 hover:bg-content2 transition-all'
+                        >
+                          <div className='flex-1 min-w-0'>
+                            <div className='flex items-center gap-2'>
+                              <span className='font-medium text-sm truncate'>{pkg.name}</span>
+                              <span className='text-xs text-default-400'>v{pkg.version}</span>
+                            </div>
+                            <p className='text-xs text-default-500 mt-1 truncate'>
+                              {pkg.description || '暂无描述'}
+                            </p>
+                            {pkg.author && (
+                              <p className='text-xs text-default-400 mt-0.5'>
+                                by {pkg.author}
+                              </p>
+                            )}
+                          </div>
+                          <Button
+                            size='sm'
+                            color='primary'
+                            variant='flat'
+                            onPress={() => {
+                              onInstall(pkg.npmPackage || pkg.id, registry);
+                            }}
+                            className='flex-shrink-0 ml-2'
+                          >
+                            安装
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </Tab>
+              <Tab key='manual' title='手动输入'>
+                <div className='flex flex-col gap-3'>
+                  <p className='text-sm text-default-500'>
+                    输入 npm 包名直接安装插件，适合安装未上架的第三方插件。
+                  </p>
+                  <Input
+                    label='npm 包名'
+                    placeholder='例如: napcat-plugin-example'
+                    value={packageName}
+                    onValueChange={setPackageName}
+                    description='输入完整的 npm 包名'
+                    onKeyDown={(e) => { if (e.key === 'Enter') handleInstall(); }}
+                  />
+                </div>
+              </Tab>
+            </Tabs>
+          </div>
+        </ModalBody>
+        <ModalFooter>
+          <Button variant='light' onPress={onClose}>取消</Button>
+          {activeTab === 'manual' && (
+            <Button color='primary' onPress={handleInstall} isDisabled={!packageName.trim()}>
+              安装
+            </Button>
+          )}
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
   );
 }
