@@ -6,8 +6,11 @@ import { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import CryptoJS from 'crypto-js';
+import { MdSettings } from 'react-icons/md';
 
 import logo from '@/assets/images/logo.png';
+import GUIDManager from '@/components/guid_manager';
+import Modal from '@/components/modal';
 
 import HoverEffectCard from '@/components/effect_card';
 import { title } from '@/components/primitives';
@@ -174,6 +177,8 @@ export default function QQLoginPage () {
     }
   };
 
+  const [showGUIDManager, setShowGUIDManager] = useState(false);
+
   useEffect(() => {
     const timer = setInterval(() => {
       onUpdateQrCode();
@@ -210,7 +215,12 @@ export default function QQLoginPage () {
                   </span>
                 </div>
               </div>
-              <ThemeSwitch className='absolute right-4 top-4' />
+              <div className='absolute right-4 top-4 flex items-center gap-2'>
+                <Button isIconOnly variant="light" aria-label="Settings" onPress={() => setShowGUIDManager(true)}>
+                  <MdSettings size={22} />
+                </Button>
+                <ThemeSwitch />
+              </div>
             </CardHeader>
 
             <CardBody className='flex gap-5 p-10 pt-0'>
@@ -266,6 +276,15 @@ export default function QQLoginPage () {
           </HoverEffectCard>
         </motion.div>
       </PureLayout>
+      {showGUIDManager && (
+        <Modal
+          title='设备 GUID 管理'
+          content={<GUIDManager compact showRestart />}
+          size='lg'
+          hideFooter
+          onClose={() => setShowGUIDManager(false)}
+        />
+      )}
     </>
   );
 }

@@ -16,6 +16,7 @@ const LoginRuntime: LoginRuntimeType = {
   },
   QQLoginError: '',
   QQVersion: 'unknown',
+  QQDataPath: '',
   OneBotContext: null,
   onQQLoginStatusChange: async (status: boolean) => {
     LoginRuntime.QQLoginStatus = status;
@@ -165,6 +166,14 @@ export const WebUiDataRuntime = {
 
   getQQVersion () {
     return LoginRuntime.QQVersion;
+  },
+
+  setQQDataPath (dataPath: string) {
+    LoginRuntime.QQDataPath = dataPath;
+  },
+
+  getQQDataPath (): string {
+    return LoginRuntime.QQDataPath;
   },
 
   setWebUiConfigQuickFunction (func: LoginRuntimeType['WebUiConfigQuickFunction']): void {

@@ -128,6 +128,12 @@ importers:
         specifier: ^22.0.1
         version: 22.19.1
 
+  packages/napcat-dpapi:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.0.1
+        version: 22.19.1
+
   packages/napcat-framework:
     dependencies:
       napcat-adapter:
@@ -441,6 +447,9 @@ importers:
       napcat-common:
         specifier: workspace:*
         version: link:../napcat-common
+      napcat-dpapi:
+        specifier: workspace:*
+        version: link:../napcat-dpapi
       napcat-pty:
         specifier: workspace:*
         version: link:../napcat-pty

@@ -425,6 +425,7 @@ export async function NCoreInitShell () {
     }
   }
   const [dataPath, dataPathGlobal] = getDataPaths(wrapper);
+  WebUiDataRuntime.setQQDataPath(dataPath);
   const systemPlatform = getPlatformType();
 
   if (!basicInfoWrapper.QQVersionAppid || !basicInfoWrapper.QQVersionQua) throw new Error('QQVersionAppid or QQVersionQua  is not defined');

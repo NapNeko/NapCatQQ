@@ -49,6 +49,7 @@ export interface LoginRuntimeType {
   QQLoginInfo: SelfInfo;
   QQLoginError: string;
   QQVersion: string;
+  QQDataPath: string;
   onQQLoginStatusChange: (status: boolean) => Promise<void>;
   onWebUiTokenChange: (token: string) => Promise<void>;
   onRefreshQRCode: () => Promise<void>;

@@ -101,4 +101,36 @@ export default class QQManager {
       passwordMd5,
     });
   }
+
+  public static async resetDeviceID () {
+    await serverRequest.post<ServerResponse<null>>('/QQLogin/ResetDeviceID');
+  }
+
+  public static async restartNapCat () {
+    await serverRequest.post<ServerResponse<null>>('/QQLogin/RestartNapCat');
+  }
+
+  public static async getDeviceGUID () {
+    const data = await serverRequest.post<ServerResponse<{ guid: string; }>>('/QQLogin/GetDeviceGUID');
+    return data.data.data;
+  }
+
+  public static async setDeviceGUID (guid: string) {
+    await serverRequest.post<ServerResponse<null>>('/QQLogin/SetDeviceGUID', { guid });
+  }
+
+  public static async getGUIDBackups () {
+    const data = await serverRequest.post<ServerResponse<string[]>>('/QQLogin/GetGUIDBackups');
+    return data.data.data;
+  }
+
+  public static async restoreGUIDBackup (backupName: string) {
+    await serverRequest.post<ServerResponse<null>>('/QQLogin/RestoreGUIDBackup', { backupName });
+  }
+
+  public static async createGUIDBackup () {
+    const data = await serverRequest.post<ServerResponse<{ path: string; }>>('/QQLogin/CreateGUIDBackup');
+    return data.data.data;
+  }
 }
+

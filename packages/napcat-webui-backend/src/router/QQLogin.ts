@@ -11,6 +11,13 @@ import {
   setAutoLoginAccountHandler,
   QQRefreshQRcodeHandler,
   QQPasswordLoginHandler,
+  QQResetDeviceIDHandler,
+  QQRestartNapCatHandler,
+  QQGetDeviceGUIDHandler,
+  QQSetDeviceGUIDHandler,
+  QQGetGUIDBackupsHandler,
+  QQRestoreGUIDBackupHandler,
+  QQCreateGUIDBackupHandler,
 } from '@/napcat-webui-backend/src/api/QQLogin';
 
 const router: Router = Router();
@@ -34,5 +41,19 @@ router.post('/SetQuickLoginQQ', setAutoLoginAccountHandler);
 router.post('/RefreshQRcode', QQRefreshQRcodeHandler);
 // router:密码登录
 router.post('/PasswordLogin', QQPasswordLoginHandler);
+// router:重置设备信息
+router.post('/ResetDeviceID', QQResetDeviceIDHandler);
+// router:重启NapCat
+router.post('/RestartNapCat', QQRestartNapCatHandler);
+// router:获取设备GUID
+router.post('/GetDeviceGUID', QQGetDeviceGUIDHandler);
+// router:设置设备GUID
+router.post('/SetDeviceGUID', QQSetDeviceGUIDHandler);
+// router:获取GUID备份列表
+router.post('/GetGUIDBackups', QQGetGUIDBackupsHandler);
+// router:恢复GUID备份
+router.post('/RestoreGUIDBackup', QQRestoreGUIDBackupHandler);
+// router:创建GUID备份
+router.post('/CreateGUIDBackup', QQCreateGUIDBackupHandler);
 
 export { router as QQLoginRouter };

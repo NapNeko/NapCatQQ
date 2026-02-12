@@ -78,6 +78,7 @@ export async function NCoreInitFramework (
 
   // 启动WebUi
   WebUiDataRuntime.setWorkingEnv(NapCatCoreWorkingEnv.Framework);
+  WebUiDataRuntime.setQQDataPath(loaderObject.core.dataPath);
   InitWebUi(logger, pathWrapper, logSubscription, statusHelperSubscription).then().catch(e => logger.logError(e));
   // 使用 NapCatAdapterManager 统一管理协议适配器
   const adapterManager = new NapCatAdapterManager(loaderObject.core, loaderObject.context, pathWrapper);
