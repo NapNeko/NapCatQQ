@@ -6,7 +6,7 @@ import {
   buildMirrorUrl,
   getMirrorConfig,
   setCustomMirror,
-  clearMirrorCache
+  clearMirrorCache,
 } from 'napcat-common/src/mirror';
 import https from 'https';
 import http from 'http';

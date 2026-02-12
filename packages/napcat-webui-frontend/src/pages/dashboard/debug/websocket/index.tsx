@@ -51,12 +51,12 @@ export default function WSDebug () {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
         });
         const data = await response.json();
         if (data.code === 0) {
-          //const adapterName = data.data.adapterName;
+          // const adapterName = data.data.adapterName;
           const token = data.data.token;
           const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
 
@@ -66,7 +66,7 @@ export default function WSDebug () {
 
             setSocketConfig({
               url: wsUrl,
-              token: token
+              token,
             });
             setInputUrl(wsUrl);
             setInputToken(token);
@@ -120,7 +120,8 @@ export default function WSDebug () {
           hasBackground
             ? 'bg-white/10 dark:bg-black/10 border-white/40 dark:border-white/10'
             : 'bg-white/60 dark:bg-black/40 border-white/40 dark:border-white/10'
-        )}>
+        )}
+        >
           <CardBody className='gap-3 p-3 md:p-4'>
             {/* Connection Config */}
             <div className='grid gap-3 items-end md:grid-cols-[1fr_1fr_auto]'>
@@ -162,17 +163,17 @@ export default function WSDebug () {
                   input: hasBackground ? 'text-white placeholder:text-white/50' : '',
                 }}
               />
-              <div className="flex gap-2">
+              <div className='flex gap-2'>
                 <Button
                   isIconOnly
-                  size="md"
-                  radius="full"
-                  color="warning"
-                  variant="flat"
+                  size='md'
+                  radius='full'
+                  color='warning'
+                  variant='flat'
                   onPress={handleResetConfig}
-                  title="重置配置"
+                  title='重置配置'
                 >
-                  <IoRefresh className="text-xl" />
+                  <IoRefresh className='text-xl' />
                 </Button>
                 <Button
                   onPress={shouldConnect ? handleDisconnect : handleConnect}
@@ -193,9 +194,10 @@ export default function WSDebug () {
               hasBackground
                 ? 'bg-white/10 border-white/20'
                 : 'bg-white/50 dark:bg-white/5 border-white/20'
-            )}>
+            )}
+            >
               <div className='flex items-center gap-3 w-full md:w-auto'>
-                <div className="flex-shrink-0">
+                <div className='flex-shrink-0'>
                   <WSStatus state={readyState} />
                 </div>
                 <div className='flex-1 md:w-56 overflow-hidden'>
@@ -225,7 +227,8 @@ export default function WSDebug () {
           hasBackground
             ? 'bg-white/10 dark:bg-black/10 border-white/40 dark:border-white/10'
             : 'bg-white/60 dark:bg-black/40 border-white/40 dark:border-white/10'
-        )}>
+        )}
+        >
           <OneBotMessageList messages={filteredMessages} />
         </div>
       </div>

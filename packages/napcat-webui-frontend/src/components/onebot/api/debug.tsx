@@ -75,7 +75,7 @@ const OneBotApiDebug = forwardRef<OneBotApiDebugRef, OneBotApiDebugProps>((props
     try {
       const wrappedResponseSchema = Type.Object({
         ...BaseResponseSchema.properties,
-        data: data?.response || Type.Any({ description: '数据' })
+        data: data?.response || Type.Any({ description: '数据' }),
       });
       return parseTypeBox(wrappedResponseSchema);
     } catch (e) {
@@ -99,11 +99,11 @@ const OneBotApiDebug = forwardRef<OneBotApiDebugRef, OneBotApiDebugProps>((props
       if (adapterName) {
         request.post(`/api/Debug/call/${adapterName}`, {
           action: path,
-          params: parsedRequestBody
+          params: parsedRequestBody,
         }, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
         }).then((res) => {
           if (res.data.code === 0) {
             setResponseContent(JSON.stringify(res.data.data, null, 2));
@@ -169,11 +169,12 @@ const OneBotApiDebug = forwardRef<OneBotApiDebugRef, OneBotApiDebugProps>((props
       setActiveTab('request');
       setRequestBody(value);
       // 直接用 override 发送，避免 setState 异步导致拿到旧值
+      // eslint-disable-next-line no-void
       void sendRequest(value);
     },
     focusRequestEditor: () => {
       setActiveTab('request');
-    }
+    },
   }));
 
   useEffect(() => {
@@ -251,7 +252,6 @@ const OneBotApiDebug = forwardRef<OneBotApiDebugRef, OneBotApiDebugProps>((props
     document.addEventListener('touchend', handleTouchEnd);
   }, [responseHeight, setStoredHeight]);
 
-
   return (
 
     <div className='flex flex-col h-full w-full relative overflow-hidden'>
@@ -259,15 +259,17 @@ const OneBotApiDebug = forwardRef<OneBotApiDebugRef, OneBotApiDebugProps>((props
       <div className={clsx(
         'flex items-center gap-4 px-4 py-2 border-b flex-shrink-0 z-10',
         hasBackground ? 'border-white/10 bg-white/5' : 'border-black/5 dark:border-white/10 bg-white/40 dark:bg-black/20'
-      )}>
+      )}
+      >
         {/* Method & Path */}
         {/* Method & Path */}
         {/* Method & Path */}
-        <div className="flex items-center gap-3 flex-1 min-w-0 pl-1">
+        <div className='flex items-center gap-3 flex-1 min-w-0 pl-1'>
           <div className={clsx(
             'text-sm font-mono truncate select-all px-2 py-1 rounded-md transition-colors',
             hasBackground ? 'text-white/90 bg-black/10' : 'text-foreground dark:text-white/90 bg-default-100/50'
-          )}>
+          )}
+          >
             {path}
           </div>
         </div>
@@ -277,14 +279,14 @@ const OneBotApiDebug = forwardRef<OneBotApiDebugRef, OneBotApiDebugProps>((props
           <Popover placement='bottom-end' backdrop='transparent'>
             <PopoverTrigger>
               <Button size='sm' variant='light' radius='sm' isIconOnly className='opacity-60 hover:opacity-100'>
-                <IoSettingsSharp className="text-lg" />
+                <IoSettingsSharp className='text-lg' />
               </Button>
             </PopoverTrigger>
             <PopoverContent className='w-[260px] p-3 rounded-md border border-white/10 shadow-2xl bg-white/80 dark:bg-black/80 backdrop-blur-xl'>
               <div className='flex flex-col gap-2'>
                 <p className='text-[10px] font-bold opacity-30 uppercase tracking-widest'>Debug Setup</p>
-                <Input label='Base URL' labelPlacement="outside" placeholder="http://..." value={httpConfig.url} onChange={(e) => setHttpConfig({ ...httpConfig, url: e.target.value })} size='sm' variant='bordered' />
-                <Input label='Token' labelPlacement="outside" placeholder="access_token" value={httpConfig.token} onChange={(e) => setHttpConfig({ ...httpConfig, token: e.target.value })} size='sm' variant='bordered' />
+                <Input label='Base URL' labelPlacement='outside' placeholder='http://...' value={httpConfig.url} onChange={(e) => setHttpConfig({ ...httpConfig, url: e.target.value })} size='sm' variant='bordered' />
+                <Input label='Token' labelPlacement='outside' placeholder='access_token' value={httpConfig.token} onChange={(e) => setHttpConfig({ ...httpConfig, token: e.target.value })} size='sm' variant='bordered' />
               </div>
             </PopoverContent>
           </Popover>
@@ -296,7 +298,7 @@ const OneBotApiDebug = forwardRef<OneBotApiDebugRef, OneBotApiDebugProps>((props
             size='sm'
             className='font-bold shadow-sm px-4'
             isLoading={isFetching}
-            startContent={!isFetching && <IoSend className="text-xs" />}
+            startContent={!isFetching && <IoSend className='text-xs' />}
           >
             发送
           </Button>
@@ -310,43 +312,46 @@ const OneBotApiDebug = forwardRef<OneBotApiDebugRef, OneBotApiDebugProps>((props
           <div className={clsx(
             'px-4 flex items-center justify-between h-10 flex-shrink-0 border-b',
             hasBackground ? 'border-white/10' : 'border-default-100 dark:border-white/10'
-          )}>
+          )}
+          >
             <Tabs
-              aria-label="Request Options"
-              size="sm"
-              variant="underlined"
+              aria-label='Request Options'
+              size='sm'
+              variant='underlined'
               selectedKey={activeTab}
               onSelectionChange={setActiveTab}
               classNames={{
                 tabList: 'p-0 gap-6 bg-transparent',
                 cursor: 'w-full bg-foreground dark:bg-white h-[2px]',
                 tab: 'px-0 h-full',
-                tabContent: 'text-xs font-medium text-default-500 dark:text-white/50 group-data-[selected=true]:text-foreground dark:group-data-[selected=true]:text-white'
+                tabContent: 'text-xs font-medium text-default-500 dark:text-white/50 group-data-[selected=true]:text-foreground dark:group-data-[selected=true]:text-white',
               }}
             >
-              <Tab key="request" title="请求体" />
-              <Tab key="docs" title="接口文档" />
+              <Tab key='request' title='请求体' />
+              <Tab key='docs' title='接口文档' />
             </Tabs>
 
             <div className='flex items-center gap-1 opacity-70'>
               <ChatInputModal>
                 {(onOpen) => (
-                  <Tooltip content="构造 CQ 码" closeDelay={0}>
+                  <Tooltip content='构造 CQ 码' closeDelay={0}>
                     <Button isIconOnly size='sm' variant='light' radius='sm' className='w-8 h-8' onPress={onOpen}>
                       <TbMessageCode size={16} />
                     </Button>
                   </Tooltip>
                 )}
               </ChatInputModal>
-              <Tooltip content="生成示例" closeDelay={0}>
-                <Button isIconOnly size='sm' variant='light' radius='sm' className='w-8 h-8' onPress={() => {
-                  try {
-                    setRequestBody(JSON.stringify(generateDefaultFromTypeBox(data?.payload), null, 2));
-                  } catch (e) {
-                    console.error('Error generating default:', e);
-                    toast.error('生成示例失败');
-                  }
-                }}>
+              <Tooltip content='生成示例' closeDelay={0}>
+                <Button
+                  isIconOnly size='sm' variant='light' radius='sm' className='w-8 h-8' onPress={() => {
+                    try {
+                      setRequestBody(JSON.stringify(generateDefaultFromTypeBox(data?.payload), null, 2));
+                    } catch (e) {
+                      console.error('Error generating default:', e);
+                      toast.error('生成示例失败');
+                    }
+                  }}
+                >
                   <TbCode size={16} />
                 </Button>
               </Tooltip>
@@ -355,38 +360,40 @@ const OneBotApiDebug = forwardRef<OneBotApiDebugRef, OneBotApiDebugProps>((props
 
           {/* Content Area */}
           <div className='flex-1 relative overflow-hidden'>
-            {activeTab === 'request' ? (
-              <div className="absolute inset-0">
-                <CodeEditor
-                  value={requestBody}
-                  onChange={(value) => setRequestBody(value ?? '')}
-                  language='json'
-                  options={{
-                    minimap: { enabled: false },
-                    fontSize: 13,
-                    fontFamily: 'JetBrains Mono, monospace',
-                    scrollBeyondLastLine: false,
-                    wordWrap: 'on',
-                    padding: { top: 16, bottom: 16 },
-                    lineNumbersMinChars: 3,
-                    chromeless: true,
-                    backgroundColor: 'transparent'
-                  }}
-                />
-              </div>
-            ) : (
-              <div className='p-6 space-y-8 overflow-y-auto h-full scrollbar-hide'>
-                <section>
-                  <h3 className='text-[10px] font-bold text-default-700 dark:text-default-50 uppercase tracking-widest mb-4'>Request Params</h3>
-                  <DisplayStruct schema={parsedRequest} />
-                </section>
-                <div className='h-px bg-white/10 w-full' />
-                <section>
-                  <h3 className='text-[10px] font-bold text-default-700 dark:text-default-50 uppercase tracking-widest mb-4'>Response Data</h3>
-                  <DisplayStruct schema={parsedResponse} />
-                </section>
-              </div>
-            )}
+            {activeTab === 'request'
+              ? (
+                <div className='absolute inset-0'>
+                  <CodeEditor
+                    value={requestBody}
+                    onChange={(value) => setRequestBody(value ?? '')}
+                    language='json'
+                    options={{
+                      minimap: { enabled: false },
+                      fontSize: 13,
+                      fontFamily: 'JetBrains Mono, monospace',
+                      scrollBeyondLastLine: false,
+                      wordWrap: 'on',
+                      padding: { top: 16, bottom: 16 },
+                      lineNumbersMinChars: 3,
+                      chromeless: true,
+                      backgroundColor: 'transparent',
+                    }}
+                  />
+                </div>
+              )
+              : (
+                <div className='p-6 space-y-8 overflow-y-auto h-full scrollbar-hide'>
+                  <section>
+                    <h3 className='text-[10px] font-bold text-default-700 dark:text-default-50 uppercase tracking-widest mb-4'>Request Params</h3>
+                    <DisplayStruct schema={parsedRequest} />
+                  </section>
+                  <div className='h-px bg-white/10 w-full' />
+                  <section>
+                    <h3 className='text-[10px] font-bold text-default-700 dark:text-default-50 uppercase tracking-widest mb-4'>Response Data</h3>
+                    <DisplayStruct schema={parsedResponse} />
+                  </section>
+                </div>
+              )}
           </div>
         </div>
       </div>
@@ -407,7 +414,7 @@ const OneBotApiDebug = forwardRef<OneBotApiDebugRef, OneBotApiDebugProps>((props
           {/* Invisible Draggable Area */}
           {responseExpanded && (
             <div
-              className="absolute -top-1.5 left-0 w-full h-4 cursor-ns-resize z-20"
+              className='absolute -top-1.5 left-0 w-full h-4 cursor-ns-resize z-20'
               onMouseDown={(e) => { e.stopPropagation(); handleMouseDown(e); }}
               onTouchStart={(e) => { e.stopPropagation(); handleTouchStart(e); }}
               onClick={(e) => e.stopPropagation()}
@@ -416,14 +423,16 @@ const OneBotApiDebug = forwardRef<OneBotApiDebugRef, OneBotApiDebugProps>((props
 
           <div className='flex items-center gap-2'>
             <div className={clsx('transition-transform duration-200', !responseExpanded && '-rotate-90')}>
-              <IoChevronDown size={14} className="opacity-50" />
+              <IoChevronDown size={14} className='opacity-50' />
             </div>
             <span className={clsx(
               'text-[10px] font-bold tracking-widest uppercase',
               hasBackground ? 'text-white' : 'text-foreground dark:text-white'
-            )}>Response</span>
+            )}
+            >Response
+            </span>
             {responseStatus && (
-              <Chip size="sm" variant="dot" color={responseStatus.code >= 200 && responseStatus.code < 300 ? 'success' : 'danger'} className="h-5 text-[10px] font-mono border-none bg-transparent pl-0">
+              <Chip size='sm' variant='dot' color={responseStatus.code >= 200 && responseStatus.code < 300 ? 'success' : 'danger'} className='h-5 text-[10px] font-mono border-none bg-transparent pl-0'>
                 {responseStatus.code} {responseStatus.text}
               </Chip>
             )}
@@ -436,9 +445,9 @@ const OneBotApiDebug = forwardRef<OneBotApiDebugRef, OneBotApiDebugProps>((props
 
         {/* Response Editor */}
         {responseExpanded && (
-          <div style={{ height: responseHeight }} className="relative bg-transparent">
+          <div style={{ height: responseHeight }} className='relative bg-transparent'>
             <PageLoading loading={isFetching} />
-            <div className="absolute inset-0">
+            <div className='absolute inset-0'>
               <CodeEditor
                 value={responseContent || '// Waiting for response...'}
                 language='json'
@@ -454,7 +463,7 @@ const OneBotApiDebug = forwardRef<OneBotApiDebugRef, OneBotApiDebugProps>((props
                   padding: { top: 12, bottom: 12 },
                   renderLineHighlight: 'none',
                   chromeless: true,
-                  backgroundColor: 'transparent'
+                  backgroundColor: 'transparent',
                 }}
               />
             </div>

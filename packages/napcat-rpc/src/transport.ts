@@ -67,6 +67,7 @@ export class MessageTransport implements RpcTransport {
     resolve: (response: RpcResponse) => void;
     reject: (error: Error) => void;
   }>();
+
   private callbackHandler?: (callbackId: string, args: SerializedValue[]) => Promise<SerializedValue>;
   private sendMessage: (message: string) => void | Promise<void>;
 

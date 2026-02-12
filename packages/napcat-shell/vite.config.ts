@@ -11,7 +11,7 @@ import react from '@vitejs/plugin-react-swc';
 const external = [
   'ws',
   'express',
-  'electron'
+  'electron',
 ];
 
 const nodeModules = [...builtinModules, builtinModules.map((m) => `node:${m}`)].flat();

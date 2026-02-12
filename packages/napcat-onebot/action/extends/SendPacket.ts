@@ -24,8 +24,9 @@ export class SendPacket extends GetPacketStatusDepends<PayloadType, ReturnType> 
   override payloadExample = {
     cmd: 'Example.Cmd',
     data: '123456',
-    rsp: true
+    rsp: true,
   };
+
   override returnExample = '123456';
 
   async _handle (payload: PayloadType) {

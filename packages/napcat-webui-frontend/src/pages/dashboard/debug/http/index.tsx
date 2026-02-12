@@ -53,14 +53,14 @@ export default function HttpDebug () {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
           }).then(res => res.json()).then(data => {
             if (data.code === 0) {
               currentAdapterName = data.data.adapterName;
               setAdapterName(currentAdapterName);
             }
-          })
+          }),
         ]);
         setOneBotHttpApi(apiData);
       } catch (error) {
@@ -74,7 +74,6 @@ export default function HttpDebug () {
       // 不再主动关闭 adapter，由后端自动管理活跃状态
     };
   }, []);
-
 
   const handleSelectApi = (api: OneBotHttpApiPath) => {
     if (!openApis.includes(api)) {
@@ -161,16 +160,18 @@ export default function HttpDebug () {
           //   ? 'bg-white/5 dark:bg-black/5 backdrop-blur-sm border-white/10'
           //   : 'bg-white/40 dark:bg-black/20 backdrop-blur-md shadow-sm border-white/40 dark:border-white/10'
           'bg-transparent'
-        )}>
+        )}
+        >
           <div className='flex-1 flex flex-col overflow-hidden relative'>
             <div className={clsx(
               'flex items-center w-full flex-shrink-0 pr-2 md:pl-4 py-1 relative z-20 rounded-md',
               hasBackground
                 ? 'bg-white/5'
                 : 'bg-white/30 dark:bg-white/5'
-            )}>
+            )}
+            >
               {/* Tab List */}
-              <div className="flex-1 overflow-x-auto no-scrollbar flex items-center">
+              <div className='flex-1 overflow-x-auto no-scrollbar flex items-center'>
                 {openApis.map((api) => {
                   const isActive = api === activeApi;
                   const item = oneBotHttpApi[api];
@@ -193,7 +194,9 @@ export default function HttpDebug () {
                         isActive
                           ? 'bg-success/20 text-success'
                           : 'opacity-60 bg-default-200/50 dark:bg-white/10'
-                      )}>POST</span>
+                      )}
+                      >POST
+                      </span>
                       <span className='text-xs truncate flex-1'>{item?.description || api}</span>
                       <div
                         className={clsx(
@@ -206,7 +209,6 @@ export default function HttpDebug () {
                       </div>
                     </div>
                   );
-
                 })}
               </div>
 

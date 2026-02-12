@@ -13,7 +13,7 @@ import { ALLRouter } from '@/napcat-webui-backend/src/router';
 import { cors } from '@/napcat-webui-backend/src/middleware/cors';
 import { createUrl, getRandomToken } from '@/napcat-webui-backend/src/utils/url';
 import { sendError } from '@/napcat-webui-backend/src/utils/response';
-import { join } from 'node:path';
+import { join, dirname, resolve } from 'node:path';
 import { terminalManager } from '@/napcat-webui-backend/src/terminal/terminal_manager';
 import multer from 'multer';
 import * as net from 'node:net';
@@ -26,7 +26,7 @@ import { handleDebugWebSocket } from '@/napcat-webui-backend/src/api/Debug';
 import compression from 'compression';
 import { napCatVersion } from 'napcat-common/src/version';
 import { fileURLToPath } from 'node:url';
-import { dirname, resolve } from 'node:path';
+
 import { NapCatOneBot11Adapter } from '@/napcat-onebot/index';
 import { OB11PluginMangerAdapter } from '@/napcat-onebot/network/plugin-manger';
 

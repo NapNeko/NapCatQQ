@@ -31,7 +31,7 @@ export interface CodeEditorRef {
 const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>((props, ref) => {
   const { isDark } = useTheme();
   const chromeless = !!props.options?.chromeless;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   const [val, setVal] = useState(props.value || props.defaultValue || '');
   const internalRef = React.useRef<ReactCodeMirrorRef>(null);
 
@@ -45,71 +45,71 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>((props, ref)
     getValue: () => {
       // Prefer getting dynamic value from view, fallback to state
       return internalRef.current?.view?.state.doc.toString() || val;
-    }
+    },
   }));
 
   const customTheme = EditorView.theme({
-    "&": {
-      fontSize: "14px",
-      height: "100% !important",
+    '&': {
+      fontSize: '14px',
+      height: '100% !important',
       backgroundColor: 'transparent !important',
     },
-    "&.cm-editor": {
+    '&.cm-editor': {
       backgroundColor: 'transparent !important',
     },
-    ".cm-scroller": {
+    '.cm-scroller': {
       fontFamily: "var(--font-family-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace)",
-      lineHeight: "1.6",
-      overflow: "auto !important",
-      height: "100% !important",
+      lineHeight: '1.6',
+      overflow: 'auto !important',
+      height: '100% !important',
       backgroundColor: 'transparent !important',
     },
-    ".cm-gutters": {
-      backgroundColor: "transparent !important",
-      borderRight: "none",
+    '.cm-gutters': {
+      backgroundColor: 'transparent !important',
+      borderRight: 'none',
       color: isDark
         ? 'hsl(var(--heroui-foreground-500) / 0.75)'
         : 'hsl(var(--heroui-foreground-500) / 0.65)',
     },
-    ".cm-gutterElement": {
-      paddingLeft: "12px",
-      paddingRight: "12px",
+    '.cm-gutterElement': {
+      paddingLeft: '12px',
+      paddingRight: '12px',
     },
-    ".cm-activeLineGutter": {
+    '.cm-activeLineGutter': {
       backgroundColor: 'transparent !important',
       color: isDark
         ? 'hsl(var(--heroui-foreground) / 0.9) !important'
         : 'hsl(var(--heroui-foreground) / 0.8) !important',
     },
-    ".cm-content": {
+    '.cm-content': {
       color: 'hsl(var(--heroui-foreground) / 0.9)',
       caretColor: 'hsl(var(--heroui-foreground) / 0.9)',
-      paddingTop: "12px",
-      paddingBottom: "12px",
+      paddingTop: '12px',
+      paddingBottom: '12px',
       backgroundColor: 'transparent !important',
     },
-    ".cm-activeLine": {
+    '.cm-activeLine': {
       backgroundColor: isDark
         ? 'hsl(var(--heroui-foreground) / 0.08)'
         : 'hsl(var(--heroui-foreground) / 0.06)',
     },
-    ".cm-selectionMatch": {
+    '.cm-selectionMatch': {
       backgroundColor: isDark
         ? 'hsl(var(--heroui-foreground) / 0.16)'
         : 'hsl(var(--heroui-foreground) / 0.12)',
     },
     // Syntax highlighting overrides for better readability
-    ".ͼo": {
+    '.ͼo': {
       // JSON property names - use a softer primary color
       color: isDark
         ? 'hsl(var(--heroui-primary) / 0.85)'
         : 'hsl(var(--heroui-primary) / 0.75)',
     },
-    ".ͼd": {
+    '.ͼd': {
       // Strings - softer green
       color: isDark ? '#98c379cc' : '#50a14fcc',
     },
-    ".ͼc": {
+    '.ͼc': {
       // Numbers - softer orange
       color: isDark ? '#d19a66cc' : '#c18401cc',
     },
@@ -137,8 +137,8 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>((props, ref)
       <CodeMirror
         ref={internalRef}
         value={props.value ?? props.defaultValue}
-        height="100%"
-        className="h-full w-full [&_.cm-editor]:!bg-transparent [&_.cm-scroller]:!bg-transparent"
+        height='100%'
+        className='h-full w-full [&_.cm-editor]:!bg-transparent [&_.cm-scroller]:!bg-transparent'
         style={{ backgroundColor: 'transparent' }}
         theme={isDark ? oneDark : 'light'}
         extensions={extensions}

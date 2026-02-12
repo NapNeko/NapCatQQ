@@ -375,7 +375,7 @@ export default function NetworkPage () {
           <AddButton onOpen={handleClickCreate} />
           <Button
             isIconOnly
-            className="bg-default-100/50 hover:bg-default-200/50 text-default-700 backdrop-blur-md"
+            className='bg-default-100/50 hover:bg-default-200/50 text-default-700 backdrop-blur-md'
             radius='full'
             onPress={refresh}
           >

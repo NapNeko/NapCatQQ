@@ -26,7 +26,7 @@ export class GetGroupIgnoredNotifies extends OneBotAction<PayloadType, ReturnTyp
   override returnExample = {
     invited_requests: [],
     InvitedRequest: [],
-    join_requests: []
+    join_requests: [],
   };
 
   async _handle (): Promise<ReturnType> {

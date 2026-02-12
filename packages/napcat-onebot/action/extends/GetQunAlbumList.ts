@@ -20,14 +20,16 @@ export class GetQunAlbumList extends OneBotAction<PayloadType, GetQunAlbumListRe
   override payloadExample = {
     group_id: '123456',
   };
+
   override returnExample = [
     {
       album_id: 'album_1',
       album_name: '测试相册',
       cover_url: 'http://example.com/cover.jpg',
-      create_time: 1734567890
-    }
+      create_time: 1734567890,
+    },
   ];
+
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
 

@@ -241,28 +241,28 @@ export default function PluginConfigModal ({ isOpen, onOpenChange, pluginId }: P
             value={value || ''}
             onValueChange={(val) => updateConfig(item.key, val)}
             description={item.description}
-            className="mb-4"
+            className='mb-4'
           />
         );
       case 'number':
         return (
           <Input
             key={item.key}
-            type="number"
+            type='number'
             label={item.label}
             placeholder={item.placeholder || item.description}
             value={String(value ?? 0)}
             onValueChange={(val) => updateConfig(item.key, Number(val))}
             description={item.description}
-            className="mb-4"
+            className='mb-4'
           />
         );
       case 'boolean':
         return (
-          <div key={item.key} className="flex justify-between items-center mb-4 p-2 bg-default-100 rounded-lg">
-            <div className="flex flex-col">
-              <span className="text-small">{item.label}</span>
-              {item.description && <span className="text-tiny text-default-500">{item.description}</span>}
+          <div key={item.key} className='flex justify-between items-center mb-4 p-2 bg-default-100 rounded-lg'>
+            <div className='flex flex-col'>
+              <span className='text-small'>{item.label}</span>
+              {item.description && <span className='text-tiny text-default-500'>{item.description}</span>}
             </div>
             <Switch
               isSelected={!!value}
@@ -285,7 +285,7 @@ export default function PluginConfigModal ({ isOpen, onOpenChange, pluginId }: P
               updateConfig(item.key, opt ? opt.value : val);
             }}
             description={item.description}
-            className="mb-4"
+            className='mb-4'
           >
             {options.map((opt) => (
               <SelectItem key={String(opt.value)} textValue={opt.label}>
@@ -303,7 +303,7 @@ export default function PluginConfigModal ({ isOpen, onOpenChange, pluginId }: P
             key={item.key}
             label={item.label}
             placeholder={item.placeholder || 'Select options'}
-            selectionMode="multiple"
+            selectionMode='multiple'
             selectedKeys={new Set(selectedKeys)}
             onSelectionChange={(keys) => {
               const selected = Array.from(keys).map(k => {
@@ -313,7 +313,7 @@ export default function PluginConfigModal ({ isOpen, onOpenChange, pluginId }: P
               updateConfig(item.key, selected);
             }}
             description={item.description}
-            className="mb-4"
+            className='mb-4'
           >
             {options.map((opt) => (
               <SelectItem key={String(opt.value)} textValue={opt.label}>
@@ -325,18 +325,18 @@ export default function PluginConfigModal ({ isOpen, onOpenChange, pluginId }: P
       }
       case 'html':
         return (
-          <div key={item.key} className="mb-4">
-            {item.label && <h4 className="text-small font-bold mb-1">{item.label}</h4>}
-            <div dangerouslySetInnerHTML={{ __html: item.default || '' }} className="prose dark:prose-invert max-w-none" />
-            {item.description && <p className="text-tiny text-default-500 mt-1">{item.description}</p>}
+          <div key={item.key} className='mb-4'>
+            {item.label && <h4 className='text-small font-bold mb-1'>{item.label}</h4>}
+            <div dangerouslySetInnerHTML={{ __html: item.default || '' }} className='prose dark:prose-invert max-w-none' />
+            {item.description && <p className='text-tiny text-default-500 mt-1'>{item.description}</p>}
           </div>
         );
       case 'text':
         return (
-          <div key={item.key} className="mb-4">
-            {item.label && <h4 className="text-small font-bold mb-1">{item.label}</h4>}
-            <div className="whitespace-pre-wrap text-default-700">{item.default || ''}</div>
-            {item.description && <p className="text-tiny text-default-500 mt-1">{item.description}</p>}
+          <div key={item.key} className='mb-4'>
+            {item.label && <h4 className='text-small font-bold mb-1'>{item.label}</h4>}
+            <div className='whitespace-pre-wrap text-default-700'>{item.default || ''}</div>
+            {item.description && <p className='text-tiny text-default-500 mt-1'>{item.description}</p>}
           </div>
         );
       default:
@@ -345,12 +345,12 @@ export default function PluginConfigModal ({ isOpen, onOpenChange, pluginId }: P
   };
 
   return (
-    <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="2xl" scrollBehavior="inside">
+    <Modal isOpen={isOpen} onOpenChange={onOpenChange} size='2xl' scrollBehavior='inside'>
       <ModalContent>
         {(onClose) => (
           <>
-            <ModalHeader className="flex flex-col gap-1">
-              <div className="flex items-center gap-2">
+            <ModalHeader className='flex flex-col gap-1'>
+              <div className='flex items-center gap-2'>
                 插件配置: {pluginId}
                 {supportReactive && (
                   <span className={`text-tiny px-2 py-0.5 rounded ${connected ? 'bg-success-100 text-success-600' : 'bg-warning-100 text-warning-600'}`}>
@@ -360,23 +360,27 @@ export default function PluginConfigModal ({ isOpen, onOpenChange, pluginId }: P
               </div>
             </ModalHeader>
             <ModalBody>
-              {loading ? (
-                <div className="flex justify-center p-8">Loading configuration...</div>
-              ) : (
-                <div className="flex flex-col gap-2">
-                  {schema.length === 0 ? (
-                    <div className="text-center text-default-500">No configuration schema available.</div>
-                  ) : (
-                    schema.filter(item => !item.hidden).map(renderField)
-                  )}
-                </div>
-              )}
+              {loading
+                ? (
+                  <div className='flex justify-center p-8'>Loading configuration...</div>
+                )
+                : (
+                  <div className='flex flex-col gap-2'>
+                    {schema.length === 0
+                      ? (
+                        <div className='text-center text-default-500'>No configuration schema available.</div>
+                      )
+                      : (
+                        schema.filter(item => !item.hidden).map(renderField)
+                      )}
+                  </div>
+                )}
             </ModalBody>
             <ModalFooter>
-              <Button color="danger" variant="light" onPress={onClose}>
+              <Button color='danger' variant='light' onPress={onClose}>
                 Close
               </Button>
-              <Button color="primary" onPress={handleSave} isLoading={saving}>
+              <Button color='primary' onPress={handleSave} isLoading={saving}>
                 Save
               </Button>
             </ModalFooter>
@@ -386,4 +390,3 @@ export default function PluginConfigModal ({ isOpen, onOpenChange, pluginId }: P
     </Modal>
   );
 }
-

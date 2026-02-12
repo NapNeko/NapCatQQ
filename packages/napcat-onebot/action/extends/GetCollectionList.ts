@@ -21,32 +21,33 @@ export class GetCollectionList extends OneBotAction<PayloadType, ReturnType> {
   override actionTags = ['系统扩展'];
   override payloadExample = {
     category: '0',
-    count: '50'
+    count: '50',
   };
+
   override returnExample = {
     errCode: 0,
-    errMsg: "",
+    errMsg: '',
     collectionSearchList: {
       collectionItemList: [
         {
-          cid: "123456",
+          cid: '123456',
           type: 8,
           status: 1,
           author: {
             type: 2,
-            numId: "123456",
-            strId: "昵称",
-            groupId: "123456",
-            groupName: "群名",
-            uid: "123456"
+            numId: '123456',
+            strId: '昵称',
+            groupId: '123456',
+            groupName: '群名',
+            uid: '123456',
           },
           bid: 1,
           category: 1,
-          createTime: "1769169157000",
-          collectTime: "1769413477691",
-          modifyTime: "1769413477691",
-          sequence: "1769413476735",
-          shareUrl: "",
+          createTime: '1769169157000',
+          collectTime: '1769413477691',
+          modifyTime: '1769413477691',
+          sequence: '1769413476735',
+          shareUrl: '',
           customGroupId: 0,
           securityBeat: false,
           summary: {
@@ -58,21 +59,21 @@ export class GetCollectionList extends OneBotAction<PayloadType, ReturnType> {
             fileSummary: null,
             locationSummary: null,
             richMediaSummary: {
-              title: "",
-              subTitle: "",
-              brief: "text",
+              title: '',
+              subTitle: '',
+              brief: 'text',
               picList: [],
               contentType: 1,
-              originalUri: "",
-              publisher: "",
-              richMediaVersion: 0
-            }
-          }
-        }
+              originalUri: '',
+              publisher: '',
+              richMediaVersion: 0,
+            },
+          },
+        },
       ],
       hasMore: false,
-      bottomTimeStamp: "1769413477691"
-    }
+      bottomTimeStamp: '1769413477691',
+    },
   };
 
   async _handle (payload: PayloadType) {

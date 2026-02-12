@@ -22,11 +22,12 @@ export class GetUserStatus extends GetPacketStatusDepends<PayloadType, ReturnTyp
   override actionSummary = '获取用户在线状态';
   override actionTags = ['系统扩展'];
   override payloadExample = {
-    user_id: '123456789'
+    user_id: '123456789',
   };
+
   override returnExample = {
     status: 10,
-    ext_status: 0
+    ext_status: 0,
   };
 
   async _handle (payload: PayloadType) {

@@ -1,28 +1,29 @@
 /**
  * NapCat WebUI Service Worker
- * 
+ *
  * 路由缓存策略设计：
- * 
+ *
  * 【永不缓存 - Network Only】
  *   - /api/*                          WebUI API
  *   - /plugin/:id/api/*               插件 API
  *   - /files/theme.css                动态主题 CSS
  *   - /webui/fonts/CustomFont.woff    用户自定义字体
  *   - WebSocket / SSE 连接
- * 
+ *
  * 【强缓存 - Cache First】
  *   - /webui/assets/*                 前端静态资源（带 hash）
  *   - /webui/fonts/*                  内置字体（排除 CustomFont）
  *   - q1.qlogo.cn                     QQ 头像
- * 
+ *
  * 【网络优先 - Network First】
  *   - /webui/* (HTML 导航)            SPA 页面
  *   - /plugin/:id/page/*              插件页面
  *   - /plugin/:id/files/*             插件文件系统静态资源
- * 
- * 【后台更新 - Stale-While-Revalidate】  
+ *
+ * 【后台更新 - Stale-While-Revalidate】
  *   - /plugin/:id/mem/*               插件内存静态资源
  */
+/* global self, caches */
 
 const CACHE_NAME = 'napcat-webui-v{{VERSION}}';
 
@@ -157,6 +158,7 @@ self.addEventListener('activate', (event) => {
             console.log('[SW] Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
+          return Promise.resolve();
         })
       );
       // 立即接管所有客户端
@@ -216,11 +218,10 @@ self.addEventListener('fetch', (event) => {
   // 8. 其他同源请求 - Network Only（避免意外缓存）
   if (url.origin === self.location.origin) {
     // 不缓存，直接穿透
-    return;
+
   }
 
   // 9. 其他外部请求 - Network Only
-  return;
 });
 
 // ============ 缓存策略实现 ============

@@ -15,13 +15,14 @@ export class GetFlashFileList extends OneBotAction<GetFlashFileListPayload, any>
   override actionSummary = '获取闪传文件列表';
   override actionTags = ['文件扩展'];
   override payloadExample = {
-    fileset_id: 'set_123'
+    fileset_id: 'set_123',
   };
+
   override returnExample = [
     {
       file_name: 'test.jpg',
-      size: 1024
-    }
+      size: 1024,
+    },
   ];
 
   async _handle (payload: GetFlashFileListPayload) {

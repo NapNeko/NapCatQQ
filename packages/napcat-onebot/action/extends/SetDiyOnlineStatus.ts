@@ -23,8 +23,9 @@ export class SetDiyOnlineStatus extends OneBotAction<PayloadType, ReturnType> {
   override payloadExample = {
     face_id: '123',
     face_type: '1',
-    wording: '自定义状态'
+    wording: '自定义状态',
   };
+
   override returnExample = '';
   async _handle (payload: PayloadType) {
     const ret = await this.core.apis.UserApi.setDiySelfOnlineStatus(

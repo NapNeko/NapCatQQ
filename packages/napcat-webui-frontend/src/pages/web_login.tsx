@@ -155,7 +155,7 @@ export default function WebLoginPage () {
         <motion.div
           initial={{ opacity: 0, y: 20, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.5, type: "spring", stiffness: 120, damping: 20 }}
+          transition={{ duration: 0.5, type: 'spring', stiffness: 120, damping: 20 }}
           className='w-[608px] max-w-full py-8 px-2 md:px-8 overflow-hidden'
         >
           <HoverEffectCard

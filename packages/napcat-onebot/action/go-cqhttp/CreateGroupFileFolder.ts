@@ -28,11 +28,12 @@ export class CreateGroupFileFolder extends OneBotAction<PayloadType, ReturnType>
   override actionTags = ['Go-CQHTTP'];
   override payloadExample = {
     group_id: '123456789',
-    folder_name: '新建文件夹'
+    folder_name: '新建文件夹',
   };
+
   override returnExample = {
     result: {},
-    groupItem: {}
+    groupItem: {},
   };
 
   async _handle (payload: PayloadType) {

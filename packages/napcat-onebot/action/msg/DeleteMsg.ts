@@ -21,8 +21,9 @@ class DeleteMsg extends OneBotAction<PayloadType, ReturnType> {
   override actionDescription = '撤回已发送的消息';
   override actionTags = ['消息接口'];
   override payloadExample = {
-    message_id: 12345
+    message_id: 12345,
   };
+
   override returnExample = null;
 
   async _handle (payload: PayloadType) {

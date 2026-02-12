@@ -273,7 +273,7 @@ const ServerConfigCard = () => {
                   <textarea
                     value={ipListText}
                     onChange={(e) => setIpListText(e.target.value)}
-                    placeholder={`每行一个IP地址或规则\n支持格式：\nIPv4:\n- 精确IP: 192.168.1.100\n- 通配符: 192.168.1.*\n- CIDR: 192.168.1.0/24\nIPv6:\n- 精确IP: 2001:db8::1\n- CIDR: 2001:db8::/32`}
+                    placeholder={'每行一个IP地址或规则\n支持格式：\nIPv4:\n- 精确IP: 192.168.1.100\n- 通配符: 192.168.1.*\n- CIDR: 192.168.1.0/24\nIPv6:\n- 精确IP: 2001:db8::1\n- CIDR: 2001:db8::/32'}
                     disabled={!!configError}
                     rows={10}
                     className='w-full px-3 py-2 bg-default-100/50 dark:bg-white/5 backdrop-blur-md border border-transparent hover:bg-default-200/50 dark:hover:bg-white/10 transition-all shadow-sm hover:border-default-300 rounded-lg text-default-700 dark:text-default-300 placeholder:text-default-400 font-mono text-sm resize-y focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed'

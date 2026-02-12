@@ -1,5 +1,5 @@
 import { readdir, readFile, writeFile, rename } from 'node:fs/promises';
-import { join, extname, basename } from 'node:path';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = fileURLToPath(new URL('../', import.meta.url));
@@ -12,6 +12,7 @@ const ALLOWED_PACKAGES = [
 ];
 
 // 外部包类型到 any 的映射
+// eslint-disable-next-line no-unused-vars
 const EXTERNAL_TYPE_REPLACEMENTS = {
   // winston
   'winston.Logger': 'any',
@@ -20,27 +21,27 @@ const EXTERNAL_TYPE_REPLACEMENTS = {
   'express.Express': 'any',
   'express.Application': 'any',
   'express.Router': 'any',
-  'Express': 'any',
-  'Request': 'any',
-  'Response': 'any',
-  'NextFunction': 'any',
+  Express: 'any',
+  Request: 'any',
+  Response: 'any',
+  NextFunction: 'any',
   // ws
-  'WebSocket': 'any',
-  'WebSocketServer': 'any',
-  'RawData': 'any',
+  WebSocket: 'any',
+  WebSocketServer: 'any',
+  RawData: 'any',
   // ajv
-  'Ajv': 'any',
-  'AnySchema': 'any',
-  'ValidateFunction': 'any',
+  Ajv: 'any',
+  AnySchema: 'any',
+  ValidateFunction: 'any',
   'ValidateFunction<T>': 'any',
   // inversify
-  'Container': 'any',
+  Container: 'any',
   // async-mutex
-  'Mutex': 'any',
-  'Semaphore': 'any',
+  Mutex: 'any',
+  Semaphore: 'any',
   // napcat-protobuf
-  'NapProtoDecodeStructType': 'any',
-  'NapProtoEncodeStructType': 'any',
+  NapProtoDecodeStructType: 'any',
+  NapProtoEncodeStructType: 'any',
   'NapProtoDecodeStructType<T>': 'any',
   'NapProtoEncodeStructType<T>': 'any',
 };
@@ -90,6 +91,7 @@ function replaceExternalTypes (content) {
   // 使用类型上下文的模式匹配
   const typeContextPatterns = [
     // : Type
+    // eslint-disable-next-line no-useless-escape
     /:\s*(WebSocket|WebSocketServer|RawData|Ajv|AnySchema|ValidateFunction|Container|Mutex|Semaphore|NapProtoDecodeStructType|NapProtoEncodeStructType|Express|Request|Response|NextFunction)(?=\s*[;,)\]\}|&]|$)/g,
     // <Type>
     /<(WebSocket|WebSocketServer|RawData|Ajv|AnySchema|ValidateFunction|Container|Mutex|Semaphore|NapProtoDecodeStructType|NapProtoEncodeStructType|Express|Request|Response|NextFunction)>/g,
@@ -144,7 +146,7 @@ async function processFile (filePath) {
   const newPath = filePath.replace(/\.d\.ts$/, '.ts');
   await rename(filePath, newPath);
 
-  //console.log(`Processed: ${basename(filePath)} -> ${basename(newPath)}`);
+  // console.log(`Processed: ${basename(filePath)} -> ${basename(newPath)}`);
 }
 
 console.log('Starting post-build processing...');

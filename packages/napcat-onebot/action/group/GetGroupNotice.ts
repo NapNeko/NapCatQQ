@@ -63,7 +63,7 @@ export class GetGroupNotice extends OneBotAction<PayloadType, ReturnType> {
           images: image,
         },
         settings: retApiNotice.settings,
-        read_num: retApiNotice.read_num
+        read_num: retApiNotice.read_num,
       };
       retNotices.push(retNotice);
     }

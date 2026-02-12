@@ -63,7 +63,6 @@ export class JpegParser implements ImageParser {
         const bufferSize = buffer.length;
         const MIN_REQUIRED_BYTES = 10; // SOF段最低字节数
 
-
         // 从JPEG头部后开始扫描
         while (offset < bufferSize - MIN_REQUIRED_BYTES) {
           // 寻找FF标记

@@ -99,7 +99,8 @@ const RealTimeLogs = () => {
       <div className={clsx(
         'flex items-center gap-2 p-2 rounded-2xl border backdrop-blur-sm transition-all shadow-sm mb-4',
         hasBackground ? 'bg-white/20 dark:bg-black/10 border-white/40 dark:border-white/10' : 'bg-white/60 dark:bg-black/40 border-white/40 dark:border-white/10'
-      )}>
+      )}
+      >
         <LogLevelSelect
           selectedKeys={logLevel}
           onSelectionChange={setLogLevel}

@@ -44,8 +44,6 @@ export default function PluginPage () {
     loadPlugins();
   }, []);
 
-
-
   const handleToggle = async (plugin: PluginItem) => {
     const isEnable = plugin.status !== 'active';
     const actionText = isEnable ? '启用' : '禁用';
@@ -64,9 +62,9 @@ export default function PluginPage () {
       dialog.confirm({
         title: '卸载插件',
         content: (
-          <div className="flex flex-col gap-2">
+          <div className='flex flex-col gap-2'>
             <p>确定要卸载插件「{plugin.name}」吗? 此操作不可恢复。</p>
-            <p className="text-small text-default-500">如果插件创建了数据文件，是否一并删除？</p>
+            <p className='text-small text-default-500'>如果插件创建了数据文件，是否一并删除？</p>
           </div>
         ),
         // This 'dialog' utility might not support returning a value from UI interacting.
@@ -98,7 +96,7 @@ export default function PluginPage () {
         },
         onCancel: () => {
           resolve();
-        }
+        },
       });
     });
   };
@@ -113,11 +111,11 @@ export default function PluginPage () {
       dialog.confirm({
         title: '插件管理器未加载',
         content: (
-          <div className="space-y-2">
-            <p className="text-sm text-default-600">
+          <div className='space-y-2'>
+            <p className='text-sm text-default-600'>
               插件管理器尚未加载，无法导入插件。
             </p>
-            <p className="text-sm text-default-600">
+            <p className='text-sm text-default-600'>
               是否立即注册插件管理器？
             </p>
           </div>
@@ -175,17 +173,17 @@ export default function PluginPage () {
         />
 
         <div className='flex mb-6 items-center gap-4'>
-          <h1 className="text-2xl font-bold">插件管理</h1>
+          <h1 className='text-2xl font-bold'>插件管理</h1>
           <Button
             isIconOnly
-            className="bg-default-100/50 hover:bg-default-200/50 text-default-700 backdrop-blur-md"
+            className='bg-default-100/50 hover:bg-default-200/50 text-default-700 backdrop-blur-md'
             radius='full'
             onPress={loadPlugins}
           >
             <IoMdRefresh size={24} />
           </Button>
           <Button
-            className="bg-primary-100/50 hover:bg-primary-200/50 text-primary-700 backdrop-blur-md"
+            className='bg-primary-100/50 hover:bg-primary-200/50 text-primary-700 backdrop-blur-md'
             radius='full'
             startContent={<FiUpload size={18} />}
             onPress={handleImportClick}
@@ -194,47 +192,51 @@ export default function PluginPage () {
           </Button>
           <input
             ref={fileInputRef}
-            type="file"
-            accept=".zip"
-            className="hidden"
+            type='file'
+            accept='.zip'
+            className='hidden'
             onChange={handleFileChange}
           />
         </div>
 
-        {pluginManagerNotFound ? (
-          <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
-            <div className="text-6xl mb-4">📦</div>
-            <h2 className="text-xl font-semibold text-default-700 dark:text-white/90 mb-2">
-              无插件加载
-            </h2>
-            <p className="text-default-500 dark:text-white/60 max-w-md">
-              插件管理器未加载，请检查 plugins 目录是否存在
-            </p>
-          </div>
-        ) : plugins.length === 0 ? (
-          <div className="text-default-400">暂时没有安装插件</div>
-        ) : (
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 justify-start items-stretch gap-x-2 gap-y-4'>
-            {plugins.map(plugin => (
-              <PluginDisplayCard
-                key={plugin.id}
-                data={plugin}
-                onToggleStatus={() => handleToggle(plugin)}
-                onUninstall={() => handleUninstall(plugin)}
-                onConfig={() => {
-                  if (plugin.status !== 'active') {
-                    toast.error('未启用插件，无法配置插件');
-                  } else if (plugin.hasConfig) {
-                    handleConfig(plugin);
-                  } else {
-                    toast.error('此插件没有配置哦');
-                  }
-                }}
-                hasConfig={true}
-              />
-            ))}
-          </div>
-        )}
+        {pluginManagerNotFound
+          ? (
+            <div className='flex flex-col items-center justify-center min-h-[400px] text-center'>
+              <div className='text-6xl mb-4'>📦</div>
+              <h2 className='text-xl font-semibold text-default-700 dark:text-white/90 mb-2'>
+                无插件加载
+              </h2>
+              <p className='text-default-500 dark:text-white/60 max-w-md'>
+                插件管理器未加载，请检查 plugins 目录是否存在
+              </p>
+            </div>
+          )
+          : plugins.length === 0
+            ? (
+              <div className='text-default-400'>暂时没有安装插件</div>
+            )
+            : (
+              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 justify-start items-stretch gap-x-2 gap-y-4'>
+                {plugins.map(plugin => (
+                  <PluginDisplayCard
+                    key={plugin.id}
+                    data={plugin}
+                    onToggleStatus={() => handleToggle(plugin)}
+                    onUninstall={() => handleUninstall(plugin)}
+                    onConfig={() => {
+                      if (plugin.status !== 'active') {
+                        toast.error('未启用插件，无法配置插件');
+                      } else if (plugin.hasConfig) {
+                        handleConfig(plugin);
+                      } else {
+                        toast.error('此插件没有配置哦');
+                      }
+                    }}
+                    hasConfig
+                  />
+                ))}
+              </div>
+            )}
       </div>
     </>
   );

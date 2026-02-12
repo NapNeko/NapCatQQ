@@ -228,8 +228,9 @@ export class PacketOperationContext {
     const res = trans.UploadForwardMsg.parse(resp);
     return res.result.resId;
   }
+
   async UploadForwardMsgV2 (msg: UploadForwardMsgParams[], groupUin: number = 0) {
-    //await this.SendPreprocess(msg, groupUin);
+    // await this.SendPreprocess(msg, groupUin);
     // 遍历上传资源
     await Promise.allSettled(msg.map(async (item) => { return await this.SendPreprocess(item.actionMsg, groupUin); }));
     const req = trans.UploadForwardMsgV2.build(this.context.napcore.basicInfo.uid, msg, groupUin);
@@ -237,6 +238,7 @@ export class PacketOperationContext {
     const res = trans.UploadForwardMsg.parse(resp);
     return res.result.resId;
   }
+
   async MoveGroupFile (
     groupUin: number,
     fileUUID: string,

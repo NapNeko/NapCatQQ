@@ -1,5 +1,5 @@
-import { ConfigBase } from 'napcat-core';
-import { NapCatCore } from 'napcat-core';
+import { ConfigBase, NapCatCore } from 'napcat-core';
+
 import { NapCatProtocolConfig, NapCatProtocolConfigSchema } from './config';
 
 export class NapCatProtocolConfigLoader extends ConfigBase<NapCatProtocolConfig> {

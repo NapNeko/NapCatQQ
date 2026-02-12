@@ -18,8 +18,9 @@ class SetGroupSignBase extends GetPacketStatusDepends<PayloadType, ReturnType> {
   override actionSummary = '群打卡';
   override actionTags = ['群组扩展'];
   override payloadExample = {
-    group_id: '123456789'
+    group_id: '123456789',
   };
+
   override returnExample = null;
 
   async _handle (payload: PayloadType) {

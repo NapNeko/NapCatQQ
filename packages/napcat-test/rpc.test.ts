@@ -102,6 +102,7 @@ function createTestObject (): TestObject {
       greet () {
         return `Instance: ${this.name}`;
       }
+
       getName () {
         return this.name;
       }
@@ -609,8 +610,8 @@ describe('napcat-rpc RPC', () => {
       const transport = new LocalTransport(target);
       const proxy = createDeepProxy<typeof target>({ transport });
 
-      const processor = vi.fn(async (x: number) => {
-        await new Promise(r => setTimeout(r, 1));
+      const processor = vi.fn(async (_x: number) => {
+        await new Promise(_resolve => setTimeout(_resolve, 1));
         return x * 10;
       });
 
@@ -779,8 +780,8 @@ describe('napcat-rpc RPC', () => {
         async fetchUser (id: number) {
           return { id, name: `User${id}` };
         },
-        async delay (ms: number) {
-          await new Promise(r => setTimeout(r, ms));
+        async delay (_ms: number) {
+          await new Promise(_resolve => setTimeout(_resolve, _ms));
           return 'done';
         },
       });
@@ -1441,6 +1442,7 @@ describe('napcat-rpc RPC', () => {
             { id: 2, name: 'item2' },
           ];
         }
+
         getItem (index: number) {
           return { id: index, getValue: () => `item${index}` };
         }

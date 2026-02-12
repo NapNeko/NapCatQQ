@@ -43,7 +43,7 @@ function extractCharsFromSource () {
 
   // 匹配所有 .tsx, .ts, .jsx, .js, .css 文件
   const files = glob.sync(`${SRC_DIR}/**/*.{tsx,ts,jsx,js,css}`, {
-    ignore: ['**/node_modules/**']
+    ignore: ['**/node_modules/**'],
   });
 
   // 中文字符正则
@@ -73,7 +73,7 @@ async function run () {
   console.log(`📝 Found ${text.length} unique characters`);
 
   // 检查源字体是否存在
-  let sourceFont = SOURCE_FONT;
+  const sourceFont = SOURCE_FONT;
   if (!fs.existsSync(SOURCE_FONT)) {
     // 尝试查找原始 TTF 并复制（不重命名，保留原始）
     if (fs.existsSync(SOURCE_TTF_ORIGINAL)) {

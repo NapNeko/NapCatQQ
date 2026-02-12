@@ -219,7 +219,7 @@ export class SendMsgBase extends OneBotAction<SendMsgPayload, ReturnDataType> {
   } | null> {
     const packetMsg: PacketMsg[] = [];
     const delFiles: string[] = [];
-    const innerMsg: Array<{ uuid: string, packetMsg: PacketMsg[]; }> = new Array();
+    const innerMsg: Array<{ uuid: string, packetMsg: PacketMsg[]; }> = [];
     for (const node of messageNodes) {
       if (dp >= 3) {
         this.core.context.logger.logWarn('转发消息深度超过3层，将停止解析！');
@@ -243,7 +243,6 @@ export class SendMsgBase extends OneBotAction<SendMsgPayload, ReturnDataType> {
               innerMsg.push({ uuid: m.uuid, packetMsg: m.packetMsg });
             });
           }
-
         } else {
           const sendElementsCreateReturn = await this.obContext.apis.MsgApi.createSendElements(OB11Data, msgPeer);
           sendElements = sendElementsCreateReturn.sendElements;
@@ -308,8 +307,8 @@ export class SendMsgBase extends OneBotAction<SendMsgPayload, ReturnDataType> {
         },
       } as SendArkElement,
       res_id: resid,
-      uuid: uuid,
-      packetMsg: packetMsg,
+      uuid,
+      packetMsg,
       innerPacketMsg: innerMsg,
     };
   }

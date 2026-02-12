@@ -17,11 +17,12 @@ export default class SendLike extends OneBotAction<SendLikePayload, void> {
   override actionTags = ['用户接口'];
   override payloadExample = {
     user_id: '123456',
-    times: 10
+    times: 10,
   };
+
   override returnExample = {};
   override errorExamples = [
-    { code: 1400, description: '点赞失败（频率过快或用户不存在）' }
+    { code: 1400, description: '点赞失败（频率过快或用户不存在）' },
   ];
 
   async _handle (payload: SendLikePayload): Promise<void> {

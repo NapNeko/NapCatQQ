@@ -35,7 +35,8 @@ const parseLoginError = (errorStr: string) => {
 
         return `${info.message || errorStr}${codeStr}`;
       }
-    } catch (e) {
+    } catch (error) {
+      console.log(error);
       // 忽略解析错误
     }
   }

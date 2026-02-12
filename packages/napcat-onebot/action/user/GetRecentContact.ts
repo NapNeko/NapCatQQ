@@ -31,16 +31,17 @@ export default class GetRecentContact extends OneBotAction<GetRecentContactPaylo
   override actionDescription = '获取最近会话';
   override actionTags = ['用户接口'];
   override payloadExample = {
-    count: 10
+    count: 10,
   };
+
   override returnExample = [
     {
       peerUin: '123456',
       peerName: '测试',
       msgTime: '1734567890',
       msgId: '12345',
-      lastestMsg: {}
-    }
+      lastestMsg: {},
+    },
   ];
 
   async _handle (payload: GetRecentContactPayload, _adapter: string, config: NetworkAdapterConfig): Promise<GetRecentContactReturn> {

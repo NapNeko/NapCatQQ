@@ -348,7 +348,7 @@ const ThemeConfigCard = () => {
             >
               保存应用
             </Button>
-            <div className='w-px h-6 bg-divider mx-1 hidden sm:block'></div>
+            <div className='w-px h-6 bg-divider mx-1 hidden sm:block' />
             <Button
               size='sm'
               isIconOnly
@@ -364,22 +364,22 @@ const ThemeConfigCard = () => {
 
       <div className='px-4 pt-0 pb-4 w-full h-full'>
         <Tabs
-          aria-label="Theme Config Options"
-          color="primary"
-          variant="underlined"
+          aria-label='Theme Config Options'
+          color='primary'
+          variant='underlined'
           disableAnimation
           classNames={{
-            tabList: "gap-8 w-full relative rounded-none p-0 border-b border-divider overflow-x-auto no-scrollbar",
-            cursor: "w-full bg-primary h-[3px] -bottom-[1.5px]",
-            tab: "max-w-fit px-0 h-12 hover:opacity-100 opacity-70 data-[selected=true]:opacity-100",
-            tabContent: "font-semibold py-2",
-            panel: "py-4"
+            tabList: 'gap-8 w-full relative rounded-none p-0 border-b border-divider overflow-x-auto no-scrollbar',
+            cursor: 'w-full bg-primary h-[3px] -bottom-[1.5px]',
+            tab: 'max-w-fit px-0 h-12 hover:opacity-100 opacity-70 data-[selected=true]:opacity-100',
+            tabContent: 'font-semibold py-2',
+            panel: 'py-4',
           }}
         >
           <Tab
-            key="font"
+            key='font'
             title={
-              <div className="flex items-center space-x-2">
+              <div className='flex items-center space-x-2'>
                 <FaFont />
                 <span>字体设置</span>
               </div>
@@ -463,9 +463,9 @@ const ThemeConfigCard = () => {
           </Tab>
 
           <Tab
-            key="theme"
+            key='theme'
             title={
-              <div className="flex items-center space-x-2">
+              <div className='flex items-center space-x-2'>
                 <IoIosColorPalette size={18} />
                 <span>选择主题</span>
               </div>
@@ -486,9 +486,9 @@ const ThemeConfigCard = () => {
           </Tab>
 
           <Tab
-            key="custom-color"
+            key='custom-color'
             title={
-              <div className="flex items-center space-x-2">
+              <div className='flex items-center space-x-2'>
                 <FaPaintbrush />
                 <span>自定义配色</span>
               </div>
@@ -499,7 +499,7 @@ const ThemeConfigCard = () => {
                 <Card key={mode} className={clsx('border shadow-sm', mode === 'dark' ? 'bg-[#18181b] border-zinc-800' : 'bg-white border-zinc-200')}>
                   <CardHeader className='pb-0 pt-4 px-4 flex-col items-start'>
                     <div className='flex items-center gap-2 mb-1'>
-                      {mode === 'dark' ? <MdDarkMode className="text-zinc-400" size={20} /> : <MdLightMode className="text-orange-400" size={20} />}
+                      {mode === 'dark' ? <MdDarkMode className='text-zinc-400' size={20} /> : <MdLightMode className='text-orange-400' size={20} />}
                       <h4 className={clsx('font-bold text-large', mode === 'dark' ? 'text-white' : 'text-black')}>
                         {mode === 'dark' ? '深色模式' : '浅色模式'}
                       </h4>

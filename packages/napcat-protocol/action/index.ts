@@ -40,7 +40,7 @@ export abstract class BaseAction<PayloadType = unknown, ReturnType = unknown> {
 export type ActionMap = Map<string, BaseAction<unknown, unknown>>;
 
 // 创建 Action 映射
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 export function createActionMap (_adapter: NapCatProtocolAdapter, _core: NapCatCore): ActionMap {
   const actionMap = new Map<string, BaseAction<unknown, unknown>>();
 

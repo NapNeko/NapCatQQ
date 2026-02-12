@@ -1,7 +1,7 @@
 /**
  * GitHub 镜像配置模块
  * 提供统一的镜像源管理，支持复杂网络环境
- * 
+ *
  * 镜像源测试时间: 2026-01-03
  * 测试通过: 55/61 完全可用
  */
@@ -17,7 +17,7 @@ import { PromiseTimer } from './helper';
  * GitHub 文件加速镜像
  * 用于加速 release assets 下载
  * 按延迟排序，优先使用快速镜像
- * 
+ *
  * 测试时间: 2026-01-03
  * 镜像支持 301/302 重定向
  * 懒加载测速：首次使用时自动测速，缓存 30 分钟
@@ -74,7 +74,7 @@ export const GITHUB_FILE_MIRRORS = [
  * GitHub API 镜像
  * 用于访问 GitHub API（作为备选方案）
  * 注：优先使用非 API 方法，减少对 API 的依赖
- * 
+ *
  * 经测试，大部分代理镜像不支持 API 转发
  * 建议使用 getLatestReleaseTag 等方法避免 API 调用
  */
@@ -271,8 +271,6 @@ async function performMirrorTest (): Promise<string[]> {
     .sort((a, b) => a.latency - b.latency)
     .map(r => r.mirror);
 
-
-
   // 至少返回原始 URL
   if (successfulMirrors.length === 0) {
     return [''];
@@ -287,7 +285,6 @@ async function performMirrorTest (): Promise<string[]> {
 export function clearMirrorCache (): void {
   cachedFastMirrors = null;
   cacheTimestamp = 0;
-
 }
 
 /**
@@ -664,7 +661,7 @@ export function buildReleaseDownloadUrl (
 
 /**
  * 获取 GitHub release 信息（优先使用非 API 方法）
- * 
+ *
  * 策略：
  * 1. 先通过 git refs 获取 tags
  * 2. 直接构建下载 URL，不依赖 API
@@ -725,7 +722,7 @@ export async function getGitHubRelease (
       const response = await PromiseTimer(
         RequestUtil.HttpGetJson<any>(url, 'GET', undefined, {
           'User-Agent': 'NapCat',
-          'Accept': 'application/vnd.github.v3+json',
+          Accept: 'application/vnd.github.v3+json',
         }),
         currentConfig.timeout
       );
@@ -958,7 +955,7 @@ async function getWorkflowRunsFromHtml (
                 allRuns.push({
                   id,
                   created_at: timeMatch[1],
-                  title: title.trim()
+                  title: title.trim(),
                 });
               }
             }
@@ -994,7 +991,7 @@ async function getWorkflowRunsFromHtml (
 /**
  * 通过 API 获取最新的 workflow runs，然后直接拼接 nightly.link 下载链接
  * 无需解析 HTML，直接使用固定的 URL 格式
- * 
+ *
  * 策略：
  * 1. 优先使用 GitHub API
  * 2. API 失败时，从 GitHub Actions HTML 页面解析
@@ -1042,7 +1039,6 @@ async function getArtifactsFromNightlyLink (
       }
     }
     return { artifacts, mirror: runsMirror };
-
   } catch {
     return { artifacts: [], mirror: '' };
   }
@@ -1051,7 +1047,7 @@ async function getArtifactsFromNightlyLink (
 /**
  * 获取 GitHub Action 最新运行的 artifacts
  * 用于下载 nightly/dev 版本
- * 
+ *
  * 策略：
  * 1. 检查缓存（10分钟有效）
  * 2. 优先尝试从 nightly.link 获取（无需认证，更稳定）

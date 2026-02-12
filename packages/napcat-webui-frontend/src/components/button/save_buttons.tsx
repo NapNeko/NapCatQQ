@@ -26,9 +26,9 @@ const SaveButtons: React.FC<SaveButtonsProps> = ({
   >
     <div className='flex items-center justify-center gap-2 mt-5'>
       <Button
-        radius="full"
-        variant="flat"
-        className="font-medium bg-default-100 text-default-600 dark:bg-default-50/50"
+        radius='full'
+        variant='flat'
+        className='font-medium bg-default-100 text-default-600 dark:bg-default-50/50'
         onPress={() => {
           reset();
           toast.success('重置成功');
@@ -38,8 +38,8 @@ const SaveButtons: React.FC<SaveButtonsProps> = ({
       </Button>
       <Button
         color='primary'
-        radius="full"
-        className="font-medium shadow-md shadow-primary/20"
+        radius='full'
+        className='font-medium shadow-md shadow-primary/20'
         isLoading={isSubmitting}
         onPress={() => onSubmit()}
       >
@@ -50,7 +50,7 @@ const SaveButtons: React.FC<SaveButtonsProps> = ({
           isIconOnly
           radius='full'
           variant='flat'
-          className="text-default-500 bg-default-100 dark:bg-default-50/50"
+          className='text-default-500 bg-default-100 dark:bg-default-50/50'
           onPress={() => refresh()}
         >
           <IoMdRefresh size={20} />

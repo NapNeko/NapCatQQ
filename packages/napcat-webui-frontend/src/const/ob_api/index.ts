@@ -16,8 +16,8 @@ export async function fetchOneBotHttpApi (): Promise<OneBotHttpApi> {
   try {
     const response = await fetch('/api/Debug/schemas', {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
     });
     const data = await response.json();
     if (data.code === 0) {
@@ -37,4 +37,3 @@ export function getOneBotHttpApi () {
 export type OneBotHttpApiPath = string;
 
 export default oneBotHttpApi;
-

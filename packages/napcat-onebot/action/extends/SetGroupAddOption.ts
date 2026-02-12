@@ -23,6 +23,7 @@ export default class SetGroupAddOption extends OneBotAction<PayloadType, ReturnT
     group_id: '123456',
     add_type: 1,
   };
+
   override returnExample = null;
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;

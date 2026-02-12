@@ -144,7 +144,7 @@ export interface MemoryStaticFile {
 export interface PluginRouterRegistry {
   // ==================== API 路由注册（需要认证） ====================
 
-  /** 
+  /**
    * 注册单个 API 路由（需要认证，挂载到 /api/Plugin/ext/{pluginId}/）
    * @param method HTTP 方法
    * @param path 路由路径
@@ -284,7 +284,7 @@ export interface NapCatPluginContext {
   pluginManager: IPluginManager;
   /** 插件日志器 - 自动添加插件名称前缀 */
   logger: PluginLogger;
-  /** 
+  /**
    * WebUI 路由注册器
    * 用于注册插件的 HTTP API 路由，路由将挂载到 /api/Plugin/ext/{pluginId}/
    * 静态资源将挂载到 /plugin/{pluginId}/files/{urlPath}/
@@ -317,7 +317,7 @@ export interface PluginModule<T extends OB11EmitEventContent = OB11EmitEventCont
   plugin_config_ui?: PluginConfigSchema;
   plugin_get_config?: (ctx: NapCatPluginContext) => C | Promise<C>;
   plugin_set_config?: (ctx: NapCatPluginContext, config: C) => void | Promise<void>;
-  /** 
+  /**
    * 配置界面控制器 - 当配置界面打开时调用
    * 返回清理函数，在界面关闭时调用
    */

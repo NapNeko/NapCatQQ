@@ -30,16 +30,18 @@ export class GetEmojiLikes extends OneBotAction<PayloadType, ReturnType> {
   override actionTags = ['消息扩展'];
   override payloadExample = {
     message_id: '12345',
-    emoji_id: '123'
+    emoji_id: '123',
   };
+
   override returnExample = {
     emoji_like_list: [
       {
         user_id: '654321',
-        nick_name: '测试用户'
-      }
-    ]
+        nick_name: '测试用户',
+      },
+    ],
   };
+
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
 
@@ -64,7 +66,7 @@ export class GetEmojiLikes extends OneBotAction<PayloadType, ReturnType> {
     const emojiType = payload.emoji_type ?? (payload.emoji_id.length > 3 ? '2' : '1');
     const emojiLikeList: Array<{ user_id: string; nick_name: string; }> = [];
     let cookie = '';
-    let needFetchCount = payload.count == 0 ? 200 : Math.ceil(payload.count / 15);
+    const needFetchCount = payload.count === 0 ? 200 : Math.ceil(payload.count / 15);
     for (let page = 0; page < needFetchCount; page++) {
       const res = await this.core.apis.MsgApi.getMsgEmojiLikesList(
         peer, msg.msgSeq, payload.emoji_id.toString(), emojiType, cookie, 15

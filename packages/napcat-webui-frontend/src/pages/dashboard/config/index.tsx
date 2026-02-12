@@ -36,7 +36,8 @@ const ConfigPageItem: React.FC<ConfigPageProps> = ({
         'max-w-3xl': size === 'md',
         'max-w-6xl': size === 'lg',
       }
-    )}>
+    )}
+    >
       <CardBody className='py-6 px-4 md:py-8 md:px-12'>
         <div className='w-full flex flex-col gap-5'>
           {children}

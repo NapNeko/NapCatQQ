@@ -26,11 +26,13 @@ export class RenameGroupFile extends GetPacketStatusDepends<PayloadType, ReturnT
     group_id: '123456',
     file_id: '/file_id',
     current_parent_directory: '/',
-    new_name: 'new_name.jpg'
+    new_name: 'new_name.jpg',
   };
+
   override returnExample = {
-    ok: true
+    ok: true,
   };
+
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
 

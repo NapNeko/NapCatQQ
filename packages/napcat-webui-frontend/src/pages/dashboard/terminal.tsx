@@ -121,7 +121,8 @@ export default function TerminalPage () {
               <TabList className={clsx(
                 'flex-1 !overflow-x-auto w-full hide-scrollbar backdrop-blur-sm p-1 rounded-lg border border-white/20',
                 hasBackground ? 'bg-white/20 dark:bg-black/10' : 'bg-white/40 dark:bg-black/20'
-              )}>
+              )}
+              >
                 <SortableContext
                   items={tabs}
                   strategy={horizontalListSortingStrategy}

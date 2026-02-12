@@ -8,7 +8,7 @@ const PayloadSchema = Type.Object({
   emojiId: Type.Union([Type.Number(), Type.String()], { description: '表情ID' }),
   emojiType: Type.Union([Type.Number(), Type.String()], { description: '表情类型' }),
   count: Type.Union([Type.Number(), Type.String()], { default: 20, description: '获取数量' }),
-  cookie: Type.String({ default: '', description: '分页Cookie' })
+  cookie: Type.String({ default: '', description: '分页Cookie' }),
 });
 
 type PayloadType = Static<typeof PayloadSchema>;
@@ -37,22 +37,24 @@ export class FetchEmojiLike extends OneBotAction<PayloadType, ReturnType> {
     emojiId: '123',
     emojiType: 1,
     count: 10,
-    cookie: ''
+    cookie: '',
   };
+
   override returnExample = {
     emojiLikesList: [
       {
         tinyId: '123456',
         nickName: '测试用户',
-        headUrl: 'http://example.com/avatar.png'
-      }
+        headUrl: 'http://example.com/avatar.png',
+      },
     ],
     cookie: '',
     isLastPage: true,
     isFirstPage: true,
     result: 0,
-    errMsg: ''
+    errMsg: '',
   };
+
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
 

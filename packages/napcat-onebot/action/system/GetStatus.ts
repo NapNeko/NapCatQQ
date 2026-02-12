@@ -21,7 +21,7 @@ export default class GetStatus extends OneBotAction<void, GetStatusReturnType> {
   override returnExample = {
     online: true,
     good: true,
-    stat: {}
+    stat: {},
   };
 
   async _handle (): Promise<GetStatusReturnType> {

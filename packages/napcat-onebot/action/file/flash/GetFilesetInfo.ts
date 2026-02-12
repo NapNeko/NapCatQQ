@@ -15,11 +15,12 @@ export class GetFilesetInfo extends OneBotAction<GetFilesetInfoPayload, any> {
   override actionSummary = '获取文件集信息';
   override actionTags = ['文件扩展'];
   override payloadExample = {
-    fileset_id: 'set_123'
+    fileset_id: 'set_123',
   };
+
   override returnExample = {
     fileset_id: 'set_123',
-    file_list: []
+    file_list: [],
   };
 
   async _handle (payload: GetFilesetInfoPayload) {

@@ -47,12 +47,12 @@ const itemsToCopy = [
   'package.json',
   'QBar.dll',
   'wrapper.node',
-  'LightQuic.dll'
+  'LightQuic.dll',
 ];
 
 const win64ItemsToCopy = [
   'SSOShareInfoHelper64.dll',
-  'parent-ipc-core-x64.dll'
+  'parent-ipc-core-x64.dll',
 ];
 
 async function copyAll () {

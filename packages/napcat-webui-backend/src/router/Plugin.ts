@@ -12,13 +12,13 @@ import {
   RegisterPluginManagerHandler,
   PluginConfigSSEHandler,
   PluginConfigChangeHandler,
-  ImportLocalPluginHandler
+  ImportLocalPluginHandler,
 } from '@/napcat-webui-backend/src/api/Plugin';
 import {
   GetPluginStoreListHandler,
   GetPluginStoreDetailHandler,
   InstallPluginFromStoreHandler,
-  InstallPluginFromStoreSSEHandler
+  InstallPluginFromStoreSSEHandler,
 } from '@/napcat-webui-backend/src/api/PluginStore';
 import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
 import { NapCatOneBot11Adapter } from '@/napcat-onebot/index';
@@ -37,7 +37,7 @@ const storage = multer.diskStorage({
   filename: (_req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     cb(null, uniqueSuffix + '-' + file.originalname);
-  }
+  },
 });
 
 const upload = multer({
@@ -54,7 +54,7 @@ const upload = multer({
     } else {
       cb(new Error('Only .zip files are allowed'));
     }
-  }
+  },
 });
 
 const router: Router = Router();

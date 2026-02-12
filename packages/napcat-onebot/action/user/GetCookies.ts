@@ -23,11 +23,12 @@ export class GetCookies extends OneBotAction<GetCookiesPayload, GetCookiesRespon
   override actionDescription = '获取指定域名的 Cookies';
   override actionTags = ['用户接口'];
   override payloadExample = {
-    domain: 'qun.qq.com'
+    domain: 'qun.qq.com',
   };
+
   override returnExample = {
     cookies: 'uin=o123456789; skey=@abc12345;',
-    bkn: '123456789'
+    bkn: '123456789',
   };
 
   async _handle (payload: GetCookiesPayload) {

@@ -151,7 +151,7 @@ function httpDownloadWithProxy (url: string, headers: Record<string, string>, pr
 
     const isTargetHttps = targetUrl.protocol === 'https:';
     const proxyPort = parseInt(proxyUrl.port) || (proxyUrl.protocol === 'https:' ? 443 : 80);
-    
+
     // 代理认证头
     const proxyAuthHeader = proxyUrl.username && proxyUrl.password
       ? { 'Proxy-Authorization': 'Basic ' + Buffer.from(`${decodeURIComponent(proxyUrl.username)}:${decodeURIComponent(proxyUrl.password)}`).toString('base64') }
@@ -165,7 +165,7 @@ function httpDownloadWithProxy (url: string, headers: Record<string, string>, pr
         method: 'CONNECT',
         path: `${targetUrl.hostname}:${targetUrl.port || 443}`,
         headers: {
-          'Host': `${targetUrl.hostname}:${targetUrl.port || 443}`,
+          Host: `${targetUrl.hostname}:${targetUrl.port || 443}`,
           ...proxyAuthHeader,
         },
       });
@@ -179,7 +179,7 @@ function httpDownloadWithProxy (url: string, headers: Record<string, string>, pr
 
         // 在隧道上建立 TLS 连接
         const tlsSocket = tls.connect({
-          socket: socket,
+          socket,
           servername: targetUrl.hostname,
           rejectUnauthorized: true,
         }, () => {
@@ -187,14 +187,14 @@ function httpDownloadWithProxy (url: string, headers: Record<string, string>, pr
           const requestPath = targetUrl.pathname + targetUrl.search;
           const requestHeaders = {
             ...headers,
-            'Host': targetUrl.hostname,
-            'Connection': 'close',
+            Host: targetUrl.hostname,
+            Connection: 'close',
           };
-          
+
           const headerLines = Object.entries(requestHeaders)
             .map(([key, value]) => `${key}: ${value}`)
             .join('\r\n');
-          
+
           const httpRequest = `GET ${requestPath} HTTP/1.1\r\n${headerLines}\r\n\r\n`;
           tlsSocket.write(httpRequest);
         });
@@ -209,19 +209,19 @@ function httpDownloadWithProxy (url: string, headers: Record<string, string>, pr
 
         tlsSocket.on('data', (chunk: Buffer) => {
           responseData = Buffer.concat([responseData, chunk]);
-          
+
           if (!headersParsed) {
             const headerEndIndex = responseData.indexOf('\r\n\r\n');
             if (headerEndIndex !== -1) {
               headersParsed = true;
               const headerStr = responseData.subarray(0, headerEndIndex).toString();
               const headerLines = headerStr.split('\r\n');
-              
+
               // 解析状态码
               const statusLine = headerLines[0];
               const statusMatch = statusLine?.match(/HTTP\/\d\.\d\s+(\d+)/);
               statusCode = statusMatch ? parseInt(statusMatch[1]!) : 0;
-              
+
               // 解析响应头
               for (const line of headerLines.slice(1)) {
                 const [key, ...valueParts] = line.split(':');
@@ -232,7 +232,7 @@ function httpDownloadWithProxy (url: string, headers: Record<string, string>, pr
                   redirectLocation = value;
                 }
               }
-              
+
               bodyData = responseData.subarray(headerEndIndex + 4);
             }
           } else {
@@ -243,18 +243,18 @@ function httpDownloadWithProxy (url: string, headers: Record<string, string>, pr
         tlsSocket.on('end', () => {
           // 处理重定向
           if (statusCode >= 300 && statusCode < 400 && redirectLocation) {
-            const redirectUrl = redirectLocation.startsWith('http') 
-              ? redirectLocation 
+            const redirectUrl = redirectLocation.startsWith('http')
+              ? redirectLocation
               : `${targetUrl.protocol}//${targetUrl.host}${redirectLocation}`;
             httpDownloadWithProxy(redirectUrl, headers, proxy).then(resolve).catch(reject);
             return;
           }
-          
+
           if (statusCode !== 200) {
             reject(new Error(`下载失败: ${statusCode}`));
             return;
           }
-          
+
           // 处理 chunked 编码
           if (isChunked) {
             resolve(parseChunkedBody(bodyData));
@@ -282,7 +282,7 @@ function httpDownloadWithProxy (url: string, headers: Record<string, string>, pr
         path: url, // 完整 URL
         headers: {
           ...headers,
-          'Host': targetUrl.hostname,
+          Host: targetUrl.hostname,
           ...proxyAuthHeader,
         },
       }, (response) => {
@@ -304,26 +304,26 @@ function httpDownloadWithProxy (url: string, headers: Record<string, string>, pr
 function parseChunkedBody (data: Buffer): Buffer {
   const chunks: Buffer[] = [];
   let offset = 0;
-  
+
   while (offset < data.length) {
     // 查找 chunk 大小行的结束
     const lineEnd = data.indexOf('\r\n', offset);
     if (lineEnd === -1) break;
-    
+
     const sizeStr = data.subarray(offset, lineEnd).toString().split(';')[0]; // 忽略 chunk 扩展
     const chunkSize = parseInt(sizeStr!, 16);
-    
+
     if (chunkSize === 0) break; // 最后一个 chunk
-    
+
     const chunkStart = lineEnd + 2;
     const chunkEnd = chunkStart + chunkSize;
-    
+
     if (chunkEnd > data.length) break;
-    
+
     chunks.push(data.subarray(chunkStart, chunkEnd));
     offset = chunkEnd + 2; // 跳过 chunk 数据后的 \r\n
   }
-  
+
   return Buffer.concat(chunks);
 }
 

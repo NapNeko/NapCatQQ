@@ -22,8 +22,9 @@ class ForwardSingleMsg extends OneBotAction<PayloadType, ReturnType> {
   override actionTags = ['消息接口'];
   override payloadExample = {
     message_id: 12345,
-    group_id: '123456'
+    group_id: '123456',
   };
+
   override returnExample = null;
 
   protected async getTargetPeer (payload: PayloadType): Promise<Peer> {

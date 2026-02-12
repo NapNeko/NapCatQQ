@@ -28,9 +28,11 @@ export class MoveGroupFile extends GetPacketStatusDepends<PayloadType, ReturnTyp
     current_parent_directory: '/current_folder_id',
     target_parent_directory: '/target_folder_id',
   };
+
   override returnExample = {
-    ok: true
+    ok: true,
   };
+
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
 

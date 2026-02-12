@@ -1,7 +1,6 @@
 import fs from 'fs';
 import path from 'path';
 import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
 import { LogWrapper } from 'napcat-core/helper/log';
 import {
   PluginPackageJson,
@@ -9,6 +8,7 @@ import {
   PluginEntry,
   PluginStatusConfig,
 } from './types';
+const require = createRequire(import.meta.url);
 
 /**
  * 插件加载器
@@ -286,7 +286,7 @@ export class PluginLoader {
           if (pkg.name === pluginId) {
             return item.name;
           }
-        } catch (e) { }
+        } catch (_e) { }
       }
 
       // 如果目录名就是 ID
@@ -297,6 +297,7 @@ export class PluginLoader {
 
     return null;
   }
+
   /**
    * 清除插件文件的 require 缓存
    * 用于确保卸载插件时清理 CJS 模块缓存

@@ -41,28 +41,28 @@ const PasswordLogin: React.FC<PasswordLoginProps> = ({ onSubmit, isLoading, qqLi
           radius='full'
           src={`https://q1.qlogo.cn/g?b=qq&nk=${uin || '0'}&s=100`}
           width={100}
-          alt="QQ Avatar"
+          alt='QQ Avatar'
         />
       </div>
       <div className='flex flex-col gap-4'>
         <Input
-          type="text"
-          label="QQ账号"
-          placeholder="请输入QQ号"
+          type='text'
+          label='QQ账号'
+          placeholder='请输入QQ号'
           value={uin}
           onValueChange={setUin}
-          variant="bordered"
+          variant='bordered'
           size='lg'
-          autoComplete="off"
+          autoComplete='off'
           endContent={
             <Dropdown>
               <DropdownTrigger>
-                <Button isIconOnly variant="light" size="sm" radius="full">
+                <Button isIconOnly variant='light' size='sm' radius='full'>
                   <IoChevronDown size={16} />
                 </Button>
               </DropdownTrigger>
               <DropdownMenu
-                aria-label="QQ Login History"
+                aria-label='QQ Login History'
                 items={qqList}
                 onAction={(key) => setUin(key.toString())}
               >
@@ -92,14 +92,14 @@ const PasswordLogin: React.FC<PasswordLoginProps> = ({ onSubmit, isLoading, qqLi
           }
         />
         <Input
-          type="password"
-          label="密码"
-          placeholder="请输入密码"
+          type='password'
+          label='密码'
+          placeholder='请输入密码'
           value={password}
           onValueChange={setPassword}
-          variant="bordered"
+          variant='bordered'
           size='lg'
-          autoComplete="new-password"
+          autoComplete='new-password'
         />
       </div>
       <div className='flex justify-center mt-5'>

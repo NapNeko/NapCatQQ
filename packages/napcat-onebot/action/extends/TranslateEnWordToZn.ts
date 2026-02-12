@@ -32,7 +32,7 @@ export class TranslateEnWordToZn extends OneBotAction<PayloadType, ReturnType> {
       throw new Error('翻译失败');
     }
     return {
-      words: ret.words
+      words: ret.words,
     };
   }
 }

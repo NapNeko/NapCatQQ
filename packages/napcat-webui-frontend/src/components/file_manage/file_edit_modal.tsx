@@ -63,22 +63,24 @@ export default function FileEditModal ({
   };
 
   return (
-    <Modal radius='sm' size='full' isOpen={isOpen} onClose={onClose} scrollBehavior="inside">
-      <ModalContent className="flex flex-col h-full max-h-[100dvh]">
+    <Modal radius='sm' size='full' isOpen={isOpen} onClose={onClose} scrollBehavior='inside'>
+      <ModalContent className='flex flex-col h-full max-h-[100dvh]'>
         <ModalHeader className='flex items-center gap-2 border-b border-default-200/50 flex-shrink-0'>
           <span>编辑文件</span>
           <Code radius='sm' className='text-xs'>{file?.path}</Code>
-          <div className="ml-auto text-xs text-default-400 font-normal px-2">
-            按 <span className="px-1 py-0.5 rounded border border-default-300 bg-default-100">Ctrl/Cmd + S</span> 保存
+          <div className='ml-auto text-xs text-default-400 font-normal px-2'>
+            按 <span className='px-1 py-0.5 rounded border border-default-300 bg-default-100'>Ctrl/Cmd + S</span> 保存
           </div>
         </ModalHeader>
         <ModalBody className='p-4 bg-content2/50 flex-1 min-h-0 overflow-hidden'>
-          <div className='h-full w-full overflow-auto' onKeyDown={(e) => {
-            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-              e.preventDefault();
-              onSave();
-            }
-          }}>
+          <div
+            className='h-full w-full overflow-auto' onKeyDown={(e) => {
+              if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                onSave();
+              }
+            }}
+          >
             <CodeEditor
               height='100%'
               value={file?.content || ''}
@@ -88,7 +90,7 @@ export default function FileEditModal ({
             />
           </div>
         </ModalBody>
-        <ModalFooter className="border-t border-default-200/50 flex-shrink-0">
+        <ModalFooter className='border-t border-default-200/50 flex-shrink-0'>
           <Button radius='sm' color='primary' variant='flat' onPress={onClose}>
             取消
           </Button>

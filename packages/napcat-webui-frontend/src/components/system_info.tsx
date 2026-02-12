@@ -26,7 +26,6 @@ import Modal from '@/components/modal';
 import MirrorSelectorModal from '@/components/mirror_selector_modal';
 import { hasNewVersion, compareVersion } from '@/utils/version';
 
-
 export interface SystemInfoItemProps {
   title: string;
   icon?: React.ReactNode;
@@ -57,13 +56,15 @@ const SystemInfoItem: React.FC<SystemInfoItemProps> = ({
       )}
       onClick={onClick}
     >
-      <div className="text-lg opacity-70 self-center">{icon}</div>
+      <div className='text-lg opacity-70 self-center'>{icon}</div>
       <div className='w-24 font-medium'>{title}</div>
       <div className={clsx(
         'text-xs font-mono flex-1',
         hasBackground ? 'text-white/80' : 'text-default-500'
-      )}>{value}</div>
-      <div className="self-center">{endContent}</div>
+      )}
+      >{value}
+      </div>
+      <div className='self-center'>{endContent}</div>
     </div>
   );
 };
@@ -85,28 +86,28 @@ const UpdateDialogContent: React.FC<{
   return (
     <div className='space-y-6'>
       {/* 版本对比 */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-8 bg-default-50 dark:bg-default-100/5 rounded-xl border border-default-100 dark:border-default-100/10">
-        <div className="flex flex-col items-center gap-2 min-w-0 w-full sm:w-auto">
-          <span className="text-xs text-default-500 font-medium uppercase tracking-wider">当前版本</span>
+      <div className='flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-8 bg-default-50 dark:bg-default-100/5 rounded-xl border border-default-100 dark:border-default-100/10'>
+        <div className='flex flex-col items-center gap-2 min-w-0 w-full sm:w-auto'>
+          <span className='text-xs text-default-500 font-medium uppercase tracking-wider'>当前版本</span>
           <Tooltip content={`v${currentVersion}`}>
-            <Chip size="md" variant="flat" color="default" classNames={{ content: "font-mono font-bold text-sm truncate max-w-[120px] sm:max-w-[160px]" }}>
+            <Chip size='md' variant='flat' color='default' classNames={{ content: 'font-mono font-bold text-sm truncate max-w-[120px] sm:max-w-[160px]' }}>
               v{currentVersion}
             </Chip>
           </Tooltip>
         </div>
 
-        <div className="flex flex-col items-center text-primary-500 px-4 shrink-0">
-          <div className="p-2 rounded-full bg-primary-50 dark:bg-primary-900/20">
-            <svg className="w-6 h-6 animate-pulse rotate-90 sm:rotate-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+        <div className='flex flex-col items-center text-primary-500 px-4 shrink-0'>
+          <div className='p-2 rounded-full bg-primary-50 dark:bg-primary-900/20'>
+            <svg className='w-6 h-6 animate-pulse rotate-90 sm:rotate-0' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M17 8l4 4m0 0l-4 4m4-4H3' />
             </svg>
           </div>
         </div>
 
-        <div className="flex flex-col items-center gap-2 min-w-0 w-full sm:w-auto">
-          <span className="text-xs text-primary-500 font-medium uppercase tracking-wider">最新版本</span>
+        <div className='flex flex-col items-center gap-2 min-w-0 w-full sm:w-auto'>
+          <span className='text-xs text-primary-500 font-medium uppercase tracking-wider'>最新版本</span>
           <Tooltip content={`v${latestVersion}`}>
-            <Chip size="md" color="primary" variant="shadow" classNames={{ content: "font-mono font-bold text-sm truncate max-w-[120px] sm:max-w-[160px]" }}>
+            <Chip size='md' color='primary' variant='shadow' classNames={{ content: 'font-mono font-bold text-sm truncate max-w-[120px] sm:max-w-[160px]' }}>
               v{latestVersion}
             </Chip>
           </Tooltip>
@@ -257,17 +258,17 @@ const NewVersionTip = (props: NewVersionTipProps) => {
 
   return (
     <Tooltip content='有新版本可用'>
-      <div className="cursor-pointer flex items-center justify-center" onClick={updateStatus === 'updating' ? undefined : showUpdateDialog}>
+      <div className='cursor-pointer flex items-center justify-center' onClick={updateStatus === 'updating' ? undefined : showUpdateDialog}>
         <Chip
-          size="sm"
-          color="primary"
-          variant="flat"
+          size='sm'
+          color='primary'
+          variant='flat'
           classNames={{
-            content: "font-bold text-[10px] px-1 flex items-center justify-center",
-            base: "h-5 min-h-5 min-w-[42px]"
+            content: 'font-bold text-[10px] px-1 flex items-center justify-center',
+            base: 'h-5 min-h-5 min-w-[42px]',
           }}
         >
-          {updateStatus === 'updating' ? <Spinner size="sm" color="primary" classNames={{ wrapper: "w-3 h-3" }} /> : 'New'}
+          {updateStatus === 'updating' ? <Spinner size='sm' color='primary' classNames={{ wrapper: 'w-3 h-3' }} /> : 'New'}
         </Chip>
       </div>
     </Tooltip>
@@ -324,7 +325,8 @@ const VersionSelectDialogContent: React.FC<VersionSelectDialogProps> = ({
       } else {
         setMirrorLatency(null);
       }
-    } catch (e) {
+    } catch (error) {
+      console.log(error);
       setMirrorLatency(null);
     } finally {
       setMirrorTesting(false);
@@ -362,7 +364,7 @@ const VersionSelectDialogContent: React.FC<VersionSelectDialogProps> = ({
       pageSize,
       type: activeTab,
       search: debouncedSearch,
-      mirror: selectedMirror
+      mirror: selectedMirror,
     }),
     {
       refreshDeps: [currentPage, activeTab, debouncedSearch, selectedMirror],
@@ -517,7 +519,7 @@ const VersionSelectDialogContent: React.FC<VersionSelectDialogProps> = ({
         </div>
         {releasesData?.mirror && (
           <div className='text-xs text-default-400 flex items-center gap-1'>
-            <span className='w-2 h-2 rounded-full bg-success-500'></span>
+            <span className='w-2 h-2 rounded-full bg-success-500' />
             镜像: {releasesData.mirror}
           </div>
         )}
@@ -544,50 +546,50 @@ const VersionSelectDialogContent: React.FC<VersionSelectDialogProps> = ({
       </Tabs>
 
       {/* 下载镜像状态卡片 */}
-      <Card className="bg-default-100/50 shadow-sm">
-        <CardBody className="py-2 px-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-default-500">镜像源:</span>
-              <span className="text-sm font-medium">{getMirrorDisplayName()}</span>
+      <Card className='bg-default-100/50 shadow-sm'>
+        <CardBody className='py-2 px-3'>
+          <div className='flex items-center justify-between'>
+            <div className='flex items-center gap-2'>
+              <span className='text-xs text-default-500'>镜像源:</span>
+              <span className='text-sm font-medium'>{getMirrorDisplayName()}</span>
               {mirrorLatency !== null && (
                 <Chip
-                  size="sm"
+                  size='sm'
                   color={getLatencyColor(mirrorLatency)}
-                  variant="flat"
+                  variant='flat'
                   startContent={<IoMdCheckmark size={12} />}
                 >
                   {formatLatency(mirrorLatency)}
                 </Chip>
               )}
               {mirrorLatency === null && !mirrorTesting && (
-                <Chip size="sm" color="default" variant="flat">
+                <Chip size='sm' color='default' variant='flat'>
                   未测试
                 </Chip>
               )}
               {mirrorTesting && (
-                <Chip size="sm" color="primary" variant="flat">
+                <Chip size='sm' color='primary' variant='flat'>
                   测速中...
                 </Chip>
               )}
             </div>
-            <div className="flex items-center gap-1">
-              <Tooltip content="测速">
+            <div className='flex items-center gap-1'>
+              <Tooltip content='测速'>
                 <Button
                   isIconOnly
-                  size="sm"
-                  variant="light"
+                  size='sm'
+                  variant='light'
                   onPress={testCurrentMirror}
                   isLoading={mirrorTesting}
                 >
                   <IoMdFlash size={16} />
                 </Button>
               </Tooltip>
-              <Tooltip content="切换镜像">
+              <Tooltip content='切换镜像'>
                 <Button
                   isIconOnly
-                  size="sm"
-                  variant="light"
+                  size='sm'
+                  variant='light'
                   onPress={() => setMirrorModalOpen(true)}
                 >
                   <IoMdSettings size={16} />
@@ -626,76 +628,81 @@ const VersionSelectDialogContent: React.FC<VersionSelectDialogProps> = ({
             </span>
           )}
         </div>
-        {releasesLoading ? (
-          <div className='flex items-center gap-2 py-2'>
-            <Spinner size='sm' />
-            <span className='text-sm text-default-500'>加载版本列表...</span>
-          </div>
-        ) : releasesError ? (
-          <div className='text-sm text-danger-500'>
-            加载版本列表失败: {releasesError.message}
-          </div>
-        ) : filteredVersions.length === 0 ? (
-          <div className='text-sm text-default-500 py-4 text-center'>
-            {searchQuery ? `未找到匹配 "${searchQuery}" 的版本` : '暂无可用版本'}
-          </div>
-        ) : (
-          <Select
-            label='选择版本'
-            placeholder='请选择要更新的版本'
-            selectedKeys={selectedVersion ? [selectedVersionTag] : []}
-            onSelectionChange={(keys) => {
-              const selectedTag = Array.from(keys)[0] as string;
-              const version = filteredVersions.find(v => v.tag === selectedTag);
-              setSelectedVersion(version || null);
-            }}
-            classNames={{
-              trigger: 'h-auto min-h-10',
-            }}
-          >
-            {filteredVersions.map((version) => {
-              const isCurrent = version.tag.replace(/^v/, '') === currentVersion;
-              const downgrade = isDowngrade(version.tag);
-              return (
-                <SelectItem
-                  key={version.tag}
-                  textValue={version.tag}
+        {releasesLoading
+          ? (
+            <div className='flex items-center gap-2 py-2'>
+              <Spinner size='sm' />
+              <span className='text-sm text-default-500'>加载版本列表...</span>
+            </div>
+          )
+          : releasesError
+            ? (
+              <div className='text-sm text-danger-500'>
+                加载版本列表失败: {releasesError.message}
+              </div>
+            )
+            : filteredVersions.length === 0
+              ? (
+                <div className='text-sm text-default-500 py-4 text-center'>
+                  {searchQuery ? `未找到匹配 "${searchQuery}" 的版本` : '暂无可用版本'}
+                </div>
+              )
+              : (
+                <Select
+                  label='选择版本'
+                  placeholder='请选择要更新的版本'
+                  selectedKeys={selectedVersion ? [selectedVersionTag] : []}
+                  onSelectionChange={(keys) => {
+                    const selectedTag = Array.from(keys)[0] as string;
+                    const version = filteredVersions.find(v => v.tag === selectedTag);
+                    setSelectedVersion(version || null);
+                  }}
+                  classNames={{
+                    trigger: 'h-auto min-h-10',
+                  }}
                 >
-                  <div className='flex flex-col gap-0.5'>
-                    <div className='flex items-center gap-2'>
-                      <span className="truncate max-w-[300px]">
-                        {version.type === 'action'
-                          ? (version.workflowTitle || version.artifactName || version.tag)
-                          : version.tag
-                        }
-                      </span>
-                      {version.type === 'prerelease' && (
-                        <Chip size='sm' color='secondary' variant='flat'>预发布</Chip>
-                      )}
-                      {version.type === 'action' && (
-                        <Chip size='sm' color='default' variant='flat'>临时</Chip>
-                      )}
-                      {isCurrent && (
-                        <Chip size='sm' color='success' variant='flat'>当前</Chip>
-                      )}
-                      {downgrade && !isCurrent && version.type !== 'action' && (
-                        <Chip size='sm' color='warning' variant='flat'>降级</Chip>
-                      )}
-                    </div>
-                    {version.type === 'action' && (
-                      <div className='text-xs text-default-400 flex items-center gap-2'>
-                        <span className='font-mono bg-default-100 dark:bg-default-100/10 px-1 rounded'>{version.tag}</span>
-                        {version.headSha && <span className='font-mono' title={version.headSha}>{version.headSha.slice(0, 7)}</span>}
-                        {version.createdAt && <span>{new Date(version.createdAt).toLocaleString()}</span>}
-                        {version.size && <span>{(version.size / 1024 / 1024).toFixed(1)} MB</span>}
-                      </div>
-                    )}
-                  </div>
-                </SelectItem>
-              );
-            })}
-          </Select>
-        )}
+                  {filteredVersions.map((version) => {
+                    const isCurrent = version.tag.replace(/^v/, '') === currentVersion;
+                    const downgrade = isDowngrade(version.tag);
+                    return (
+                      <SelectItem
+                        key={version.tag}
+                        textValue={version.tag}
+                      >
+                        <div className='flex flex-col gap-0.5'>
+                          <div className='flex items-center gap-2'>
+                            <span className='truncate max-w-[300px]'>
+                              {version.type === 'action'
+                                ? (version.workflowTitle || version.artifactName || version.tag)
+                                : version.tag}
+                            </span>
+                            {version.type === 'prerelease' && (
+                              <Chip size='sm' color='secondary' variant='flat'>预发布</Chip>
+                            )}
+                            {version.type === 'action' && (
+                              <Chip size='sm' color='default' variant='flat'>临时</Chip>
+                            )}
+                            {isCurrent && (
+                              <Chip size='sm' color='success' variant='flat'>当前</Chip>
+                            )}
+                            {downgrade && !isCurrent && version.type !== 'action' && (
+                              <Chip size='sm' color='warning' variant='flat'>降级</Chip>
+                            )}
+                          </div>
+                          {version.type === 'action' && (
+                            <div className='text-xs text-default-400 flex items-center gap-2'>
+                              <span className='font-mono bg-default-100 dark:bg-default-100/10 px-1 rounded'>{version.tag}</span>
+                              {version.headSha && <span className='font-mono' title={version.headSha}>{version.headSha.slice(0, 7)}</span>}
+                              {version.createdAt && <span>{new Date(version.createdAt).toLocaleString()}</span>}
+                              {version.size && <span>{(version.size / 1024 / 1024).toFixed(1)} MB</span>}
+                            </div>
+                          )}
+                        </div>
+                      </SelectItem>
+                    );
+                  })}
+                </Select>
+              )}
       </div>
 
       {/* Action 版本提示 */}
@@ -786,7 +793,7 @@ const VersionSelectDialogContent: React.FC<VersionSelectDialogProps> = ({
           setSelectedMirror(mirror || undefined);
           setMirrorLatency(null);
         }}
-        type="file"
+        type='file'
       />
     </div>
   );
@@ -848,7 +855,7 @@ const NapCatVersion: React.FC<NapCatVersionProps> = ({ hasBackground = false }) 
         <Modal
           title='版本管理'
           size='lg'
-          hideFooter={true}
+          hideFooter
           onClose={() => setIsVersionModalOpen(false)}
           content={
             <VersionSelectDialogContent
@@ -883,11 +890,13 @@ const SystemInfo: React.FC<SystemInfoProps> = (props) => {
     <Card className={clsx(
       'backdrop-blur-sm border border-white/40 dark:border-white/10 shadow-sm overflow-visible flex-1',
       hasBackground ? 'bg-white/10 dark:bg-black/10' : 'bg-white/60 dark:bg-black/40'
-    )}>
+    )}
+    >
       <CardHeader className={clsx(
         'pb-0 items-center gap-2 font-bold px-4 pt-4',
         hasBackground ? 'text-white drop-shadow-sm' : 'text-default-700 dark:text-white'
-      )}>
+      )}
+      >
         <FaCircleInfo className='text-lg opacity-80' />
         <span>系统信息</span>
       </CardHeader>

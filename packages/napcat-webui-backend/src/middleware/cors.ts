@@ -121,7 +121,7 @@ function matchIPv6CIDR (ip: string, cidr: string): boolean {
     }
 
     return true;
-  } catch (error) {
+  } catch (_error) {
     return false;
   }
 }
@@ -170,7 +170,7 @@ function expandIPv6 (ip: string): number[] | null {
     if (segments.length !== 8) return null;
 
     return segments.map(s => parseInt(s || '0', 16));
-  } catch (error) {
+  } catch (_error) {
     return null;
   }
 }

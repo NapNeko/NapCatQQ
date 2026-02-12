@@ -96,24 +96,24 @@ export default function MirrorSelectorModal ({
   };
 
   return (
-    <Modal 
-      isOpen={isOpen} 
-      onClose={onClose} 
-      size="2xl" 
-      scrollBehavior="inside"
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      size='2xl'
+      scrollBehavior='inside'
       classNames={{
         backdrop: 'z-[200]',
         wrapper: 'z-[200]',
       }}
     >
       <ModalContent>
-        <ModalHeader className="flex flex-col gap-1">
-          <div className="flex items-center justify-between pr-8">
+        <ModalHeader className='flex flex-col gap-1'>
+          <div className='flex items-center justify-between pr-8'>
             <span>选择镜像源</span>
             <Button
-              size="sm"
-              color="primary"
-              variant="flat"
+              size='sm'
+              color='primary'
+              variant='flat'
               startContent={!isTesting && <IoMdFlash />}
               onPress={startSpeedTest}
               isLoading={isTesting}
@@ -122,34 +122,34 @@ export default function MirrorSelectorModal ({
             </Button>
           </div>
           {isTesting && (
-            <div className="mt-2">
-              <div className="w-full bg-default-200 rounded-full h-2">
+            <div className='mt-2'>
+              <div className='w-full bg-default-200 rounded-full h-2'>
                 <div
-                  className="bg-primary h-2 rounded-full transition-all duration-300"
+                  className='bg-primary h-2 rounded-full transition-all duration-300'
                   style={{ width: `${testProgress}%` }}
                 />
               </div>
-              <p className="text-xs text-default-500 mt-1">{testMessage}</p>
+              <p className='text-xs text-default-500 mt-1'>{testMessage}</p>
             </div>
           )}
         </ModalHeader>
         <ModalBody>
-          <div className="flex flex-col gap-2">
+          <div className='flex flex-col gap-2'>
             {/* 自动选择选项 */}
             <MirrorOption
-              value="auto"
-              label="自动选择"
-              description="系统自动选择最快的镜像源"
+              value='auto'
+              label='自动选择'
+              description='系统自动选择最快的镜像源'
               isSelected={selectedMirror === 'auto'}
               onSelect={() => setSelectedMirror('auto')}
-              badge={<Chip size="sm" color="primary" variant="flat">推荐</Chip>}
+              badge={<Chip size='sm' color='primary' variant='flat'>推荐</Chip>}
             />
 
             {/* 原始 GitHub */}
             <MirrorOption
-              value="https://github.com"
-              label="GitHub 原始"
-              description="直连 GitHub（可能较慢）"
+              value='https://github.com'
+              label='GitHub 原始'
+              description='直连 GitHub（可能较慢）'
               isSelected={selectedMirror === 'https://github.com'}
               onSelect={() => setSelectedMirror('https://github.com')}
               testResult={testResults.get('https://github.com (原始)')}
@@ -183,10 +183,10 @@ export default function MirrorSelectorModal ({
           </div>
         </ModalBody>
         <ModalFooter>
-          <Button variant="light" onPress={onClose}>
+          <Button variant='light' onPress={onClose}>
             取消
           </Button>
-          <Button color="primary" onPress={handleConfirm}>
+          <Button color='primary' onPress={handleConfirm}>
             确认选择
           </Button>
         </ModalFooter>
@@ -226,14 +226,14 @@ function MirrorOption ({
       )}
       onClick={onSelect}
     >
-      <div className="flex-1 min-w-0">
-        <p className="font-medium">{label}</p>
-        <p className="text-xs text-default-500 truncate">{description}</p>
+      <div className='flex-1 min-w-0'>
+        <p className='font-medium'>{label}</p>
+        <p className='text-xs text-default-500 truncate'>{description}</p>
       </div>
-      <div className="flex items-center gap-2 ml-2">
+      <div className='flex items-center gap-2 ml-2'>
         {badge}
         {isFastest && !badge && (
-          <Chip size="sm" color="success" variant="flat">最快</Chip>
+          <Chip size='sm' color='success' variant='flat'>最快</Chip>
         )}
         {testResult && <MirrorStatus result={testResult} />}
       </div>
@@ -253,9 +253,9 @@ function MirrorStatus ({ result }: { result: MirrorTestResult; }) {
     return (
       <Tooltip content={result.error || '连接失败'}>
         <Chip
-          size="sm"
-          color="danger"
-          variant="flat"
+          size='sm'
+          color='danger'
+          variant='flat'
           startContent={<IoMdClose size={14} />}
         >
           失败
@@ -272,9 +272,9 @@ function MirrorStatus ({ result }: { result: MirrorTestResult; }) {
 
   return (
     <Chip
-      size="sm"
+      size='sm'
       color={getColor()}
-      variant="flat"
+      variant='flat'
       startContent={<IoMdCheckmark size={14} />}
     >
       {formatLatency(result.latency)}

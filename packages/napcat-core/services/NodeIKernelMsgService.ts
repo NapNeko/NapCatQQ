@@ -687,14 +687,14 @@ export interface NodeIKernelMsgService {
     msgSeq: string;
     msgRandom: string;
   }>, DataMigrationResourceInfo: {
-    extraData: string;
-    filePath: string;
-    fileSize: string;
-    msgRandom: string;
-    msgSeq: string;
-    msgSubType: number;
-    msgType: number;
-  }): unknown;
+      extraData: string;
+      filePath: string;
+      fileSize: string;
+      msgRandom: string;
+      msgSeq: string;
+      msgSubType: number;
+      msgType: number;
+    }): unknown;
 
   dataMigrationGetResourceLocalDestinyPath (...args: unknown[]): unknown;
 

@@ -60,6 +60,7 @@ class GetMsg extends OneBotAction<PayloadType, ReturnType> {
         emoji_type: emoji.emojiType,
         likes_cnt: emoji.likesCnt,
       });
+      return undefined;
     });
     try {
       retMsg.message_id = MessageUnique.createUniqueMsgId(peer, msg.msgId)!;

@@ -86,7 +86,7 @@ export function parseTypeBox (
         type: 'object',
         optional: false,
         description: `... 还有 ${allOptions.length - MAX_UNION_OPTIONS} 个类型`,
-        isTruncated: true
+        isTruncated: true,
       });
     }
     return { name, type: 'union', children, optional, description };

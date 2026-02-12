@@ -21,11 +21,12 @@ export class CreateCollection extends OneBotAction<PayloadType, ReturnType> {
   override actionTags = ['扩展接口'];
   override payloadExample = {
     rawData: '收藏内容',
-    brief: '收藏标题'
+    brief: '收藏标题',
   };
+
   override returnExample = {
     result: 0,
-    errMsg: ''
+    errMsg: '',
   };
 
   async _handle (payload: PayloadType) {

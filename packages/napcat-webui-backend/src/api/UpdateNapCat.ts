@@ -10,7 +10,7 @@ import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
 import { NapCatCoreWorkingEnv } from '@/napcat-webui-backend/src/types';
 import {
   getGitHubRelease,
-  findAvailableDownloadUrl
+  findAvailableDownloadUrl,
 } from '@/napcat-common/src/mirror';
 import { ILogWrapper } from '@/napcat-common/src/log-interface';
 
@@ -39,7 +39,7 @@ interface UpdateConfig {
 // 需要跳过更新的文件
 const SKIP_UPDATE_FILES = [
   'NapCatWinBootMain.exe',
-  'NapCatWinBootHook.dll'
+  'NapCatWinBootHook.dll',
 ];
 
 /**
@@ -67,7 +67,7 @@ function scanFilesRecursively (dirPath: string, basePath: string = dirPath): Arr
     } else if (stat.isFile()) {
       files.push({
         sourcePath: fullPath,
-        relativePath: relativePath
+        relativePath,
       });
     }
   }
@@ -86,7 +86,7 @@ async function downloadFile (url: string, dest: string): Promise<void> {
 
   return new Promise((resolve, reject) => {
     const request = https.get(url, {
-      headers: { 'User-Agent': 'NapCat-WebUI' }
+      headers: { 'User-Agent': 'NapCat-WebUI' },
     }, (res) => {
       webUiLogger?.log('[NapCat Update] Response status:', res.statusCode);
       webUiLogger?.log('[NapCat Update] Content-Type:', res.headers['content-type']);
@@ -169,9 +169,8 @@ export const UpdateNapCatHandler: RequestHandler = async (req, res) => {
           customMirror: mirror,
         });
         webUiLogger?.log(`[NapCat Update] Using download URL: ${downloadUrl}`);
-      } catch (error) {
-        // 如果镜像都不可用，直接使用原始 URL
-        webUiLogger?.logWarn(`[NapCat Update] All nightly.link mirrors failed, using original URL`);
+      } catch (_error) {
+        webUiLogger?.logWarn('[NapCat Update] All nightly.link mirrors failed, using original URL');
         downloadUrl = baseUrl;
       }
     } else {
@@ -289,7 +288,7 @@ export const UpdateNapCatHandler: RequestHandler = async (req, res) => {
           webUiLogger?.logError(`[NapCat Update] Failed to update ${targetFilePath}, will retry on next startup:`, error);
           failedFiles.push({
             sourcePath: fileInfo.sourcePath,
-            targetPath: targetFilePath
+            targetPath: targetFilePath,
           });
         }
       }
@@ -300,7 +299,7 @@ export const UpdateNapCatHandler: RequestHandler = async (req, res) => {
           version: actualVersion,
           updateTime: new Date().toISOString(),
           files: failedFiles,
-          changelog: ''
+          changelog: '',
         };
 
         // 保存更新配置文件
@@ -317,14 +316,12 @@ export const UpdateNapCatHandler: RequestHandler = async (req, res) => {
         status: 'completed',
         message,
         newVersion: actualVersion,
-        failedFilesCount: failedFiles.length
+        failedFilesCount: failedFiles.length,
       });
-
     } catch (error) {
       webUiLogger?.logError('[NapCat Update] 更新失败:', error);
       sendError(res, '更新失败: ' + (error instanceof Error ? error.message : '未知错误'));
     }
-
   } catch (error: any) {
     webUiLogger?.logError('[NapCat Update] 更新失败:', error);
     sendError(res, '更新失败: ' + error.message);
@@ -340,7 +337,7 @@ export async function applyPendingUpdates (webUiPathWrapper: NapCatPathWrapper, 
   const configPath = path.join(webUiPathWrapper.configPath, 'napcat-update.json');
 
   if (!fs.existsSync(configPath)) {
-    //logger.log('[NapCat Update] No pending updates found');
+    // logger.log('[NapCat Update] No pending updates found');
     return;
   }
 
@@ -373,7 +370,6 @@ export async function applyPendingUpdates (webUiPathWrapper: NapCatPathWrapper, 
         }
         fs.copyFileSync(file.sourcePath, file.targetPath);
         logger.log(`[NapCat Update] Updated ${path.basename(file.targetPath)} on startup`);
-
       } catch (error) {
         logger.logError(`[NapCat Update] Failed to update ${file.targetPath} on startup:`, error);
         // 如果仍然失败，保留在列表中
@@ -385,7 +381,7 @@ export async function applyPendingUpdates (webUiPathWrapper: NapCatPathWrapper, 
     if (remainingFiles.length > 0) {
       const updatedConfig: UpdateConfig = {
         ...updateConfig,
-        files: remainingFiles
+        files: remainingFiles,
       };
       fs.writeFileSync(configPath, JSON.stringify(updatedConfig, null, 2));
       logger.log(`[NapCat Update] ${remainingFiles.length} files still pending update`);

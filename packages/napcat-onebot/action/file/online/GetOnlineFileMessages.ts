@@ -16,8 +16,9 @@ export class GetOnlineFileMessages extends OneBotAction<GetOnlineFileMessagesPay
   override actionSummary = '获取在线文件消息';
   override actionTags = ['文件扩展'];
   override payloadExample = {
-    user_id: '123456789'
+    user_id: '123456789',
   };
+
   override returnExample = [];
 
   async _handle (payload: GetOnlineFileMessagesPayload) {

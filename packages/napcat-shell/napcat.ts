@@ -17,7 +17,7 @@ const envPath = path.join(__dirname, 'config', '.env');
 if (fs.existsSync(envPath)) {
   try {
     const data = fs.readFileSync(envPath, 'utf8');
-    let loadedCount = 0;
+    // const _loadedCount = 0;
     data.split(/\r?\n/).forEach(line => {
       line = line.trim();
       if (line && !line.startsWith('#')) {
@@ -26,7 +26,7 @@ if (fs.existsSync(envPath)) {
         const value = parts.slice(1).join('=').trim();
         if (key && value) {
           process.env[key] = value;
-          loadedCount++;
+          // loadedCount++;
         }
       }
     });
@@ -42,14 +42,12 @@ const ENV = {
   isPipeDisabled: process.env['NAPCAT_DISABLE_PIPE'] === '1',
 } as const;
 
-
 // Worker 消息类型
 interface WorkerMessage {
   type: 'restart' | 'restart-prepare' | 'shutdown';
   secretKey?: string;
   port?: number;
 }
-
 
 const logger = new LogWrapper(pathWrapper.logsPath);
 
@@ -108,7 +106,7 @@ function forceKillProcess (pid: number): void {
         logger.logError(`[NapCat] [Process] 强制终止进程失败: PID ${pid}`);
       }
     } else {
-      logger.logError(`[NapCat] [Process] 强制终止进程失败:`, error);
+      logger.logError('[NapCat] [Process] 强制终止进程失败:', error);
     }
   }
 }
@@ -365,7 +363,7 @@ async function startWorkerProcess (): Promise<void> {
       logger.logError('[NapCat] [Process] 发送重启请求失败:', e);
       return {
         result: false,
-        message: '发送重启请求失败: ' + (e as Error).message
+        message: '发送重启请求失败: ' + (e as Error).message,
       };
     }
   });

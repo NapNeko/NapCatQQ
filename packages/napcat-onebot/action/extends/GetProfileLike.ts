@@ -39,8 +39,9 @@ export class GetProfileLike extends OneBotAction<PayloadType, ReturnType> {
   override payloadExample = {
     user_id: '123456789',
     start: 0,
-    count: 10
+    count: 10,
   };
+
   override returnExample = {
     uid: 'u_123',
     time: '1734567890',
@@ -48,15 +49,15 @@ export class GetProfileLike extends OneBotAction<PayloadType, ReturnType> {
       userInfos: [],
       total_count: 10,
       last_time: 1734567890,
-      today_count: 5
+      today_count: 5,
     },
     voteInfo: {
       total_count: 100,
       new_count: 2,
       new_nearby_count: 0,
       last_visit_time: 1734567890,
-      userInfos: []
-    }
+      userInfos: [],
+    },
   };
 
   async _handle (payload: PayloadType): Promise<ReturnType> {

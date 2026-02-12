@@ -153,7 +153,7 @@ const WebUIConfigCard = () => {
                   challenge: base64UrlToUint8Array(registrationOptions.challenge) as BufferSource,
                   rp: {
                     name: registrationOptions.rp.name,
-                    id: registrationOptions.rp.id
+                    id: registrationOptions.rp.id,
                   },
                   user: {
                     id: base64UrlToUint8Array(registrationOptions.user.id) as BufferSource,

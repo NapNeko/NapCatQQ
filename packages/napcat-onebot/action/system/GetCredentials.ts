@@ -23,11 +23,12 @@ export class GetCredentials extends OneBotAction<GetCredentialsPayload, GetCrede
   override actionDescription = '获取登录凭证';
   override actionTags = ['系统接口'];
   override payloadExample = {
-    domain: 'qun.qq.com'
+    domain: 'qun.qq.com',
   };
+
   override returnExample = {
     cookies: 'uin=o123456789; skey=@abc12345;',
-    token: 123456789
+    token: 123456789,
   };
 
   async _handle (payload: GetCredentialsPayload) {

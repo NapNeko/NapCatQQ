@@ -20,8 +20,9 @@ export class SendOnlineFile extends OneBotAction<SendOnlineFilePayload, any> {
   override payloadExample = {
     user_id: '123456789',
     file_path: 'C:\\path\\to\\file.txt',
-    file_name: 'test.txt'
+    file_name: 'test.txt',
   };
+
   override returnExample = null;
 
   async _handle (payload: SendOnlineFilePayload) {

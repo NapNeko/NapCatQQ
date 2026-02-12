@@ -19,8 +19,9 @@ export class RefuseOnlineFile extends OneBotAction<RefuseOnlineFilePayload, any>
   override actionTags = ['文件扩展'];
   override payloadExample = {
     user_id: '123456789',
-    msg_id: '123'
+    msg_id: '123',
   };
+
   override returnExample = null;
 
   async _handle (payload: RefuseOnlineFilePayload) {

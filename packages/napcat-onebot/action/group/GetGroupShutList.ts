@@ -19,14 +19,15 @@ export class GetGroupShutList extends OneBotAction<PayloadType, ReturnType> {
   override actionSummary = '获取群禁言列表';
   override actionTags = ['群组接口'];
   override payloadExample = {
-    group_id: '123456789'
+    group_id: '123456789',
   };
+
   override returnExample = [
     {
       user_id: 123456789,
       nickname: '禁言用户',
-      shut_up_time: 1734567890
-    }
+      shut_up_time: 1734567890,
+    },
   ];
 
   async _handle (payload: PayloadType) {

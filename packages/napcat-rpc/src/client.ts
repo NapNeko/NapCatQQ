@@ -31,7 +31,7 @@ export function createDeepProxy<T = unknown> (options: DeepProxyOptions): T {
     refId: rootRefId,
     // callbackTimeout 可供未来扩展使用
   } = options;
-  void options.callbackTimeout;
+  // const _callbackTimeout = options.callbackTimeout;
 
   const callbackRegistry = new SimpleCallbackRegistry();
 

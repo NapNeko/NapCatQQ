@@ -20,8 +20,9 @@ export class SetDoubtFriendsAddRequest extends OneBotAction<SetDoubtFriendsAddRe
   override actionTags = ['系统接口'];
   override payloadExample = {
     flag: '12345',
-    approve: true
+    approve: true,
   };
+
   override returnExample = null;
 
   async _handle (payload: SetDoubtFriendsAddRequestPayload) {

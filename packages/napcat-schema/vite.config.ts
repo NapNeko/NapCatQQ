@@ -7,7 +7,7 @@ import napcatVersion from 'napcat-vite/vite-plugin-version';
 const external = [
   'ws',
   'express',
-  'electron'
+  'electron',
 ];
 const nodeModules = [...builtinModules, builtinModules.map((m) => `node:${m}`)].flat();
 
@@ -26,7 +26,7 @@ export default defineConfig({
   },
   plugins: [
     nodeResolve(),
-    napcatVersion()
+    napcatVersion(),
   ],
   build: {
     target: 'esnext',
@@ -41,8 +41,8 @@ export default defineConfig({
     rollupOptions: {
       external: [
         ...nodeModules,
-        ...external
-      ]
+        ...external,
+      ],
     },
   },
 });

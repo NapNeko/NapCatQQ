@@ -26,11 +26,13 @@ export class UploadImageToQunAlbum extends OneBotAction<PayloadType, ReturnType>
     group_id: '123456',
     album_id: 'album_id_1',
     album_name: '相册1',
-    file: '/path/to/image.jpg'
+    file: '/path/to/image.jpg',
   };
+
   override returnExample = {
-    result: null
+    result: null,
   };
+
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
 
