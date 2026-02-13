@@ -185,6 +185,19 @@ const PluginStoreCard: React.FC<PluginStoreCardProps> = ({
             v{version}
           </Chip>
 
+          {/* 来源标识 */}
+          {data.source === 'npm' && (
+            <Chip
+              size='sm'
+              variant='flat'
+              color='danger'
+              className='h-5 text-xs font-semibold px-0.5'
+              classNames={{ content: 'px-1' }}
+            >
+              npm
+            </Chip>
+          )}
+
           {/* Tags with proper truncation and hover */}
           {tags?.slice(0, 2).map((tag) => (
             <Chip

@@ -18,7 +18,11 @@ import {
   GetPluginStoreListHandler,
   GetPluginStoreDetailHandler,
   InstallPluginFromStoreHandler,
-  InstallPluginFromStoreSSEHandler
+  InstallPluginFromStoreSSEHandler,
+  InstallPluginFromNpmHandler,
+  InstallPluginFromNpmSSEHandler,
+  SearchNpmPluginsHandler,
+  GetNpmPluginDetailHandler,
 } from '@/napcat-webui-backend/src/api/PluginStore';
 import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
 import { NapCatOneBot11Adapter } from '@/napcat-onebot/index';
@@ -74,6 +78,12 @@ router.get('/Store/List', GetPluginStoreListHandler);
 router.get('/Store/Detail/:id', GetPluginStoreDetailHandler);
 router.post('/Store/Install', InstallPluginFromStoreHandler);
 router.get('/Store/Install/SSE', InstallPluginFromStoreSSEHandler);
+
+// npm 插件安装相关路由
+router.post('/Npm/Install', InstallPluginFromNpmHandler);
+router.get('/Npm/Install/SSE', InstallPluginFromNpmSSEHandler);
+router.get('/Npm/Search', SearchNpmPluginsHandler);
+router.get('/Npm/Detail/:packageName', GetNpmPluginDetailHandler);
 
 // 插件扩展路由 - 动态挂载插件注册的 API 路由
 router.use('/ext/:pluginId', (req, res, next): void => {

@@ -164,13 +164,46 @@ export default class PluginManager {
   /**
    * 从商店安装插件
    * @param id 插件 ID
-   * @param mirror 镜像源
+   * @param mirror 镜像源（GitHub 模式）
+   * @param registry npm 镜像源（npm 模式）
    */
-  public static async installPluginFromStore (id: string, mirror?: string): Promise<void> {
+  public static async installPluginFromStore (id: string, mirror?: string, registry?: string): Promise<void> {
     await serverRequest.post<ServerResponse<void>>(
       '/Plugin/Store/Install',
-      { id, mirror },
+      { id, mirror, registry },
       { timeout: 300000 } // 5分钟超时
+    );
+  }
+
+  // ==================== npm 插件安装 ====================
+
+  /** npm 搜索结果 */
+  public static async searchNpmPlugins (
+    keyword: string = 'napcat-plugin',
+    registry?: string,
+    from: number = 0,
+    size: number = 20,
+  ): Promise<{ total: number; plugins: PluginStoreItem[]; }> {
+    const params: Record<string, string> = { keyword, from: String(from), size: String(size) };
+    if (registry) params['registry'] = registry;
+    const { data } = await serverRequest.get<ServerResponse<{ total: number; plugins: PluginStoreItem[]; }>>('/Plugin/Npm/Search', { params });
+    return data.data;
+  }
+
+  /** 获取 npm 包详情 */
+  public static async getNpmPluginDetail (packageName: string, registry?: string): Promise<any> {
+    const params: Record<string, string> = {};
+    if (registry) params['registry'] = registry;
+    const { data } = await serverRequest.get<ServerResponse<any>>(`/Plugin/Npm/Detail/${encodeURIComponent(packageName)}`, { params });
+    return data.data;
+  }
+
+  /** 从 npm 直接安装插件 */
+  public static async installPluginFromNpm (packageName: string, version?: string, registry?: string): Promise<void> {
+    await serverRequest.post<ServerResponse<void>>(
+      '/Plugin/Npm/Install',
+      { packageName, version, registry },
+      { timeout: 300000 },
     );
   }
 
