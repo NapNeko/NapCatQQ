@@ -114,6 +114,42 @@ function forceKillProcess (pid: number): void {
 }
 
 /**
+ * 清理进程树中的残留子进程（Electron 模式专用）
+ * 排除当前主进程和新 worker 进程
+ */
+async function cleanupOrphanedProcesses (excludePids: number[]): Promise<void> {
+  if (!isElectron) return;
+
+  try {
+    // 使用 Electron 的 app.getAppMetrics() 获取所有相关进程
+    // @ts-ignore - electron 运行时存在但类型声明可能缺失
+    const electron = await import('electron');
+    if (electron.app && typeof electron.app.getAppMetrics === 'function') {
+      const metrics = electron.app.getAppMetrics();
+      const mainPid = process.pid;
+
+      for (const metric of metrics) {
+        const pid = metric.pid;
+        // 排除主进程、新 worker 进程和明确排除的 PID
+        if (pid === mainPid || excludePids.includes(pid)) {
+          continue;
+        }
+        // 尝试终止残留进程
+        try {
+          process.kill(pid, 'SIGTERM');
+          logger.log(`[NapCat] [Process] 已清理残留进程: PID ${pid} (${metric.type})`);
+        } catch {
+          // 进程可能已经不存在，忽略错误
+        }
+      }
+    }
+  } catch (error) {
+    // Electron API 不可用或出错，静默忽略
+    logger.logDebug?.('[NapCat] [Process] 清理残留进程时出错:', error);
+  }
+}
+
+/**
  * 重启 Worker 进程
  */
 export async function restartWorker (secretKey?: string, port?: number): Promise<void> {
@@ -166,6 +202,13 @@ export async function restartWorker (secretKey?: string, port?: number): Promise
 
   // 5. 启动新进程（重启模式不传递快速登录参数，传递密钥和端口）
   await startWorker(false, secretKey, port);
+
+  // 6. Electron 模式下清理可能残留的子进程
+  if (isElectron && currentWorker?.pid) {
+    const excludePids = [process.pid, currentWorker.pid];
+    await cleanupOrphanedProcesses(excludePids);
+  }
+
   isRestarting = false;
 }
 
