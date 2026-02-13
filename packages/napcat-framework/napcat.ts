@@ -2,6 +2,7 @@ import { NapCatPathWrapper } from 'napcat-common/src/path';
 import { InitWebUi, WebUiConfig, webUiRuntimePort } from 'napcat-webui-backend/index';
 import { NapCatAdapterManager } from 'napcat-adapter';
 import { NativePacketHandler } from 'napcat-core/packet/handler/client';
+import { Napi2NativeLoader } from 'napcat-core/packet/handler/napi2nativeLoader';
 import { FFmpegService } from 'napcat-core/helper/ffmpeg/ffmpeg';
 import { logSubscription, LogWrapper } from 'napcat-core/helper/log';
 import { QQBasicInfoWrapper } from '@/napcat-core/helper/qq-basic-info';
@@ -40,6 +41,7 @@ export async function NCoreInitFramework (
   const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
   const wrapper = loadQQWrapper(basicInfoWrapper.QQMainPath, basicInfoWrapper.getFullQQVersion());
   const nativePacketHandler = new NativePacketHandler({ logger }); // 初始化 NativePacketHandler 用于后续使用
+  const napi2nativeLoader = new Napi2NativeLoader({ logger }); // 初始化 Napi2NativeLoader 用于后续使用
   // nativePacketHandler.onAll((packet) => {
   //     console.log('[Packet]', packet.uin, packet.cmd, packet.hex_data);
   // });
@@ -73,7 +75,7 @@ export async function NCoreInitFramework (
   // 过早进入会导致addKernelMsgListener等Listener添加失败
   // await sleep(2500);
   // 初始化 NapCatFramework
-  const loaderObject = new NapCatFramework(wrapper, session, logger, selfInfo, basicInfoWrapper, pathWrapper, nativePacketHandler);
+  const loaderObject = new NapCatFramework(wrapper, session, logger, selfInfo, basicInfoWrapper, pathWrapper, nativePacketHandler, napi2nativeLoader);
   await loaderObject.core.initCore();
 
   // 启动WebUi
@@ -101,10 +103,12 @@ export class NapCatFramework {
     selfInfo: SelfInfo,
     basicInfoWrapper: QQBasicInfoWrapper,
     pathWrapper: NapCatPathWrapper,
-    packetHandler: NativePacketHandler
+    packetHandler: NativePacketHandler,
+    napi2nativeLoader: Napi2NativeLoader
   ) {
     this.context = {
       packetHandler,
+      napi2nativeLoader,
       workingEnv: NapCatCoreWorkingEnv.Framework,
       wrapper,
       session,

@@ -2,6 +2,7 @@ import { NativePacketClient } from '@/napcat-core/packet/client/nativeClient';
 import { OidbPacket } from '@/napcat-core/packet/transformer/base';
 import { PacketLogger } from '@/napcat-core/packet/context/loggerContext';
 import { NapCoreContext } from '@/napcat-core/packet/context/napCoreContext';
+import { Napi2NativeLoader } from '@/napcat-core/packet/handler/napi2nativeLoader';
 
 export class LogStack {
   private stack: string[] = [];
@@ -43,12 +44,14 @@ export class PacketClientContext {
   private readonly napCore: NapCoreContext;
   private readonly logger: PacketLogger;
   private readonly logStack: LogStack;
+  private readonly napi2nativeLoader: Napi2NativeLoader;
   private readonly _client: NativePacketClient;
 
-  constructor (napCore: NapCoreContext, logger: PacketLogger) {
+  constructor (napCore: NapCoreContext, logger: PacketLogger, napi2nativeLoader: Napi2NativeLoader) {
     this.napCore = napCore;
     this.logger = logger;
     this.logStack = new LogStack(logger);
+    this.napi2nativeLoader = napi2nativeLoader;
     this._client = this.newClient();
   }
 
@@ -71,7 +74,7 @@ export class PacketClientContext {
 
   private newClient (): NativePacketClient {
     this.logger.info('使用 NativePacketClient 作为后端');
-    const client = new NativePacketClient(this.napCore, this.logger, this.logStack);
+    const client = new NativePacketClient(this.napCore, this.logger, this.logStack, this.napi2nativeLoader);
     if (!client.check()) {
       throw new Error('[Core] [Packet] NativePacketClient 不可用，NapCat.Packet将不会加载！');
     }

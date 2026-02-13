@@ -30,6 +30,7 @@ import { NodeIO3MiscListener } from 'napcat-core/listeners/NodeIO3MiscListener';
 import { sleep } from 'napcat-common/src/helper';
 import { FFmpegService } from '@/napcat-core/helper/ffmpeg/ffmpeg';
 import { NativePacketHandler } from 'napcat-core/packet/handler/client';
+import { Napi2NativeLoader } from 'napcat-core/packet/handler/napi2nativeLoader';
 import { logSubscription, LogWrapper } from '@/napcat-core/helper/log';
 import { proxiedListenerOf } from '@/napcat-core/helper/proxy-handler';
 import { QQBasicInfoWrapper } from '@/napcat-core/helper/qq-basic-info';
@@ -396,6 +397,7 @@ export async function NCoreInitShell () {
   const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
   const wrapper = loadQQWrapper(basicInfoWrapper.QQMainPath, basicInfoWrapper.getFullQQVersion());
   const nativePacketHandler = new NativePacketHandler({ logger }); // 初始化 NativePacketHandler 用于后续使用
+  const napi2nativeLoader = new Napi2NativeLoader({ logger }); // 初始化 Napi2NativeLoader 用于后续使用
 
   // nativePacketHandler.onAll((packet) => {
   //     console.log('[Packet]', packet.uin, packet.cmd, packet.hex_data);
@@ -488,7 +490,8 @@ export async function NCoreInitShell () {
     selfInfo,
     basicInfoWrapper,
     pathWrapper,
-    nativePacketHandler
+    nativePacketHandler,
+    napi2nativeLoader
   ).InitNapCat();
 }
 
@@ -503,10 +506,12 @@ export class NapCatShell {
     selfInfo: SelfInfo,
     basicInfoWrapper: QQBasicInfoWrapper,
     pathWrapper: NapCatPathWrapper,
-    packetHandler: NativePacketHandler
+    packetHandler: NativePacketHandler,
+    napi2nativeLoader: Napi2NativeLoader
   ) {
     this.context = {
       packetHandler,
+      napi2nativeLoader,
       workingEnv: NapCatCoreWorkingEnv.Shell,
       wrapper,
       session,
