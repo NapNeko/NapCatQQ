@@ -396,7 +396,7 @@ jobs:
             --arg system "$SYSTEM_PROMPT" \
             --arg user "$USER_CONTENT" \
             --arg model "$OPENROUTER_MODEL" \
-            '{model: $model, messages:[{role:"system", content:$system},{role:"user", content:$user}], temperature:0.2, max_tokens:1500}')
+            '{model: $model, messages:[{role:"system", content:$system},{role:"user", content:$user}], temperature:0.2, max_tokens:5000}')
 
           echo "=== OpenRouter request body ==="
           echo "$BODY" | jq .
