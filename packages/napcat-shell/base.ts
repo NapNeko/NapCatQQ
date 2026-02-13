@@ -402,10 +402,14 @@ export async function NCoreInitShell () {
   }
   const wrapper = loadQQWrapper(basicInfoWrapper.QQMainPath, basicInfoWrapper.getFullQQVersion());
 
-  // wrapper.node 加载后立刻启用 Bypass
-  const bypassEnabled = napi2nativeLoader.nativeExports.enableAllBypasses?.();
-  if (bypassEnabled) {
-    logger.log('[NapCat] Napi2NativeLoader: 已启用Bypass');
+  // wrapper.node 加载后立刻启用 Bypass（可通过环境变量禁用）
+  if (process.env['NAPCAT_DISABLE_BYPASS'] !== '1') {
+    const bypassEnabled = napi2nativeLoader.nativeExports.enableAllBypasses?.();
+    if (bypassEnabled) {
+      logger.log('[NapCat] Napi2NativeLoader: 已启用Bypass');
+    }
+  } else {
+    logger.log('[NapCat] Napi2NativeLoader: Bypass已通过环境变量禁用');
   }
 
   const o3Service = wrapper.NodeIO3MiscService.get();

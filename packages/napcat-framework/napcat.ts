@@ -43,9 +43,13 @@ export async function NCoreInitFramework (
   const nativePacketHandler = new NativePacketHandler({ logger }); // 初始化 NativePacketHandler 用于后续使用
   const napi2nativeLoader = new Napi2NativeLoader({ logger }); // 初始化 Napi2NativeLoader 用于后续使用
   //console.log('[NapCat] [Napi2NativeLoader]', napi2nativeLoader.nativeExports.enableAllBypasses?.());
-  const bypassEnabled = napi2nativeLoader.nativeExports.enableAllBypasses?.();
-  if (bypassEnabled) {
-    logger.log('[NapCat] Napi2NativeLoader: 已启用Bypass');
+  if (process.env['NAPCAT_DISABLE_BYPASS'] !== '1') {
+    const bypassEnabled = napi2nativeLoader.nativeExports.enableAllBypasses?.();
+    if (bypassEnabled) {
+      logger.log('[NapCat] Napi2NativeLoader: 已启用Bypass');
+    }
+  } else {
+    logger.log('[NapCat] Napi2NativeLoader: Bypass已通过环境变量禁用');
   }
   // nativePacketHandler.onAll((packet) => {
   //     console.log('[Packet]', packet.uin, packet.cmd, packet.hex_data);
