@@ -401,7 +401,9 @@ export async function NCoreInitShell () {
     await connectToNamedPipe(logger).catch(e => logger.logError('命名管道连接失败', e));
   }
   const wrapper = loadQQWrapper(basicInfoWrapper.QQMainPath, basicInfoWrapper.getFullQQVersion());
-
+  if (process.env['NAPCAT_ENABLE_VERBOSE_LOG'] === '1') {
+    napi2nativeLoader.nativeExports.setVerbose?.(true);
+  }
   // wrapper.node 加载后立刻启用 Bypass（可通过环境变量禁用）
   if (process.env['NAPCAT_DISABLE_BYPASS'] !== '1') {
     const bypassEnabled = napi2nativeLoader.nativeExports.enableAllBypasses?.();
