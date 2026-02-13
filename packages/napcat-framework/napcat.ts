@@ -42,6 +42,11 @@ export async function NCoreInitFramework (
   const wrapper = loadQQWrapper(basicInfoWrapper.QQMainPath, basicInfoWrapper.getFullQQVersion());
   const nativePacketHandler = new NativePacketHandler({ logger }); // 初始化 NativePacketHandler 用于后续使用
   const napi2nativeLoader = new Napi2NativeLoader({ logger }); // 初始化 Napi2NativeLoader 用于后续使用
+  //console.log('[NapCat] [Napi2NativeLoader]', napi2nativeLoader.nativeExports.enableAllBypasses?.());
+  const bypassEnabled = napi2nativeLoader.nativeExports.enableAllBypasses?.();
+  if (bypassEnabled) {
+    logger.log('[NapCat] Napi2NativeLoader: 已启用Bypass');
+  }
   // nativePacketHandler.onAll((packet) => {
   //     console.log('[Packet]', packet.uin, packet.cmd, packet.hex_data);
   // });

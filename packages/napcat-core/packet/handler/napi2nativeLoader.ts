@@ -6,6 +6,8 @@ import { LogWrapper } from '../../helper/log';
 
 export interface Napi2NativeExportType {
   initHook?: (send: string, recv: string) => boolean;
+  setVerbose?: (verbose: boolean) => void; // 默认关闭日志
+  enableAllBypasses?: () => void;
 }
 
 export class Napi2NativeLoader {

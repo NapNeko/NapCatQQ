@@ -67,7 +67,7 @@ export class PacketClientContext {
     await this._client.init(pid, recv, send);
   }
 
-  async sendOidbPacket<T extends boolean = false>(pkt: OidbPacket, rsp?: T, timeout?: number): Promise<T extends true ? Buffer : void> {
+  async sendOidbPacket<T extends boolean = false> (pkt: OidbPacket, rsp?: T, timeout?: number): Promise<T extends true ? Buffer : void> {
     const raw = await this._client.sendOidbPacket(pkt, rsp, timeout);
     return raw.data as T extends true ? Buffer : void;
   }

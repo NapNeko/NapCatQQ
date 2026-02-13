@@ -388,21 +388,25 @@ export async function NCoreInitShell () {
   handleUncaughtExceptions(logger);
   await applyPendingUpdates(pathWrapper, logger);
 
+  // 提前初始化 Native 模块（在登录前加载）
+  const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
+  const nativePacketHandler = new NativePacketHandler({ logger });
+  const napi2nativeLoader = new Napi2NativeLoader({ logger });
+  await nativePacketHandler.init(basicInfoWrapper.getFullQQVersion());
+
   // 初始化 FFmpeg 服务
   await FFmpegService.init(pathWrapper.binaryPath, logger);
 
   if (!(process.env['NAPCAT_DISABLE_PIPE'] === '1' || process.env['NAPCAT_WORKER_PROCESS'] === '1')) {
     await connectToNamedPipe(logger).catch(e => logger.logError('命名管道连接失败', e));
   }
-  const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
   const wrapper = loadQQWrapper(basicInfoWrapper.QQMainPath, basicInfoWrapper.getFullQQVersion());
-  const nativePacketHandler = new NativePacketHandler({ logger }); // 初始化 NativePacketHandler 用于后续使用
-  const napi2nativeLoader = new Napi2NativeLoader({ logger }); // 初始化 Napi2NativeLoader 用于后续使用
 
-  // nativePacketHandler.onAll((packet) => {
-  //     console.log('[Packet]', packet.uin, packet.cmd, packet.hex_data);
-  // });
-  await nativePacketHandler.init(basicInfoWrapper.getFullQQVersion());
+  // wrapper.node 加载后立刻启用 Bypass
+  const bypassEnabled = napi2nativeLoader.nativeExports.enableAllBypasses?.();
+  if (bypassEnabled) {
+    logger.log('[NapCat] Napi2NativeLoader: 已启用Bypass');
+  }
 
   const o3Service = wrapper.NodeIO3MiscService.get();
   o3Service.addO3MiscListener(new NodeIO3MiscListener());
