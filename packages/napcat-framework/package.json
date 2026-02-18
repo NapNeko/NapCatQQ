@@ -23,7 +23,7 @@
     "napcat-webui-backend": "workspace:*",
     "napcat-vite": "workspace:*",
     "napcat-qrcode": "workspace:*",
-    "json5": "^3.2.2"
+    "json5": "^2.2.3"
   },
   "devDependencies": {
     "@types/node": "^22.0.1"
