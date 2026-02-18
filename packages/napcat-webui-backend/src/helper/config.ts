@@ -8,6 +8,7 @@ import { resolve } from 'node:path';
 import { deepMerge } from '../utils/object';
 import { themeType } from '../types/theme';
 import { getRandomToken } from '../utils/url';
+import { buildAutoPasswordLoginConfigPatch } from '../utils/auto_login_config';
 
 // 限制尝试端口的次数，避免死循环
 // 定义配置的类型
@@ -17,6 +18,8 @@ const WebUiConfigSchema = Type.Object({
   token: Type.String({ default: getRandomToken(12) }),
   loginRate: Type.Number({ default: 10 }),
   autoLoginAccount: Type.String({ default: '' }),
+  autoPasswordLoginAccount: Type.String({ default: '' }),
+  autoPasswordLoginPasswordMd5: Type.String({ default: '' }),
   theme: themeType,
   // 是否关闭WebUI
   disableWebUI: Type.Boolean({ default: false }),
@@ -230,6 +233,36 @@ export class WebUiConfigWrapper {
   // 更新自动登录账号
   async UpdateAutoLoginAccount (uin: string): Promise<void> {
     await this.UpdateWebUIConfig({ autoLoginAccount: uin });
+  }
+
+  getAutoPasswordLoginConfig (): { uin: string | undefined; passwordMd5: string | undefined; } {
+    return {
+      uin: this.WebUiConfigData?.autoPasswordLoginAccount,
+      passwordMd5: this.WebUiConfigData?.autoPasswordLoginPasswordMd5,
+    };
+  }
+
+  // 获取自动密码回退登录配置
+  async GetAutoPasswordLoginConfig (): Promise<{ uin: string; passwordMd5: string; }> {
+    const config = await this.GetWebUIConfig();
+    return {
+      uin: config.autoPasswordLoginAccount,
+      passwordMd5: config.autoPasswordLoginPasswordMd5,
+    };
+  }
+
+  // 更新自动密码回退登录配置，passwordMd5 为空时不覆盖原配置
+  async UpdateAutoPasswordLoginConfig (uin: string, passwordMd5?: string): Promise<void> {
+    const updateConfig = buildAutoPasswordLoginConfigPatch(uin, passwordMd5);
+    await this.UpdateWebUIConfig(updateConfig);
+  }
+
+  // 清空自动密码回退登录配置
+  async ClearAutoPasswordLoginConfig (): Promise<void> {
+    await this.UpdateWebUIConfig({
+      autoPasswordLoginAccount: '',
+      autoPasswordLoginPasswordMd5: '',
+    });
   }
 
   // 获取主题内容

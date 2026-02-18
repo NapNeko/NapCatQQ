@@ -95,6 +95,27 @@ export default class QQManager {
     });
   }
 
+  public static async getAutoPasswordLoginConfig () {
+    const { data } = await serverRequest.post<
+      ServerResponse<{
+        uin: string;
+        hasPassword: boolean;
+      }>
+    >('/QQLogin/GetAutoPasswordLoginConfig');
+    return data.data;
+  }
+
+  public static async setAutoPasswordLoginConfig (uin: string, passwordMd5?: string) {
+    await serverRequest.post<ServerResponse<null>>('/QQLogin/SetAutoPasswordLoginConfig', {
+      uin,
+      ...(passwordMd5 ? { passwordMd5 } : {}),
+    });
+  }
+
+  public static async clearAutoPasswordLoginConfig () {
+    await serverRequest.post<ServerResponse<null>>('/QQLogin/ClearAutoPasswordLoginConfig');
+  }
+
   public static async passwordLogin (uin: string, passwordMd5: string) {
     await serverRequest.post<ServerResponse<null>>('/QQLogin/PasswordLogin', {
       uin,
@@ -197,4 +218,3 @@ export default class QQManager {
     );
   }
 }
-

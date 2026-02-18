@@ -29,6 +29,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { NapCatOneBot11Adapter } from '@/napcat-onebot/index';
 import { OB11PluginMangerAdapter } from '@/napcat-onebot/network/plugin-manger';
+import { runAutoLoginWithFallback } from '@/napcat-webui-backend/src/utils/auto_login';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -156,17 +157,19 @@ export async function InitWebUi (logger: ILogWrapper, pathWrapper: NapCatPathWra
   WebUiDataRuntime.setWebUiConfigQuickFunction(
     async () => {
       const autoLoginAccount = process.env['NAPCAT_QUICK_ACCOUNT'] || WebUiConfig.getAutoLoginAccount();
-      if (autoLoginAccount) {
-        try {
-          const { result, message } = await WebUiDataRuntime.requestQuickLogin(autoLoginAccount);
-          if (!result) {
-            throw new Error(message);
-          }
-          console.log(`[NapCat] [WebUi] Auto login account: ${autoLoginAccount}`);
-        } catch (error) {
-          console.log('[NapCat] [WebUi] Auto login account failed.' + error);
+      const autoPasswordLoginConfig = WebUiConfig.getAutoPasswordLoginConfig();
+      await runAutoLoginWithFallback(
+        {
+          autoLoginAccount,
+          autoPasswordLoginAccount: autoPasswordLoginConfig.uin,
+          autoPasswordLoginPasswordMd5: autoPasswordLoginConfig.passwordMd5,
+        },
+        {
+          quickLogin: WebUiDataRuntime.requestQuickLogin,
+          passwordLogin: WebUiDataRuntime.requestPasswordLogin,
+          log: (message) => console.log(message),
         }
-      }
+      );
     });
   // ------------注册中间件------------
   // 使用express的json中间件

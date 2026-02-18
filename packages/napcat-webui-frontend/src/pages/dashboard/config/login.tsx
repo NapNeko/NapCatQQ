@@ -2,6 +2,7 @@ import { Input } from '@heroui/input';
 import { Button } from '@heroui/button';
 import { Divider } from '@heroui/divider';
 import { useRequest } from 'ahooks';
+import CryptoJS from 'crypto-js';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -14,6 +15,12 @@ import QQManager from '@/controllers/qq_manager';
 import ProcessManager from '@/controllers/process_manager';
 import { waitForBackendReady } from '@/utils/process_utils';
 
+interface LoginConfigFormData {
+  quickLoginQQ: string;
+  autoPasswordLoginQQ: string;
+  autoPasswordLoginPassword: string;
+}
+
 const LoginConfigCard = () => {
   const [isRestarting, setIsRestarting] = useState(false);
   const {
@@ -23,25 +30,49 @@ const LoginConfigCard = () => {
     refreshAsync: refreshQuickLogin,
   } = useRequest(QQManager.getQuickLoginQQ);
   const {
+    data: autoPasswordLoginConfig,
+    loading: autoPasswordLoginLoading,
+    error: autoPasswordLoginError,
+    refreshAsync: refreshAutoPasswordLoginConfig,
+  } = useRequest(QQManager.getAutoPasswordLoginConfig);
+  const {
     control,
     handleSubmit: handleOnebotSubmit,
     formState: { isSubmitting },
     setValue: setOnebotValue,
-  } = useForm<{
-    quickLoginQQ: string;
-  }>({
+  } = useForm<LoginConfigFormData>({
     defaultValues: {
       quickLoginQQ: '',
+      autoPasswordLoginQQ: '',
+      autoPasswordLoginPassword: '',
     },
   });
 
   const reset = () => {
     setOnebotValue('quickLoginQQ', quickLoginData ?? '');
+    setOnebotValue('autoPasswordLoginQQ', autoPasswordLoginConfig?.uin ?? '');
+    setOnebotValue('autoPasswordLoginPassword', '');
   };
 
   const onSubmit = handleOnebotSubmit(async (data) => {
     try {
+      const autoPasswordLoginQQ = data.autoPasswordLoginQQ.trim();
+      const autoPasswordLoginPassword = data.autoPasswordLoginPassword.trim();
+      if (autoPasswordLoginPassword && !autoPasswordLoginQQ) {
+        toast.error('请输入自动回退登录QQ号');
+        return;
+      }
+
       await QQManager.setQuickLoginQQ(data.quickLoginQQ);
+      if (autoPasswordLoginQQ) {
+        const passwordMd5 = autoPasswordLoginPassword
+          ? CryptoJS.MD5(autoPasswordLoginPassword).toString()
+          : undefined;
+        await QQManager.setAutoPasswordLoginConfig(autoPasswordLoginQQ, passwordMd5);
+      }
+
+      await Promise.all([refreshQuickLogin(), refreshAutoPasswordLoginConfig()]);
+      setOnebotValue('autoPasswordLoginPassword', '');
       toast.success('保存成功');
     } catch (error) {
       const msg = (error as Error).message;
@@ -51,11 +82,24 @@ const LoginConfigCard = () => {
 
   const onRefresh = async () => {
     try {
-      await refreshQuickLogin();
+      await Promise.all([refreshQuickLogin(), refreshAutoPasswordLoginConfig()]);
       toast.success('刷新成功');
     } catch (error) {
       const msg = (error as Error).message;
       toast.error(`刷新失败: ${msg}`);
+    }
+  };
+
+  const onClearAutoPasswordConfig = async () => {
+    try {
+      await QQManager.clearAutoPasswordLoginConfig();
+      await refreshAutoPasswordLoginConfig();
+      setOnebotValue('autoPasswordLoginQQ', '');
+      setOnebotValue('autoPasswordLoginPassword', '');
+      toast.success('已清除自动回退密码登录配置');
+    } catch (error) {
+      const msg = (error as Error).message;
+      toast.error(`清除失败: ${msg}`);
     }
   };
 
@@ -90,9 +134,9 @@ const LoginConfigCard = () => {
 
   useEffect(() => {
     reset();
-  }, [quickLoginData]);
+  }, [quickLoginData, autoPasswordLoginConfig]);
 
-  if (quickLoginLoading) return <PageLoading loading />;
+  if (quickLoginLoading || autoPasswordLoginLoading) return <PageLoading loading />;
 
   return (
     <>
@@ -111,10 +155,51 @@ const LoginConfigCard = () => {
           />
         )}
       />
+      <div className='flex-shrink-0 w-full mt-6 pt-6 border-t border-divider'>自动回退密码登录</div>
+      <Controller
+        control={control}
+        name='autoPasswordLoginQQ'
+        render={({ field }) => (
+          <Input
+            {...field}
+            label='回退登录QQ'
+            placeholder='快速登录失败后使用此QQ号密码登录'
+            isDisabled={!!autoPasswordLoginError}
+            errorMessage={autoPasswordLoginError ? '获取自动回退配置失败' : undefined}
+          />
+        )}
+      />
+      <Controller
+        control={control}
+        name='autoPasswordLoginPassword'
+        render={({ field }) => (
+          <Input
+            {...field}
+            label='回退登录密码'
+            placeholder='留空表示不修改已保存密码'
+            type='password'
+            autoComplete='new-password'
+            isDisabled={!!autoPasswordLoginError}
+            errorMessage={autoPasswordLoginError ? '获取自动回退配置失败' : undefined}
+          />
+        )}
+      />
+      <div className='text-xs text-default-500'>
+        当前状态：
+        {autoPasswordLoginConfig?.hasPassword ? '已设置回退密码（不会回显）' : '未设置回退密码'}
+      </div>
+      <Button
+        color='danger'
+        variant='flat'
+        onPress={onClearAutoPasswordConfig}
+        isDisabled={!autoPasswordLoginConfig?.uin && !autoPasswordLoginConfig?.hasPassword}
+      >
+        清除回退密码配置
+      </Button>
       <SaveButtons
         onSubmit={onSubmit}
         reset={reset}
-        isSubmitting={isSubmitting || quickLoginLoading}
+        isSubmitting={isSubmitting || quickLoginLoading || autoPasswordLoginLoading}
         refresh={onRefresh}
       />
       <div className='flex-shrink-0 w-full mt-6 pt-6 border-t border-divider'>
