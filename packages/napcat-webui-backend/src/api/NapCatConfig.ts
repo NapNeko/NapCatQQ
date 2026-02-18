@@ -16,11 +16,11 @@ const defaultNapcatConfig = {
   o3HookMode: 1,
   bypass: {
     hook: true,
-    module: true,
     window: true,
-    js: true,
+    module: true,
+    process: true,
     container: true,
-    maps: true,
+    js: true,
   },
 };
 
@@ -81,7 +81,7 @@ export const NapCatSetConfigHandler: RequestHandler = (req, res) => {
     // 验证 bypass 字段
     if (mergedConfig.bypass && typeof mergedConfig.bypass === 'object') {
       const bypass = mergedConfig.bypass as Record<string, unknown>;
-      const validKeys = ['hook', 'module', 'window', 'js', 'container', 'maps'];
+      const validKeys = ['hook', 'window', 'module', 'process', 'container', 'js'];
       for (const key of validKeys) {
         if (key in bypass && typeof bypass[key] !== 'boolean') {
           return sendError(res, `bypass.${key} must be boolean`);

@@ -1,10 +1,10 @@
 interface BypassOptions {
   hook: boolean;
-  module: boolean;
   window: boolean;
-  js: boolean;
+  module: boolean;
+  process: boolean;
   container: boolean;
-  maps: boolean;
+  js: boolean;
 }
 
 interface NapCatConfig {

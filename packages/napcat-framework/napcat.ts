@@ -50,11 +50,11 @@ export async function NCoreInitFramework (
     // 读取 napcat.json 配置
     let bypassOptions: BypassOptions = {
       hook: false,
-      module: false,
       window: false,
-      js: false,
+      module: false,
+      process: false,
       container: false,
-      maps: false,
+      js: false,
     };
     try {
       const configFile = path.join(pathWrapper.configPath, 'napcat.json');

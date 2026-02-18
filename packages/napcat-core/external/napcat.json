@@ -8,10 +8,10 @@
   "o3HookMode": 1,
   "bypass": {
     "hook": true,
-    "module": true,
     "window": true,
-    "js": true,
+    "module": true,
+    "process": true,
     "container": true,
-    "maps": true
+    "js": true
   }
 }

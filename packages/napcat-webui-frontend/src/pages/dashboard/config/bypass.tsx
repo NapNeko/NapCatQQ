@@ -10,20 +10,20 @@ import QQManager from '@/controllers/qq_manager';
 
 interface BypassFormData {
   hook: boolean;
-  module: boolean;
   window: boolean;
-  js: boolean;
+  module: boolean;
+  process: boolean;
   container: boolean;
-  maps: boolean;
+  js: boolean;
 }
 
 const defaultBypass: BypassFormData = {
   hook: true,
-  module: true,
   window: true,
-  js: true,
+  module: true,
+  process: true,
   container: true,
-  maps: true,
+  js: true,
 };
 
 const BypassConfigCard = () => {
@@ -43,11 +43,11 @@ const BypassConfigCard = () => {
       const config = await QQManager.getNapCatConfig();
       const bypass = config.bypass ?? defaultBypass;
       setValue('hook', bypass.hook ?? true);
-      setValue('module', bypass.module ?? true);
       setValue('window', bypass.window ?? true);
-      setValue('js', bypass.js ?? true);
+      setValue('module', bypass.module ?? true);
+      setValue('process', bypass.process ?? true);
       setValue('container', bypass.container ?? true);
-      setValue('maps', bypass.maps ?? true);
+      setValue('js', bypass.js ?? true);
       if (showTip) toast.success('刷新成功');
     } catch (error) {
       const msg = (error as Error).message;
@@ -103,17 +103,6 @@ const BypassConfigCard = () => {
       />
       <Controller
         control={control}
-        name='module'
-        render={({ field }) => (
-          <SwitchCard
-            {...field}
-            label='Module'
-            description='加载模块隐藏'
-          />
-        )}
-      />
-      <Controller
-        control={control}
         name='window'
         render={({ field }) => (
           <SwitchCard
@@ -125,12 +114,23 @@ const BypassConfigCard = () => {
       />
       <Controller
         control={control}
-        name='js'
+        name='module'
         render={({ field }) => (
           <SwitchCard
             {...field}
-            label='JS'
-            description='JS Bypass（保留）'
+            label='Module'
+            description='加载模块隐藏'
+          />
+        )}
+      />
+      <Controller
+        control={control}
+        name='process'
+        render={({ field }) => (
+          <SwitchCard
+            {...field}
+            label='Process'
+            description='进程反检测'
           />
         )}
       />
@@ -147,12 +147,12 @@ const BypassConfigCard = () => {
       />
       <Controller
         control={control}
-        name='maps'
+        name='js'
         render={({ field }) => (
           <SwitchCard
             {...field}
-            label='Maps'
-            description='linux maps反检测'
+            label='JS'
+            description='JS反检测'
           />
         )}
       />

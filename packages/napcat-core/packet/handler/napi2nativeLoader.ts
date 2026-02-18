@@ -6,11 +6,11 @@ import { LogWrapper } from '../../helper/log';
 
 export interface BypassOptions {
   hook?: boolean;
-  module?: boolean;
   window?: boolean;
-  js?: boolean;
+  module?: boolean;
+  process?: boolean;
   container?: boolean;
-  maps?: boolean;
+  js?: boolean;
 }
 
 export interface Napi2NativeExportType {

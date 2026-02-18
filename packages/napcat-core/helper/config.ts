@@ -5,11 +5,11 @@ import { AnySchema } from 'ajv';
 
 export const BypassOptionsSchema = Type.Object({
   hook: Type.Boolean({ default: true }),
-  module: Type.Boolean({ default: true }),
   window: Type.Boolean({ default: true }),
-  js: Type.Boolean({ default: true }),
+  module: Type.Boolean({ default: true }),
+  process: Type.Boolean({ default: true }),
   container: Type.Boolean({ default: true }),
-  maps: Type.Boolean({ default: true }),
+  js: Type.Boolean({ default: true }),
 });
 
 export const NapcatConfigSchema = Type.Object({
