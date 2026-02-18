@@ -66,40 +66,49 @@ export default function PluginPage () {
         content: (
           <div className="flex flex-col gap-2">
             <p>确定要卸载插件「{plugin.name}」吗? 此操作不可恢复。</p>
-            <p className="text-small text-default-500">如果插件创建了数据文件，是否一并删除？</p>
+            <p className="text-small text-default-500">如果插件创建了配置文件，是否一并删除？</p>
           </div>
         ),
-        // This 'dialog' utility might not support returning a value from UI interacting.
-        // We might need to implement a custom confirmation flow if we want a checkbox.
-        // Alternatively, use two buttons? "Uninstall & Clean", "Uninstall Only"?
-        // Standard dialog usually has Confirm/Cancel.
-        // Let's stick to a simpler "Uninstall" and then maybe a second prompt? Or just clean data?
-        // User requested: "Uninstall prompts whether to clean data".
-        // Let's use `window.confirm` for the second step or assume `dialog.confirm` is flexible enough?
-        // I will implement a two-step confirmation or try to modify the dialog hook if visible (not visible here).
-        // Let's use a standard `window.confirm` for the data cleanup question if the custom dialog doesn't support complex return.
-        // Better: Inside onConfirm, ask again?
         onConfirm: async () => {
           // Ask for data cleanup
-          // Since we are in an async callback, we can use another dialog or confirm.
-          // Native confirm is ugly but works reliably for logic:
-          const cleanData = window.confirm(`是否同时清理插件「${plugin.name}」的数据文件？\n点击“确定”清理数据，点击“取消”仅卸载插件。`);
-
-          const loadingToast = toast.loading('卸载中...');
-          try {
-            await PluginManager.uninstallPlugin(plugin.id, cleanData);
-            toast.success('卸载成功', { id: loadingToast });
-            loadPlugins();
-            resolve();
-          } catch (e: any) {
-            toast.error(e.message, { id: loadingToast });
-            reject(e);
-          }
+          dialog.confirm({
+            title: '删除配置',
+            content: (
+              <div className="flex flex-col gap-2">
+                <p>是否同时清理插件「{plugin.name}」的配置文件？</p>
+                <div className="text-small text-default-500">
+                  <p>配置目录: config/plugins/{plugin.id}</p>
+                  <p>点击"确定"清理配置，点击"取消"仅卸载插件。</p>
+                </div>
+              </div>
+            ),
+            confirmText: '清理并卸载',
+            cancelText: '仅卸载',
+            onConfirm: async () => {
+              await performUninstall(true);
+            },
+            onCancel: async () => {
+              await performUninstall(false);
+            }
+          });
         },
         onCancel: () => {
           resolve();
         }
       });
+
+      const performUninstall = async (cleanData: boolean) => {
+        const loadingToast = toast.loading('卸载中...');
+        try {
+          await PluginManager.uninstallPlugin(plugin.id, cleanData);
+          toast.success('卸载成功', { id: loadingToast });
+          loadPlugins();
+          resolve();
+        } catch (e: any) {
+          toast.error(e.message, { id: loadingToast });
+          reject(e);
+        }
+      };
     });
   };
 

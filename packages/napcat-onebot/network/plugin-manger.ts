@@ -196,8 +196,13 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> i
    * 创建插件上下文
    */
   private createPluginContext (entry: PluginEntry): NapCatPluginContext {
-    const dataPath = path.join(entry.pluginPath, 'data');
+    const dataPath = path.join(this.core.context.pathWrapper.configPath, 'plugins', entry.id);
     const configPath = path.join(dataPath, 'config.json');
+
+    // 确保插件配置目录存在
+    if (!fs.existsSync(dataPath)) {
+      fs.mkdirSync(dataPath, { recursive: true });
+    }
 
     // 创建插件专用日志器
     const pluginPrefix = `[Plugin: ${entry.id}]`;
@@ -358,7 +363,7 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> i
     }
 
     const pluginPath = entry.pluginPath;
-    const dataPath = path.join(pluginPath, 'data');
+    const dataPath = path.join(this.core.context.pathWrapper.configPath, 'plugins', pluginId);
 
     if (entry.loaded) {
       await this.unloadPlugin(entry);
@@ -372,7 +377,7 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> i
       fs.rmSync(pluginPath, { recursive: true, force: true });
     }
 
-    // 清理数据
+    // 清理插件配置数据
     if (cleanData && fs.existsSync(dataPath)) {
       fs.rmSync(dataPath, { recursive: true, force: true });
     }
@@ -440,11 +445,7 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> i
    * 获取插件数据目录路径
    */
   public getPluginDataPath (pluginId: string): string {
-    const entry = this.plugins.get(pluginId);
-    if (!entry) {
-      throw new Error(`Plugin ${pluginId} not found`);
-    }
-    return path.join(entry.pluginPath, 'data');
+    return path.join(this.core.context.pathWrapper.configPath, 'plugins', pluginId);
   }
 
   /**
