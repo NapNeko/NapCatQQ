@@ -9,9 +9,6 @@ import {
   getQQLoginInfoHandler,
   getAutoLoginAccountHandler,
   setAutoLoginAccountHandler,
-  getAutoPasswordLoginConfigHandler,
-  setAutoPasswordLoginConfigHandler,
-  clearAutoPasswordLoginConfigHandler,
   QQRefreshQRcodeHandler,
   QQPasswordLoginHandler,
   QQResetDeviceIDHandler,
@@ -49,12 +46,6 @@ router.post('/GetQQLoginInfo', getQQLoginInfoHandler);
 router.post('/GetQuickLoginQQ', getAutoLoginAccountHandler);
 // router:设置自动登录QQ账号
 router.post('/SetQuickLoginQQ', setAutoLoginAccountHandler);
-// router:获取自动密码回退登录配置
-router.post('/GetAutoPasswordLoginConfig', getAutoPasswordLoginConfigHandler);
-// router:设置自动密码回退登录配置
-router.post('/SetAutoPasswordLoginConfig', setAutoPasswordLoginConfigHandler);
-// router:清空自动密码回退登录配置
-router.post('/ClearAutoPasswordLoginConfig', clearAutoPasswordLoginConfigHandler);
 // router:刷新QQ登录二维码
 router.post('/RefreshQRcode', QQRefreshQRcodeHandler);
 // router:密码登录

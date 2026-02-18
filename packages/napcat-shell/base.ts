@@ -20,6 +20,7 @@ import { hostname, systemVersion } from 'napcat-common/src/system';
 import path from 'path';
 import fs from 'fs';
 import os from 'os';
+import { createHash } from 'node:crypto';
 import json5 from 'json5';
 import { LoginListItem, NodeIKernelLoginService } from 'napcat-core/services';
 import qrcode from 'napcat-qrcode/lib/main';
@@ -248,6 +249,24 @@ async function handleLogin (
   return await selfInfo;
 }
 async function handleLoginInner (context: { isLogined: boolean; }, logger: LogWrapper, loginService: NodeIKernelLoginService, quickLoginUin: string | undefined, historyLoginList: LoginListItem[]) {
+  const resolveQuickPasswordMd5 = (): string | undefined => {
+    const quickPasswordMd5 = process.env['NAPCAT_QUICK_PASSWORD_MD5']?.trim();
+    if (quickPasswordMd5) {
+      if (/^[a-fA-F0-9]{32}$/.test(quickPasswordMd5)) {
+        return quickPasswordMd5.toLowerCase();
+      }
+      logger.logError('NAPCAT_QUICK_PASSWORD_MD5 格式无效（需为 32 位 MD5）');
+    }
+
+    const quickPassword = process.env['NAPCAT_QUICK_PASSWORD'];
+    if (typeof quickPassword === 'string' && quickPassword.length > 0) {
+      logger.log('检测到 NAPCAT_QUICK_PASSWORD，已在内存中计算 MD5 用于回退登录');
+      return createHash('md5').update(quickPassword, 'utf8').digest('hex');
+    }
+
+    return undefined;
+  };
+
   // 注册刷新二维码回调
   WebUiDataRuntime.setRefreshQRCodeCallback(async () => {
     loginService.getQRCodePicture();
@@ -258,10 +277,12 @@ async function handleLoginInner (context: { isLogined: boolean; }, logger: LogWr
       if (uin) {
         logger.log('正在快速登录 ', uin);
         loginService.quickLoginWithUin(uin).then(res => {
-          if (res.loginErrorInfo.errMsg) {
-            WebUiDataRuntime.setQQLoginError(res.loginErrorInfo.errMsg);
+          const quickLoginSuccess = res.result === '0' && !res.loginErrorInfo?.errMsg;
+          if (!quickLoginSuccess) {
+            const errMsg = res.loginErrorInfo?.errMsg || `快速登录失败，错误码: ${res.result}`;
+            WebUiDataRuntime.setQQLoginError(errMsg);
             loginService.getQRCodePicture();
-            resolve({ result: false, message: res.loginErrorInfo.errMsg });
+            resolve({ result: false, message: errMsg });
           } else {
             WebUiDataRuntime.setQQLoginStatus(true);
             WebUiDataRuntime.setQQLoginError('');
@@ -324,21 +345,46 @@ async function handleLoginInner (context: { isLogined: boolean; }, logger: LogWr
       }
     });
   });
+  const tryPasswordFallbackLogin = async (uin: string): Promise<{ success: boolean, attempted: boolean; }> => {
+    const quickPasswordMd5 = resolveQuickPasswordMd5();
+    if (!quickPasswordMd5) {
+      logger.log(`QQ ${uin} 未配置回退密码环境变量，建议优先使用 ACCOUNT + NAPCAT_QUICK_PASSWORD（NAPCAT_QUICK_PASSWORD_MD5 作为备用），将使用二维码登录方式`);
+      return { success: false, attempted: false };
+    }
+
+    logger.log('正在尝试密码回退登录 ', uin);
+    const { result, message } = await WebUiDataRuntime.requestPasswordLogin(uin, quickPasswordMd5);
+    if (result) {
+      logger.log('密码回退登录成功 ', uin);
+      return { success: true, attempted: true };
+    }
+    logger.logError('密码回退登录失败：', message);
+    return { success: false, attempted: true };
+  };
   if (quickLoginUin) {
     if (historyLoginList.some(u => u.uin === quickLoginUin)) {
       logger.log('正在快速登录 ', quickLoginUin);
       loginService.quickLoginWithUin(quickLoginUin)
-        .then(result => {
-          if (result.loginErrorInfo.errMsg) {
-            logger.logError('快速登录错误：', result.loginErrorInfo.errMsg);
-            WebUiDataRuntime.setQQLoginError(result.loginErrorInfo.errMsg);
-            if (!context.isLogined) loginService.getQRCodePicture();
+        .then(async result => {
+          const quickLoginSuccess = result.result === '0' && !result.loginErrorInfo?.errMsg;
+          if (!quickLoginSuccess) {
+            const errMsg = result.loginErrorInfo?.errMsg || `快速登录失败，错误码: ${result.result}`;
+            logger.logError('快速登录错误：', errMsg);
+            WebUiDataRuntime.setQQLoginError(errMsg);
+            const { success, attempted } = await tryPasswordFallbackLogin(quickLoginUin);
+            if (!success && !attempted && !context.isLogined) loginService.getQRCodePicture();
           }
         })
-        .catch();
+        .catch(async (error) => {
+          logger.logError('快速登录异常：', error);
+          WebUiDataRuntime.setQQLoginError('快速登录发生错误');
+          const { success, attempted } = await tryPasswordFallbackLogin(quickLoginUin);
+          if (!success && !attempted && !context.isLogined) loginService.getQRCodePicture();
+        });
     } else {
-      logger.logError('快速登录失败，未找到该 QQ 历史登录记录，将使用二维码登录方式');
-      if (!context.isLogined) loginService.getQRCodePicture();
+      logger.logError('快速登录失败，未找到该 QQ 历史登录记录，将尝试密码回退登录');
+      const { success, attempted } = await tryPasswordFallbackLogin(quickLoginUin);
+      if (!success && !attempted && !context.isLogined) loginService.getQRCodePicture();
     }
   } else {
     logger.log('没有 -q 指令指定快速登录，将使用二维码登录方式');

@@ -140,39 +140,6 @@ export const setAutoLoginAccountHandler: RequestHandler = async (req, res) => {
   return sendSuccess(res, null);
 };
 
-// 获取自动密码回退登录配置
-export const getAutoPasswordLoginConfigHandler: RequestHandler = async (_, res) => {
-  const data = await WebUiConfig.GetAutoPasswordLoginConfig();
-  return sendSuccess(res, {
-    uin: data.uin,
-    hasPassword: !isEmpty(data.passwordMd5),
-  });
-};
-
-// 设置自动密码回退登录配置
-export const setAutoPasswordLoginConfigHandler: RequestHandler = async (req, res) => {
-  const rawUin = typeof req.body?.uin === 'string' ? req.body.uin : '';
-  const rawPasswordMd5 = typeof req.body?.passwordMd5 === 'string' ? req.body.passwordMd5 : '';
-  const uin = rawUin.trim();
-  const passwordMd5 = rawPasswordMd5.trim();
-
-  if (isEmpty(uin)) {
-    return sendError(res, 'uin is empty');
-  }
-  if (!isEmpty(passwordMd5) && !/^[a-fA-F0-9]{32}$/.test(passwordMd5)) {
-    return sendError(res, 'passwordMd5 format invalid');
-  }
-
-  await WebUiConfig.UpdateAutoPasswordLoginConfig(uin, passwordMd5 || undefined);
-  return sendSuccess(res, null);
-};
-
-// 清空自动密码回退登录配置
-export const clearAutoPasswordLoginConfigHandler: RequestHandler = async (_, res) => {
-  await WebUiConfig.ClearAutoPasswordLoginConfig();
-  return sendSuccess(res, null);
-};
-
 // 刷新QQ登录二维码
 export const QQRefreshQRcodeHandler: RequestHandler = async (_, res) => {
   // 判断是否已经登录
@@ -444,4 +411,5 @@ export const QQResetLinuxDeviceIDHandler: RequestHandler = async (_, res) => {
     return sendError(res, `Failed to reset Device ID: ${(e as Error).message}`);
   }
 };
+
 
