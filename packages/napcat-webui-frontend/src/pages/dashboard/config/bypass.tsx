@@ -1,0 +1,169 @@
+import { useEffect, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
+
+import SaveButtons from '@/components/button/save_buttons';
+import PageLoading from '@/components/page_loading';
+import SwitchCard from '@/components/switch_card';
+
+import QQManager from '@/controllers/qq_manager';
+
+interface BypassFormData {
+  hook: boolean;
+  module: boolean;
+  window: boolean;
+  js: boolean;
+  container: boolean;
+  maps: boolean;
+}
+
+const defaultBypass: BypassFormData = {
+  hook: true,
+  module: true,
+  window: true,
+  js: true,
+  container: true,
+  maps: true,
+};
+
+const BypassConfigCard = () => {
+  const [loading, setLoading] = useState(true);
+  const {
+    control,
+    handleSubmit,
+    formState: { isSubmitting },
+    setValue,
+  } = useForm<BypassFormData>({
+    defaultValues: defaultBypass,
+  });
+
+  const loadConfig = async (showTip = false) => {
+    try {
+      setLoading(true);
+      const config = await QQManager.getNapCatConfig();
+      const bypass = config.bypass ?? defaultBypass;
+      setValue('hook', bypass.hook ?? true);
+      setValue('module', bypass.module ?? true);
+      setValue('window', bypass.window ?? true);
+      setValue('js', bypass.js ?? true);
+      setValue('container', bypass.container ?? true);
+      setValue('maps', bypass.maps ?? true);
+      if (showTip) toast.success('刷新成功');
+    } catch (error) {
+      const msg = (error as Error).message;
+      toast.error(`获取配置失败: ${msg}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onSubmit = handleSubmit(async (data) => {
+    try {
+      await QQManager.setNapCatConfig({ bypass: data });
+      toast.success('保存成功，重启后生效');
+    } catch (error) {
+      const msg = (error as Error).message;
+      toast.error(`保存失败: ${msg}`);
+    }
+  });
+
+  const onReset = () => {
+    loadConfig();
+  };
+
+  const onRefresh = async () => {
+    await loadConfig(true);
+  };
+
+  useEffect(() => {
+    loadConfig();
+  }, []);
+
+  if (loading) return <PageLoading loading />;
+
+  return (
+    <>
+      <title>反检测配置 - NapCat WebUI</title>
+      <div className='flex flex-col gap-1 mb-2'>
+        <h3 className='text-lg font-semibold text-default-700'>反检测开关配置</h3>
+        <p className='text-sm text-default-500'>
+          控制 Napi2Native 模块的各项反检测功能，修改后需重启生效。
+        </p>
+      </div>
+      <Controller
+        control={control}
+        name='hook'
+        render={({ field }) => (
+          <SwitchCard
+            {...field}
+            label='Hook'
+            description='hook特征隐藏'
+          />
+        )}
+      />
+      <Controller
+        control={control}
+        name='module'
+        render={({ field }) => (
+          <SwitchCard
+            {...field}
+            label='Module'
+            description='加载模块隐藏'
+          />
+        )}
+      />
+      <Controller
+        control={control}
+        name='window'
+        render={({ field }) => (
+          <SwitchCard
+            {...field}
+            label='Window'
+            description='窗口伪造'
+          />
+        )}
+      />
+      <Controller
+        control={control}
+        name='js'
+        render={({ field }) => (
+          <SwitchCard
+            {...field}
+            label='JS'
+            description='JS Bypass（保留）'
+          />
+        )}
+      />
+      <Controller
+        control={control}
+        name='container'
+        render={({ field }) => (
+          <SwitchCard
+            {...field}
+            label='Container'
+            description='容器反检测'
+          />
+        )}
+      />
+      <Controller
+        control={control}
+        name='maps'
+        render={({ field }) => (
+          <SwitchCard
+            {...field}
+            label='Maps'
+            description='linux maps反检测'
+          />
+        )}
+      />
+      <SaveButtons
+        onSubmit={onSubmit}
+        reset={onReset}
+        isSubmitting={isSubmitting}
+        refresh={onRefresh}
+      />
+    </>
+  );
+};
+
+export default BypassConfigCard;

@@ -20,6 +20,7 @@ import { hostname, systemVersion } from 'napcat-common/src/system';
 import path from 'path';
 import fs from 'fs';
 import os from 'os';
+import json5 from 'json5';
 import { LoginListItem, NodeIKernelLoginService } from 'napcat-core/services';
 import qrcode from 'napcat-qrcode/lib/main';
 import { NapCatAdapterManager } from 'napcat-adapter';
@@ -30,13 +31,72 @@ import { NodeIO3MiscListener } from 'napcat-core/listeners/NodeIO3MiscListener';
 import { sleep } from 'napcat-common/src/helper';
 import { FFmpegService } from '@/napcat-core/helper/ffmpeg/ffmpeg';
 import { NativePacketHandler } from 'napcat-core/packet/handler/client';
-import { Napi2NativeLoader } from 'napcat-core/packet/handler/napi2nativeLoader';
+import { Napi2NativeLoader, BypassOptions } from 'napcat-core/packet/handler/napi2nativeLoader';
 import { logSubscription, LogWrapper } from '@/napcat-core/helper/log';
 import { proxiedListenerOf } from '@/napcat-core/helper/proxy-handler';
 import { QQBasicInfoWrapper } from '@/napcat-core/helper/qq-basic-info';
 import { statusHelperSubscription } from '@/napcat-core/helper/status';
 import { applyPendingUpdates } from '@/napcat-webui-backend/src/api/UpdateNapCat';
 import { connectToNamedPipe } from './pipe';
+
+/**
+ * 读取 napcat.json 配置中的 bypass 选项，并根据分步禁用级别覆盖
+ *
+ * 分步禁用级别 (NAPCAT_BYPASS_DISABLE_LEVEL):
+ *   0: 使用配置文件原始值（全部启用或用户自定义）
+ *   1: 强制禁用 hook
+ *   2: 强制禁用 hook + module
+ *   3: 强制禁用全部 bypass
+ */
+function loadBypassConfig (configPath: string, logger: LogWrapper): BypassOptions {
+  const defaultOptions: BypassOptions = {
+    hook: true,
+    module: true,
+    window: true,
+    js: true,
+    container: true,
+    maps: true,
+  };
+
+  let options = { ...defaultOptions };
+
+  try {
+    const configFile = path.join(configPath, 'napcat.json');
+    if (fs.existsSync(configFile)) {
+      const content = fs.readFileSync(configFile, 'utf-8');
+      const config = json5.parse(content);
+      if (config.bypass && typeof config.bypass === 'object') {
+        options = { ...defaultOptions, ...config.bypass };
+      }
+    }
+  } catch (e) {
+    logger.logWarn('[NapCat] 读取 bypass 配置失败，使用默认值:', e);
+  }
+
+  // 根据分步禁用级别覆盖配置
+  const disableLevel = parseInt(process.env['NAPCAT_BYPASS_DISABLE_LEVEL'] || '0', 10);
+  if (disableLevel > 0) {
+    const levelDescriptions = ['全部启用', '禁用 hook', '禁用 hook + module', '全部禁用 bypass'];
+    logger.logWarn(`[NapCat] 崩溃恢复：当前 bypass 禁用级别 ${disableLevel} (${levelDescriptions[disableLevel] ?? '未知'})`);
+
+    if (disableLevel >= 1) {
+      options.hook = false;
+    }
+    if (disableLevel >= 2) {
+      options.module = false;
+    }
+    if (disableLevel >= 3) {
+      options.hook = false;
+      options.module = false;
+      options.window = false;
+      options.js = false;
+      options.container = false;
+      options.maps = false;
+    }
+  }
+
+  return options;
+}
 // NapCat Shell App ES 入口文件
 async function handleUncaughtExceptions (logger: LogWrapper) {
   process.on('uncaughtException', (err) => {
@@ -406,7 +466,9 @@ export async function NCoreInitShell () {
   }
   // wrapper.node 加载后立刻启用 Bypass（可通过环境变量禁用）
   if (process.env['NAPCAT_DISABLE_BYPASS'] !== '1') {
-    const bypassEnabled = napi2nativeLoader.nativeExports.enableAllBypasses?.();
+    const bypassOptions = loadBypassConfig(pathWrapper.configPath, logger);
+    logger.logDebug('[NapCat] Bypass 配置:', bypassOptions);
+    const bypassEnabled = napi2nativeLoader.nativeExports.enableAllBypasses?.(bypassOptions);
     if (bypassEnabled) {
       logger.log('[NapCat] Napi2NativeLoader: 已启用Bypass');
     }
@@ -463,6 +525,13 @@ export async function NCoreInitShell () {
   o3Service.reportAmgomWeather('login', 'a1', [dataTimestape, '0', '0']);
 
   const selfInfo = await handleLogin(loginService, logger, pathWrapper, quickLoginUin, historyLoginList);
+
+  // 登录成功后通知 Master 进程（用于切换崩溃重试策略）
+  if (typeof process.send === 'function') {
+    process.send({ type: 'login-success' });
+    logger.log('[NapCat] 已通知主进程登录成功');
+  }
+
   const amgomDataPiece = 'eb1fd6ac257461580dc7438eb099f23aae04ca679f4d88f53072dc56e3bb1129';
   o3Service.setAmgomDataPiece(basicInfoWrapper.QQVersionAppid, new Uint8Array(Buffer.from(amgomDataPiece, 'hex')));
 

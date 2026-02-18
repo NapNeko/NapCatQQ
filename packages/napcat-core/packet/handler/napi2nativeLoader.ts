@@ -4,10 +4,19 @@ import fs from 'fs';
 import { constants } from 'node:os';
 import { LogWrapper } from '../../helper/log';
 
+export interface BypassOptions {
+  hook?: boolean;
+  module?: boolean;
+  window?: boolean;
+  js?: boolean;
+  container?: boolean;
+  maps?: boolean;
+}
+
 export interface Napi2NativeExportType {
   initHook?: (send: string, recv: string) => boolean;
   setVerbose?: (verbose: boolean) => void; // 默认关闭日志
-  enableAllBypasses?: () => void;
+  enableAllBypasses?: (options?: BypassOptions) => boolean;
 }
 
 export class Napi2NativeLoader {

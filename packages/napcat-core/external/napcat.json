@@ -5,5 +5,13 @@
   "consoleLogLevel": "info",
   "packetBackend": "auto",
   "packetServer": "",
-  "o3HookMode": 1
+  "o3HookMode": 1,
+  "bypass": {
+    "hook": true,
+    "module": true,
+    "window": true,
+    "js": true,
+    "container": true,
+    "maps": true
+  }
 }

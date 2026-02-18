@@ -178,5 +178,23 @@ export default class QQManager {
   public static async resetLinuxDeviceID () {
     await serverRequest.post<ServerResponse<null>>('/QQLogin/ResetLinuxDeviceID');
   }
+
+  // ============================================================
+  // NapCat 配置管理
+  // ============================================================
+
+  public static async getNapCatConfig () {
+    const { data } = await serverRequest.get<ServerResponse<NapCatConfig>>(
+      '/NapCatConfig/GetConfig'
+    );
+    return data.data;
+  }
+
+  public static async setNapCatConfig (config: Partial<NapCatConfig>) {
+    await serverRequest.post<ServerResponse<null>>(
+      '/NapCatConfig/SetConfig',
+      config
+    );
+  }
 }
 
