@@ -68,7 +68,7 @@ export async function NCoreInitFramework (
     } catch (e) {
       logger.logWarn('[NapCat] 读取 napcat.json bypass 配置失败，已全部禁用:', e);
     }
-    const bypassEnabled = napi2nativeLoader.nativeExports.enableAllBypasses?.(bypassOptions);
+    napi2nativeLoader.nativeExports.enableAllBypasses?.(bypassOptions);
     logger.log('[NapCat] Napi2NativeLoader: Framework模式Bypass配置:', bypassOptions);
   } else {
     logger.log('[NapCat] Napi2NativeLoader: Bypass已通过环境变量禁用');
