@@ -11,7 +11,20 @@ import { useState } from 'react';
 
 import key from '@/const/key';
 import { PluginItem } from '@/controllers/plugin_manager';
-import { getPluginIconUrl } from '@/utils/plugin_icon';
+
+function getPluginIconUrl (iconPath?: string): string | undefined {
+  if (!iconPath) return undefined;
+  try {
+    const raw = localStorage.getItem(key.token);
+    if (!raw) return iconPath;
+    const token = JSON.parse(raw);
+    const url = new URL(iconPath, window.location.origin);
+    url.searchParams.set('webui_token', token);
+    return url.pathname + url.search;
+  } catch {
+    return iconPath;
+  }
+}
 
 export interface PluginDisplayCardProps {
   data: PluginItem;
