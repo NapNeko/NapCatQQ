@@ -2,10 +2,8 @@ import { NapCatPathWrapper } from 'napcat-common/src/path';
 import { InitWebUi, WebUiConfig, webUiRuntimePort } from 'napcat-webui-backend/index';
 import { NapCatAdapterManager } from 'napcat-adapter';
 import { NativePacketHandler } from 'napcat-core/packet/handler/client';
-import { Napi2NativeLoader, BypassOptions } from 'napcat-core/packet/handler/napi2nativeLoader';
-import path from 'path';
-import fs from 'fs';
-import json5 from 'json5';
+import { Napi2NativeLoader } from 'napcat-core/packet/handler/napi2nativeLoader';
+import { loadNapcatConfig } from '@/napcat-core/helper/config';
 import { FFmpegService } from 'napcat-core/helper/ffmpeg/ffmpeg';
 import { logSubscription, LogWrapper } from 'napcat-core/helper/log';
 import { QQBasicInfoWrapper } from '@/napcat-core/helper/qq-basic-info';
@@ -45,21 +43,10 @@ export async function NCoreInitFramework (
   const wrapper = loadQQWrapper(basicInfoWrapper.QQMainPath, basicInfoWrapper.getFullQQVersion());
   const nativePacketHandler = new NativePacketHandler({ logger }); // 初始化 NativePacketHandler 用于后续使用
   const napi2nativeLoader = new Napi2NativeLoader({ logger }); // 初始化 Napi2NativeLoader 用于后续使用
+  const napcatConfig = loadNapcatConfig(pathWrapper.configPath);
   //console.log('[NapCat] [Napi2NativeLoader]', napi2nativeLoader.nativeExports.enableAllBypasses?.());
   if (process.env['NAPCAT_DISABLE_BYPASS'] !== '1') {
-    let bypassOptions: BypassOptions = {};
-    try {
-      const configFile = path.join(pathWrapper.configPath, 'napcat.json');
-      if (fs.existsSync(configFile)) {
-        const content = fs.readFileSync(configFile, 'utf-8');
-        const config = json5.parse(content);
-        if (config.bypass && typeof config.bypass === 'object') {
-          bypassOptions = { ...config.bypass };
-        }
-      }
-    } catch (e) {
-      logger.logWarn('[NapCat] 读取 napcat.json bypass 配置失败，已全部禁用:', e);
-    }
+    const bypassOptions = napcatConfig.bypass ?? {};
     const bypassEnabled = napi2nativeLoader.nativeExports.enableAllBypasses?.(bypassOptions);
     if (bypassEnabled) {
       logger.log('[NapCat] Napi2NativeLoader: 已启用Bypass');
@@ -71,7 +58,7 @@ export async function NCoreInitFramework (
   // nativePacketHandler.onAll((packet) => {
   //     console.log('[Packet]', packet.uin, packet.cmd, packet.hex_data);
   // });
-  await nativePacketHandler.init(basicInfoWrapper.getFullQQVersion());
+  await nativePacketHandler.init(basicInfoWrapper.getFullQQVersion(), napcatConfig.o3HookMode === 1 ? true : false);
   // 在 init 之后注册监听器
 
   // 初始化 FFmpeg 服务
