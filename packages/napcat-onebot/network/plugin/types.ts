@@ -15,6 +15,7 @@ export interface PluginPackageJson {
   author?: string;
   homepage?: string;
   repository?: string | { type: string; url: string; };
+  icon?: string; // 插件图标文件路径（相对于插件目录），如 "icon.png"
 }
 
 // ==================== 插件配置 Schema ====================

@@ -288,6 +288,95 @@ async function extractPlugin (zipPath: string, pluginId: string): Promise<void> 
 }
 
 /**
+ * 安装后尝试缓存插件图标
+ * 如果插件 package.json 没有 icon 字段，则尝试从 GitHub 头像获取并缓存到 config 目录
+ */
+async function cachePluginIcon (pluginId: string, storePlugin: PluginStoreList['plugins'][0]): Promise<void> {
+  const PLUGINS_DIR = getPluginsDir();
+  const pluginDir = path.join(PLUGINS_DIR, pluginId);
+  const configDir = path.join(webUiPathWrapper.configPath, 'plugins', pluginId);
+
+  // 检查 package.json 是否已有 icon 字段
+  const packageJsonPath = path.join(pluginDir, 'package.json');
+  if (fs.existsSync(packageJsonPath)) {
+    try {
+      const pkg = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+      if (pkg.icon) {
+        const iconPath = path.join(pluginDir, pkg.icon);
+        if (fs.existsSync(iconPath)) {
+          return; // 已有 icon，无需缓存
+        }
+      }
+    } catch {
+      // 忽略解析错误
+    }
+  }
+
+  // 检查是否已有缓存的图标 (固定 icon.png)
+  if (fs.existsSync(path.join(configDir, 'icon.png'))) {
+    return; // 已有缓存图标
+  }
+
+  // 尝试从 GitHub 获取头像
+  let avatarUrl: string | undefined;
+
+  // 从 downloadUrl 提取 GitHub 用户名
+  if (storePlugin.downloadUrl) {
+    try {
+      const url = new URL(storePlugin.downloadUrl);
+      if (url.hostname === 'github.com' || url.hostname === 'www.github.com') {
+        const parts = url.pathname.split('/').filter(Boolean);
+        if (parts.length >= 1) {
+          avatarUrl = `https://github.com/${parts[0]}.png?size=128`;
+        }
+      }
+    } catch {
+      // 忽略
+    }
+  }
+
+  // 从 homepage 提取
+  if (!avatarUrl && storePlugin.homepage) {
+    try {
+      const url = new URL(storePlugin.homepage);
+      if (url.hostname === 'github.com' || url.hostname === 'www.github.com') {
+        const parts = url.pathname.split('/').filter(Boolean);
+        if (parts.length >= 1) {
+          avatarUrl = `https://github.com/${parts[0]}.png?size=128`;
+        }
+      }
+    } catch {
+      // 忽略
+    }
+  }
+
+  if (!avatarUrl) return;
+
+  try {
+    // 确保 config 目录存在
+    if (!fs.existsSync(configDir)) {
+      fs.mkdirSync(configDir, { recursive: true });
+    }
+
+    const response = await fetch(avatarUrl, {
+      headers: { 'User-Agent': 'NapCat-WebUI' },
+      signal: AbortSignal.timeout(15000),
+      redirect: 'follow',
+    });
+
+    if (!response.ok || !response.body) return;
+
+    const iconPath = path.join(configDir, 'icon.png');
+    const fileStream = createWriteStream(iconPath);
+    await pipeline(response.body as any, fileStream);
+
+    console.log(`[cachePluginIcon] Cached icon for ${pluginId} at ${iconPath}`);
+  } catch (e: any) {
+    console.warn(`[cachePluginIcon] Failed to cache icon for ${pluginId}:`, e.message);
+  }
+}
+
+/**
  * 获取插件商店列表
  */
 export const GetPluginStoreListHandler: RequestHandler = async (req, res) => {
@@ -372,6 +461,13 @@ export const InstallPluginFromStoreHandler: RequestHandler = async (req, res) =>
         } else {
           await pluginManager.loadPluginById(id);
         }
+      }
+
+      // 安装后尝试缓存插件图标（如果 package.json 没有 icon 字段），失败可跳过
+      try {
+        await cachePluginIcon(id, plugin);
+      } catch (e: any) {
+        console.warn(`[InstallPlugin] Failed to cache icon for ${id}, skipping:`, e.message);
       }
 
       return sendSuccess(res, {
@@ -497,6 +593,12 @@ export const InstallPluginFromStoreSSEHandler: RequestHandler = async (req, res)
       }
 
       sendProgress('安装成功！', 100);
+
+      // 安装后尝试缓存插件图标（如果 package.json 没有 icon 字段）
+      cachePluginIcon(id, plugin).catch(e => {
+        console.warn(`[cachePluginIcon] Failed to cache icon for ${id}:`, e.message);
+      });
+
       res.write(`data: ${JSON.stringify({
         success: true,
         message: 'Plugin installed successfully',

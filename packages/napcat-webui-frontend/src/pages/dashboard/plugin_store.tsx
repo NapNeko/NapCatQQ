@@ -3,7 +3,8 @@ import { Input } from '@heroui/input';
 import { Tab, Tabs } from '@heroui/tabs';
 import { Tooltip } from '@heroui/tooltip';
 import { Spinner } from '@heroui/spinner';
-import { useEffect, useMemo, useState, useRef } from 'react';
+import { Pagination } from '@heroui/pagination';
+import { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { IoMdRefresh, IoMdSearch, IoMdSettings } from 'react-icons/io';
 import clsx from 'clsx';
@@ -18,6 +19,16 @@ import PluginDetailModal from '@/pages/dashboard/plugin_detail_modal';
 import { PluginStoreItem } from '@/types/plugin-store';
 import useDialog from '@/hooks/use-dialog';
 import key from '@/const/key';
+
+/** Fisher-Yates 洗牌算法，返回新数组 */
+function shuffleArray<T> (arr: T[]): T[] {
+  const shuffled = [...arr];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
 
 interface EmptySectionProps {
   isEmpty: boolean;
@@ -86,6 +97,10 @@ export default function PluginStorePage () {
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedPlugin, setSelectedPlugin] = useState<PluginStoreItem | null>(null);
 
+  // 分页状态
+  const ITEMS_PER_PAGE = 20;
+  const [currentPage, setCurrentPage] = useState(1);
+
   const loadPlugins = async (forceRefresh: boolean = false) => {
     setLoading(true);
     try {
@@ -145,6 +160,7 @@ export default function PluginStorePage () {
       tools: filtered.filter(p => p.tags?.includes('工具')),
       entertainment: filtered.filter(p => p.tags?.includes('娱乐')),
       other: filtered.filter(p => !p.tags?.some(t => ['官方', '工具', '娱乐'].includes(t))),
+      random: shuffleArray(filtered),
     };
 
     return categories;
@@ -175,8 +191,29 @@ export default function PluginStorePage () {
       { key: 'tools', title: '工具', count: categorizedPlugins.tools?.length || 0 },
       { key: 'entertainment', title: '娱乐', count: categorizedPlugins.entertainment?.length || 0 },
       { key: 'other', title: '其它', count: categorizedPlugins.other?.length || 0 },
+      { key: 'random', title: '随机', count: categorizedPlugins.random?.length || 0 },
     ];
   }, [categorizedPlugins]);
+
+  // 当前分类的总数和分页数据
+  const currentCategoryPlugins = useMemo(() => categorizedPlugins[activeTab] || [], [categorizedPlugins, activeTab]);
+  const totalPages = useMemo(() => Math.max(1, Math.ceil(currentCategoryPlugins.length / ITEMS_PER_PAGE)), [currentCategoryPlugins.length]);
+  const paginatedPlugins = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return currentCategoryPlugins.slice(start, start + ITEMS_PER_PAGE);
+  }, [currentCategoryPlugins, currentPage]);
+
+  // 切换分类或搜索时重置页码
+  const handleTabChange = useCallback((key: string) => {
+    setActiveTab(key);
+    setCurrentPage(1);
+  }, []);
+
+  // 搜索变化时重置页码
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
+  }, []);
 
   const handleInstall = async (plugin: PluginStoreItem) => {
     // 弹窗选择下载镜像
@@ -338,7 +375,7 @@ export default function PluginStorePage () {
                 placeholder='搜索(Ctrl+F)...'
                 startContent={<IoMdSearch className='text-default-400' />}
                 value={searchQuery}
-                onValueChange={setSearchQuery}
+                onValueChange={handleSearchChange}
                 className='max-w-xs w-full'
                 size='sm'
                 isClearable
@@ -370,7 +407,7 @@ export default function PluginStorePage () {
             aria-label='Plugin Store Categories'
             className='max-w-full'
             selectedKey={activeTab}
-            onSelectionChange={(key) => setActiveTab(String(key))}
+            onSelectionChange={(key) => handleTabChange(String(key))}
             classNames={{
               tabList: 'bg-white/40 dark:bg-black/20 backdrop-blur-md',
               cursor: 'bg-white/80 dark:bg-white/10 backdrop-blur-md shadow-sm',
@@ -395,9 +432,9 @@ export default function PluginStorePage () {
             </div>
           )}
 
-          <EmptySection isEmpty={!categorizedPlugins[activeTab]?.length} />
+          <EmptySection isEmpty={!currentCategoryPlugins.length} />
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 justify-start items-stretch gap-4'>
-            {categorizedPlugins[activeTab]?.map((plugin) => {
+            {paginatedPlugins.map((plugin) => {
               const installInfo = getPluginInstallInfo(plugin);
               return (
                 <PluginStoreCard
@@ -414,6 +451,24 @@ export default function PluginStorePage () {
               );
             })}
           </div>
+
+          {/* 分页控件 */}
+          {totalPages > 1 && (
+            <div className='flex justify-center mt-6 mb-2'>
+              <Pagination
+                total={totalPages}
+                page={currentPage}
+                onChange={setCurrentPage}
+                showControls
+                showShadow
+                color='primary'
+                size='lg'
+                classNames={{
+                  wrapper: 'backdrop-blur-md bg-white/40 dark:bg-black/20',
+                }}
+              />
+            </div>
+          )}
         </div>
       </div>
 

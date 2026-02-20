@@ -8,6 +8,49 @@ import path from 'path';
 import fs from 'fs';
 import compressing from 'compressing';
 
+/**
+ * 获取插件图标 URL
+ * 优先使用 package.json 中的 icon 字段，否则检查缓存的图标文件
+ */
+function getPluginIconUrl (pluginId: string, pluginPath: string, iconField?: string): string | undefined {
+  // 1. 检查 package.json 中指定的 icon 文件
+  if (iconField) {
+    const iconPath = path.join(pluginPath, iconField);
+    if (fs.existsSync(iconPath)) {
+      return `/api/Plugin/Icon/${encodeURIComponent(pluginId)}`;
+    }
+  }
+
+  // 2. 检查 config 目录中缓存的图标 (固定 icon.png)
+  const cachedIcon = path.join(webUiPathWrapper.configPath, 'plugins', pluginId, 'icon.png');
+  if (fs.existsSync(cachedIcon)) {
+    return `/api/Plugin/Icon/${encodeURIComponent(pluginId)}`;
+  }
+
+  return undefined;
+}
+
+/**
+ * 查找插件图标文件的实际路径
+ */
+function findPluginIconPath (pluginId: string, pluginPath: string, iconField?: string): string | undefined {
+  // 1. 优先使用 package.json 中指定的 icon
+  if (iconField) {
+    const iconPath = path.join(pluginPath, iconField);
+    if (fs.existsSync(iconPath)) {
+      return iconPath;
+    }
+  }
+
+  // 2. 检查 config 目录中缓存的图标 (固定 icon.png)
+  const cachedIcon = path.join(webUiPathWrapper.configPath, 'plugins', pluginId, 'icon.png');
+  if (fs.existsSync(cachedIcon)) {
+    return cachedIcon;
+  }
+
+  return undefined;
+}
+
 // Helper to get the plugin manager adapter
 const getPluginManager = (): OB11PluginMangerAdapter | null => {
   const ob11 = WebUiDataRuntime.getOneBotContext() as NapCatOneBot11Adapter;
@@ -77,6 +120,7 @@ export const GetPluginListHandler: RequestHandler = async (_req, res) => {
     hasPages: boolean;
     homepage?: string;
     repository?: string;
+    icon?: string;
   }> = new Array();
 
   // 收集所有插件的扩展页面
@@ -117,7 +161,8 @@ export const GetPluginListHandler: RequestHandler = async (_req, res) => {
       homepage: p.packageJson?.homepage,
       repository: typeof p.packageJson?.repository === 'string'
         ? p.packageJson.repository
-        : p.packageJson?.repository?.url
+        : p.packageJson?.repository?.url,
+      icon: getPluginIconUrl(p.id, p.pluginPath, p.packageJson?.icon),
     });
 
     // 收集插件的扩展页面
@@ -599,4 +644,25 @@ export const ImportLocalPluginHandler: RequestHandler = async (req, res) => {
     }
     return sendError(res, 'Failed to import plugin: ' + e.message);
   }
+};
+
+/**
+ * 获取插件图标
+ */
+export const GetPluginIconHandler: RequestHandler = async (req, res) => {
+  const pluginId = req.params['pluginId'];
+  if (!pluginId) return sendError(res, 'Plugin ID is required');
+
+  const pluginManager = getPluginManager();
+  if (!pluginManager) return sendError(res, 'Plugin Manager not found');
+
+  const plugin = pluginManager.getPluginInfo(pluginId);
+  if (!plugin) return sendError(res, 'Plugin not found');
+
+  const iconPath = findPluginIconPath(pluginId, plugin.pluginPath, plugin.packageJson?.icon);
+  if (!iconPath) {
+    return res.status(404).json({ code: -1, message: 'Icon not found' });
+  }
+
+  return res.sendFile(iconPath);
 };
