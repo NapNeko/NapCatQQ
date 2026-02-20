@@ -49,47 +49,18 @@ import { connectToNamedPipe } from './pipe';
  *   3: 强制禁用全部 bypass
  */
 function loadBypassConfig (configPath: string, logger: LogWrapper): BypassOptions {
-  const defaultOptions: BypassOptions = {
-    hook: true,
-    window: true,
-    module: true,
-    process: true,
-    container: true,
-    js: true,
-  };
-
-  let options = { ...defaultOptions };
+  let options: BypassOptions = {};
   try {
     const configFile = path.join(configPath, 'napcat.json');
     if (fs.existsSync(configFile)) {
       const content = fs.readFileSync(configFile, 'utf-8');
       const config = json5.parse(content);
       if (config.bypass && typeof config.bypass === 'object') {
-        options = { ...defaultOptions, ...config.bypass };
+        options = { ...config.bypass };
       }
     }
   } catch (e) {
-    logger.logWarn('[NapCat] 读取 bypass 配置失败，使用默认值:', e);
-  }
-  // 根据分步禁用级别覆盖配置
-  const disableLevel = parseInt(process.env['NAPCAT_BYPASS_DISABLE_LEVEL'] || '0', 10);
-  if (disableLevel > 0) {
-    const levelDescriptions = ['全部启用', '禁用 hook', '禁用 hook + module', '全部禁用 bypass'];
-    logger.logWarn(`[NapCat] 崩溃恢复：当前 bypass 禁用级别 ${disableLevel} (${levelDescriptions[disableLevel] ?? '未知'})`);
-    if (disableLevel >= 1) {
-      options.hook = false;
-    }
-    if (disableLevel >= 2) {
-      options.module = false;
-    }
-    if (disableLevel >= 3) {
-      options.hook = false;
-      options.window = false;
-      options.module = false;
-      options.process = false;
-      options.container = false;
-      options.js = false;
-    }
+    logger.logWarn('[NapCat] 读取 bypass 配置失败:', e);
   }
   return options;
 }

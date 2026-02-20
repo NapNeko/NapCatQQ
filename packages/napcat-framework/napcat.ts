@@ -47,28 +47,23 @@ export async function NCoreInitFramework (
   const napi2nativeLoader = new Napi2NativeLoader({ logger }); // 初始化 Napi2NativeLoader 用于后续使用
   //console.log('[NapCat] [Napi2NativeLoader]', napi2nativeLoader.nativeExports.enableAllBypasses?.());
   if (process.env['NAPCAT_DISABLE_BYPASS'] !== '1') {
-    // 读取 napcat.json 配置
-    let bypassOptions: BypassOptions = {
-      hook: false,
-      window: false,
-      module: false,
-      process: false,
-      container: false,
-      js: false,
-    };
+    let bypassOptions: BypassOptions = {};
     try {
       const configFile = path.join(pathWrapper.configPath, 'napcat.json');
       if (fs.existsSync(configFile)) {
         const content = fs.readFileSync(configFile, 'utf-8');
         const config = json5.parse(content);
         if (config.bypass && typeof config.bypass === 'object') {
-          bypassOptions = { ...bypassOptions, ...config.bypass };
+          bypassOptions = { ...config.bypass };
         }
       }
     } catch (e) {
       logger.logWarn('[NapCat] 读取 napcat.json bypass 配置失败，已全部禁用:', e);
     }
     const bypassEnabled = napi2nativeLoader.nativeExports.enableAllBypasses?.(bypassOptions);
+    if (bypassEnabled) {
+      logger.log('[NapCat] Napi2NativeLoader: 已启用Bypass');
+    }
     logger.log('[NapCat] Napi2NativeLoader: Framework模式Bypass配置:', bypassOptions);
   } else {
     logger.log('[NapCat] Napi2NativeLoader: Bypass已通过环境变量禁用');
