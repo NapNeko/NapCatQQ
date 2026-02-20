@@ -131,7 +131,7 @@ const WebUIConfigCard = () => {
             isLoading={isLoadingOptions}
             className='w-fit'
           >
-            {!isLoadingOptions && '📥'}
+            {!isLoadingOptions}
             准备选项
           </Button>
           <Button
@@ -225,12 +225,12 @@ const WebUIConfigCard = () => {
             disabled={!registrationOptions}
             className='w-fit'
           >
-            🔐 注册Passkey
+            注册Passkey
           </Button>
         </div>
         {registrationOptions && (
           <div className='text-xs text-green-600'>
-            ✅ 注册选项已准备就绪，可以开始注册
+            注册选项已准备就绪，可以开始注册
           </div>
         )}
       </div>

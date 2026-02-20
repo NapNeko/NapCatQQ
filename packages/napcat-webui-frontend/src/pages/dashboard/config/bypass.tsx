@@ -83,83 +83,85 @@ const BypassConfigCard = () => {
           控制 Napi2Native 模块的各项反检测功能，修改后需重启生效。
         </p>
       </div>
-      <Controller
-        control={control}
-        name='hook'
-        render={({ field }) => (
-          <SwitchCard
-            {...field}
-            label='Hook'
-            description='hook特征隐藏'
-          />
-        )}
-      />
-      <Controller
-        control={control}
-        name='window'
-        render={({ field }) => (
-          <SwitchCard
-            {...field}
-            label='Window'
-            description='窗口伪造'
-          />
-        )}
-      />
-      <Controller
-        control={control}
-        name='module'
-        render={({ field }) => (
-          <SwitchCard
-            {...field}
-            label='Module'
-            description='加载模块隐藏'
-          />
-        )}
-      />
-      <Controller
-        control={control}
-        name='process'
-        render={({ field }) => (
-          <SwitchCard
-            {...field}
-            label='Process'
-            description='进程反检测'
-          />
-        )}
-      />
-      <Controller
-        control={control}
-        name='container'
-        render={({ field }) => (
-          <SwitchCard
-            {...field}
-            label='Container'
-            description='容器反检测'
-          />
-        )}
-      />
-      <Controller
-        control={control}
-        name='js'
-        render={({ field }) => (
-          <SwitchCard
-            {...field}
-            label='JS'
-            description='JS反检测'
-          />
-        )}
-      />
-      <Controller
-        control={control}
-        name='o3HookMode'
-        render={({ field }) => (
-          <SwitchCard
-            {...field}
-            label='o3HookMode'
-            description='O3 Hook 模式'
-          />
-        )}
-      />
+      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3'>
+        <Controller
+          control={control}
+          name='hook'
+          render={({ field }) => (
+            <SwitchCard
+              {...field}
+              label='Hook'
+              description='hook特征隐藏'
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name='window'
+          render={({ field }) => (
+            <SwitchCard
+              {...field}
+              label='Window'
+              description='窗口伪造'
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name='module'
+          render={({ field }) => (
+            <SwitchCard
+              {...field}
+              label='Module'
+              description='加载模块隐藏'
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name='process'
+          render={({ field }) => (
+            <SwitchCard
+              {...field}
+              label='Process'
+              description='进程反检测'
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name='container'
+          render={({ field }) => (
+            <SwitchCard
+              {...field}
+              label='Container'
+              description='容器反检测'
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name='js'
+          render={({ field }) => (
+            <SwitchCard
+              {...field}
+              label='JS'
+              description='JS反检测'
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name='o3HookMode'
+          render={({ field }) => (
+            <SwitchCard
+              {...field}
+              label='o3HookMode'
+              description='O3 Hook 模式'
+            />
+          )}
+        />
+      </div>
       <SaveButtons
         onSubmit={onSubmit}
         reset={onReset}

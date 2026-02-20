@@ -115,7 +115,7 @@ export default function ConfigPage () {
             <BackupConfigCard />
           </ConfigPageItem>
         </Tab>
-        <Tab title='Bypass配置' key='bypass'>
+        <Tab title='反检测' key='bypass'>
           <ConfigPageItem>
             <BypassConfigCard />
           </ConfigPageItem>
