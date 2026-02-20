@@ -1,11 +1,8 @@
-import path, { dirname } from 'path';
-import { fileURLToPath } from 'url';
-import fs from 'fs';
-import { constants } from 'node:os';
 import { LogStack } from '@/napcat-core/packet/context/clientContext';
 import { NapCoreContext } from '@/napcat-core/packet/context/napCoreContext';
 import { PacketLogger } from '@/napcat-core/packet/context/loggerContext';
 import { OidbPacket, PacketBuf } from '@/napcat-core/packet/transformer/base';
+import { Napi2NativeLoader } from '@/napcat-core/packet/handler/napi2nativeLoader';
 export interface RecvPacket {
   type: string, // 仅recv
   data: RecvPacketData;
@@ -17,48 +14,36 @@ export interface RecvPacketData {
   data: Buffer;
 }
 
-// 0 send 1 recv
-export interface NativePacketExportType {
-  initHook?: (send: string, recv: string) => boolean;
-}
-
 export class NativePacketClient {
   protected readonly napcore: NapCoreContext;
   protected readonly logger: PacketLogger;
   protected readonly cb = new Map<string, (json: RecvPacketData) => Promise<any> | any>(); // hash-type callback
+  protected readonly napi2nativeLoader: Napi2NativeLoader;
   logStack: LogStack;
   available: boolean = false;
-  private readonly supportedPlatforms = ['win32.x64', 'linux.x64', 'linux.arm64', 'darwin.x64', 'darwin.arm64'];
-  private readonly MoeHooExport: { exports: NativePacketExportType; } = { exports: {} };
 
-  constructor (napCore: NapCoreContext, logger: PacketLogger, logStack: LogStack) {
+  constructor (napCore: NapCoreContext, logger: PacketLogger, logStack: LogStack, napi2nativeLoader: Napi2NativeLoader) {
     this.napcore = napCore;
     this.logger = logger;
     this.logStack = logStack;
+    this.napi2nativeLoader = napi2nativeLoader;
   }
 
   check (): boolean {
-    const platform = process.platform + '.' + process.arch;
-    if (!this.supportedPlatforms.includes(platform)) {
-      this.logStack.pushLogWarn(`NativePacketClient: 不支持的平台: ${platform}`);
-      return false;
-    }
-    const moehoo_path = path.join(dirname(fileURLToPath(import.meta.url)), './native/napi2native/napi2native.' + platform + '.node');
-    if (!fs.existsSync(moehoo_path)) {
-      this.logStack.pushLogWarn(`NativePacketClient: 缺失运行时文件: ${moehoo_path}`);
+    if (!this.napi2nativeLoader.loaded) {
+      this.logStack.pushLogWarn('NativePacketClient: Napi2NativeLoader 未成功加载');
       return false;
     }
     return true;
   }
 
   async init (_pid: number, recv: string, send: string): Promise<void> {
-    const platform = process.platform + '.' + process.arch;
     const isNewQQ = this.napcore.basicInfo.requireMinNTQQBuild('40824');
     if (isNewQQ) {
-      const moehoo_path = path.join(dirname(fileURLToPath(import.meta.url)), './native/napi2native/napi2native.' + platform + '.node');
-      process.dlopen(this.MoeHooExport, moehoo_path, constants.dlopen.RTLD_LAZY);
-      this.MoeHooExport?.exports.initHook?.(send, recv);
-      this.available = true;
+      const success = this.napi2nativeLoader.initHook(send, recv);
+      if (success) {
+        this.available = true;
+      }
     }
   }
 

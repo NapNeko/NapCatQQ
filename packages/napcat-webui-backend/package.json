@@ -26,6 +26,7 @@
     "json5": "^2.2.3",
     "multer": "^2.0.1",
     "napcat-common": "workspace:*",
+    "napcat-dpapi": "workspace:*",
     "napcat-pty": "workspace:*",
     "ws": "^8.18.3"
   },

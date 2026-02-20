@@ -30,12 +30,15 @@ import { NodeIO3MiscListener } from 'napcat-core/listeners/NodeIO3MiscListener';
 import { sleep } from 'napcat-common/src/helper';
 import { FFmpegService } from '@/napcat-core/helper/ffmpeg/ffmpeg';
 import { NativePacketHandler } from 'napcat-core/packet/handler/client';
+import { Napi2NativeLoader } from 'napcat-core/packet/handler/napi2nativeLoader';
+import { loadNapcatConfig } from '@/napcat-core/helper/config';
 import { logSubscription, LogWrapper } from '@/napcat-core/helper/log';
 import { proxiedListenerOf } from '@/napcat-core/helper/proxy-handler';
 import { QQBasicInfoWrapper } from '@/napcat-core/helper/qq-basic-info';
 import { statusHelperSubscription } from '@/napcat-core/helper/status';
 import { applyPendingUpdates } from '@/napcat-webui-backend/src/api/UpdateNapCat';
 import { connectToNamedPipe } from './pipe';
+
 // NapCat Shell App ES 入口文件
 async function handleUncaughtExceptions (logger: LogWrapper) {
   process.on('uncaughtException', (err) => {
@@ -387,20 +390,35 @@ export async function NCoreInitShell () {
   handleUncaughtExceptions(logger);
   await applyPendingUpdates(pathWrapper, logger);
 
+  // 提前初始化 Native 模块（在登录前加载）
+  const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
+  const nativePacketHandler = new NativePacketHandler({ logger });
+  const napi2nativeLoader = new Napi2NativeLoader({ logger });
+
   // 初始化 FFmpeg 服务
   await FFmpegService.init(pathWrapper.binaryPath, logger);
 
   if (!(process.env['NAPCAT_DISABLE_PIPE'] === '1' || process.env['NAPCAT_WORKER_PROCESS'] === '1')) {
     await connectToNamedPipe(logger).catch(e => logger.logError('命名管道连接失败', e));
   }
-  const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
   const wrapper = loadQQWrapper(basicInfoWrapper.QQMainPath, basicInfoWrapper.getFullQQVersion());
-  const nativePacketHandler = new NativePacketHandler({ logger }); // 初始化 NativePacketHandler 用于后续使用
-
-  // nativePacketHandler.onAll((packet) => {
-  //     console.log('[Packet]', packet.uin, packet.cmd, packet.hex_data);
-  // });
-  await nativePacketHandler.init(basicInfoWrapper.getFullQQVersion());
+  // wrapper.node 加载后再初始化 hook，按 schema 读取配置
+  const napcatConfig = loadNapcatConfig(pathWrapper.configPath);
+  await nativePacketHandler.init(basicInfoWrapper.getFullQQVersion(), napcatConfig.o3HookMode === 1 ? true : false);
+  if (process.env['NAPCAT_ENABLE_VERBOSE_LOG'] === '1') {
+    napi2nativeLoader.nativeExports.setVerbose?.(true);
+  }
+  // wrapper.node 加载后立刻启用 Bypass（可通过环境变量禁用）
+  if (process.env['NAPCAT_DISABLE_BYPASS'] !== '1') {
+    const bypassOptions = napcatConfig.bypass ?? {};
+    logger.logDebug('[NapCat] Bypass 配置:', bypassOptions);
+    const bypassEnabled = napi2nativeLoader.nativeExports.enableAllBypasses?.(bypassOptions);
+    if (bypassEnabled) {
+      logger.log('[NapCat] Napi2NativeLoader: 已启用Bypass');
+    }
+  } else {
+    logger.log('[NapCat] Napi2NativeLoader: Bypass已通过环境变量禁用');
+  }
 
   const o3Service = wrapper.NodeIO3MiscService.get();
   o3Service.addO3MiscListener(new NodeIO3MiscListener());
@@ -425,6 +443,7 @@ export async function NCoreInitShell () {
     }
   }
   const [dataPath, dataPathGlobal] = getDataPaths(wrapper);
+  WebUiDataRuntime.setQQDataPath(dataPath);
   const systemPlatform = getPlatformType();
 
   if (!basicInfoWrapper.QQVersionAppid || !basicInfoWrapper.QQVersionQua) throw new Error('QQVersionAppid or QQVersionQua  is not defined');
@@ -450,6 +469,13 @@ export async function NCoreInitShell () {
   o3Service.reportAmgomWeather('login', 'a1', [dataTimestape, '0', '0']);
 
   const selfInfo = await handleLogin(loginService, logger, pathWrapper, quickLoginUin, historyLoginList);
+
+  // 登录成功后通知 Master 进程（用于切换崩溃重试策略）
+  if (typeof process.send === 'function') {
+    process.send({ type: 'login-success' });
+    logger.log('[NapCat] 已通知主进程登录成功');
+  }
+
   const amgomDataPiece = 'eb1fd6ac257461580dc7438eb099f23aae04ca679f4d88f53072dc56e3bb1129';
   o3Service.setAmgomDataPiece(basicInfoWrapper.QQVersionAppid, new Uint8Array(Buffer.from(amgomDataPiece, 'hex')));
 
@@ -487,7 +513,8 @@ export async function NCoreInitShell () {
     selfInfo,
     basicInfoWrapper,
     pathWrapper,
-    nativePacketHandler
+    nativePacketHandler,
+    napi2nativeLoader
   ).InitNapCat();
 }
 
@@ -502,10 +529,12 @@ export class NapCatShell {
     selfInfo: SelfInfo,
     basicInfoWrapper: QQBasicInfoWrapper,
     pathWrapper: NapCatPathWrapper,
-    packetHandler: NativePacketHandler
+    packetHandler: NativePacketHandler,
+    napi2nativeLoader: Napi2NativeLoader
   ) {
     this.context = {
       packetHandler,
+      napi2nativeLoader,
       workingEnv: NapCatCoreWorkingEnv.Shell,
       wrapper,
       session,

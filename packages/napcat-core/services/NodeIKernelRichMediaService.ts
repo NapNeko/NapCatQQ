@@ -62,7 +62,7 @@ export interface NodeIKernelRichMediaService {
   //     KHAND,
   //     KAUTO
   // }
-  getVideoPlayUrl(peer: Peer, msgId: string, elemId: string, videoCodecFormat: number, VideoRequestWay: number): Promise<unknown>;
+  getVideoPlayUrl (peer: Peer, msgId: string, elemId: string, videoCodecFormat: number, VideoRequestWay: number): Promise<unknown>;
 
   // exParams (RMReqExParams)
   // this.downSourceType = i2;
@@ -81,9 +81,9 @@ export interface NodeIKernelRichMediaService {
   // public static final int KTRIGGERTYPEAUTO = 1;
   // public static final int KTRIGGERTYPEMANUAL = 0;
 
-  getVideoPlayUrlV2(peer: Peer, msgId: string, elemId: string, videoCodecFormat: number, exParams: {
+  getVideoPlayUrlV2 (peer: Peer, msgId: string, elemId: string, videoCodecFormat: number, exParams: {
     downSourceType: number,
-    triggerType: number
+    triggerType: number;
   }): Promise<GeneralCallResult & {
     urlResult: {
       v4IpUrl: [],
@@ -91,15 +91,15 @@ export interface NodeIKernelRichMediaService {
       domainUrl: Array<{
         url: string,
         isHttps: boolean,
-        httpsDomain: string
+        httpsDomain: string;
       }>,
-      videoCodecFormat: number
-    }
+      videoCodecFormat: number;
+    };
   }>;
 
-  getRichMediaFileDir(elementType: number, downType: number, isTemp: boolean): unknown;
+  getRichMediaFileDir (elementType: number, downType: number, isTemp: boolean): unknown;
 
-  getVideoPlayUrlInVisit(arg: {
+  getVideoPlayUrlInVisit (arg: {
     downloadType: number,
     thumbSize: number,
     msgId: string,
@@ -111,17 +111,17 @@ export interface NodeIKernelRichMediaService {
     peerUid: string,
     guildId: string,
     ele: MessageElement,
-    useHttps: boolean
+    useHttps: boolean;
   }): Promise<unknown>;
 
-  isFileExpired(arg: number): unknown;
+  isFileExpired (arg: number): unknown;
 
-  deleteGroupFolder(GroupCode: string, FolderId: string): Promise<GeneralCallResult & {
-    groupFileCommonResult: { retCode: number, retMsg: string, clientWording: string }
+  deleteGroupFolder (GroupCode: string, FolderId: string): Promise<GeneralCallResult & {
+    groupFileCommonResult: { retCode: number, retMsg: string, clientWording: string; };
   }>;
 
   // 参数与getVideoPlayUrlInVisit一样
-  downloadRichMediaInVisit(arg: {
+  downloadRichMediaInVisit (arg: {
     downloadType: number,
     thumbSize: number,
     msgId: string,
@@ -133,10 +133,10 @@ export interface NodeIKernelRichMediaService {
     peerUid: string,
     guildId: string,
     ele: MessageElement,
-    useHttps: boolean
+    useHttps: boolean;
   }): unknown;
 
-  downloadFileForModelId(peer: Peer, ModelId: string[], unknown: string): Promise<unknown>;
+  downloadFileForModelId (peer: Peer, ModelId: string[], unknown: string): Promise<unknown>;
 
   // 第三个参数 Array<Type>
   // this.fileId = "";
@@ -146,83 +146,83 @@ export interface NodeIKernelRichMediaService {
   // this.fileSize = j2;
   // this.fileModelId = j3;
 
-  downloadFileForFileUuid(peer: Peer, uuid: string, arg3: {
+  downloadFileForFileUuid (peer: Peer, uuid: string, arg3: {
     fileId: string,
     fileName: string,
     fileSize: string,
-    fileModelId: string
+    fileModelId: string;
   }[]): Promise<unknown>;
 
-  downloadFileByUrlList(fileDownloadTyp: UrlFileDownloadType, urlList: Array<string>): unknown;
+  downloadFileByUrlList (fileDownloadTyp: UrlFileDownloadType, urlList: Array<string>): unknown;
 
-  downloadFileForFileInfo(fileInfo: CommonFileInfo[], savePath: string): unknown;
+  downloadFileForFileInfo (fileInfo: CommonFileInfo[], savePath: string): unknown;
 
-  createGroupFolder(GroupCode: string, FolderName: string): Promise<GeneralCallResult & {
-    resultWithGroupItem: { result: unknown, groupItem: Array<unknown> }
+  createGroupFolder (GroupCode: string, FolderName: string): Promise<GeneralCallResult & {
+    resultWithGroupItem: { result: unknown, groupItem: Array<unknown>; };
   }>;
 
-  downloadFile(commonFile: CommonFileInfo, arg2: unknown, arg3: unknown, savePath: string): unknown;
+  downloadFile (arg1: unknown, arg2: number, arg3: number, arg4: string): unknown;
 
-  createGroupFolder(arg1: unknown, arg2: unknown): unknown;
+  createGroupFolder (arg1: unknown, arg2: unknown): unknown;
 
-  downloadGroupFolder(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
+  downloadGroupFolder (arg1: string, arg2: string, arg3: string): unknown;
 
-  renameGroupFolder(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
+  renameGroupFolder (arg1: string, arg2: string, arg3: string): unknown;
 
-  deleteGroupFolder(arg1: unknown, arg2: unknown): unknown;
+  deleteGroupFolder (arg1: unknown, arg2: unknown): unknown;
 
-  deleteTransferInfo(arg1: unknown, arg2: unknown): unknown;
+  deleteTransferInfo (arg1: unknown, arg2: unknown): unknown;
 
-  cancelTransferTask(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
+  cancelTransferTask (arg1: Peer, arg2: Array<unknown>[], arg3: string): unknown;
 
-  cancelUrlDownload(arg: unknown): unknown;
+  cancelUrlDownload (arg: unknown): unknown;
 
-  updateOnlineVideoElemStatus(arg: unknown): unknown;
+  updateOnlineVideoElemStatus (arg: unknown): unknown;
 
-  getGroupSpace(arg: unknown): unknown;
+  getGroupSpace (arg: unknown): unknown;
 
-  getGroupFileList(groupCode: string, params: GetFileListParam): Promise<GeneralCallResult & {
+  getGroupFileList (groupCode: string, params: GetFileListParam): Promise<GeneralCallResult & {
     groupSpaceResult: {
-      retCode: number
-      retMsg: string
-      clientWording: string
-      totalSpace: number
-      usedSpace: number
-      allUpload: boolean
-    }
+      retCode: number;
+      retMsg: string;
+      clientWording: string;
+      totalSpace: number;
+      usedSpace: number;
+      allUpload: boolean;
+    };
   }>;
 
-  getGroupFileInfo(arg1: unknown, arg2: unknown): unknown;
+  getGroupFileInfo (arg1: unknown, arg2: unknown): unknown;
 
-  getGroupTransferList(arg1: unknown, arg2: unknown): unknown;
+  getGroupTransferList (arg1: string, arg2: unknown): unknown;
 
-  renameGroupFile(arg1: unknown, arg2: unknown, arg3: unknown, arg4: unknown, arg5: unknown): unknown;
+  renameGroupFile (arg1: string, arg2: number, arg3: string, arg4: string, arg5: string): unknown;
 
-  moveGroupFile(groupCode: string, busId: Array<number>, fileList: Array<string>, currentParentDirectory: string, targetParentDirectory: string): Promise<GeneralCallResult & {
+  moveGroupFile (groupCode: string, busId: Array<number>, fileList: Array<string>, currentParentDirectory: string, targetParentDirectory: string): Promise<GeneralCallResult & {
     moveGroupFileResult: {
       result: {
         retCode: number,
         retMsg: symbol,
-        clientWording: string
+        clientWording: string;
       },
       successFileIdList: Array<string>,
-      failFileIdList: Array<string>
-    }
+      failFileIdList: Array<string>;
+    };
   }>;
 
-  transGroupFile(groupCode: string, fileId: string): Promise<GeneralCallResult & {
+  transGroupFile (groupCode: string, fileId: string): Promise<GeneralCallResult & {
     transGroupFileResult: {
       result: {
-        retCode: number
-        retMsg: string
-        clientWording: string
-      }
-      saveBusId: number
-      saveFilePath: string
-    }
+        retCode: number;
+        retMsg: string;
+        clientWording: string;
+      };
+      saveBusId: number;
+      saveFilePath: string;
+    };
   }>;
 
-  searchGroupFile(
+  searchGroupFile (
     keywords: Array<string>,
     param: {
       groupIds: Array<string>,
@@ -230,55 +230,57 @@ export interface NodeIKernelRichMediaService {
       context: string,
       count: number,
       sortType: number,
-      groupNames: Array<string>
+      groupNames: Array<string>;
     }): Promise<unknown>;
 
-  searchGroupFileByWord(arg1: unknown, arg2: unknown, arg3: unknown, arg4: unknown, arg5: unknown): unknown;
+  searchGroupFileByWord (arg1: unknown[], arg2: unknown[], arg3: string, arg4: string, arg5: number): unknown;
 
-  deleteGroupFile(GroupCode: string, params: Array<number>, Files: Array<string>): Promise<GeneralCallResult & {
+  deleteGroupFile (GroupCode: string, params: Array<number>, Files: Array<string>): Promise<GeneralCallResult & {
     transGroupFileResult: {
-      result: unknown
-      successFileIdList: Array<unknown>
-      failFileIdList: Array<unknown>
-    }
+      result: unknown;
+      successFileIdList: Array<unknown>;
+      failFileIdList: Array<unknown>;
+    };
   }>;
 
-  translateEnWordToZn(words: string[]): Promise<GeneralCallResult & { words: string[] }>;
+  translateEnWordToZn (words: string[]): Promise<GeneralCallResult & { words: string[]; }>;
 
-  getScreenOCR(path: string): Promise<unknown>;
+  getScreenOCR (path: string): Promise<unknown>;
 
-  batchGetGroupFileCount(Gids: Array<string>): Promise<GeneralCallResult & {
+  batchGetGroupFileCount (Gids: Array<string>): Promise<GeneralCallResult & {
     groupCodes: Array<string>,
-    groupFileCounts: Array<number>
+    groupFileCounts: Array<number>;
   }>;
 
-  queryPicDownloadSize(arg: unknown): unknown;
+  queryPicDownloadSize (arg: unknown): unknown;
 
-  searchGroupFile(arg1: unknown, arg2: unknown): unknown;
+  searchGroupFile (arg1: unknown, arg2: unknown): unknown;
 
-  searchMoreGroupFile(arg: unknown): unknown;
+  searchMoreGroupFile (arg: unknown): unknown;
 
-  cancelSearcheGroupFile(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
+  cancelSearcheGroupFile (arg1: number, arg2: number, arg3: string): unknown;
 
-  onlyDownloadFile(peer: Peer, arg2: unknown, arg3: Array<{
-    fileId: string,
-    fileName: string,
-    fileSize: string,
-    fileModelId: string
-  }
-    >): unknown;
+  onlyDownloadFile (arg1: Peer, arg2: string, arg3: Array<unknown>[]): unknown;
 
-  onlyUploadFile(arg1: unknown, arg2: unknown): unknown;
+  onlyUploadFile (arg1: unknown, arg2: unknown): unknown;
 
-  isExtraLargePic(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
+  isExtraLargePic (arg1: unknown, arg2: unknown, arg3: unknown): unknown;
 
-  uploadRMFileWithoutMsg(arg: {
+  uploadRMFileWithoutMsg (arg: {
     bizType: RMBizTypeEnum,
     filePath: string,
     peerUid: string,
-    transferId: string
-    useNTV2: string
+    transferId: string;
+    useNTV2: string;
   }): Promise<unknown>;
 
-  isNull(): boolean;
+  isNull (): boolean;
+
+  getRichMediaCodecInfo (arg: unknown): unknown;
+
+  getScreenOCRWithSourceType (arg1: unknown, arg2: unknown): unknown;
+
+  imageTranslate (arg1: string, arg2: string, arg3: number): unknown;
+
+  downloadFileByUrl (arg1: number, arg2: string, arg3: boolean): unknown;
 }

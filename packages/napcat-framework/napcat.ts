@@ -2,6 +2,8 @@ import { NapCatPathWrapper } from 'napcat-common/src/path';
 import { InitWebUi, WebUiConfig, webUiRuntimePort } from 'napcat-webui-backend/index';
 import { NapCatAdapterManager } from 'napcat-adapter';
 import { NativePacketHandler } from 'napcat-core/packet/handler/client';
+import { Napi2NativeLoader } from 'napcat-core/packet/handler/napi2nativeLoader';
+import { loadNapcatConfig } from '@/napcat-core/helper/config';
 import { FFmpegService } from 'napcat-core/helper/ffmpeg/ffmpeg';
 import { logSubscription, LogWrapper } from 'napcat-core/helper/log';
 import { QQBasicInfoWrapper } from '@/napcat-core/helper/qq-basic-info';
@@ -40,10 +42,23 @@ export async function NCoreInitFramework (
   const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
   const wrapper = loadQQWrapper(basicInfoWrapper.QQMainPath, basicInfoWrapper.getFullQQVersion());
   const nativePacketHandler = new NativePacketHandler({ logger }); // 初始化 NativePacketHandler 用于后续使用
+  const napi2nativeLoader = new Napi2NativeLoader({ logger }); // 初始化 Napi2NativeLoader 用于后续使用
+  const napcatConfig = loadNapcatConfig(pathWrapper.configPath);
+  //console.log('[NapCat] [Napi2NativeLoader]', napi2nativeLoader.nativeExports.enableAllBypasses?.());
+  if (process.env['NAPCAT_DISABLE_BYPASS'] !== '1') {
+    const bypassOptions = napcatConfig.bypass ?? {};
+    const bypassEnabled = napi2nativeLoader.nativeExports.enableAllBypasses?.(bypassOptions);
+    if (bypassEnabled) {
+      logger.log('[NapCat] Napi2NativeLoader: 已启用Bypass');
+    }
+    logger.log('[NapCat] Napi2NativeLoader: Framework模式Bypass配置:', bypassOptions);
+  } else {
+    logger.log('[NapCat] Napi2NativeLoader: Bypass已通过环境变量禁用');
+  }
   // nativePacketHandler.onAll((packet) => {
   //     console.log('[Packet]', packet.uin, packet.cmd, packet.hex_data);
   // });
-  await nativePacketHandler.init(basicInfoWrapper.getFullQQVersion());
+  await nativePacketHandler.init(basicInfoWrapper.getFullQQVersion(), napcatConfig.o3HookMode === 1 ? true : false);
   // 在 init 之后注册监听器
 
   // 初始化 FFmpeg 服务
@@ -73,11 +88,12 @@ export async function NCoreInitFramework (
   // 过早进入会导致addKernelMsgListener等Listener添加失败
   // await sleep(2500);
   // 初始化 NapCatFramework
-  const loaderObject = new NapCatFramework(wrapper, session, logger, selfInfo, basicInfoWrapper, pathWrapper, nativePacketHandler);
+  const loaderObject = new NapCatFramework(wrapper, session, logger, selfInfo, basicInfoWrapper, pathWrapper, nativePacketHandler, napi2nativeLoader);
   await loaderObject.core.initCore();
 
   // 启动WebUi
   WebUiDataRuntime.setWorkingEnv(NapCatCoreWorkingEnv.Framework);
+  WebUiDataRuntime.setQQDataPath(loaderObject.core.dataPath);
   InitWebUi(logger, pathWrapper, logSubscription, statusHelperSubscription).then().catch(e => logger.logError(e));
   // 使用 NapCatAdapterManager 统一管理协议适配器
   const adapterManager = new NapCatAdapterManager(loaderObject.core, loaderObject.context, pathWrapper);
@@ -100,10 +116,12 @@ export class NapCatFramework {
     selfInfo: SelfInfo,
     basicInfoWrapper: QQBasicInfoWrapper,
     pathWrapper: NapCatPathWrapper,
-    packetHandler: NativePacketHandler
+    packetHandler: NativePacketHandler,
+    napi2nativeLoader: Napi2NativeLoader
   ) {
     this.context = {
       packetHandler,
+      napi2nativeLoader,
       workingEnv: NapCatCoreWorkingEnv.Framework,
       wrapper,
       session,

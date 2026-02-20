@@ -323,7 +323,7 @@ export interface FlashTransferInfo {
     id: string;
     urls: FlashTransferIcon[];
     localCachePath: string;
-  }
+  };
 }
 
 /**
@@ -337,7 +337,7 @@ export interface MarkdownElement {
   mdExtType?: number;
   mdExtInfo?: {
     flashTransferInfo: FlashTransferInfo;
-  }
+  };
 }
 
 /**
@@ -548,6 +548,96 @@ export interface QueryMsgsParams {
   pageLimit: number;
   isReverseOrder: boolean;
   isIncludeCurrent: boolean;
+}
+
+/**
+ * 消息引用标识（msgId + msgSeq + msgTime）
+ */
+export interface MsgRef {
+  msgId: string;
+  msgSeq: string;
+  msgTime: string;
+}
+
+/**
+ * 消息完整标识（含cliSeq和msgRandom）
+ */
+export interface MsgIdentity {
+  msgId: string;
+  msgSeq: string;
+  cliSeq: string;
+  msgTime: string;
+  msgRandom: string;
+}
+
+/**
+ * 灰条JSON消息信息
+ */
+export interface GrayTipJsonInfo {
+  busiId: number | string;
+  jsonStr: string;
+  recentAbstract: string;
+  isServer: boolean;
+  xmlToJsonParam?: unknown;
+}
+
+/**
+ * 转发文件信息
+ */
+export interface ForwardFileInfo {
+  targetMsgId: string;
+  targetElemId: string;
+  commonFileInfo: unknown;
+}
+
+/**
+ * 本地灰条提示信息
+ */
+export interface LocalGrayTipInfo {
+  type: number;
+  robot?: unknown;
+  direct?: unknown;
+  extraJson: string;
+}
+
+/**
+ * Token设置信息
+ */
+export interface TokenInfo {
+  tokenType: number;
+  apnsToken?: string | Uint8Array;
+  voipToken?: string | Uint8Array;
+  profileId?: string;
+}
+
+/**
+ * 后台切换时的未读计数信息
+ */
+export interface BackGroundInfo {
+  c2cUnreadCnt: number;
+  groupUnreadCnt: number;
+  guildUnreadCnt: number;
+  guildPsvboxUnreadCnt: number;
+  verifyUnreadCnt: number;
+  contactUnreadCnt: number;
+  groupUnreadCodes: string[];
+}
+
+/**
+ * 消息类型过滤参数
+ */
+export interface MsgTypeFilter {
+  filterMsgType: Array<{ type: number; subType: Array<number>; }>;
+  filterSendersUid: string[];
+}
+
+/**
+ * 空间流参数
+ */
+export interface SgrpStreamParams {
+  sgrpStreamPginSourceName: string;
+  sgrpVisitFrom: string;
+  sgrpSessionId: string;
 }
 
 /**

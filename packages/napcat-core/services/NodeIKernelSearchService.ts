@@ -3,134 +3,146 @@ import { GeneralCallResult } from './common';
 
 export interface NodeIKernelSearchService {
 
-  addKernelSearchListener(listener: unknown): number;
+  addKernelSearchListener (listener: unknown): number;
 
-  removeKernelSearchListener(listenerId: number): void;
+  removeKernelSearchListener (listenerId: number): void;
 
-  searchStranger(unknown: string, searchStranger: unknown, searchParams: unknown): Promise<unknown>;
+  searchStranger (keyword: string, searchType: unknown, searchParams: unknown): Promise<unknown>;
 
-  searchGroup(param: {
+  searchGroup (param: {
     keyWords: string,
     groupNum: number,
     exactSearch: boolean,
-    penetrate: string
-  }): Promise<GeneralCallResult>;// needs 1 arguments
+    penetrate: string;
+  }): Promise<GeneralCallResult>;
 
-  searchLocalInfo(keywords: string, type: number/* 4 */): unknown;
+  searchLocalInfo (keywords: string, type: number): unknown;
 
-  cancelSearchLocalInfo(...args: unknown[]): unknown;// needs 3 arguments
+  cancelSearchLocalInfo (arg1: number, arg2: number, arg3: string): unknown;
 
-  searchBuddyChatInfo(...args: unknown[]): unknown;// needs 2 arguments
+  searchBuddyChatInfo (arg1: unknown, arg2: unknown): unknown;
 
-  searchMoreBuddyChatInfo(...args: unknown[]): unknown;// needs 1 arguments
+  searchMoreBuddyChatInfo (arg: unknown): unknown;
 
-  cancelSearchBuddyChatInfo(...args: unknown[]): unknown;// needs 3 arguments
+  cancelSearchBuddyChatInfo (arg1: number, arg2: number, arg3: string): unknown;
 
-  searchContact(...args: unknown[]): unknown;// needs 2 arguments
+  searchContact (arg1: Array<unknown>[], arg2: unknown): unknown;
 
-  searchMoreContact(...args: unknown[]): unknown;// needs 1 arguments
+  searchMoreContact (arg: unknown): unknown;
 
-  cancelSearchContact(...args: unknown[]): unknown;// needs 3 arguments
+  cancelSearchContact (arg1: number, arg2: number, arg3: string): unknown;
 
-  searchGroupChatInfo(...args: unknown[]): unknown;// needs 3 arguments
+  searchGroupChatInfo (arg1: unknown[], arg2: unknown, arg3: number): unknown;
 
-  resetSearchGroupChatInfoSortType(...args: unknown[]): unknown;// needs 3 arguments
+  resetSearchGroupChatInfoSortType (arg1: number, arg2: number, arg3: number): unknown;
 
-  resetSearchGroupChatInfoFilterMembers(...args: unknown[]): unknown;// needs 3 arguments
+  resetSearchGroupChatInfoFilterMembers (arg1: number, arg2: Array<unknown>[], arg3: number): unknown;
 
-  searchMoreGroupChatInfo(...args: unknown[]): unknown;// needs 1 arguments
+  searchMoreGroupChatInfo (arg: unknown): unknown;
 
-  cancelSearchGroupChatInfo(...args: unknown[]): unknown;// needs 3 arguments
+  cancelSearchGroupChatInfo (arg1: number, arg2: number, arg3: string): unknown;
 
-  searchChatsWithKeywords(...args: unknown[]): unknown;// needs 3 arguments
+  searchChatsWithKeywords (arg1: unknown[], arg2: number, arg3: number): unknown;
 
-  searchMoreChatsWithKeywords(...args: unknown[]): unknown;// needs 1 arguments
+  searchMoreChatsWithKeywords (arg: unknown): unknown;
 
-  cancelSearchChatsWithKeywords(...args: unknown[]): unknown;// needs 3 arguments
+  cancelSearchChatsWithKeywords (arg1: number, arg2: number, arg3: string): unknown;
 
-  searchChatMsgs(...args: unknown[]): unknown;// needs 2 arguments
+  searchChatMsgs (arg1: Array<unknown>[], arg2: unknown): unknown;
 
-  searchMoreChatMsgs(...args: unknown[]): unknown;// needs 1 arguments
+  searchMoreChatMsgs (arg: unknown): unknown;
 
-  cancelSearchChatMsgs(...args: unknown[]): unknown;// needs 3 arguments
+  cancelSearchChatMsgs (arg1: number, arg2: number, arg3: string): unknown;
 
-  searchMsgWithKeywords(keyWords: string[], param: Peer & { searchFields: number, pageLimit: number }): Promise<GeneralCallResult>;
+  searchMsgWithKeywords (keyWords: string[], param: Peer & { searchFields: number, pageLimit: number; }): Promise<GeneralCallResult>;
 
-  searchMoreMsgWithKeywords(...args: unknown[]): unknown;// needs 1 arguments
+  searchMoreMsgWithKeywords (arg: unknown): unknown;
 
-  cancelSearchMsgWithKeywords(...args: unknown[]): unknown;// needs 3 arguments
+  cancelSearchMsgWithKeywords (arg1: number, arg2: number, arg3: string): unknown;
 
-  searchFileWithKeywords(keywords: string[], source: number): Promise<string>;// needs 2 arguments
+  searchFileWithKeywords (keywords: string[], source: number): Promise<string>;
 
-  searchMoreFileWithKeywords(...args: unknown[]): unknown;// needs 1 arguments
+  searchMoreFileWithKeywords (arg: unknown): unknown;
 
-  cancelSearchFileWithKeywords(...args: unknown[]): unknown;// needs 3 arguments
+  cancelSearchFileWithKeywords (arg1: number, arg2: number, arg3: string): unknown;
 
-  searchAtMeChats(...args: unknown[]): unknown;// needs 3 arguments
+  searchFileInFileCenterForPC (arg1: unknown, arg2: unknown): unknown;
 
-  searchMoreAtMeChats(...args: unknown[]): unknown;// needs 1 arguments
+  searchMoreFileInFileCenter (arg: unknown): unknown;
 
-  cancelSearchAtMeChats(...args: unknown[]): unknown;// needs 3 arguments
+  cancelSearchFileInFileCenter (arg1: number, arg2: number, arg3: string): unknown;
 
-  searchChatAtMeMsgs(...args: unknown[]): unknown;// needs 1 arguments
+  searchAtMeChats (arg1: boolean, arg2: number, arg3: number): unknown;
 
-  searchMoreChatAtMeMsgs(...args: unknown[]): unknown;// needs 1 arguments
+  searchMoreAtMeChats (arg: unknown): unknown;
 
-  cancelSearchChatAtMeMsgs(...args: unknown[]): unknown;// needs 3 arguments
+  cancelSearchAtMeChats (arg1: number, arg2: number, arg3: string): unknown;
 
-  addSearchHistory(param: {
-    type: number, // 4
+  searchChatAtMeMsgs (arg: unknown): unknown;
+
+  searchMoreChatAtMeMsgs (arg: unknown): unknown;
+
+  cancelSearchChatAtMeMsgs (arg1: number, arg2: number, arg3: string): unknown;
+
+  searchRobot (arg: unknown): unknown;
+
+  searchCache (arg1: string, arg2: string, arg3: unknown): unknown;
+
+  addSearchHistory (param: {
+    type: number,
     contactList: [],
-    id: number, // -1
+    id: number,
     groupInfos: [],
     msgs: [],
-    fileInfos: [
-      {
-        chatType: ChatType,
-        buddyChatInfo: Array<{ category_name: string, peerUid: string, peerUin: string, remark: string }>,
-        discussChatInfo: [],
-        groupChatInfo: Array<
-                    {
-                      groupCode: string,
-                      isConf: boolean,
-                      hasModifyConfGroupFace: boolean,
-                      hasModifyConfGroupName: boolean,
-                      groupName: string,
-                      remark: string
-                    }>,
-        dataLineChatInfo: [],
-        tmpChatInfo: [],
-        msgId: string,
-        msgSeq: string,
-        msgTime: string,
-        senderUid: string,
-        senderNick: string,
-        senderRemark: string,
-        senderCard: string,
-        elemId: string,
-        elemType: string, // 3
-        fileSize: string,
-        filePath: string,
-        fileName: string,
-        hits: Array<
-                    {
-                      start: 12,
-                      end: 14
-                    }
-                >
-      }
-    ]
-
+    fileInfos: Array<{
+      chatType: ChatType,
+      buddyChatInfo: Array<{ category_name: string, peerUid: string, peerUin: string, remark: string; }>,
+      discussChatInfo: [],
+      groupChatInfo: Array<{
+        groupCode: string,
+        isConf: boolean,
+        hasModifyConfGroupFace: boolean,
+        hasModifyConfGroupName: boolean,
+        groupName: string,
+        remark: string;
+      }>,
+      dataLineChatInfo: [],
+      tmpChatInfo: [],
+      msgId: string,
+      msgSeq: string,
+      msgTime: string,
+      senderUid: string,
+      senderNick: string,
+      senderRemark: string,
+      senderCard: string,
+      elemId: string,
+      elemType: string,
+      fileSize: string,
+      filePath: string,
+      fileName: string,
+      hits: Array<{ start: number, end: number; }>;
+    }>;
   }): Promise<{
     result: number,
     errMsg: string,
-    id?: number
+    id?: number;
   }>;
 
-  removeSearchHistory(...args: unknown[]): unknown;// needs 1 arguments
+  removeSearchHistory (arg: unknown): unknown;
 
-  searchCache(...args: unknown[]): unknown;// needs 3 arguments
+  addOrUpdateSearchMostUseItem (arg1: unknown, arg2: unknown): unknown;
 
-  clearSearchCache(...args: unknown[]): unknown;// needs 1 arguments
+  getSearchMostUseItem (arg: unknown): unknown;
 
+  deleteSearchMostUseItem (arg: unknown): unknown;
+
+  deleteGroupHistoryFile (arg: unknown): unknown;
+
+  clearSearchCache (arg: unknown): unknown;
+
+  clearSearchHistory (): unknown;
+
+  loadSearchHistory (): unknown;
+
+  initTokenizeUtil (): unknown;
 }

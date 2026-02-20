@@ -29,6 +29,28 @@ import { NodeIkernelTestPerformanceService } from './services/NodeIkernelTestPer
 import { NodeIKernelECDHService } from './services/NodeIKernelECDHService';
 import { NodeIO3MiscService } from './services/NodeIO3MiscService';
 import { NodeIKernelFlashTransferService } from './services/NodeIKernelFlashTransferService';
+import { NodeIKernelOnlineStatusService } from './services/NodeIKernelOnlineStatusService';
+import { NodeIKernelBaseEmojiService } from './services/NodeIKernelBaseEmojiService';
+import { NodeIKernelSettingService } from './services/NodeIKernelSettingService';
+import { NodeIKernelFileAssistantService } from './services/NodeIKernelFileAssistantService';
+import { NodeIKernelDbToolsService } from './services/NodeIKernelDbToolsService';
+import { NodeIYellowFaceService } from './services/NodeIYellowFaceService';
+import { NodeIKernelQiDianService } from './services/NodeIKernelQiDianService';
+import { NodeIKernelSkinService } from './services/NodeIKernelSkinService';
+import { NodeIKernelQQPlayService } from './services/NodeIKernelQQPlayService';
+import { NodeIKernelRDeliveryService } from './services/NodeIKernelRDeliveryService';
+import { NodeIKernelRemotingService } from './services/NodeIKernelRemotingService';
+import { NodeIKernelLiteBusinessService } from './services/NodeIKernelLiteBusinessService';
+import { NodeIKernelGroupTabService } from './services/NodeIKernelGroupTabService';
+import { NodeIKernelLockService } from './services/NodeIKernelLockService';
+import { NodeIKernelHandOffService } from './services/NodeIKernelHandOffService';
+import { NodeIKernelMiniAppService } from './services/NodeIKernelMiniAppService';
+import { NodeIKernelPublicAccountService } from './services/NodeIKernelPublicAccountService';
+import { NodeIKernelThirdPartySigService } from './services/NodeIKernelThirdPartySigService';
+import { NodeIKernelUnifySearchService } from './services/NodeIKernelUnifySearchService';
+import { NodeIKernelVasSystemUpdateService } from './services/NodeIKernelVasSystemUpdateService';
+import { NodeIKernelPersonalAlbumService } from './services/NodeIKernelPersonalAlbumService';
+import { NodeIKernelConfigMgrService } from './services/NodeIKernelConfigMgrService';
 
 export interface NodeQQNTWrapperUtil {
   get (): NodeQQNTWrapperUtil;
@@ -39,45 +61,45 @@ export interface NodeQQNTWrapperUtil {
 
   getSsoCmdOfOidbReq (arg1: number, arg2: number): unknown;
 
-  getSsoBufferOfOidbReq (...args: unknown[]): unknown; // 有点看不懂参数定义 待补充 好像是三个参数
+  getSsoBufferOfOidbReq (arg1: unknown, arg2: unknown, arg3: unknown): unknown;
 
-  getOidbRspInfo (arg: string): unknown; // 可能是错的
+  getOidbRspInfo (arg: string): unknown;
 
-  getFileSize (path: string): Promise<number>; // 直接的猜测
+  getFileSize (path: string): Promise<number>;
 
-  genFileMd5Buf (arg: string): unknown; // 可能是错的
+  genFileMd5Buf (arg: string): unknown;
 
-  genFileMd5Hex (path: string): unknown; // 直接的猜测
+  genFileMd5Hex (path: string): unknown;
 
-  genFileShaBuf (path: string): unknown; // 直接的猜测
+  genFileShaBuf (path: string): unknown;
 
-  genFileCumulateSha1 (path: string): unknown; // 直接的猜测
+  genFileCumulateSha1 (path: string): unknown;
 
-  genFileShaHex (path: string): unknown; // 直接的猜测
+  genFileShaHex (path: string): unknown;
 
   fileIsExist (path: string): unknown;
 
-  startTrace (path: string): unknown; // 可能是错的
+  startTrace (path: string): unknown;
 
   copyFile (src: string, dst: string): unknown;
 
-  genFileShaAndMd5Hex (path: string, unknown: number): unknown; // 可能是错的
+  genFileShaAndMd5Hex (path: string, unknown: number): unknown;
 
   setTraceInfo (unknown: unknown): unknown;
 
   encodeOffLine (unknown: unknown): unknown;
 
-  decodeOffLine (arg: string): unknown; // 可能是错的 传递hex
+  decodeOffLine (arg: string): unknown;
 
-  DecoderRecentInfo (arg: string): unknown; // 可能是错的 传递hex
+  DecoderRecentInfo (arg: string): unknown;
 
   getPinyin (arg0: string, arg1: boolean): unknown;
 
-  matchInPinyin (arg0: unknown[], arg1: string): unknown; // 参数特复杂 arg0是个复杂数据类型
+  getPinyinExt (arg0: string, arg1: boolean): unknown;
+
+  matchInPinyin (arg0: unknown[], arg1: string): unknown;
 
   makeDirByPath (arg0: string): unknown;
-
-  emptyWorkingSet (arg0: number): unknown; // 参数是UINT32
 
   runProcess (arg0: string, arg1: boolean): unknown;
 
@@ -141,6 +163,24 @@ export interface NodeQQNTWrapperUtil {
 
   isNull (): unknown;
 
+  deletePath (path: string): unknown;
+
+  calculateDirectoryTotalSize (path: string): unknown;
+
+  GetBaseEmojiPathByIds (arg: unknown): unknown;
+
+  SetMobileBaseEmojiPath (arg0: unknown, arg1: unknown): unknown;
+
+  setCreateThumbailSupportedFileExtensions (arg0: unknown, arg1: unknown): unknown;
+
+  setFileDropNativeWindowHide (arg: unknown): unknown;
+
+  setFileDropWindowNativeWindowHandle (arg: unknown): unknown;
+
+  startListenFileDragEvent (arg: unknown): unknown;
+
+  stopAccessingSecurityScopedResource (arg: unknown): unknown;
+
   createThumbnailImage (
     serviceName: string,
     filePath: string,
@@ -180,6 +220,43 @@ export interface NodeIQQNTWrapperSession {
 
   startNT (): void;
 
+  // === Session lifecycle ===
+  close (arg: unknown): void;
+
+  onLine (arg: unknown): void;
+
+  offLine (arg: unknown): void;
+
+  disableIpDirect (arg: unknown): void;
+
+  getAccountPath (arg: unknown): string;
+
+  updateTicket (arg: unknown): void;
+
+  // === SSO/Network dispatch ===
+  onDispatchPush (arg1: unknown, arg2: unknown): void;
+
+  onDispatchPushWithJson (arg1: unknown, arg2: unknown): void;
+
+  onDispatchRequestReply (arg1: unknown, arg2: unknown, arg3: unknown): void;
+
+  onMsfPush (arg1: unknown, arg2: unknown, arg3: unknown): void;
+
+  onNetReply (arg1: unknown, arg2: unknown, arg3: unknown, arg4: unknown): void;
+
+  onSendOidbReply (arg1: unknown, arg2: unknown, arg3: unknown, arg4: unknown, arg5: unknown): void;
+
+  onSendSSOReply (arg1: unknown, arg2: unknown, arg3: unknown, arg4: unknown, arg5: unknown): void;
+
+  onUIConfigUpdate (arg1: unknown, arg2: unknown): void;
+
+  setOnMsfStatusChanged (arg1: unknown, arg2: unknown, arg3: unknown): void;
+
+  setOnNetworkChanged (arg: unknown): void;
+
+  setOnWeakNetChanged (arg: unknown): void;
+
+  // === Service getters ===
   getBdhUploadService (): unknown;
 
   getECDHService (): NodeIKernelECDHService;
@@ -220,47 +297,47 @@ export interface NodeIQQNTWrapperSession {
 
   getDirectSessionService (): unknown;
 
-  getRDeliveryService (): unknown;
+  getRDeliveryService (): NodeIKernelRDeliveryService;
 
   getAvatarService (): NodeIKernelAvatarService;
 
   getFeedChannelService (): unknown;
 
-  getYellowFaceService (): unknown;
+  getYellowFaceService (): NodeIYellowFaceService;
 
   getCollectionService (): NodeIKernelCollectionService;
 
-  getSettingService (): unknown;
+  getSettingService (): NodeIKernelSettingService;
 
-  getQiDianService (): unknown;
+  getQiDianService (): NodeIKernelQiDianService;
 
-  getFileAssistantService (): unknown;
+  getFileAssistantService (): NodeIKernelFileAssistantService;
 
   getGuildService (): unknown;
 
-  getSkinService (): unknown;
+  getSkinService (): NodeIKernelSkinService;
 
   getTestPerformanceService (): NodeIkernelTestPerformanceService;
 
-  getQQPlayService (): unknown;
+  getQQPlayService (): NodeIKernelQQPlayService;
 
-  getDbToolsService (): unknown;
+  getDbToolsService (): NodeIKernelDbToolsService;
 
   getUixConvertService (): NodeIKernelUixConvertService;
 
-  getOnlineStatusService (): unknown;
+  getOnlineStatusService (): NodeIKernelOnlineStatusService;
 
-  getRemotingService (): unknown;
+  getRemotingService (): NodeIKernelRemotingService;
 
-  getGroupTabService (): unknown;
+  getGroupTabService (): NodeIKernelGroupTabService;
 
   getGroupSchoolService (): unknown;
 
-  getLiteBusinessService (): unknown;
+  getLiteBusinessService (): NodeIKernelLiteBusinessService;
 
   getGuildMsgService (): unknown;
 
-  getLockService (): unknown;
+  getLockService (): NodeIKernelLockService;
 
   getMSFService (): NodeIKernelMSFService;
 
@@ -270,7 +347,29 @@ export interface NodeIQQNTWrapperSession {
 
   getRecentContactService (): NodeIKernelRecentContactService;
 
-  getConfigMgrService (): unknown;
+  getConfigMgrService (): NodeIKernelConfigMgrService;
+
+  getBaseEmojiService (): NodeIKernelBaseEmojiService;
+
+  getHandOffService (): NodeIKernelHandOffService;
+
+  getMiniAppService (): NodeIKernelMiniAppService;
+
+  getPublicAccountService (): NodeIKernelPublicAccountService;
+
+  getThirdPartySigService (): NodeIKernelThirdPartySigService;
+
+  getUnifySearchService (): NodeIKernelUnifySearchService;
+
+  getVasSystemUpdateService (): NodeIKernelVasSystemUpdateService;
+
+  getPersonalAlbumService (): NodeIKernelPersonalAlbumService;
+
+  getGProGuildMsgService (): unknown;
+
+  getFileBridgeHostService (): unknown;
+
+  getWiFiPhotoClientService (): unknown;
 }
 
 export interface EnginInitDesktopConfig {
@@ -291,6 +390,14 @@ export interface NodeIQQNTWrapperEngine {
   get (): NodeIQQNTWrapperEngine;
 
   initWithDeskTopConfig (config: EnginInitDesktopConfig, nodeIGlobalAdapter: NodeIGlobalAdapter): void;
+
+  initWithMobileConfig (config: unknown, nodeIGlobalAdapter: NodeIGlobalAdapter): void;
+
+  initLog (arg: unknown): void;
+
+  setLogLevel (arg: unknown): void;
+
+  onSendSSOReply (arg1: unknown, arg2: unknown, arg3: unknown, arg4: unknown, arg5: unknown): void;
 }
 
 export interface WrapperNodeApi {

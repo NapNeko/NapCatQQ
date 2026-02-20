@@ -61,30 +61,28 @@ export default function PluginPage () {
 
   const handleUninstall = async (plugin: PluginItem) => {
     return new Promise<void>((resolve, reject) => {
+      let cleanData = false;
       dialog.confirm({
         title: '卸载插件',
         content: (
           <div className="flex flex-col gap-2">
-            <p>确定要卸载插件「{plugin.name}」吗? 此操作不可恢复。</p>
-            <p className="text-small text-default-500">如果插件创建了数据文件，是否一并删除？</p>
+            <p className="text-base text-default-800">确定要卸载插件「<span className="font-semibold text-danger">{plugin.name}</span>」吗? 此操作不可恢复。</p>
+            <div className="mt-2 bg-default-100 dark:bg-default-50/10 p-3 rounded-lg flex flex-col gap-1">
+              <label className="flex items-center gap-2 cursor-pointer w-fit">
+                <input
+                  type="checkbox"
+                  onChange={(e) => { cleanData = e.target.checked; }}
+                  className="w-4 h-4 cursor-pointer accent-danger"
+                />
+                <span className="text-small font-medium text-default-700">同时删除其配置文件</span>
+              </label>
+              <p className="text-xs text-default-500 pl-6 break-all w-full">配置目录: config/plugins/{plugin.id}</p>
+            </div>
           </div>
         ),
-        // This 'dialog' utility might not support returning a value from UI interacting.
-        // We might need to implement a custom confirmation flow if we want a checkbox.
-        // Alternatively, use two buttons? "Uninstall & Clean", "Uninstall Only"?
-        // Standard dialog usually has Confirm/Cancel.
-        // Let's stick to a simpler "Uninstall" and then maybe a second prompt? Or just clean data?
-        // User requested: "Uninstall prompts whether to clean data".
-        // Let's use `window.confirm` for the second step or assume `dialog.confirm` is flexible enough?
-        // I will implement a two-step confirmation or try to modify the dialog hook if visible (not visible here).
-        // Let's use a standard `window.confirm` for the data cleanup question if the custom dialog doesn't support complex return.
-        // Better: Inside onConfirm, ask again?
+        confirmText: '确定卸载',
+        cancelText: '取消',
         onConfirm: async () => {
-          // Ask for data cleanup
-          // Since we are in an async callback, we can use another dialog or confirm.
-          // Native confirm is ugly but works reliably for logic:
-          const cleanData = window.confirm(`是否同时清理插件「${plugin.name}」的数据文件？\n点击“确定”清理数据，点击“取消”仅卸载插件。`);
-
           const loadingToast = toast.loading('卸载中...');
           try {
             await PluginManager.uninstallPlugin(plugin.id, cleanData);

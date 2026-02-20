@@ -1,9 +1,17 @@
 {
-    "fileLog": false,
-    "consoleLog": true,
-    "fileLogLevel": "debug",
-    "consoleLogLevel": "info",
-    "packetBackend": "auto",
-    "packetServer": "",
-    "o3HookMode": 1
+  "fileLog": false,
+  "consoleLog": true,
+  "fileLogLevel": "debug",
+  "consoleLogLevel": "info",
+  "packetBackend": "auto",
+  "packetServer": "",
+  "o3HookMode": 1,
+  "bypass": {
+    "hook": false,
+    "window": false,
+    "module": false,
+    "process": false,
+    "container": false,
+    "js": false
   }
+}

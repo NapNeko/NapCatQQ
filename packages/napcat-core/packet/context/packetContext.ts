@@ -18,7 +18,7 @@ export class PacketContext {
     this.msgConverter = new PacketMsgConverter();
     this.napcore = new NapCoreContext(core);
     this.logger = new PacketLogger(this.napcore);
-    this.client = new PacketClientContext(this.napcore, this.logger);
+    this.client = new PacketClientContext(this.napcore, this.logger, this.napcore.napi2nativeLoader);
     this.highway = new PacketHighwayContext(this.napcore, this.logger, this.client);
     this.operation = new PacketOperationContext(this);
   }

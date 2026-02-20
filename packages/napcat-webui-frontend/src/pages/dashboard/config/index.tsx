@@ -14,6 +14,7 @@ import SSLConfigCard from './ssl';
 import ThemeConfigCard from './theme';
 import WebUIConfigCard from './webui';
 import BackupConfigCard from './backup';
+import BypassConfigCard from './bypass';
 
 export interface ConfigPageProps {
   children?: React.ReactNode;
@@ -112,6 +113,11 @@ export default function ConfigPage () {
         <Tab title='备份与恢复' key='backup'>
           <ConfigPageItem>
             <BackupConfigCard />
+          </ConfigPageItem>
+        </Tab>
+        <Tab title='反检测' key='bypass'>
+          <ConfigPageItem>
+            <BypassConfigCard />
           </ConfigPageItem>
         </Tab>
       </Tabs>

@@ -33,6 +33,7 @@ import { NodeIKernelMsgListener, NodeIKernelProfileListener } from '@/napcat-cor
 import { proxiedListenerOf } from '@/napcat-core/helper/proxy-handler';
 import { NTQQPacketApi } from './apis/packet';
 import { NativePacketHandler } from './packet/handler/client';
+import { Napi2NativeLoader } from './packet/handler/napi2nativeLoader';
 import { container, ReceiverServiceRegistry } from './packet/handler/serviceRegister';
 import { appEvent } from './packet/handler/eventList';
 import { TypedEventEmitter } from './packet/handler/typeEvent';
@@ -314,6 +315,7 @@ export interface InstanceContext {
   readonly basicInfoWrapper: QQBasicInfoWrapper;
   readonly pathWrapper: NapCatPathWrapper;
   readonly packetHandler: NativePacketHandler;
+  readonly napi2nativeLoader: Napi2NativeLoader;
 }
 
 export interface StableNTApiWrapper {

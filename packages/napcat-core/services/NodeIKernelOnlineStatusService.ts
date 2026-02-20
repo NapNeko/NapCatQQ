@@ -1,36 +1,29 @@
 export interface NodeIKernelOnlineStatusService {
 
-  addKernelOnlineStatusListener(listener: unknown): number;
+  addKernelOnlineStatusListener (listener: unknown): number;
 
-  removeKernelOnlineStatusListener(listenerId: number): void;
+  removeKernelOnlineStatusListener (listenerId: number): void;
 
-  getShouldShowAIOStatusAnimation(arg: unknown): unknown;
+  getShouldShowAIOStatusAnimation (arg: unknown): unknown;
 
-  setReadLikeList(arg: unknown): unknown;
+  setReadLikeList (arg: unknown): unknown;
 
-  getLikeList(arg: unknown): unknown;
+  getLikeList (arg: unknown): Promise<unknown>;
 
-  setLikeStatus(arg: unknown): unknown;
+  setLikeStatus (arg: unknown): Promise<unknown>;
 
-  getAggregationPageEntrance(): unknown;
+  setOnlineStatusLiteBusinessSwitch (enabled: boolean): void;
 
-  didClickAggregationPageEntrance(): unknown;
+  getAggregationPageEntrance (): unknown;
 
-  getAggregationGroupModels(): unknown;
+  didClickAggregationPageEntrance (): unknown;
 
-  // {
-  //   "businessType": 1,
-  //   "uins": [
-  //     "1627126029",
-  //     "66600000",
-  //     "71702575"
-  //   ]
-  // }
+  getAggregationGroupModels (): unknown;
 
-  checkLikeStatus(param: {
+  checkLikeStatus (param: {
     businessType: number,
-    uins: string[]
+    uins: string[];
   }): Promise<unknown>;
 
-  isNull(): boolean;
+  isNull (): boolean;
 }

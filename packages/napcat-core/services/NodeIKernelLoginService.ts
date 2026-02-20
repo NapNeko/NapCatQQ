@@ -63,7 +63,9 @@ export interface QuickLoginResult {
 export interface NodeIKernelLoginService {
   getMsfStatus: () => number;
 
-  setLoginMiscData (arg0: string, value: string): unknown;
+  setLoginMiscData (key: string, value: string): unknown;
+
+  getLoginMiscData (key: string): Promise<GeneralCallResult & { value: string; }>;
 
   getMachineGuid (): string;
 
@@ -73,14 +75,12 @@ export interface NodeIKernelLoginService {
 
   addKernelLoginListener (listener: NodeIKernelLoginListener): number;
 
-  removeKernelLoginListener (listener: number): void;
+  removeKernelLoginListener (listenerId: number): void;
 
   initConfig (config: LoginInitConfig): void;
 
-  getLoginMiscData (data: string): Promise<GeneralCallResult & { value: string; }>;
-
   getLoginList (): Promise<{
-    result: number,  // 0是ok
+    result: number,
     LocalLoginInfoList: LoginListItem[];
   }>;
 
@@ -89,4 +89,32 @@ export interface NodeIKernelLoginService {
   passwordLogin (param: PasswordLoginArgType): Promise<QuickLoginResult>;
 
   getQRCodePicture (): boolean;
+
+  destroy (): unknown;
+
+  cancel (): unknown;
+
+  abortPolling (): unknown;
+
+  startPolling (): unknown;
+
+  deleteLoginInfo (arg: unknown): unknown;
+
+  isHasLoginInfo (uin: string): boolean;
+
+  loadNoLoginUnitedConfig (arg: unknown): unknown;
+
+  loginUnusualDevice (arg: unknown): unknown;
+
+  registerUnitedConfigPushGroupList (groupList: unknown): unknown;
+
+  resetLoginInfo (arg: unknown): unknown;
+
+  setAutoLogin (arg: unknown): unknown;
+
+  setRemerberPwd (remember: boolean): unknown;
+
+  online (): unknown;
+
+  offline (): unknown;
 }

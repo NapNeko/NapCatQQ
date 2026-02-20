@@ -101,4 +101,100 @@ export default class QQManager {
       passwordMd5,
     });
   }
+
+  public static async resetDeviceID () {
+    await serverRequest.post<ServerResponse<null>>('/QQLogin/ResetDeviceID');
+  }
+
+  public static async restartNapCat () {
+    await serverRequest.post<ServerResponse<null>>('/QQLogin/RestartNapCat');
+  }
+
+  public static async getDeviceGUID () {
+    const data = await serverRequest.post<ServerResponse<{ guid: string; }>>('/QQLogin/GetDeviceGUID');
+    return data.data.data;
+  }
+
+  public static async setDeviceGUID (guid: string) {
+    await serverRequest.post<ServerResponse<null>>('/QQLogin/SetDeviceGUID', { guid });
+  }
+
+  public static async getGUIDBackups () {
+    const data = await serverRequest.post<ServerResponse<string[]>>('/QQLogin/GetGUIDBackups');
+    return data.data.data;
+  }
+
+  public static async restoreGUIDBackup (backupName: string) {
+    await serverRequest.post<ServerResponse<null>>('/QQLogin/RestoreGUIDBackup', { backupName });
+  }
+
+  public static async createGUIDBackup () {
+    const data = await serverRequest.post<ServerResponse<{ path: string; }>>('/QQLogin/CreateGUIDBackup');
+    return data.data.data;
+  }
+
+  // ============================================================
+  // 平台信息 & Linux GUID 管理
+  // ============================================================
+
+  public static async getPlatformInfo () {
+    const data = await serverRequest.post<ServerResponse<{ platform: string; }>>('/QQLogin/GetPlatformInfo');
+    return data.data.data;
+  }
+
+  public static async getLinuxMAC () {
+    const data = await serverRequest.post<ServerResponse<{ mac: string; }>>('/QQLogin/GetLinuxMAC');
+    return data.data.data;
+  }
+
+  public static async setLinuxMAC (mac: string) {
+    await serverRequest.post<ServerResponse<null>>('/QQLogin/SetLinuxMAC', { mac });
+  }
+
+  public static async getLinuxMachineId () {
+    const data = await serverRequest.post<ServerResponse<{ machineId: string; }>>('/QQLogin/GetLinuxMachineId');
+    return data.data.data;
+  }
+
+  public static async computeLinuxGUID (mac?: string, machineId?: string) {
+    const data = await serverRequest.post<ServerResponse<{ guid: string; machineId: string; mac: string; }>>('/QQLogin/ComputeLinuxGUID', { mac, machineId });
+    return data.data.data;
+  }
+
+  public static async getLinuxMachineInfoBackups () {
+    const data = await serverRequest.post<ServerResponse<string[]>>('/QQLogin/GetLinuxMachineInfoBackups');
+    return data.data.data;
+  }
+
+  public static async createLinuxMachineInfoBackup () {
+    const data = await serverRequest.post<ServerResponse<{ path: string; }>>('/QQLogin/CreateLinuxMachineInfoBackup');
+    return data.data.data;
+  }
+
+  public static async restoreLinuxMachineInfoBackup (backupName: string) {
+    await serverRequest.post<ServerResponse<null>>('/QQLogin/RestoreLinuxMachineInfoBackup', { backupName });
+  }
+
+  public static async resetLinuxDeviceID () {
+    await serverRequest.post<ServerResponse<null>>('/QQLogin/ResetLinuxDeviceID');
+  }
+
+  // ============================================================
+  // NapCat 配置管理
+  // ============================================================
+
+  public static async getNapCatConfig () {
+    const { data } = await serverRequest.get<ServerResponse<NapCatConfig>>(
+      '/NapCatConfig/GetConfig'
+    );
+    return data.data;
+  }
+
+  public static async setNapCatConfig (config: Partial<NapCatConfig>) {
+    await serverRequest.post<ServerResponse<null>>(
+      '/NapCatConfig/SetConfig',
+      config
+    );
+  }
 }
+

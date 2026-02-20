@@ -2,21 +2,19 @@ import { GeneralCallResult } from './common';
 
 export interface NodeIKernelTipOffService {
 
-  addKernelTipOffListener(listener: unknown): number;
+  addKernelTipOffListener (listener: unknown): number;
 
-  removeKernelTipOffListener(listenerId: unknown): void;
+  removeKernelTipOffListener (listenerId: number): void;
 
-  tipOffSendJsData(args: unknown[]): Promise<unknown>;// 2
+  tipOffSendJsData (arg1: unknown, arg2: unknown): Promise<unknown>;
 
-  getPskey(domainList: string[], nocache: boolean): Promise<GeneralCallResult & {
-    domainPskeyMap: Map<string, string>
+  getPskey (domainList: string[], nocache: boolean): Promise<GeneralCallResult & {
+    domainPskeyMap: Map<string, string>;
   }>;
 
-  tipOffSendJsData(args: unknown[]): Promise<unknown>;// 2
+  tipOffMsgs (arg: unknown): Promise<unknown>;
 
-  tipOffMsgs(args: unknown[]): Promise<unknown>;// 1
+  encodeUinAesInfo (arg1: unknown, arg2: unknown): Promise<unknown>;
 
-  encodeUinAesInfo(args: unknown[]): Promise<unknown>;// 2
-
-  isNull(): boolean;
+  isNull (): boolean;
 }

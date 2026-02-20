@@ -25,6 +25,7 @@
     "napcat-qrcode": "workspace:*"
   },
   "devDependencies": {
+    "json5": "^2.2.3",
     "@types/node": "^22.0.1",
     "napcat-vite": "workspace:*"
   },

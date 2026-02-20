@@ -34,5 +34,9 @@ export class NapCoreContext {
     return this.core.configLoader.configData;
   }
 
+  get napi2nativeLoader () {
+    return this.core.context.napi2nativeLoader;
+  }
+
   sendSsoCmdReqByContend = (cmd: string, data: Buffer) => this.core.context.session.getMsgService().sendSsoCmdReqByContend(cmd, data);
 }
