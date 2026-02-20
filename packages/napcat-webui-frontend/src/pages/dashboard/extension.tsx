@@ -1,7 +1,7 @@
 import { Tab, Tabs } from '@heroui/tabs';
 import { Button } from '@heroui/button';
 import { Spinner } from '@heroui/spinner';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { IoMdRefresh } from 'react-icons/io';
 import { MdExtension } from 'react-icons/md';
@@ -93,14 +93,45 @@ export default function ExtensionPage () {
     window.open(url, '_blank');
   };
 
+  // 拖拽滚动支持（鼠标 + 触摸）
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const isDragging = useRef(false);
+  const startX = useRef(0);
+  const scrollLeft = useRef(0);
+
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    const el = scrollRef.current;
+    if (!el) return;
+    isDragging.current = true;
+    startX.current = e.clientX;
+    scrollLeft.current = el.scrollLeft;
+    el.setPointerCapture(e.pointerId);
+    el.style.cursor = 'grabbing';
+    el.style.userSelect = 'none';
+  }, []);
+
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    if (!isDragging.current || !scrollRef.current) return;
+    const dx = e.clientX - startX.current;
+    scrollRef.current.scrollLeft = scrollLeft.current - dx;
+  }, []);
+
+  const handlePointerUp = useCallback((e: React.PointerEvent) => {
+    if (!isDragging.current || !scrollRef.current) return;
+    isDragging.current = false;
+    scrollRef.current.releasePointerCapture(e.pointerId);
+    scrollRef.current.style.cursor = 'grab';
+    scrollRef.current.style.userSelect = '';
+  }, []);
+
   return (
     <>
       <title>扩展页面 - NapCat WebUI</title>
       <div className='p-2 md:p-4 relative h-[calc(100vh-6rem)] md:h-[calc(100vh-4rem)] flex flex-col'>
         <PageLoading loading={loading} />
 
-        <div className='flex mb-4 items-center justify-between gap-4 flex-wrap'>
-          <div className='flex items-center gap-4'>
+        <div className='flex mb-4 items-center gap-4 flex-nowrap min-w-0'>
+          <div className='flex items-center gap-4 shrink-0'>
             <div className='flex items-center gap-2 text-default-600'>
               <MdExtension size={24} />
               <span className='text-lg font-medium'>插件扩展页面</span>
@@ -115,10 +146,18 @@ export default function ExtensionPage () {
             </Button>
           </div>
           {extensionPages.length > 0 && (
-            <div className='max-w-full overflow-x-auto overflow-y-hidden pb-1 -mb-1'>
+            <div
+              ref={scrollRef}
+              className='overflow-x-auto min-w-0 flex-1 scrollbar-thin scrollbar-thumb-default-300 scrollbar-track-transparent cursor-grab touch-pan-x'
+              style={{ WebkitOverflowScrolling: 'touch' }}
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
+              onPointerCancel={handlePointerUp}
+            >
               <Tabs
                 aria-label='Extension Pages'
-                className='min-w-max'
+                className='w-max min-w-full'
                 selectedKey={selectedTab}
                 onSelectionChange={(key) => setSelectedTab(key as string)}
                 classNames={{
@@ -130,12 +169,11 @@ export default function ExtensionPage () {
                 {tabs.map((tab) => (
                   <Tab
                     key={tab.key}
-                    className='shrink-0'
                     title={
-                      <div className='flex items-center gap-2'>
+                      <div className='flex items-center gap-2 whitespace-nowrap'>
                         {tab.icon && <span>{tab.icon}</span>}
                         <span
-                          className='cursor-pointer hover:underline truncate max-w-[6rem] md:max-w-none shrink-0'
+                          className='cursor-pointer hover:underline truncate max-w-[6rem] md:max-w-none'
                           title={`插件：${tab.pluginName}\n点击在新窗口打开`}
                           onClick={(e) => {
                             e.stopPropagation();
@@ -144,7 +182,7 @@ export default function ExtensionPage () {
                         >
                           {tab.title}
                         </span>
-                        <span className='text-xs text-default-400 hidden md:inline shrink-0'>({tab.pluginName})</span>
+                        <span className='text-xs text-default-400 hidden md:inline'>({tab.pluginName})</span>
                       </div>
                     }
                   />
