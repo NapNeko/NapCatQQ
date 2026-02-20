@@ -374,10 +374,10 @@ export default function PluginConfigModal ({ isOpen, onOpenChange, pluginId }: P
             </ModalBody>
             <ModalFooter>
               <Button color="danger" variant="light" onPress={onClose}>
-                Close
+                关闭
               </Button>
               <Button color="primary" onPress={handleSave} isLoading={saving}>
-                Save
+                保存
               </Button>
             </ModalFooter>
           </>
