@@ -419,7 +419,6 @@ export async function NCoreInitShell () {
   const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
   const nativePacketHandler = new NativePacketHandler({ logger });
   const napi2nativeLoader = new Napi2NativeLoader({ logger });
-  await nativePacketHandler.init(basicInfoWrapper.getFullQQVersion());
 
   // 初始化 FFmpeg 服务
   await FFmpegService.init(pathWrapper.binaryPath, logger);
@@ -428,6 +427,8 @@ export async function NCoreInitShell () {
     await connectToNamedPipe(logger).catch(e => logger.logError('命名管道连接失败', e));
   }
   const wrapper = loadQQWrapper(basicInfoWrapper.QQMainPath, basicInfoWrapper.getFullQQVersion());
+  // wrapper.node 加载后再初始化 hook
+  await nativePacketHandler.init(basicInfoWrapper.getFullQQVersion());
   if (process.env['NAPCAT_ENABLE_VERBOSE_LOG'] === '1') {
     napi2nativeLoader.nativeExports.setVerbose?.(true);
   }
