@@ -15,16 +15,9 @@ interface BypassFormData {
   process: boolean;
   container: boolean;
   js: boolean;
+  o3HookMode: boolean;
 }
 
-const defaultBypass: BypassFormData = {
-  hook: true,
-  window: true,
-  module: true,
-  process: true,
-  container: true,
-  js: true,
-};
 
 const BypassConfigCard = () => {
   const [loading, setLoading] = useState(true);
@@ -33,21 +26,20 @@ const BypassConfigCard = () => {
     handleSubmit,
     formState: { isSubmitting },
     setValue,
-  } = useForm<BypassFormData>({
-    defaultValues: defaultBypass,
-  });
+  } = useForm<BypassFormData>();
 
   const loadConfig = async (showTip = false) => {
     try {
       setLoading(true);
       const config = await QQManager.getNapCatConfig();
-      const bypass = config.bypass ?? defaultBypass;
-      setValue('hook', bypass.hook ?? true);
-      setValue('window', bypass.window ?? true);
-      setValue('module', bypass.module ?? true);
-      setValue('process', bypass.process ?? true);
-      setValue('container', bypass.container ?? true);
-      setValue('js', bypass.js ?? true);
+      const bypass = config.bypass ?? {} as Partial<BypassOptions>;
+      setValue('hook', bypass.hook ?? false);
+      setValue('window', bypass.window ?? false);
+      setValue('module', bypass.module ?? false);
+      setValue('process', bypass.process ?? false);
+      setValue('container', bypass.container ?? false);
+      setValue('js', bypass.js ?? false);
+      setValue('o3HookMode', config.o3HookMode === 1);
       if (showTip) toast.success('刷新成功');
     } catch (error) {
       const msg = (error as Error).message;
@@ -59,7 +51,8 @@ const BypassConfigCard = () => {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      await QQManager.setNapCatConfig({ bypass: data });
+      const { o3HookMode, ...bypass } = data;
+      await QQManager.setNapCatConfig({ bypass, o3HookMode: o3HookMode ? 1 : 0 });
       toast.success('保存成功，重启后生效');
     } catch (error) {
       const msg = (error as Error).message;
@@ -90,72 +83,85 @@ const BypassConfigCard = () => {
           控制 Napi2Native 模块的各项反检测功能，修改后需重启生效。
         </p>
       </div>
-      <Controller
-        control={control}
-        name='hook'
-        render={({ field }) => (
-          <SwitchCard
-            {...field}
-            label='Hook'
-            description='hook特征隐藏'
-          />
-        )}
-      />
-      <Controller
-        control={control}
-        name='window'
-        render={({ field }) => (
-          <SwitchCard
-            {...field}
-            label='Window'
-            description='窗口伪造'
-          />
-        )}
-      />
-      <Controller
-        control={control}
-        name='module'
-        render={({ field }) => (
-          <SwitchCard
-            {...field}
-            label='Module'
-            description='加载模块隐藏'
-          />
-        )}
-      />
-      <Controller
-        control={control}
-        name='process'
-        render={({ field }) => (
-          <SwitchCard
-            {...field}
-            label='Process'
-            description='进程反检测'
-          />
-        )}
-      />
-      <Controller
-        control={control}
-        name='container'
-        render={({ field }) => (
-          <SwitchCard
-            {...field}
-            label='Container'
-            description='容器反检测'
-          />
-        )}
-      />
-      <Controller
-        control={control}
-        name='js'
-        render={({ field }) => (
-          <SwitchCard
-            {...field}
-            label='JS'
-            description='JS反检测'
-          />
-        )}
-      />
+      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3'>
+        <Controller
+          control={control}
+          name='hook'
+          render={({ field }) => (
+            <SwitchCard
+              {...field}
+              label='Hook'
+              description='hook特征隐藏'
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name='window'
+          render={({ field }) => (
+            <SwitchCard
+              {...field}
+              label='Window'
+              description='窗口伪造'
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name='module'
+          render={({ field }) => (
+            <SwitchCard
+              {...field}
+              label='Module'
+              description='加载模块隐藏'
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name='process'
+          render={({ field }) => (
+            <SwitchCard
+              {...field}
+              label='Process'
+              description='进程反检测'
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name='container'
+          render={({ field }) => (
+            <SwitchCard
+              {...field}
+              label='Container'
+              description='容器反检测'
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name='js'
+          render={({ field }) => (
+            <SwitchCard
+              {...field}
+              label='JS'
+              description='JS反检测'
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name='o3HookMode'
+          render={({ field }) => (
+            <SwitchCard
+              {...field}
+              label='o3HookMode'
+              description='O3 Hook 模式'
+            />
+          )}
+        />
+      </div>
       <SaveButtons
         onSubmit={onSubmit}
         reset={onReset}

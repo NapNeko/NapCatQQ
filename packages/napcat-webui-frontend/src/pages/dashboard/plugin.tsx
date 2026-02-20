@@ -61,54 +61,43 @@ export default function PluginPage () {
 
   const handleUninstall = async (plugin: PluginItem) => {
     return new Promise<void>((resolve, reject) => {
+      let cleanData = false;
       dialog.confirm({
         title: '卸载插件',
         content: (
           <div className="flex flex-col gap-2">
-            <p>确定要卸载插件「{plugin.name}」吗? 此操作不可恢复。</p>
-            <p className="text-small text-default-500">如果插件创建了配置文件，是否一并删除？</p>
+            <p className="text-base text-default-800">确定要卸载插件「<span className="font-semibold text-danger">{plugin.name}</span>」吗? 此操作不可恢复。</p>
+            <div className="mt-2 bg-default-100 dark:bg-default-50/10 p-3 rounded-lg flex flex-col gap-1">
+              <label className="flex items-center gap-2 cursor-pointer w-fit">
+                <input
+                  type="checkbox"
+                  onChange={(e) => { cleanData = e.target.checked; }}
+                  className="w-4 h-4 cursor-pointer accent-danger"
+                />
+                <span className="text-small font-medium text-default-700">同时删除其配置文件</span>
+              </label>
+              <p className="text-xs text-default-500 pl-6 break-all w-full">配置目录: config/plugins/{plugin.id}</p>
+            </div>
           </div>
         ),
+        confirmText: '确定卸载',
+        cancelText: '取消',
         onConfirm: async () => {
-          // Ask for data cleanup
-          dialog.confirm({
-            title: '删除配置',
-            content: (
-              <div className="flex flex-col gap-2">
-                <p>是否同时清理插件「{plugin.name}」的配置文件？</p>
-                <div className="text-small text-default-500">
-                  <p>配置目录: config/plugins/{plugin.id}</p>
-                  <p>点击"确定"清理配置，点击"取消"仅卸载插件。</p>
-                </div>
-              </div>
-            ),
-            confirmText: '清理并卸载',
-            cancelText: '仅卸载',
-            onConfirm: async () => {
-              await performUninstall(true);
-            },
-            onCancel: async () => {
-              await performUninstall(false);
-            }
-          });
+          const loadingToast = toast.loading('卸载中...');
+          try {
+            await PluginManager.uninstallPlugin(plugin.id, cleanData);
+            toast.success('卸载成功', { id: loadingToast });
+            loadPlugins();
+            resolve();
+          } catch (e: any) {
+            toast.error(e.message, { id: loadingToast });
+            reject(e);
+          }
         },
         onCancel: () => {
           resolve();
         }
       });
-
-      const performUninstall = async (cleanData: boolean) => {
-        const loadingToast = toast.loading('卸载中...');
-        try {
-          await PluginManager.uninstallPlugin(plugin.id, cleanData);
-          toast.success('卸载成功', { id: loadingToast });
-          loadPlugins();
-          resolve();
-        } catch (e: any) {
-          toast.error(e.message, { id: loadingToast });
-          reject(e);
-        }
-      };
     });
   };
 

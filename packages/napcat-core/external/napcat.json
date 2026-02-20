@@ -7,11 +7,11 @@
   "packetServer": "",
   "o3HookMode": 1,
   "bypass": {
-    "hook": true,
-    "window": true,
-    "module": true,
-    "process": true,
-    "container": true,
-    "js": true
+    "hook": false,
+    "window": false,
+    "module": false,
+    "process": false,
+    "container": false,
+    "js": false
   }
 }

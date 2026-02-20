@@ -54,7 +54,7 @@ const AddButton: React.FC<AddButtonProps> = (props) => {
           textValue='title'
         >
           <div className='flex items-center gap-2 justify-center'>
-            <div className='w-5 h-5 -ml-3'>
+            <div className='w-5 h-5 -ml-3 flex items-center justify-center'>
               <PlusIcon />
             </div>
             <div className='text-primary-400'>新建网络配置</div>

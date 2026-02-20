@@ -194,7 +194,7 @@ export class NativePacketHandler {
     }
   }
 
-  async init (version: string): Promise<boolean> {
+  async init (version: string, o3HookMode: boolean = false): Promise<boolean> {
     const version_arch = version + '-' + process.arch;
     try {
       if (!this.loaded) {
@@ -215,7 +215,7 @@ export class NativePacketHandler {
 
       this.MoeHooExport.exports.initHook?.(send, recv, (type: PacketType, uin: string, cmd: string, seq: number, hex_data: string) => {
         this.emitPacket(type, uin, cmd, seq, hex_data);
-      }, true);
+      }, o3HookMode);
       this.logger.log('[PacketHandler] 初始化成功');
       return true;
     } catch (error) {

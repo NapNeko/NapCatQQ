@@ -5,24 +5,17 @@ import { webUiPathWrapper } from '@/napcat-webui-backend/index';
 import { sendError, sendSuccess } from '@/napcat-webui-backend/src/utils/response';
 import json5 from 'json5';
 
-// NapCat 配置默认值
-const defaultNapcatConfig = {
-  fileLog: false,
-  consoleLog: true,
-  fileLogLevel: 'debug',
-  consoleLogLevel: 'info',
-  packetBackend: 'auto',
-  packetServer: '',
-  o3HookMode: 1,
-  bypass: {
-    hook: true,
-    window: true,
-    module: true,
-    process: true,
-    container: true,
-    js: true,
-  },
-};
+import Ajv from 'ajv';
+import { NapcatConfigSchema } from '@/napcat-core/helper/config';
+
+// 动态获取 NapCat 配置默认值
+function getDefaultNapcatConfig (): Record<string, unknown> {
+  const ajv = new Ajv({ useDefaults: true, coerceTypes: true });
+  const validate = ajv.compile(NapcatConfigSchema);
+  const data = {};
+  validate(data);
+  return data;
+}
 
 /**
  * 获取 napcat 配置文件路径
@@ -39,12 +32,12 @@ function readNapcatConfig (): Record<string, unknown> {
   try {
     if (existsSync(configPath)) {
       const content = readFileSync(configPath, 'utf-8');
-      return { ...defaultNapcatConfig, ...json5.parse(content) };
+      return { ...getDefaultNapcatConfig(), ...json5.parse(content) };
     }
   } catch (_e) {
     // 读取失败，使用默认值
   }
-  return { ...defaultNapcatConfig };
+  return { ...getDefaultNapcatConfig() };
 }
 
 /**

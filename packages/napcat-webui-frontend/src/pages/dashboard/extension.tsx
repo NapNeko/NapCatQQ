@@ -115,39 +115,42 @@ export default function ExtensionPage () {
             </Button>
           </div>
           {extensionPages.length > 0 && (
-            <Tabs
-              aria-label='Extension Pages'
-              className='max-w-full'
-              selectedKey={selectedTab}
-              onSelectionChange={(key) => setSelectedTab(key as string)}
-              classNames={{
-                tabList: 'bg-white/40 dark:bg-black/20 backdrop-blur-md',
-                cursor: 'bg-white/80 dark:bg-white/10 backdrop-blur-md shadow-sm',
-                panel: 'hidden',
-              }}
-            >
-              {tabs.map((tab) => (
-                <Tab
-                  key={tab.key}
-                  title={
-                    <div className='flex items-center gap-2'>
-                      {tab.icon && <span>{tab.icon}</span>}
-                      <span
-                        className='cursor-pointer hover:underline truncate max-w-[6rem] md:max-w-none'
-                        title={`插件：${tab.pluginName}\n点击在新窗口打开`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openInNewWindow(tab.pluginId, tab.path);
-                        }}
-                      >
-                        {tab.title}
-                      </span>
-                      <span className='text-xs text-default-400 hidden md:inline'>({tab.pluginName})</span>
-                    </div>
-                  }
-                />
-              ))}
-            </Tabs>
+            <div className='max-w-full overflow-x-auto overflow-y-hidden pb-1 -mb-1'>
+              <Tabs
+                aria-label='Extension Pages'
+                className='min-w-max'
+                selectedKey={selectedTab}
+                onSelectionChange={(key) => setSelectedTab(key as string)}
+                classNames={{
+                  tabList: 'bg-white/40 dark:bg-black/20 backdrop-blur-md flex-nowrap',
+                  cursor: 'bg-white/80 dark:bg-white/10 backdrop-blur-md shadow-sm',
+                  panel: 'hidden',
+                }}
+              >
+                {tabs.map((tab) => (
+                  <Tab
+                    key={tab.key}
+                    className='shrink-0'
+                    title={
+                      <div className='flex items-center gap-2'>
+                        {tab.icon && <span>{tab.icon}</span>}
+                        <span
+                          className='cursor-pointer hover:underline truncate max-w-[6rem] md:max-w-none shrink-0'
+                          title={`插件：${tab.pluginName}\n点击在新窗口打开`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openInNewWindow(tab.pluginId, tab.path);
+                          }}
+                        >
+                          {tab.title}
+                        </span>
+                        <span className='text-xs text-default-400 hidden md:inline shrink-0'>({tab.pluginName})</span>
+                      </div>
+                    }
+                  />
+                ))}
+              </Tabs>
+            </div>
           )}
         </div>
 

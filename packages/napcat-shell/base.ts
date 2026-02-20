@@ -21,7 +21,6 @@ import path from 'path';
 import fs from 'fs';
 import os from 'os';
 import { createHash } from 'node:crypto';
-import json5 from 'json5';
 import { LoginListItem, NodeIKernelLoginService } from 'napcat-core/services';
 import qrcode from 'napcat-qrcode/lib/main';
 import { NapCatAdapterManager } from 'napcat-adapter';
@@ -32,7 +31,8 @@ import { NodeIO3MiscListener } from 'napcat-core/listeners/NodeIO3MiscListener';
 import { sleep } from 'napcat-common/src/helper';
 import { FFmpegService } from '@/napcat-core/helper/ffmpeg/ffmpeg';
 import { NativePacketHandler } from 'napcat-core/packet/handler/client';
-import { Napi2NativeLoader, BypassOptions } from 'napcat-core/packet/handler/napi2nativeLoader';
+import { Napi2NativeLoader } from 'napcat-core/packet/handler/napi2nativeLoader';
+import { loadNapcatConfig } from '@/napcat-core/helper/config';
 import { logSubscription, LogWrapper } from '@/napcat-core/helper/log';
 import { proxiedListenerOf } from '@/napcat-core/helper/proxy-handler';
 import { QQBasicInfoWrapper } from '@/napcat-core/helper/qq-basic-info';
@@ -40,60 +40,6 @@ import { statusHelperSubscription } from '@/napcat-core/helper/status';
 import { applyPendingUpdates } from '@/napcat-webui-backend/src/api/UpdateNapCat';
 import { connectToNamedPipe } from './pipe';
 
-/**
- * 读取 napcat.json 配置中的 bypass 选项，并根据分步禁用级别覆盖
- *
- * 分步禁用级别 (NAPCAT_BYPASS_DISABLE_LEVEL):
- *   0: 使用配置文件原始值（全部启用或用户自定义）
- *   1: 强制禁用 hook
- *   2: 强制禁用 hook + module
- *   3: 强制禁用全部 bypass
- */
-function loadBypassConfig (configPath: string, logger: LogWrapper): BypassOptions {
-  const defaultOptions: BypassOptions = {
-    hook: true,
-    window: true,
-    module: true,
-    process: true,
-    container: true,
-    js: true,
-  };
-
-  let options = { ...defaultOptions };
-  try {
-    const configFile = path.join(configPath, 'napcat.json');
-    if (fs.existsSync(configFile)) {
-      const content = fs.readFileSync(configFile, 'utf-8');
-      const config = json5.parse(content);
-      if (config.bypass && typeof config.bypass === 'object') {
-        options = { ...defaultOptions, ...config.bypass };
-      }
-    }
-  } catch (e) {
-    logger.logWarn('[NapCat] 读取 bypass 配置失败，使用默认值:', e);
-  }
-  // 根据分步禁用级别覆盖配置
-  const disableLevel = parseInt(process.env['NAPCAT_BYPASS_DISABLE_LEVEL'] || '0', 10);
-  if (disableLevel > 0) {
-    const levelDescriptions = ['全部启用', '禁用 hook', '禁用 hook + module', '全部禁用 bypass'];
-    logger.logWarn(`[NapCat] 崩溃恢复：当前 bypass 禁用级别 ${disableLevel} (${levelDescriptions[disableLevel] ?? '未知'})`);
-    if (disableLevel >= 1) {
-      options.hook = false;
-    }
-    if (disableLevel >= 2) {
-      options.module = false;
-    }
-    if (disableLevel >= 3) {
-      options.hook = false;
-      options.window = false;
-      options.module = false;
-      options.process = false;
-      options.container = false;
-      options.js = false;
-    }
-  }
-  return options;
-}
 // NapCat Shell App ES 入口文件
 async function handleUncaughtExceptions (logger: LogWrapper) {
   process.on('uncaughtException', (err) => {
@@ -494,7 +440,6 @@ export async function NCoreInitShell () {
   const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
   const nativePacketHandler = new NativePacketHandler({ logger });
   const napi2nativeLoader = new Napi2NativeLoader({ logger });
-  await nativePacketHandler.init(basicInfoWrapper.getFullQQVersion());
 
   // 初始化 FFmpeg 服务
   await FFmpegService.init(pathWrapper.binaryPath, logger);
@@ -503,12 +448,15 @@ export async function NCoreInitShell () {
     await connectToNamedPipe(logger).catch(e => logger.logError('命名管道连接失败', e));
   }
   const wrapper = loadQQWrapper(basicInfoWrapper.QQMainPath, basicInfoWrapper.getFullQQVersion());
+  // wrapper.node 加载后再初始化 hook，按 schema 读取配置
+  const napcatConfig = loadNapcatConfig(pathWrapper.configPath);
+  await nativePacketHandler.init(basicInfoWrapper.getFullQQVersion(), napcatConfig.o3HookMode === 1 ? true : false);
   if (process.env['NAPCAT_ENABLE_VERBOSE_LOG'] === '1') {
     napi2nativeLoader.nativeExports.setVerbose?.(true);
   }
   // wrapper.node 加载后立刻启用 Bypass（可通过环境变量禁用）
   if (process.env['NAPCAT_DISABLE_BYPASS'] !== '1') {
-    const bypassOptions = loadBypassConfig(pathWrapper.configPath, logger);
+    const bypassOptions = napcatConfig.bypass ?? {};
     logger.logDebug('[NapCat] Bypass 配置:', bypassOptions);
     const bypassEnabled = napi2nativeLoader.nativeExports.enableAllBypasses?.(bypassOptions);
     if (bypassEnabled) {

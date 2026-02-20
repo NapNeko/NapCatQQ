@@ -65,15 +65,6 @@ const recentCrashTimestamps: number[] = [];
 const CRASH_TIME_WINDOW = 10000; // 10秒时间窗口
 const MAX_CRASHES_IN_WINDOW = 3; // 最大崩溃次数
 
-// 分步禁用策略：记录当前禁用级别 (0-3)
-// 0: 全部启用
-// 1: 禁用 hook
-// 2: 禁用 hook + module
-// 3: 全部禁用
-let bypassDisableLevel = 0;
-
-// 是否已登录成功（登录后不再使用分步禁用策略）
-let isLoggedIn = false;
 
 /**
  * 获取进程类型名称（用于日志）
@@ -164,8 +155,6 @@ async function cleanupOrphanedProcesses (excludePids: number[]): Promise<void> {
  */
 export async function restartWorker (secretKey?: string, port?: number): Promise<void> {
   isRestarting = true;
-  isLoggedIn = false;
-  bypassDisableLevel = 0;
 
   if (!currentWorker) {
     logger.logWarn('[NapCat] [Process] 没有运行中的Worker进程');
@@ -258,7 +247,6 @@ async function startWorker (passQuickLogin: boolean = true, secretKey?: string, 
       NAPCAT_WORKER_PROCESS: '1',
       ...(secretKey ? { NAPCAT_WEBUI_JWT_SECRET_KEY: secretKey } : {}),
       ...(preferredPort ? { NAPCAT_WEBUI_PREFERRED_PORT: String(preferredPort) } : {}),
-      ...(bypassDisableLevel > 0 ? { NAPCAT_BYPASS_DISABLE_LEVEL: String(bypassDisableLevel) } : {}),
     },
     stdio: isElectron ? 'pipe' : ['inherit', 'pipe', 'pipe', 'ipc'],
   });
@@ -289,7 +277,6 @@ async function startWorker (passQuickLogin: boolean = true, secretKey?: string, 
           logger.logError(`[NapCat] [${processType}] 重启Worker进程失败:`, e);
         });
       } else if (message.type === 'login-success') {
-        isLoggedIn = true;
         logger.log(`[NapCat] [${processType}] Worker进程已登录成功，切换到正常重试策略`);
       }
     }
@@ -313,33 +300,12 @@ async function startWorker (passQuickLogin: boolean = true, secretKey?: string, 
       // 记录本次崩溃
       recentCrashTimestamps.push(now);
 
-      // 登录前：使用分步禁用策略
-      if (!isLoggedIn) {
-        // 每次崩溃提升禁用级别
-        bypassDisableLevel = Math.min(bypassDisableLevel + 1, 3);
-
-        const levelDescriptions = [
-          '全部启用',
-          '禁用 hook',
-          '禁用 hook + module',
-          '全部禁用 bypass'
-        ];
-
-        if (bypassDisableLevel >= 3 && recentCrashTimestamps.length >= MAX_CRASHES_IN_WINDOW) {
-          logger.logError(`[NapCat] [${processType}] Worker进程在 ${CRASH_TIME_WINDOW / 1000} 秒内异常退出 ${MAX_CRASHES_IN_WINDOW} 次，已尝试全部禁用策略，主进程退出`);
-          process.exit(1);
-        }
-
-        logger.logWarn(`[NapCat] [${processType}] Worker进程意外退出 (${recentCrashTimestamps.length}/${MAX_CRASHES_IN_WINDOW})，切换到禁用级别 ${bypassDisableLevel}: ${levelDescriptions[bypassDisableLevel]}，正在尝试重新拉起...`);
-      } else {
-        // 登录后：使用正常重试策略
-        if (recentCrashTimestamps.length >= MAX_CRASHES_IN_WINDOW) {
-          logger.logError(`[NapCat] [${processType}] Worker进程在 ${CRASH_TIME_WINDOW / 1000} 秒内异常退出 ${MAX_CRASHES_IN_WINDOW} 次，主进程退出`);
-          process.exit(1);
-        }
-
-        logger.logWarn(`[NapCat] [${processType}] Worker进程意外退出 (${recentCrashTimestamps.length}/${MAX_CRASHES_IN_WINDOW})，正在尝试重新拉起...`);
+      if (recentCrashTimestamps.length >= MAX_CRASHES_IN_WINDOW) {
+        logger.logError(`[NapCat] [${processType}] Worker进程在 ${CRASH_TIME_WINDOW / 1000} 秒内异常退出 ${MAX_CRASHES_IN_WINDOW} 次，主进程退出`);
+        process.exit(1);
       }
+
+      logger.logWarn(`[NapCat] [${processType}] Worker进程意外退出 (${recentCrashTimestamps.length}/${MAX_CRASHES_IN_WINDOW})，正在尝试重新拉起...`);
 
       startWorker(true).catch(e => {
         logger.logError(`[NapCat] [${processType}] 重新拉起Worker进程失败:`, e);
