@@ -35,9 +35,6 @@ const EXTERNAL_TYPE_REPLACEMENTS = {
   'ValidateFunction<T>': 'any',
   // inversify
   'Container': 'any',
-  // async-mutex
-  'Mutex': 'any',
-  'Semaphore': 'any',
   // napcat-protobuf
   'NapProtoDecodeStructType': 'any',
   'NapProtoEncodeStructType': 'any',
@@ -90,15 +87,15 @@ function replaceExternalTypes (content) {
   // 使用类型上下文的模式匹配
   const typeContextPatterns = [
     // : Type
-    /:\s*(WebSocket|WebSocketServer|RawData|Ajv|AnySchema|ValidateFunction|Container|Mutex|Semaphore|NapProtoDecodeStructType|NapProtoEncodeStructType|Express|Request|Response|NextFunction)(?=\s*[;,)\]\}|&]|$)/g,
+    /:\s*(WebSocket|WebSocketServer|RawData|Ajv|AnySchema|ValidateFunction|Container|NapProtoDecodeStructType|NapProtoEncodeStructType|Express|Request|Response|NextFunction)(?=\s*[;,)\]\}|&]|$)/g,
     // <Type>
-    /<(WebSocket|WebSocketServer|RawData|Ajv|AnySchema|ValidateFunction|Container|Mutex|Semaphore|NapProtoDecodeStructType|NapProtoEncodeStructType|Express|Request|Response|NextFunction)>/g,
+    /<(WebSocket|WebSocketServer|RawData|Ajv|AnySchema|ValidateFunction|Container|NapProtoDecodeStructType|NapProtoEncodeStructType|Express|Request|Response|NextFunction)>/g,
     // Type[]
-    /(WebSocket|WebSocketServer|RawData|Ajv|AnySchema|ValidateFunction|Container|Mutex|Semaphore|NapProtoDecodeStructType|NapProtoEncodeStructType|Express|Request|Response|NextFunction)\[\]/g,
+    /(WebSocket|WebSocketServer|RawData|Ajv|AnySchema|ValidateFunction|Container|NapProtoDecodeStructType|NapProtoEncodeStructType|Express|Request|Response|NextFunction)\[\]/g,
     // extends Type
-    /extends\s+(WebSocket|WebSocketServer|RawData|Ajv|AnySchema|ValidateFunction|Container|Mutex|Semaphore|NapProtoDecodeStructType|NapProtoEncodeStructType|Express|Request|Response|NextFunction)(?=\s*[{,])/g,
+    /extends\s+(WebSocket|WebSocketServer|RawData|Ajv|AnySchema|ValidateFunction|Container|NapProtoDecodeStructType|NapProtoEncodeStructType|Express|Request|Response|NextFunction)(?=\s*[{,])/g,
     // implements Type
-    /implements\s+(WebSocket|WebSocketServer|RawData|Ajv|AnySchema|ValidateFunction|Container|Mutex|Semaphore|NapProtoDecodeStructType|NapProtoEncodeStructType|Express|Request|Response|NextFunction)(?=\s*[{,])/g,
+    /implements\s+(WebSocket|WebSocketServer|RawData|Ajv|AnySchema|ValidateFunction|Container|NapProtoDecodeStructType|NapProtoEncodeStructType|Express|Request|Response|NextFunction)(?=\s*[{,])/g,
   ];
 
   for (const pattern of typeContextPatterns) {

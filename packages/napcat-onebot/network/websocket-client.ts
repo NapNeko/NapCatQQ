@@ -85,9 +85,6 @@ export class OB11WebSocketClientAdapter extends IOB11NetworkAdapter<WebsocketCli
         },
 
       });
-      this.connection.on('ping', () => {
-        this.connection?.pong();
-      });
       this.connection.on('pong', () => {
         // this.logger.logDebug('[OneBot] [WebSocket Client] 收到pong');
       });
