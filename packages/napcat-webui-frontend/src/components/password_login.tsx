@@ -6,6 +6,7 @@ import { Input } from '@heroui/input';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { IoChevronDown } from 'react-icons/io5';
+import { Spinner } from '@heroui/spinner';
 
 import type { QQItem } from '@/components/quick_login';
 import { isQQQuickNewItem } from '@/utils/qq';
@@ -25,6 +26,7 @@ interface PasswordLoginProps {
     uin: string;
     password: string;
   } | null;
+  captchaVerifying?: boolean;
   newDeviceState?: {
     needNewDevice: boolean;
     jumpUrl: string;
@@ -34,7 +36,7 @@ interface PasswordLoginProps {
   onNewDeviceCancel?: () => void;
 }
 
-const PasswordLogin: React.FC<PasswordLoginProps> = ({ onSubmit, onCaptchaSubmit, onNewDeviceVerified, isLoading, qqList, captchaState, newDeviceState, onCaptchaCancel, onNewDeviceCancel }) => {
+const PasswordLogin: React.FC<PasswordLoginProps> = ({ onSubmit, onCaptchaSubmit, onNewDeviceVerified, isLoading, qqList, captchaState, captchaVerifying, newDeviceState, onCaptchaCancel, onNewDeviceCancel }) => {
   const [uin, setUin] = useState('');
   const [password, setPassword] = useState('');
 
@@ -54,14 +56,25 @@ const PasswordLogin: React.FC<PasswordLoginProps> = ({ onSubmit, onCaptchaSubmit
     <div className='flex flex-col gap-8'>
       {captchaState?.needCaptcha && captchaState.proofWaterUrl ? (
         <div className='flex flex-col gap-4 items-center'>
-          <p className='text-warning text-sm'>登录需要安全验证，请完成验证码</p>
-          <TencentCaptchaModal
-            proofWaterUrl={captchaState.proofWaterUrl}
-            onSuccess={(data) => {
-              onCaptchaSubmit?.(captchaState.uin, captchaState.password, data);
-            }}
-            onCancel={onCaptchaCancel}
-          />
+          {captchaVerifying ? (
+            <>
+              <p className='text-primary text-sm'>验证码已提交，正在等待服务器验证结果...</p>
+              <div className='flex items-center justify-center py-8 gap-3'>
+                <Spinner size='lg' />
+              </div>
+            </>
+          ) : (
+            <>
+              <p className='text-warning text-sm'>登录需要安全验证，请完成验证码</p>
+              <TencentCaptchaModal
+                proofWaterUrl={captchaState.proofWaterUrl}
+                onSuccess={(data) => {
+                  onCaptchaSubmit?.(captchaState.uin, captchaState.password, data);
+                }}
+                onCancel={onCaptchaCancel}
+              />
+            </>
+          )}
           <Button
             variant='light'
             color='danger'

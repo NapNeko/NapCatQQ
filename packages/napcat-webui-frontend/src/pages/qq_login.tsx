@@ -65,6 +65,7 @@ export default function QQLoginPage () {
     uin: string;
     password: string;
   } | null>(null);
+  const [captchaVerifying, setCaptchaVerifying] = useState(false);
   const [newDeviceState, setNewDeviceState] = useState<{
     needNewDevice: boolean;
     jumpUrl: string;
@@ -130,6 +131,7 @@ export default function QQLoginPage () {
 
   const onCaptchaSubmit = async (uin: string, password: string, captchaData: CaptchaCallbackData) => {
     setIsLoading(true);
+    setCaptchaVerifying(true);
     try {
       const passwordMd5 = CryptoJS.MD5(password).toString();
       const result = await QQManager.captchaLogin(uin, passwordMd5, captchaData.ticket, captchaData.randstr, captchaData.sid);
@@ -153,6 +155,7 @@ export default function QQLoginPage () {
       setCaptchaState(null);
     } finally {
       setIsLoading(false);
+      setCaptchaVerifying(false);
     }
   };
 
@@ -355,6 +358,7 @@ export default function QQLoginPage () {
                     onNewDeviceVerified={onNewDeviceVerified}
                     qqList={qqList}
                     captchaState={captchaState}
+                    captchaVerifying={captchaVerifying}
                     newDeviceState={newDeviceState}
                     onCaptchaCancel={onCaptchaCancel}
                     onNewDeviceCancel={onNewDeviceCancel}
