@@ -56,9 +56,6 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
       wsClient.on('message', (message) => {
         this.handleMessage(wsClient, message).then().catch(e => this.logger.logError(e));
       });
-      wsClient.on('ping', () => {
-        wsClient.pong();
-      });
       wsClient.on('pong', () => {
         // this.logger.logDebug('[OneBot] [WebSocket Server] Pong received');
       });
