@@ -61,20 +61,6 @@ declare module 'yaml' {
   export const stringify: (...args: any[]) => any;
 }
 
-declare module 'async-mutex' {
-  export class Mutex {
-    acquire (): Promise<() => void>;
-    runExclusive<T> (callback: () => T | Promise<T>): Promise<T>;
-  }
-  export class Semaphore {
-    acquire (): Promise<[() => void, number]>;
-    runExclusive<T> (callback: () => T | Promise<T>): Promise<T>;
-    release (): void;
-  }
-  const _async_mutex_default: { Mutex: typeof Mutex; Semaphore: typeof Semaphore; };
-  export default _async_mutex_default;
-}
-
 declare module 'napcat-protobuf' {
   export class NapProtoMsg<T = any> {
     constructor (schema: any);

@@ -13,14 +13,12 @@ import { URL } from 'url';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { OB11HeartbeatEvent } from '@/napcat-onebot/event/meta/OB11HeartbeatEvent';
 import { OB11LifeCycleEvent, LifeCycleSubType } from '@/napcat-onebot/event/meta/OB11LifeCycleEvent';
-import { Mutex } from 'async-mutex';
 
 export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig> {
   private app: Express | undefined;
   private server: http.Server | undefined;
   private wsServer?: WebSocketServer;
   private wsClients: WebSocket[] = [];
-  private wsClientsMutex = new Mutex();
   private heartbeatIntervalId: NodeJS.Timeout | null = null;
   private wsClientWithEvent: WebSocket[] = [];
 
@@ -30,19 +28,17 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
 
   override async onEvent<T extends OB11EmitEventContent> (event: T) {
     // http server is passive, no need to emit event
-    this.wsClientsMutex.runExclusive(async () => {
-      const promises = this.wsClientWithEvent.map((wsClient) => {
-        return new Promise<void>((resolve, reject) => {
-          if (wsClient.readyState === WebSocket.OPEN) {
-            wsClient.send(JSON.stringify(event));
-            resolve();
-          } else {
-            reject(new Error('WebSocket is not open'));
-          }
-        });
+    const promises = this.wsClientWithEvent.map((wsClient) => {
+      return new Promise<void>((resolve, reject) => {
+        if (wsClient.readyState === WebSocket.OPEN) {
+          wsClient.send(JSON.stringify(event));
+          resolve();
+        } else {
+          reject(new Error('WebSocket is not open'));
+        }
       });
-      await Promise.allSettled(promises);
     });
+    await Promise.allSettled(promises);
   }
 
   open () {
@@ -65,13 +61,9 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
     this.server?.close();
     this.app = undefined;
     this.stopHeartbeat();
-    await this.wsClientsMutex.runExclusive(async () => {
-      this.wsClients.forEach((wsClient) => {
-        wsClient.close();
-      });
-      this.wsClients = [];
-      this.wsClientWithEvent = [];
-    });
+    this.wsClients.forEach((wsClient) => wsClient.close());
+    this.wsClients = [];
+    this.wsClientWithEvent = [];
     this.wsServer?.close();
   }
 
@@ -160,29 +152,25 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
         // this.logger.logDebug('[OneBot] [HTTP WebSocket] Pong received');
       });
       wsClient.once('close', () => {
-        this.wsClientsMutex.runExclusive(async () => {
-          const NormolIndex = this.wsClients.indexOf(wsClient);
-          if (NormolIndex !== -1) {
-            this.wsClients.splice(NormolIndex, 1);
-          }
-          const EventIndex = this.wsClientWithEvent.indexOf(wsClient);
-          if (EventIndex !== -1) {
-            this.wsClientWithEvent.splice(EventIndex, 1);
-          }
-          if (this.wsClientWithEvent.length === 0) {
-            this.stopHeartbeat();
-          }
-        });
-      });
-      await this.wsClientsMutex.runExclusive(async () => {
-        if (!isApiConnect) {
-          this.wsClientWithEvent.push(wsClient);
+        const NormolIndex = this.wsClients.indexOf(wsClient);
+        if (NormolIndex !== -1) {
+          this.wsClients.splice(NormolIndex, 1);
         }
-        this.wsClients.push(wsClient);
-        if (this.wsClientWithEvent.length > 0) {
-          this.startHeartbeat();
+        const EventIndex = this.wsClientWithEvent.indexOf(wsClient);
+        if (EventIndex !== -1) {
+          this.wsClientWithEvent.splice(EventIndex, 1);
+        }
+        if (this.wsClientWithEvent.length === 0) {
+          this.stopHeartbeat();
         }
       });
+      if (!isApiConnect) {
+        this.wsClientWithEvent.push(wsClient);
+      }
+      this.wsClients.push(wsClient);
+      if (this.wsClientWithEvent.length > 0) {
+        this.startHeartbeat();
+      }
     }).on('error', (err) => this.logger.log('[OneBot] [HTTP WebSocket] Server Error:', err.message));
   }
 
@@ -197,12 +185,10 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
   private startHeartbeat () {
     if (this.heartbeatIntervalId) return;
     this.heartbeatIntervalId = setInterval(() => {
-      this.wsClientsMutex.runExclusive(async () => {
-        this.wsClientWithEvent.forEach((wsClient) => {
-          if (wsClient.readyState === WebSocket.OPEN) {
-            wsClient.send(JSON.stringify(new OB11HeartbeatEvent(this.core, 30000, this.core.selfInfo.online ?? true, true)));
-          }
-        });
+      this.wsClientWithEvent.forEach((wsClient) => {
+        if (wsClient.readyState === WebSocket.OPEN) {
+          wsClient.send(JSON.stringify(new OB11HeartbeatEvent(this.core, 30000, this.core.selfInfo.online ?? true, true)));
+        }
       });
     }, 30000);
   }
