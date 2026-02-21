@@ -11,15 +11,8 @@ _Modern protocol-side framework implemented based on NTQQ._
 
 ---
 
-## New Feature
-
-在 v4.8.115+ 版本开始
-
-1. NapCatQQ 支持 [Stream Api](https://napneko.github.io/develop/file)
-2. NapCatQQ 推荐 message_id/user_id/group_id 均使用字符串类型
-
-- [1] 解决 Docker/跨设备/大文件 的多媒体上下传问题
-- [2] 采用字符串可以解决扩展到int64的问题，同时也可以解决部分语言（如JavaScript）对大整数支持不佳的问题，增加极少成本。
+## Notice
+NapCat 当前正在寻找新的主要维护者，欢迎email到 nanaeonn@outlook.com ，在此期不会建立任何公开社区交流群，Napcat会保证此期间的正常更新。
 
 ## Welcome
 
@@ -52,12 +45,6 @@ _Modern protocol-side framework implemented based on NTQQ._
 
 | Docs | [![Cloudflare.Pages](https://img.shields.io/badge/docs%20on-Cloudflare.Pages-blue)](https://napneko.pages.dev/) | [![Server.Other](https://img.shields.io/badge/docs%20on-Server.Other-green)](https://napcat.top/) | [![NapCat.Top](https://img.shields.io/badge/docs%20on-NapCat.Top-red)](https://napcat.top/) |
 |:-:|:-:|:-:|:-:|
-
-| QQ Group | [![QQ Group#4](https://img.shields.io/badge/QQ%20Group%234-Join-blue)](https://qm.qq.com/q/CMmPbGw0jA) | [![QQ Group#3](https://img.shields.io/badge/QQ%20Group%233-Join-blue)](https://qm.qq.com/q/8zJMLjqy2Y) | [![QQ Group#2](https://img.shields.io/badge/QQ%20Group%232-Join-blue)](https://qm.qq.com/q/CMmPbGw0jA) | [![QQ Group#1](https://img.shields.io/badge/QQ%20Group%231-Join-blue)](https://qm.qq.com/q/I6LU87a0Yq) |
-|:-:|:-:|:-:|:-:|:-:|
-
-| Telegram | [![Telegram](https://img.shields.io/badge/Telegram-napcatqq-blue)](https://t.me/napcatqq) |
-|:-:|:-:|
 
 | DeepWiki | [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/NapNeko/NapCatQQ) |
 |:-:|:-:|
