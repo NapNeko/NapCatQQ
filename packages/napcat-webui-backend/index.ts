@@ -5,7 +5,7 @@
 import express from 'express';
 import type { WebUiConfigType } from './src/types';
 import { createServer } from 'http';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { createServer as createHttpsServer } from 'https';
 import { NapCatPathWrapper } from 'napcat-common/src/path';
 import { WebUiConfigWrapper } from '@/napcat-webui-backend/src/helper/config';
@@ -156,16 +156,60 @@ export async function InitWebUi (logger: ILogWrapper, pathWrapper: NapCatPathWra
   WebUiDataRuntime.setWebUiConfigQuickFunction(
     async () => {
       const autoLoginAccount = process.env['NAPCAT_QUICK_ACCOUNT'] || WebUiConfig.getAutoLoginAccount();
-      if (autoLoginAccount) {
-        try {
-          const { result, message } = await WebUiDataRuntime.requestQuickLogin(autoLoginAccount);
-          if (!result) {
-            throw new Error(message);
+      const resolveQuickPasswordMd5 = (): string | undefined => {
+        const quickPasswordMd5FromEnv = process.env['NAPCAT_QUICK_PASSWORD_MD5']?.trim();
+        if (quickPasswordMd5FromEnv) {
+          if (/^[a-fA-F0-9]{32}$/.test(quickPasswordMd5FromEnv)) {
+            return quickPasswordMd5FromEnv.toLowerCase();
           }
-          console.log(`[NapCat] [WebUi] Auto login account: ${autoLoginAccount}`);
-        } catch (error) {
-          console.log('[NapCat] [WebUi] Auto login account failed.' + error);
+          console.log('[NapCat] [WebUi] NAPCAT_QUICK_PASSWORD_MD5 格式无效（需为 32 位 MD5）');
         }
+
+        const quickPassword = process.env['NAPCAT_QUICK_PASSWORD'];
+        if (typeof quickPassword === 'string' && quickPassword.length > 0) {
+          console.log('[NapCat] [WebUi] 检测到 NAPCAT_QUICK_PASSWORD，已在内存中计算 MD5 用于回退登录');
+          return createHash('md5').update(quickPassword, 'utf8').digest('hex');
+        }
+        return undefined;
+      };
+      if (!autoLoginAccount) {
+        return;
+      }
+      const quickPasswordMd5 = resolveQuickPasswordMd5();
+
+      try {
+        const { result, message } = await WebUiDataRuntime.requestQuickLogin(autoLoginAccount);
+        if (result) {
+          console.log(`[NapCat] [WebUi] 自动快速登录成功: ${autoLoginAccount}`);
+          return;
+        }
+        console.log(`[NapCat] [WebUi] 自动快速登录失败: ${message || '未知错误'}`);
+      } catch (error) {
+        console.log('[NapCat] [WebUi] 自动快速登录异常:' + error);
+      }
+
+      if (!quickPasswordMd5) {
+        console.log(`[NapCat] [WebUi] QQ ${autoLoginAccount} 未配置回退密码环境变量，建议优先使用 ACCOUNT + NAPCAT_QUICK_PASSWORD（NAPCAT_QUICK_PASSWORD_MD5 作为备用），保持二维码登录兜底`);
+        return;
+      }
+
+      try {
+        const { result, message, needCaptcha, needNewDevice } = await WebUiDataRuntime.requestPasswordLogin(autoLoginAccount, quickPasswordMd5);
+        if (result) {
+          console.log(`[NapCat] [WebUi] 自动密码回退登录成功: ${autoLoginAccount}`);
+          return;
+        }
+        if (needCaptcha) {
+          console.log(`[NapCat] [WebUi] 自动密码回退登录需要验证码，请在登录页面继续完成: ${autoLoginAccount}`);
+          return;
+        }
+        if (needNewDevice) {
+          console.log(`[NapCat] [WebUi] 自动密码回退登录需要新设备验证，请在登录页面继续完成: ${autoLoginAccount}`);
+          return;
+        }
+        console.log(`[NapCat] [WebUi] 自动密码回退登录失败: ${message || '未知错误'}`);
+      } catch (error) {
+        console.log('[NapCat] [WebUi] 自动密码回退登录异常:' + error);
       }
     });
   // ------------注册中间件------------
