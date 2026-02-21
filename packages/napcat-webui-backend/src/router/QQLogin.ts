@@ -11,6 +11,10 @@ import {
   setAutoLoginAccountHandler,
   QQRefreshQRcodeHandler,
   QQPasswordLoginHandler,
+  QQCaptchaLoginHandler,
+  QQNewDeviceLoginHandler,
+  QQGetNewDeviceQRCodeHandler,
+  QQPollNewDeviceQRHandler,
   QQResetDeviceIDHandler,
   QQRestartNapCatHandler,
   QQGetDeviceGUIDHandler,
@@ -50,6 +54,14 @@ router.post('/SetQuickLoginQQ', setAutoLoginAccountHandler);
 router.post('/RefreshQRcode', QQRefreshQRcodeHandler);
 // router:密码登录
 router.post('/PasswordLogin', QQPasswordLoginHandler);
+// router:验证码登录（密码登录需要验证码时的第二步）
+router.post('/CaptchaLogin', QQCaptchaLoginHandler);
+// router:新设备验证登录（密码登录需要新设备验证时的第二步）
+router.post('/NewDeviceLogin', QQNewDeviceLoginHandler);
+// router:获取新设备验证二维码 (OIDB)
+router.post('/GetNewDeviceQRCode', QQGetNewDeviceQRCodeHandler);
+// router:轮询新设备验证二维码状态 (OIDB)
+router.post('/PollNewDeviceQR', QQPollNewDeviceQRHandler);
 // router:重置设备信息
 router.post('/ResetDeviceID', QQResetDeviceIDHandler);
 // router:重启NapCat

@@ -234,21 +234,43 @@ async function handleLoginInner (context: { isLogined: boolean; }, logger: LogWr
           uin,
           passwordMd5,
           step: 0,
-          newDeviceLoginSig: '',
-          proofWaterSig: '',
-          proofWaterRand: '',
-          proofWaterSid: '',
+          newDeviceLoginSig: new Uint8Array(),
+          proofWaterSig: new Uint8Array(),
+          proofWaterRand: new Uint8Array(),
+          proofWaterSid: new Uint8Array(),
+          unusualDeviceCheckSig: new Uint8Array(),
         }).then(res => {
           if (res.result === '140022008') {
-            const errMsg = '需要验证码，暂不支持';
-            WebUiDataRuntime.setQQLoginError(errMsg);
-            loginService.getQRCodePicture();
-            resolve({ result: false, message: errMsg });
+            const proofWaterUrl = res.loginErrorInfo?.proofWaterUrl || '';
+            logger.log('需要验证码, proofWaterUrl: ', proofWaterUrl);
+            resolve({
+              result: false,
+              message: '需要验证码',
+              needCaptcha: true,
+              proofWaterUrl,
+            });
           } else if (res.result === '140022010') {
-            const errMsg = '新设备需要扫码登录，暂不支持';
-            WebUiDataRuntime.setQQLoginError(errMsg);
-            loginService.getQRCodePicture();
-            resolve({ result: false, message: errMsg });
+            const jumpUrl = res.loginErrorInfo?.jumpUrl || '';
+            const newDevicePullQrCodeSig = res.loginErrorInfo?.newDevicePullQrCodeSig || '';
+            logger.log('新设备需要扫码验证, jumpUrl: ', jumpUrl);
+            resolve({
+              result: false,
+              message: '新设备需要扫码验证',
+              needNewDevice: true,
+              jumpUrl,
+              newDevicePullQrCodeSig,
+            });
+          } else if (res.result === '140022011') {
+            const jumpUrl = res.loginErrorInfo?.jumpUrl || '';
+            const newDevicePullQrCodeSig = res.loginErrorInfo?.newDevicePullQrCodeSig || '';
+            logger.log('异常设备需要验证, jumpUrl: ', jumpUrl);
+            resolve({
+              result: false,
+              message: '异常设备需要验证',
+              needNewDevice: true,
+              jumpUrl,
+              newDevicePullQrCodeSig,
+            });
           } else if (res.result !== '0') {
             const errMsg = res.loginErrorInfo?.errMsg || '密码登录失败';
             WebUiDataRuntime.setQQLoginError(errMsg);
@@ -267,6 +289,114 @@ async function handleLoginInner (context: { isLogined: boolean; }, logger: LogWr
         });
       } else {
         resolve({ result: false, message: '密码登录失败：参数不完整' });
+      }
+    });
+  });
+
+  // 注册验证码登录回调（密码登录需要验证码时的第二步）
+  WebUiDataRuntime.setCaptchaLoginCall(async (uin: string, passwordMd5: string, ticket: string, randstr: string, sid: string) => {
+    return await new Promise((resolve) => {
+      if (uin && passwordMd5 && ticket) {
+        logger.log('正在验证码登录 ', uin);
+        loginService.passwordLogin({
+          uin,
+          passwordMd5,
+          step: 1,
+          newDeviceLoginSig: new Uint8Array(),
+          proofWaterSig: new TextEncoder().encode(ticket),
+          proofWaterRand: new TextEncoder().encode(randstr),
+          proofWaterSid: new TextEncoder().encode(sid),
+          unusualDeviceCheckSig: new Uint8Array(),
+        }).then(res => {
+          console.log('验证码登录结果: ', res);
+          if (res.result === '140022010') {
+            const jumpUrl = res.loginErrorInfo?.jumpUrl || '';
+            const newDevicePullQrCodeSig = res.loginErrorInfo?.newDevicePullQrCodeSig || '';
+            logger.log('验证码登录后需要新设备验证, jumpUrl: ', jumpUrl);
+            resolve({
+              result: false,
+              message: '新设备需要扫码验证',
+              needNewDevice: true,
+              jumpUrl,
+              newDevicePullQrCodeSig,
+            });
+          } else if (res.result === '140022011') {
+            const jumpUrl = res.loginErrorInfo?.jumpUrl || '';
+            const newDevicePullQrCodeSig = res.loginErrorInfo?.newDevicePullQrCodeSig || '';
+            logger.log('验证码登录后需要异常设备验证, jumpUrl: ', jumpUrl);
+            resolve({
+              result: false,
+              message: '异常设备需要验证',
+              needNewDevice: true,
+              jumpUrl,
+              newDevicePullQrCodeSig,
+            });
+          } else if (res.result !== '0') {
+            const errMsg = res.loginErrorInfo?.errMsg || '验证码登录失败';
+            WebUiDataRuntime.setQQLoginError(errMsg);
+            loginService.getQRCodePicture();
+            resolve({ result: false, message: errMsg });
+          } else {
+            WebUiDataRuntime.setQQLoginStatus(true);
+            WebUiDataRuntime.setQQLoginError('');
+            resolve({ result: true, message: '' });
+          }
+        }).catch((e) => {
+          logger.logError(e);
+          WebUiDataRuntime.setQQLoginError('验证码登录发生错误');
+          loginService.getQRCodePicture();
+          resolve({ result: false, message: '验证码登录发生错误' });
+        });
+      } else {
+        resolve({ result: false, message: '验证码登录失败：参数不完整' });
+      }
+    });
+  });
+
+  // 注册新设备登录回调（密码登录需要新设备验证时的第二步）
+  WebUiDataRuntime.setNewDeviceLoginCall(async (uin: string, passwordMd5: string, newDevicePullQrCodeSig: string) => {
+    return await new Promise((resolve) => {
+      if (uin && passwordMd5 && newDevicePullQrCodeSig) {
+        logger.log('正在新设备验证登录 ', uin);
+        loginService.passwordLogin({
+          uin,
+          passwordMd5,
+          step: 2,
+          newDeviceLoginSig: new TextEncoder().encode(newDevicePullQrCodeSig),
+          proofWaterSig: new Uint8Array(),
+          proofWaterRand: new Uint8Array(),
+          proofWaterSid: new Uint8Array(),
+          unusualDeviceCheckSig: new Uint8Array(),
+        }).then(res => {
+          if (res.result === '140022011') {
+            const jumpUrl = res.loginErrorInfo?.jumpUrl || '';
+            const newDevicePullQrCodeSig = res.loginErrorInfo?.newDevicePullQrCodeSig || '';
+            logger.log('新设备验证后需要异常设备验证, jumpUrl: ', jumpUrl);
+            resolve({
+              result: false,
+              message: '异常设备需要验证',
+              needNewDevice: true,
+              jumpUrl,
+              newDevicePullQrCodeSig,
+            });
+          } else if (res.result !== '0') {
+            const errMsg = res.loginErrorInfo?.errMsg || '新设备验证登录失败';
+            WebUiDataRuntime.setQQLoginError(errMsg);
+            loginService.getQRCodePicture();
+            resolve({ result: false, message: errMsg });
+          } else {
+            WebUiDataRuntime.setQQLoginStatus(true);
+            WebUiDataRuntime.setQQLoginError('');
+            resolve({ result: true, message: '' });
+          }
+        }).catch((e) => {
+          logger.logError(e);
+          WebUiDataRuntime.setQQLoginError('新设备验证登录发生错误');
+          loginService.getQRCodePicture();
+          resolve({ result: false, message: '新设备验证登录发生错误' });
+        });
+      } else {
+        resolve({ result: false, message: '新设备验证登录失败：参数不完整' });
       }
     });
   });

@@ -96,10 +96,67 @@ export default class QQManager {
   }
 
   public static async passwordLogin (uin: string, passwordMd5: string) {
-    await serverRequest.post<ServerResponse<null>>('/QQLogin/PasswordLogin', {
+    const data = await serverRequest.post<ServerResponse<{
+      needCaptcha?: boolean;
+      proofWaterUrl?: string;
+      needNewDevice?: boolean;
+      jumpUrl?: string;
+      newDevicePullQrCodeSig?: string;
+    } | null>>('/QQLogin/PasswordLogin', {
       uin,
       passwordMd5,
     });
+    return data.data.data;
+  }
+
+  public static async captchaLogin (uin: string, passwordMd5: string, ticket: string, randstr: string, sid: string) {
+    const data = await serverRequest.post<ServerResponse<{
+      needNewDevice?: boolean;
+      jumpUrl?: string;
+      newDevicePullQrCodeSig?: string;
+    } | null>>('/QQLogin/CaptchaLogin', {
+      uin,
+      passwordMd5,
+      ticket,
+      randstr,
+      sid,
+    });
+    return data.data.data;
+  }
+
+  public static async newDeviceLogin (uin: string, passwordMd5: string, newDevicePullQrCodeSig: string) {
+    const data = await serverRequest.post<ServerResponse<{
+      needNewDevice?: boolean;
+      jumpUrl?: string;
+      newDevicePullQrCodeSig?: string;
+    } | null>>('/QQLogin/NewDeviceLogin', {
+      uin,
+      passwordMd5,
+      newDevicePullQrCodeSig,
+    });
+    return data.data.data;
+  }
+
+  public static async getNewDeviceQRCode (uin: string, jumpUrl: string) {
+    const data = await serverRequest.post<ServerResponse<{
+      str_url?: string;
+      bytes_token?: string;
+    }>>('/QQLogin/GetNewDeviceQRCode', {
+      uin,
+      jumpUrl,
+    });
+    return data.data.data;
+  }
+
+  public static async pollNewDeviceQR (uin: string, bytesToken: string) {
+    const data = await serverRequest.post<ServerResponse<{
+      uint32_guarantee_status?: number;
+      str_nt_succ_token?: string;
+    }>>('/QQLogin/PollNewDeviceQR', {
+      uin,
+      bytesToken,
+    });
+    return data.data.data;
   }
 
   public static async resetDeviceID () {

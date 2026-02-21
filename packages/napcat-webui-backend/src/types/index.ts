@@ -57,7 +57,9 @@ export interface LoginRuntimeType {
   OneBotContext: any | null; // OneBot 上下文，用于调试功能
   NapCatHelper: {
     onQuickLoginRequested: (uin: string) => Promise<{ result: boolean; message: string; }>;
-    onPasswordLoginRequested: (uin: string, passwordMd5: string) => Promise<{ result: boolean; message: string; }>;
+    onPasswordLoginRequested: (uin: string, passwordMd5: string) => Promise<{ result: boolean; message: string; needCaptcha?: boolean; proofWaterUrl?: string; needNewDevice?: boolean; jumpUrl?: string; newDevicePullQrCodeSig?: string; }>;
+    onCaptchaLoginRequested: (uin: string, passwordMd5: string, ticket: string, randstr: string, sid: string) => Promise<{ result: boolean; message: string; needNewDevice?: boolean; jumpUrl?: string; newDevicePullQrCodeSig?: string; }>;
+    onNewDeviceLoginRequested: (uin: string, passwordMd5: string, newDevicePullQrCodeSig: string) => Promise<{ result: boolean; message: string; needNewDevice?: boolean; jumpUrl?: string; newDevicePullQrCodeSig?: string; }>;
     onOB11ConfigChanged: (ob11: OneBotConfig) => Promise<void>;
     onRestartProcessRequested: () => Promise<{ result: boolean; message: string; }>;
     QQLoginList: string[];
