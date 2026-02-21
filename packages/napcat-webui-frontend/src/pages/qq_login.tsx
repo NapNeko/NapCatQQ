@@ -19,6 +19,7 @@ import QrCodeLogin from '@/components/qr_code_login';
 import QuickLogin from '@/components/quick_login';
 import type { QQItem } from '@/components/quick_login';
 import { ThemeSwitch } from '@/components/theme-switch';
+import type { CaptchaCallbackData } from '@/components/tencent_captcha';
 
 import QQManager from '@/controllers/qq_manager';
 import useDialog from '@/hooks/use-dialog';
@@ -58,6 +59,21 @@ export default function QQLoginPage () {
   const [refresh, setRefresh] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>('shortcut');
   const firstLoad = useRef<boolean>(true);
+  const [captchaState, setCaptchaState] = useState<{
+    needCaptcha: boolean;
+    proofWaterUrl: string;
+    uin: string;
+    password: string;
+  } | null>(null);
+  const [captchaVerifying, setCaptchaVerifying] = useState(false);
+  const [newDeviceState, setNewDeviceState] = useState<{
+    needNewDevice: boolean;
+    jumpUrl: string;
+    newDevicePullQrCodeSig: string;
+    uin: string;
+    password: string;
+  } | null>(null);
+  // newDevicePullQrCodeSig is kept for step:2 login after QR verification
   const onSubmit = async () => {
     if (!uinValue) {
       toast.error('请选择快捷登录的QQ');
@@ -83,14 +99,103 @@ export default function QQLoginPage () {
     try {
       // 计算密码的MD5值
       const passwordMd5 = CryptoJS.MD5(password).toString();
-      await QQManager.passwordLogin(uin, passwordMd5);
-      toast.success('密码登录请求已发送');
+      const result = await QQManager.passwordLogin(uin, passwordMd5);
+      if (result?.needCaptcha && result.proofWaterUrl) {
+        // 需要验证码，显示验证码组件
+        setCaptchaState({
+          needCaptcha: true,
+          proofWaterUrl: result.proofWaterUrl,
+          uin,
+          password,
+        });
+        toast('需要安全验证，请完成验证码', { icon: '🔒' });
+      } else if (result?.needNewDevice && result.jumpUrl) {
+        setNewDeviceState({
+          needNewDevice: true,
+          jumpUrl: result.jumpUrl,
+          newDevicePullQrCodeSig: result.newDevicePullQrCodeSig || '',
+          uin,
+          password,
+        });
+        toast('检测到新设备，请扫码验证', { icon: '📱' });
+      } else {
+        toast.success('密码登录请求已发送');
+      }
     } catch (error) {
       const msg = (error as Error).message;
       toast.error(`密码登录失败: ${msg}`);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const onCaptchaSubmit = async (uin: string, password: string, captchaData: CaptchaCallbackData) => {
+    setIsLoading(true);
+    setCaptchaVerifying(true);
+    try {
+      const passwordMd5 = CryptoJS.MD5(password).toString();
+      const result = await QQManager.captchaLogin(uin, passwordMd5, captchaData.ticket, captchaData.randstr, captchaData.sid);
+      if (result?.needNewDevice && result.jumpUrl) {
+        setCaptchaState(null);
+        setNewDeviceState({
+          needNewDevice: true,
+          jumpUrl: result.jumpUrl,
+          newDevicePullQrCodeSig: result.newDevicePullQrCodeSig || '',
+          uin,
+          password,
+        });
+        toast('检测到异常设备，请扫码验证', { icon: '📱' });
+      } else {
+        toast.success('验证码登录请求已发送');
+        setCaptchaState(null);
+      }
+    } catch (error) {
+      const msg = (error as Error).message;
+      toast.error(`验证码登录失败: ${msg}`);
+      setCaptchaState(null);
+    } finally {
+      setIsLoading(false);
+      setCaptchaVerifying(false);
+    }
+  };
+
+  const onCaptchaCancel = () => {
+    setCaptchaState(null);
+  };
+
+  const onNewDeviceVerified = async (token: string) => {
+    if (!newDeviceState) return;
+    setIsLoading(true);
+    try {
+      const passwordMd5 = CryptoJS.MD5(newDeviceState.password).toString();
+      // Use the str_nt_succ_token from QR verification as newDevicePullQrCodeSig for step:2
+      const sig = token || newDeviceState.newDevicePullQrCodeSig;
+      const result = await QQManager.newDeviceLogin(newDeviceState.uin, passwordMd5, sig);
+      if (result?.needNewDevice && result.jumpUrl) {
+        // 新设备验证后又触发了异常设备验证，更新 jumpUrl
+        setNewDeviceState({
+          needNewDevice: true,
+          jumpUrl: result.jumpUrl,
+          newDevicePullQrCodeSig: result.newDevicePullQrCodeSig || '',
+          uin: newDeviceState.uin,
+          password: newDeviceState.password,
+        });
+        toast('检测到异常设备，请继续扫码验证', { icon: '📱' });
+      } else {
+        toast.success('新设备验证登录请求已发送');
+        setNewDeviceState(null);
+      }
+    } catch (error) {
+      const msg = (error as Error).message;
+      toast.error(`新设备验证登录失败: ${msg}`);
+      setNewDeviceState(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const onNewDeviceCancel = () => {
+    setNewDeviceState(null);
   };
 
   const onUpdateQrCode = async () => {
@@ -249,7 +354,14 @@ export default function QQLoginPage () {
                   <PasswordLogin
                     isLoading={isLoading}
                     onSubmit={onPasswordSubmit}
+                    onCaptchaSubmit={onCaptchaSubmit}
+                    onNewDeviceVerified={onNewDeviceVerified}
                     qqList={qqList}
+                    captchaState={captchaState}
+                    captchaVerifying={captchaVerifying}
+                    newDeviceState={newDeviceState}
+                    onCaptchaCancel={onCaptchaCancel}
+                    onNewDeviceCancel={onNewDeviceCancel}
                   />
                 </Tab>
                 <Tab key='qrcode' title='扫码登录'>

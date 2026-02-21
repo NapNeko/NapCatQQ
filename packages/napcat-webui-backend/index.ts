@@ -194,9 +194,17 @@ export async function InitWebUi (logger: ILogWrapper, pathWrapper: NapCatPathWra
       }
 
       try {
-        const { result, message } = await WebUiDataRuntime.requestPasswordLogin(autoLoginAccount, quickPasswordMd5);
+        const { result, message, needCaptcha, needNewDevice } = await WebUiDataRuntime.requestPasswordLogin(autoLoginAccount, quickPasswordMd5);
         if (result) {
           console.log(`[NapCat] [WebUi] 自动密码回退登录成功: ${autoLoginAccount}`);
+          return;
+        }
+        if (needCaptcha) {
+          console.log(`[NapCat] [WebUi] 自动密码回退登录需要验证码，请在登录页面继续完成: ${autoLoginAccount}`);
+          return;
+        }
+        if (needNewDevice) {
+          console.log(`[NapCat] [WebUi] 自动密码回退登录需要新设备验证，请在登录页面继续完成: ${autoLoginAccount}`);
           return;
         }
         console.log(`[NapCat] [WebUi] 自动密码回退登录失败: ${message || '未知错误'}`);

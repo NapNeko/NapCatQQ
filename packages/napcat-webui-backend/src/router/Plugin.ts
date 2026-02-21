@@ -12,7 +12,8 @@ import {
   RegisterPluginManagerHandler,
   PluginConfigSSEHandler,
   PluginConfigChangeHandler,
-  ImportLocalPluginHandler
+  ImportLocalPluginHandler,
+  GetPluginIconHandler
 } from '@/napcat-webui-backend/src/api/Plugin';
 import {
   GetPluginStoreListHandler,
@@ -68,6 +69,7 @@ router.get('/Config/SSE', PluginConfigSSEHandler);
 router.post('/Config/Change', PluginConfigChangeHandler);
 router.post('/RegisterManager', RegisterPluginManagerHandler);
 router.post('/Import', upload.single('plugin'), ImportLocalPluginHandler);
+router.get('/Icon/:pluginId', GetPluginIconHandler);
 
 // 插件商店相关路由
 router.get('/Store/List', GetPluginStoreListHandler);

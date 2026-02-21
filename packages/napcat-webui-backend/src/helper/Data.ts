@@ -37,6 +37,12 @@ const LoginRuntime: LoginRuntimeType = {
     onPasswordLoginRequested: async () => {
       return { result: false, message: '密码登录功能未初始化' };
     },
+    onCaptchaLoginRequested: async () => {
+      return { result: false, message: '验证码登录功能未初始化' };
+    },
+    onNewDeviceLoginRequested: async () => {
+      return { result: false, message: '新设备登录功能未初始化' };
+    },
     onRestartProcessRequested: async () => {
       return { result: false, message: '重启功能未初始化' };
     },
@@ -147,6 +153,22 @@ export const WebUiDataRuntime = {
   requestPasswordLogin: function (uin: string, passwordMd5: string) {
     return LoginRuntime.NapCatHelper.onPasswordLoginRequested(uin, passwordMd5);
   } as LoginRuntimeType['NapCatHelper']['onPasswordLoginRequested'],
+
+  setCaptchaLoginCall (func: LoginRuntimeType['NapCatHelper']['onCaptchaLoginRequested']): void {
+    LoginRuntime.NapCatHelper.onCaptchaLoginRequested = func;
+  },
+
+  requestCaptchaLogin: function (uin: string, passwordMd5: string, ticket: string, randstr: string, sid: string) {
+    return LoginRuntime.NapCatHelper.onCaptchaLoginRequested(uin, passwordMd5, ticket, randstr, sid);
+  } as LoginRuntimeType['NapCatHelper']['onCaptchaLoginRequested'],
+
+  setNewDeviceLoginCall (func: LoginRuntimeType['NapCatHelper']['onNewDeviceLoginRequested']): void {
+    LoginRuntime.NapCatHelper.onNewDeviceLoginRequested = func;
+  },
+
+  requestNewDeviceLogin: function (uin: string, passwordMd5: string, newDevicePullQrCodeSig: string) {
+    return LoginRuntime.NapCatHelper.onNewDeviceLoginRequested(uin, passwordMd5, newDevicePullQrCodeSig);
+  } as LoginRuntimeType['NapCatHelper']['onNewDeviceLoginRequested'],
 
   setOnOB11ConfigChanged (func: LoginRuntimeType['NapCatHelper']['onOB11ConfigChanged']): void {
     LoginRuntime.NapCatHelper.onOB11ConfigChanged = func;

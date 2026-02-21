@@ -26,6 +26,8 @@ export interface PluginItem {
   homepage?: string;
   /** 仓库链接 */
   repository?: string;
+  /** 插件图标 URL（由后端返回） */
+  icon?: string;
 }
 
 /** 扩展页面信息 */

@@ -29,10 +29,11 @@ export interface PasswordLoginArgType {
   uin: string;
   passwordMd5: string;// passwMD5
   step: number;// 猜测是需要二次认证 参数 一次为0
-  newDeviceLoginSig: string;
-  proofWaterSig: string;
-  proofWaterRand: string;
-  proofWaterSid: string;
+  newDeviceLoginSig: Uint8Array;
+  proofWaterSig: Uint8Array;
+  proofWaterRand: Uint8Array;
+  proofWaterSid: Uint8Array;
+  unusualDeviceCheckSig: Uint8Array;
 }
 
 export interface LoginListItem {

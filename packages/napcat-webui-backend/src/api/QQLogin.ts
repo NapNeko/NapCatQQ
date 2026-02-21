@@ -1,4 +1,5 @@
 import { RequestHandler } from 'express';
+import https from 'https';
 
 import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
 import { WebUiConfig } from '@/napcat-webui-backend/index';
@@ -6,6 +7,37 @@ import { isEmpty } from '@/napcat-webui-backend/src/utils/check';
 import { sendError, sendSuccess } from '@/napcat-webui-backend/src/utils/response';
 import { Registry20Utils, MachineInfoUtils } from '@/napcat-webui-backend/src/utils/guid';
 import os from 'node:os';
+
+// oidb 新设备验证请求辅助函数
+function oidbRequest (uid: string, body: Record<string, unknown>): Promise<Record<string, unknown>> {
+  return new Promise((resolve, reject) => {
+    const postData = JSON.stringify(body);
+    const req = https.request({
+      hostname: 'oidb.tim.qq.com',
+      path: `/v3/oidbinterface/oidb_0xc9e_8?uid=${encodeURIComponent(uid)}&getqrcode=1&sdkappid=39998&actype=2`,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(postData),
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
+        'Accept': 'application/json, text/plain, */*',
+      },
+    }, (res) => {
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => {
+        try {
+          resolve(JSON.parse(data));
+        } catch {
+          reject(new Error('Failed to parse oidb response'));
+        }
+      });
+    });
+    req.on('error', reject);
+    req.write(postData);
+    req.end();
+  });
+}
 
 // 获取 Registry20 路径的辅助函数
 const getRegistryPath = () => {
@@ -171,8 +203,62 @@ export const QQPasswordLoginHandler: RequestHandler = async (req, res) => {
   }
 
   // 执行密码登录
-  const { result, message } = await WebUiDataRuntime.requestPasswordLogin(uin, passwordMd5);
+  const { result, message, needCaptcha, proofWaterUrl, needNewDevice, jumpUrl, newDevicePullQrCodeSig } = await WebUiDataRuntime.requestPasswordLogin(uin, passwordMd5);
   if (!result) {
+    if (needCaptcha && proofWaterUrl) {
+      return sendSuccess(res, { needCaptcha: true, proofWaterUrl });
+    }
+    if (needNewDevice && jumpUrl) {
+      return sendSuccess(res, { needNewDevice: true, jumpUrl, newDevicePullQrCodeSig });
+    }
+    return sendError(res, message);
+  }
+  return sendSuccess(res, null);
+};
+
+// 验证码登录（密码登录需要验证码时的第二步）
+export const QQCaptchaLoginHandler: RequestHandler = async (req, res) => {
+  const { uin, passwordMd5, ticket, randstr, sid } = req.body;
+  const isLogin = WebUiDataRuntime.getQQLoginStatus();
+  if (isLogin) {
+    return sendError(res, 'QQ Is Logined');
+  }
+  if (isEmpty(uin) || isEmpty(passwordMd5)) {
+    return sendError(res, 'uin or passwordMd5 is empty');
+  }
+  if (isEmpty(ticket) || isEmpty(randstr)) {
+    return sendError(res, 'captcha ticket or randstr is empty');
+  }
+
+  const { result, message, needNewDevice, jumpUrl, newDevicePullQrCodeSig: sig } = await WebUiDataRuntime.requestCaptchaLogin(uin, passwordMd5, ticket, randstr, sid || '');
+  if (!result) {
+    if (needNewDevice && jumpUrl) {
+      return sendSuccess(res, { needNewDevice: true, jumpUrl, newDevicePullQrCodeSig: sig });
+    }
+    return sendError(res, message);
+  }
+  return sendSuccess(res, null);
+};
+
+// 新设备验证登录（密码登录需要新设备验证时的第二步）
+export const QQNewDeviceLoginHandler: RequestHandler = async (req, res) => {
+  const { uin, passwordMd5, newDevicePullQrCodeSig } = req.body;
+  const isLogin = WebUiDataRuntime.getQQLoginStatus();
+  if (isLogin) {
+    return sendError(res, 'QQ Is Logined');
+  }
+  if (isEmpty(uin) || isEmpty(passwordMd5)) {
+    return sendError(res, 'uin or passwordMd5 is empty');
+  }
+  if (isEmpty(newDevicePullQrCodeSig)) {
+    return sendError(res, 'newDevicePullQrCodeSig is empty');
+  }
+
+  const { result, message, needNewDevice, jumpUrl, newDevicePullQrCodeSig: sig } = await WebUiDataRuntime.requestNewDeviceLogin(uin, passwordMd5, newDevicePullQrCodeSig);
+  if (!result) {
+    if (needNewDevice && jumpUrl) {
+      return sendSuccess(res, { needNewDevice: true, jumpUrl, newDevicePullQrCodeSig: sig });
+    }
     return sendError(res, message);
   }
   return sendSuccess(res, null);
@@ -409,6 +495,63 @@ export const QQResetLinuxDeviceIDHandler: RequestHandler = async (_, res) => {
     return sendSuccess(res, { message: 'Device ID reset successfully (machine-info deleted)' });
   } catch (e) {
     return sendError(res, `Failed to reset Device ID: ${(e as Error).message}`);
+  }
+};
+
+// ============================================================
+// OIDB 新设备 QR 验证
+// ============================================================
+
+// 获取新设备验证二维码 (通过 OIDB 接口)
+export const QQGetNewDeviceQRCodeHandler: RequestHandler = async (req, res) => {
+  const { uin, jumpUrl } = req.body;
+  if (!uin || !jumpUrl) {
+    return sendError(res, 'uin and jumpUrl are required');
+  }
+
+  // 从 jumpUrl 中提取参数
+  // jumpUrl 格式: https://accounts.qq.com/safe/verify?...&uin-token=xxx&sig=yyy
+  // sig -> str_dev_auth_token, uin-token -> str_uin_token
+  const url = new URL(jumpUrl);
+  const strDevAuthToken = url.searchParams.get('sig') || '';
+  const strUinToken = url.searchParams.get('uin-token') || '';
+
+  if (!strDevAuthToken || !strUinToken) {
+    return sendError(res, 'Failed to get new device QR code: unable to extract sig/uin-token from jumpUrl');
+  }
+
+  const body = {
+    str_dev_auth_token: strDevAuthToken,
+    uint32_flag: 1,
+    uint32_url_type: 0,
+    str_uin_token: strUinToken,
+    str_dev_type: 'Windows',
+    str_dev_name: os.hostname() || 'DESKTOP-NAPCAT',
+  };
+
+  const result = await oidbRequest(uin, body);
+  return sendSuccess(res, result);
+};
+
+// 轮询新设备验证二维码状态
+export const QQPollNewDeviceQRHandler: RequestHandler = async (req, res) => {
+  const { uin, bytesToken } = req.body;
+  if (!uin || !bytesToken) {
+    return sendError(res, 'uin and bytesToken are required');
+  }
+
+  try {
+    const body = {
+      uint32_flag: 0,
+      bytes_token: bytesToken, // base64 编码的 token
+    };
+
+    const result = await oidbRequest(uin, body);
+    // result 应包含 uint32_guarantee_status:
+    // 0 = 等待扫码, 3 = 已扫码, 1 = 已确认 (包含 str_nt_succ_token)
+    return sendSuccess(res, result);
+  } catch (e) {
+    return sendError(res, `Failed to poll QR status: ${(e as Error).message}`);
   }
 };
 

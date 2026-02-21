@@ -12,43 +12,18 @@ import { useState } from 'react';
 import key from '@/const/key';
 import { PluginItem } from '@/controllers/plugin_manager';
 
-/** 提取作者头像 URL */
-function getAuthorAvatar (homepage?: string, repository?: string): string | undefined {
-  // 1. 尝试从 repository 提取 GitHub 用户名
-  if (repository) {
-    try {
-      // 处理 git+https://github.com/... 或 https://github.com/...
-      const repoUrl = repository.replace(/^git\+/, '').replace(/\.git$/, '');
-      const url = new URL(repoUrl);
-      if (url.hostname === 'github.com' || url.hostname === 'www.github.com') {
-        const parts = url.pathname.split('/').filter(Boolean);
-        if (parts.length >= 1) {
-          return `https://github.com/${parts[0]}.png`;
-        }
-      }
-    } catch {
-      // 忽略解析错误
-    }
+function getPluginIconUrl (iconPath?: string): string | undefined {
+  if (!iconPath) return undefined;
+  try {
+    const raw = localStorage.getItem(key.token);
+    if (!raw) return iconPath;
+    const token = JSON.parse(raw);
+    const url = new URL(iconPath, window.location.origin);
+    url.searchParams.set('webui_token', token);
+    return url.pathname + url.search;
+  } catch {
+    return iconPath;
   }
-
-  // 2. 尝试从 homepage 提取
-  if (homepage) {
-    try {
-      const url = new URL(homepage);
-      if (url.hostname === 'github.com' || url.hostname === 'www.github.com') {
-        const parts = url.pathname.split('/').filter(Boolean);
-        if (parts.length >= 1) {
-          return `https://github.com/${parts[0]}.png`;
-        }
-      } else {
-        // 如果是自定义域名，尝试获取 favicon
-        return `https://api.iowen.cn/favicon/${url.hostname}.png`;
-      }
-    } catch {
-      // 忽略解析错误
-    }
-  }
-  return undefined;
 }
 
 export interface PluginDisplayCardProps {
@@ -66,15 +41,15 @@ const PluginDisplayCard: React.FC<PluginDisplayCardProps> = ({
   onConfig,
   hasConfig = false,
 }) => {
-  const { name, version, author, description, status, homepage, repository } = data;
+  const { name, version, author, description, status, icon } = data;
   const isEnabled = status === 'active';
   const [processing, setProcessing] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [backgroundImage] = useLocalStorage<string>(key.backgroundImage, '');
   const hasBackground = !!backgroundImage;
 
-  // 综合尝试提取头像，最后兜底使用 Vercel 风格头像
-  const avatarUrl = getAuthorAvatar(homepage, repository) || `https://avatar.vercel.sh/${encodeURIComponent(name)}`;
+  // 后端已处理 icon，前端只需拼接 token；无 icon 时兜底 Vercel 风格头像
+  const avatarUrl = getPluginIconUrl(icon) || `https://avatar.vercel.sh/${encodeURIComponent(name)}`;
 
   const handleToggle = () => {
     setProcessing(true);
