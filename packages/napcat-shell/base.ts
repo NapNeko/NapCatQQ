@@ -541,11 +541,7 @@ export async function NCoreInitShell () {
   // wrapper.node 加载后立刻启用 Bypass（可通过环境变量禁用）
   if (process.env['NAPCAT_DISABLE_BYPASS'] !== '1') {
     const bypassOptions = napcatConfig.bypass ?? {};
-    logger.logDebug('[NapCat] Bypass 配置:', bypassOptions);
-    const bypassEnabled = napi2nativeLoader.nativeExports.enableAllBypasses?.(bypassOptions);
-    if (bypassEnabled) {
-      logger.log('[NapCat] Napi2NativeLoader: 已启用Bypass');
-    }
+    napi2nativeLoader.nativeExports.enableAllBypasses?.(bypassOptions);
   } else {
     logger.log('[NapCat] Napi2NativeLoader: Bypass已通过环境变量禁用');
   }

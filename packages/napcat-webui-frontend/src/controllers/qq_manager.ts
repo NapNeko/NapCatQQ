@@ -141,11 +141,37 @@ export default class QQManager {
     const data = await serverRequest.post<ServerResponse<{
       str_url?: string;
       bytes_token?: string;
+      uint32_guarantee_status?: number;
+      ActionStatus?: string;
+      ErrorCode?: number;
+      ErrorInfo?: string;
     }>>('/QQLogin/GetNewDeviceQRCode', {
       uin,
       jumpUrl,
     });
-    return data.data.data;
+    const result = data.data.data;
+    if (result?.str_url) {
+      let bytesToken = result.bytes_token || '';
+      if (!bytesToken && result.str_url) {
+        // 只对 str_url 参数值做 base64 编码
+        try {
+          const urlObj = new URL(result.str_url);
+          const strUrlParam = urlObj.searchParams.get('str_url') || '';
+          bytesToken = strUrlParam ? btoa(strUrlParam) : '';
+        } catch {
+          bytesToken = '';
+        }
+      }
+      return {
+        str_url: result.str_url,
+        bytes_token: bytesToken,
+        uint32_guarantee_status: result.uint32_guarantee_status,
+        ActionStatus: result.ActionStatus,
+        ErrorCode: result.ErrorCode,
+        ErrorInfo: result.ErrorInfo,
+      };
+    }
+    return result;
   }
 
   public static async pollNewDeviceQR (uin: string, bytesToken: string) {

@@ -66,10 +66,11 @@ const NewDeviceVerify: React.FC<NewDeviceVerifyProps> = ({
     try {
       const result = await QQManager.getNewDeviceQRCode(uin, jumpUrl);
       if (!mountedRef.current) return;
-      if (result?.str_url && result?.bytes_token) {
+      if (result?.str_url) {
         setQrUrl(result.str_url);
         setStatus('waiting');
-        startPolling(result.bytes_token);
+        // bytes_token 用于轮询，如果 OIDB 未返回则用空字符串
+        startPolling(result.bytes_token || '');
       } else {
         setStatus('error');
         setErrorMsg('获取二维码失败，请重试');

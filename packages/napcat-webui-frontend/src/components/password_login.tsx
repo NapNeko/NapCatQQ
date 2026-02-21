@@ -52,14 +52,7 @@ const PasswordLogin: React.FC<PasswordLoginProps> = ({ onSubmit, onCaptchaSubmit
 
   return (
     <div className='flex flex-col gap-8'>
-      {newDeviceState?.needNewDevice && newDeviceState.jumpUrl ? (
-        <NewDeviceVerify
-          jumpUrl={newDeviceState.jumpUrl}
-          uin={newDeviceState.uin}
-          onVerified={(token) => onNewDeviceVerified?.(token)}
-          onCancel={onNewDeviceCancel}
-        />
-      ) : captchaState?.needCaptcha && captchaState.proofWaterUrl ? (
+      {captchaState?.needCaptcha && captchaState.proofWaterUrl ? (
         <div className='flex flex-col gap-4 items-center'>
           <p className='text-warning text-sm'>登录需要安全验证，请完成验证码</p>
           <TencentCaptchaModal
@@ -78,6 +71,13 @@ const PasswordLogin: React.FC<PasswordLoginProps> = ({ onSubmit, onCaptchaSubmit
             取消验证
           </Button>
         </div>
+      ) : newDeviceState?.needNewDevice && newDeviceState.jumpUrl ? (
+        <NewDeviceVerify
+          jumpUrl={newDeviceState.jumpUrl}
+          uin={newDeviceState.uin}
+          onVerified={(token) => onNewDeviceVerified?.(token)}
+          onCancel={onNewDeviceCancel}
+        />
       ) : (
         <>
           <div className='flex justify-center'>

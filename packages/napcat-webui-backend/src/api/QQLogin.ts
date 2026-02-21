@@ -509,37 +509,28 @@ export const QQGetNewDeviceQRCodeHandler: RequestHandler = async (req, res) => {
     return sendError(res, 'uin and jumpUrl are required');
   }
 
-  try {
-    // 从 jumpUrl 中提取 str_url 参数作为 str_dev_auth_token
-    let strDevAuthToken = '';
-    let strUinToken = '';
-    try {
-      const url = new URL(jumpUrl);
-      strDevAuthToken = url.searchParams.get('str_url') || '';
-      strUinToken = url.searchParams.get('str_uin_token') || '';
-    } catch {
-      // 如果 URL 解析失败，尝试正则提取
-      const strUrlMatch = jumpUrl.match(/str_url=([^&]*)/);
-      const uinTokenMatch = jumpUrl.match(/str_uin_token=([^&]*)/);
-      strDevAuthToken = strUrlMatch ? decodeURIComponent(strUrlMatch[1]) : '';
-      strUinToken = uinTokenMatch ? decodeURIComponent(uinTokenMatch[1]) : '';
-    }
+  // 从 jumpUrl 中提取参数
+  // jumpUrl 格式: https://accounts.qq.com/safe/verify?...&uin-token=xxx&sig=yyy
+  // sig -> str_dev_auth_token, uin-token -> str_uin_token
+  const url = new URL(jumpUrl);
+  const strDevAuthToken = url.searchParams.get('sig') || '';
+  const strUinToken = url.searchParams.get('uin-token') || '';
 
-    const body = {
-      str_dev_auth_token: strDevAuthToken,
-      uint32_flag: 1,
-      uint32_url_type: 0,
-      str_uin_token: strUinToken,
-      str_dev_type: 'Windows',
-      str_dev_name: os.hostname() || 'DESKTOP-NAPCAT',
-    };
-
-    const result = await oidbRequest(uin, body);
-    // result 应包含 str_url (二维码内容) 和 bytes_token 等
-    return sendSuccess(res, result);
-  } catch (e) {
-    return sendError(res, `Failed to get new device QR code: ${(e as Error).message}`);
+  if (!strDevAuthToken || !strUinToken) {
+    return sendError(res, 'Failed to get new device QR code: unable to extract sig/uin-token from jumpUrl');
   }
+
+  const body = {
+    str_dev_auth_token: strDevAuthToken,
+    uint32_flag: 1,
+    uint32_url_type: 0,
+    str_uin_token: strUinToken,
+    str_dev_type: 'Windows',
+    str_dev_name: os.hostname() || 'DESKTOP-NAPCAT',
+  };
+
+  const result = await oidbRequest(uin, body);
+  return sendSuccess(res, result);
 };
 
 // 轮询新设备验证二维码状态
