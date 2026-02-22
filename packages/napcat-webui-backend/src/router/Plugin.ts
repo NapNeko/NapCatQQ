@@ -68,7 +68,7 @@ router.post('/Config', SetPluginConfigHandler);
 router.get('/Config/SSE', PluginConfigSSEHandler);
 router.post('/Config/Change', PluginConfigChangeHandler);
 router.post('/RegisterManager', RegisterPluginManagerHandler);
-router.post('/Import', upload.single('plugin'), ImportLocalPluginHandler);
+// router.post('/Import', upload.single('plugin'), ImportLocalPluginHandler); // 禁用插件上传
 router.get('/Icon/:pluginId', GetPluginIconHandler);
 
 // 插件商店相关路由

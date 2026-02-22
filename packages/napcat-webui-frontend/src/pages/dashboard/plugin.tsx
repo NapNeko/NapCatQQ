@@ -182,6 +182,7 @@ export default function PluginPage () {
           >
             <IoMdRefresh size={24} />
           </Button>
+          {/* 禁用插件上传
           <Button
             className="bg-primary-100/50 hover:bg-primary-200/50 text-primary-700 backdrop-blur-md"
             radius='full'
@@ -197,6 +198,7 @@ export default function PluginPage () {
             className="hidden"
             onChange={handleFileChange}
           />
+          */}
         </div>
 
         {pluginManagerNotFound ? (
