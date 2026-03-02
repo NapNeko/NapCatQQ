@@ -21,7 +21,7 @@
         "inversify": "^7.10.4",
         "reflect-metadata": "^0.2.2",
         "@protobuf-ts/runtime": "^2.11.1",
-        "ajv": "^8.13.0",
+        "ajv": "^8.18.0",
         "@sinclair/typebox": "^0.34.38",
         "file-type": "^21.0.0",
         "compressing": "^1.10.1",

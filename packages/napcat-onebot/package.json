@@ -20,7 +20,7 @@
         "fast-xml-parser": "^4.3.6",
         "type-is": "^1.6.7",
         "on-finished": "^2.3.5",
-        "ajv": "^8.13.0",
+        "ajv": "^8.18.0",
         "@sinclair/typebox": "^0.34.38",
         "cors": "^2.8.5",
         "express": "^5.0.0",
