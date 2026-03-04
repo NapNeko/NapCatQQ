@@ -486,6 +486,7 @@ jobs:
           VERSION="${GITHUB_REF#refs/tags/}"
           HASH_REPO="NapNeko/napcat-release-hash"
 
+          gh auth setup-git
           gh repo clone "$HASH_REPO" hash-repo
 
           node .github/scripts/publish-release-hash.mjs \
