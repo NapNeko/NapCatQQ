@@ -50,11 +50,8 @@ const MAX_ENTRIES = 100;
 // 1. 计算哈希
 console.log(`Computing SHA512 for Shell: ${shellPath}`);
 const shellHash = sha512File(shellPath);
-console.log(`Shell SHA512: ${shellHash}`);
-
 console.log(`Computing SHA512 for Framework: ${frameworkPath}`);
 const frameworkHash = sha512File(frameworkPath);
-console.log(`Framework SHA512: ${frameworkHash}`);
 
 // 2. 读取现有 release.json，不存在则创建空数组
 let entries = [];
