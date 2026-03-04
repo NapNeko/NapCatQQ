@@ -9,3 +9,4 @@ export * from './packet';
 export * from './file';
 export * from './online';
 export * from './flash';
+export * from './database';

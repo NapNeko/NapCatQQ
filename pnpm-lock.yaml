@@ -101,6 +101,9 @@ importers:
       napcat-common:
         specifier: workspace:*
         version: link:../napcat-common
+      napcat-database:
+        specifier: workspace:*
+        version: link:../napcat-database
       napcat-image-size:
         specifier: workspace:*
         version: link:../napcat-image-size
@@ -113,6 +116,12 @@ importers:
       winston:
         specifier: ^3.17.0
         version: 3.18.3
+    devDependencies:
+      '@types/node':
+        specifier: ^22.0.1
+        version: 22.19.1
+
+  packages/napcat-database:
     devDependencies:
       '@types/node':
         specifier: ^22.0.1
@@ -148,6 +157,12 @@ importers:
       napcat-core:
         specifier: workspace:*
         version: link:../napcat-core
+      napcat-database:
+        specifier: workspace:*
+        version: link:../napcat-database
+      napcat-protobuf:
+        specifier: workspace:*
+        version: link:../napcat-protobuf
       napcat-qrcode:
         specifier: workspace:*
         version: link:../napcat-qrcode
@@ -347,6 +362,12 @@ importers:
       napcat-core:
         specifier: workspace:*
         version: link:../napcat-core
+      napcat-database:
+        specifier: workspace:*
+        version: link:../napcat-database
+      napcat-protobuf:
+        specifier: workspace:*
+        version: link:../napcat-protobuf
       napcat-qrcode:
         specifier: workspace:*
         version: link:../napcat-qrcode

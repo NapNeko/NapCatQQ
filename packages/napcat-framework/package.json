@@ -19,6 +19,8 @@
   "dependencies": {
     "napcat-core": "workspace:*",
     "napcat-common": "workspace:*",
+    "napcat-database": "workspace:*",
+    "napcat-protobuf": "workspace:*",
     "napcat-adapter": "workspace:*",
     "napcat-webui-backend": "workspace:*",
     "napcat-vite": "workspace:*",

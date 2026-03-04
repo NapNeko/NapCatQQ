@@ -1,38 +1,39 @@
 {
-    "name": "napcat-core",
-    "version": "0.0.1",
-    "private": true,
-    "type": "module",
-    "main": "index.ts",
-    "scripts": {
-        "typecheck": "tsc --noEmit --skipLibCheck -p tsconfig.json"
+  "name": "napcat-core",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit --skipLibCheck -p tsconfig.json"
+  },
+  "exports": {
+    ".": {
+      "import": "./index.ts"
     },
-    "exports": {
-        ".": {
-            "import": "./index.ts"
-        },
-        "./*": {
-            "import": "./*"
-        }
-    },
-    "dependencies": {
-        "winston": "^3.17.0",
-        "json5": "^2.2.3",
-        "inversify": "^7.10.4",
-        "reflect-metadata": "^0.2.2",
-        "@protobuf-ts/runtime": "^2.11.1",
-        "ajv": "^8.13.0",
-        "@sinclair/typebox": "^0.34.38",
-        "file-type": "^21.0.0",
-        "compressing": "^1.10.1",
-        "napcat-image-size": "workspace:*",
-        "napcat-common": "workspace:*",
-        "napcat-protobuf": "workspace:*"
-    },
-    "devDependencies": {
-        "@types/node": "^22.0.1"
-    },
-    "engines": {
-        "node": ">=18.0.0"
+    "./*": {
+      "import": "./*"
     }
+  },
+  "dependencies": {
+    "winston": "^3.17.0",
+    "json5": "^2.2.3",
+    "inversify": "^7.10.4",
+    "reflect-metadata": "^0.2.2",
+    "@protobuf-ts/runtime": "^2.11.1",
+    "ajv": "^8.13.0",
+    "@sinclair/typebox": "^0.34.38",
+    "file-type": "^21.0.0",
+    "compressing": "^1.10.1",
+    "napcat-image-size": "workspace:*",
+    "napcat-common": "workspace:*",
+    "napcat-database": "workspace:*",
+    "napcat-protobuf": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
 }

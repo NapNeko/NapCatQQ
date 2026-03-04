@@ -1,3 +1,4 @@
+import path from 'node:path';
 import { NapCatPathWrapper } from 'napcat-common/src/path';
 import { InitWebUi, WebUiConfig, webUiRuntimePort } from 'napcat-webui-backend/index';
 import { NapCatAdapterManager } from 'napcat-adapter';
@@ -12,6 +13,8 @@ import { proxiedListenerOf } from '@/napcat-core/helper/proxy-handler';
 import { statusHelperSubscription } from '@/napcat-core/helper/status';
 import { applyPendingUpdates } from '@/napcat-webui-backend/src/api/UpdateNapCat';
 import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
+import { NapProtoMsg } from 'napcat-protobuf';
+import { OidbSvcTrpcTcpBase, OidbSvcTrpcTcp0XCDE_2RespBody } from '@/napcat-core/packet/transformer/proto';
 
 // Framework ES入口文件
 export async function getWebUiUrl () {
@@ -61,6 +64,25 @@ export async function NCoreInitFramework (
   await nativePacketHandler.init(basicInfoWrapper.getFullQQVersion(), napcatConfig.o3HookMode === 1 ? true : false);
   // 在 init 之后注册监听器
 
+  // 登录前监听 OidbSvcTrpcTcp.0xcde_2 数据包，获取数据库 passphrase
+  let dbPassphrase: string | undefined;
+  nativePacketHandler.onCmd('OidbSvcTrpcTcp.0xcde_2', ({ type, hex_data }) => {
+    if (type !== 1) return; // 仅处理接收方向
+    try {
+      const raw = Buffer.from(hex_data, 'hex');
+      const base = new NapProtoMsg(OidbSvcTrpcTcpBase).decode(raw);
+      if (base.body && base.body.length > 0) {
+        const body = new NapProtoMsg(OidbSvcTrpcTcp0XCDE_2RespBody).decode(base.body);
+        if (body.inner?.value) {
+          dbPassphrase = body.inner.value;
+          logger.log('[NapCat] 已启用数据库辅助支持能力');
+        }
+      }
+    } catch (e) {
+      logger.logError('[NapCat] [0xCDE_2] 解析失败:', e);
+    }
+  });
+
   // 初始化 FFmpeg 服务
   await FFmpegService.init(pathWrapper.binaryPath, logger);
   // 直到登录成功后，执行下一步
@@ -89,12 +111,34 @@ export async function NCoreInitFramework (
   // await sleep(2500);
   // 初始化 NapCatFramework
   const loaderObject = new NapCatFramework(wrapper, session, logger, selfInfo, basicInfoWrapper, pathWrapper, nativePacketHandler, napi2nativeLoader);
+  // 将捕获的 passphrase 设置到 core 上，供 DatabaseApi 使用
+  if (dbPassphrase) {
+    loaderObject.core.dbPassphrase = dbPassphrase;
+  }
   await loaderObject.core.initCore();
 
   // 启动WebUi
   WebUiDataRuntime.setWorkingEnv(NapCatCoreWorkingEnv.Framework);
   WebUiDataRuntime.setQQDataPath(loaderObject.core.dataPath);
   InitWebUi(logger, pathWrapper, logSubscription, statusHelperSubscription).then().catch(e => logger.logError(e));
+
+  // // [测试代码 - 已禁用] 使用捕获的 passphrase 读取 nt_msg.db 的表信息
+  // if (dbPassphrase) {
+  //   const sqliteOk = await checkSqliteAvailable();
+  //   if (!sqliteOk) {
+  //     logger.logWarn('[NapCat] [Database] node:sqlite 不可用');
+  //   } else {
+  //     const ntDbDir = path.resolve(loaderObject.core.dataPath, selfInfo.uin, 'nt_qq', 'nt_db');
+  //     const ntMsgDbPath = path.resolve(ntDbDir, 'nt_msg.db');
+  //     try {
+  //       const result = loaderObject.core.apis.DatabaseApi.readDatabase('nt_msg.db');
+  //       if (result) logger.log('[NapCat] [Database] \n' + loaderObject.core.apis.DatabaseApi.formatResults([result]));
+  //     } catch (e) {
+  //       logger.logError('[NapCat] [Database] 读取失败:', e);
+  //     }
+  //   }
+  // }
+
   // 使用 NapCatAdapterManager 统一管理协议适配器
   const adapterManager = new NapCatAdapterManager(loaderObject.core, loaderObject.context, pathWrapper);
   await adapterManager.initAdapters();

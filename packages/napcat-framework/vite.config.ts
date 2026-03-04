@@ -11,7 +11,7 @@ const external = [
   'ws',
   'express',
 ];
-const nodeModules = [...builtinModules, builtinModules.map((m) => `node:${m}`)].flat();
+const nodeModules = [...builtinModules, builtinModules.map((m) => `node:${m}`), 'node:sqlite'].flat();
 const FrameworkBaseConfigPlugin: PluginOption[] = [
   autoIncludeTSPlugin({
     entries: [

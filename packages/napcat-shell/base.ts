@@ -32,6 +32,8 @@ import { sleep } from 'napcat-common/src/helper';
 import { FFmpegService } from '@/napcat-core/helper/ffmpeg/ffmpeg';
 import { NativePacketHandler } from 'napcat-core/packet/handler/client';
 import { Napi2NativeLoader } from 'napcat-core/packet/handler/napi2nativeLoader';
+import { NapProtoMsg } from 'napcat-protobuf';
+import { OidbSvcTrpcTcpBase, OidbSvcTrpcTcp0XCDE_2RespBody } from '@/napcat-core/packet/transformer/proto';
 import { loadNapcatConfig } from '@/napcat-core/helper/config';
 import { logSubscription, LogWrapper } from '@/napcat-core/helper/log';
 import { proxiedListenerOf } from '@/napcat-core/helper/proxy-handler';
@@ -597,6 +599,26 @@ export async function NCoreInitShell () {
   // wrapper.node 加载后再初始化 hook，按 schema 读取配置
   const napcatConfig = loadNapcatConfig(pathWrapper.configPath);
   await nativePacketHandler.init(basicInfoWrapper.getFullQQVersion(), napcatConfig.o3HookMode === 1 ? true : false);
+
+  // 登录前监听 OidbSvcTrpcTcp.0xcde_2 数据包，获取数据库 passphrase
+  let dbPassphrase: string | undefined;
+  nativePacketHandler.onCmd('OidbSvcTrpcTcp.0xcde_2', ({ type, hex_data }) => {
+    if (type !== 1) return; // 仅处理接收方向
+    try {
+      const raw = Buffer.from(hex_data, 'hex');
+      const base = new NapProtoMsg(OidbSvcTrpcTcpBase).decode(raw);
+      if (base.body && base.body.length > 0) {
+        const body = new NapProtoMsg(OidbSvcTrpcTcp0XCDE_2RespBody).decode(base.body);
+        if (body.inner?.value) {
+          dbPassphrase = body.inner.value;
+          logger.log('[NapCat] 已启用数据库辅助支持能力');
+        }
+      }
+    } catch (e) {
+      logger.logError('[NapCat] [0xCDE_2] 解析失败:', e);
+    }
+  });
+
   if (process.env['NAPCAT_ENABLE_VERBOSE_LOG'] === '1') {
     napi2nativeLoader.nativeExports.setVerbose?.(true);
   }
@@ -694,7 +716,25 @@ export async function NCoreInitShell () {
 
   logger.logDebug('本账号数据/缓存目录：', accountDataPath);
 
-  await new NapCatShell(
+  // // [测试代码 - 已禁用] 使用捕获的 passphrase 读取 nt_msg.db 的表信息
+  // if (dbPassphrase) {
+  //   const sqliteOk = await checkSqliteAvailable();
+  //   if (!sqliteOk) {
+  //     logger.logWarn('[NapCat] [Database] node:sqlite 不可用，跳过数据库读取');
+  //   } else {
+  //     const ntDbDir = path.resolve(dataPath, selfInfo.uin, 'nt_qq', 'nt_db');
+  //     const dbCacheDir = path.resolve(accountDataPath, 'decrypted_db');
+  //     const ntMsgDbPath = path.resolve(ntDbDir, 'nt_msg.db');
+  //     try {
+  //       const result = readSingleDatabase(ntMsgDbPath, Buffer.from(dbPassphrase), { cacheDir: dbCacheDir });
+  //       logger.log('[NapCat] [Database] 读取完成:\n' + formatScanResults([result]));
+  //     } catch (e) {
+  //       logger.logError('[NapCat] [Database] 读取失败:', e);
+  //     }
+  //   }
+  // }
+
+  const shell = new NapCatShell(
     wrapper,
     session,
     logger,
@@ -703,7 +743,12 @@ export async function NCoreInitShell () {
     pathWrapper,
     nativePacketHandler,
     napi2nativeLoader
-  ).InitNapCat();
+  );
+  // 将捕获的 passphrase 设置到 core 上，供 DatabaseApi 使用
+  if (dbPassphrase) {
+    shell.core.dbPassphrase = dbPassphrase;
+  }
+  await shell.InitNapCat();
 }
 
 export class NapCatShell {

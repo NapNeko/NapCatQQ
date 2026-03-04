@@ -8,6 +8,7 @@ import {
   NTQQWebApi,
   NTQQFlashApi,
   NTQQOnlineApi,
+  NTQQDatabaseApi,
 } from '@/napcat-core/apis';
 import { NTQQCollectionApi } from '@/napcat-core/apis/collection';
 import {
@@ -118,6 +119,8 @@ export class NapCatCore {
   selfInfo: SelfInfo;
   util: NodeQQNTWrapperUtil;
   configLoader: NapCatConfigLoader;
+  /** 数据库 passphrase，由 OidbSvcTrpcTcp.0xcde_2 包获取 */
+  dbPassphrase: string | undefined;
 
   // 通过构造器递过去的 runtime info 应该尽量少
   constructor (context: InstanceContext, selfInfo: SelfInfo) {
@@ -148,6 +151,7 @@ export class NapCatCore {
       GroupApi: new NTQQGroupApi(this.context, this),
       FlashApi: new NTQQFlashApi(this.context, this),
       OnlineApi: new NTQQOnlineApi(this.context, this),
+      DatabaseApi: new NTQQDatabaseApi(this.context, this),
     };
     container.bind(NapCatCore).toConstantValue(this);
     container.bind(TypedEventEmitter).toConstantValue(this.event);
@@ -330,4 +334,5 @@ export interface StableNTApiWrapper {
   GroupApi: NTQQGroupApi;
   FlashApi: NTQQFlashApi,
   OnlineApi: NTQQOnlineApi,
+  DatabaseApi: NTQQDatabaseApi,
 }

@@ -25,6 +25,7 @@ export * from './oidb/Oidb.0x929';
 export * from './oidb/Oidb.0xE37_1200';
 export * from './oidb/Oidb.0xE37_1700';
 export * from './oidb/Oidb.0XE37_800';
+export * from './oidb/Oidb.0xCDE_2';
 export * from './oidb/Oidb.0xEB7';
 export * from './oidb/Oidb.0xED3_1';
 export * from './oidb/Oidb.0XFE1_2';
