@@ -20,10 +20,12 @@ NapCat 目前正在尋找新的主要維護者，歡迎透過 email 聯繫 nanae
 
 可直接在 **WebUI 關於頁面** 取得入群密碼：
 
-- 點擊連結加入群聊【[NapCat家族群] 歡樂一家親】1090875633：https://qm.qq.com/q/VwpnklcXqo
-- 點擊連結加入群聊【[NapCat家族群] 皇親國戚】1059714215：https://qm.qq.com/q/gq18RH7o7S
-- 點擊連結加入群聊【[NapCat家族群] 相親相愛一家人】1085662710：https://qm.qq.com/q/XyiyGPqa42
-- 點擊連結加入群聊【[NapCat家族群] 開心家族】1085359803：https://qm.qq.com/q/E4nfkGD6oK
+- [NapCat家族一群](https://qm.qq.com/q/VwpnklcXqo) 群號(1090875633)
+- [NapCat家族二群](https://qm.qq.com/q/gq18RH7o7S) 群號(1059714215)
+- [NapCat家族三群](https://qm.qq.com/q/XyiyGPqa42) 群號(1085662710)
+- [NapCat家族四群](https://qm.qq.com/q/E4nfkGD6oK) 群號(1085359803)
+
+> 注意：入群密鑰只適用於最新的100個版本，且 NapCat 版本需 >= 4.17.31，如果錯誤請更新。
 
 ## 歡迎
 

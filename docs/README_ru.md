@@ -20,10 +20,12 @@ NapCat в настоящее время ищет нового основного
 
 Пароль для вступления можно получить прямо на **странице «О программе» в WebUI**：
 
-- [NapCat Family] Happy Family 1090875633：https://qm.qq.com/q/VwpnklcXqo
-- [NapCat Family] Royal Relatives 1059714215：https://qm.qq.com/q/gq18RH7o7S
-- [NapCat Family] Loving Family 1085662710：https://qm.qq.com/q/XyiyGPqa42
-- [NapCat Family] Joyful Family 1085359803：https://qm.qq.com/q/E4nfkGD6oK
+- [NapCat Family Group 1](https://qm.qq.com/q/VwpnklcXqo) Group ID(1090875633)
+- [NapCat Family Group 2](https://qm.qq.com/q/gq18RH7o7S) Group ID(1059714215)
+- [NapCat Family Group 3](https://qm.qq.com/q/XyiyGPqa42) Group ID(1085662710)
+- [NapCat Family Group 4](https://qm.qq.com/q/E4nfkGD6oK) Group ID(1085359803)
+
+> Примечание: Ключ для входа действителен только для последних 100 версий и требует версию NapCat >= 4.17.31. Если возникает ошибка, пожалуйста, обновитесь.
 
 ## Добро пожаловать
 

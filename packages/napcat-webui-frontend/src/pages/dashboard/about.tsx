@@ -3,10 +3,12 @@ import { Chip } from '@heroui/chip';
 import { Divider } from '@heroui/divider';
 import { Image } from '@heroui/image';
 import { Link } from '@heroui/link';
+import { Select, SelectItem } from '@heroui/select';
 import { Snippet } from '@heroui/snippet';
 import { Spinner } from '@heroui/spinner';
 import { Tooltip } from '@heroui/tooltip';
 import { useRequest } from 'ahooks';
+import { useEffect, useState } from 'react';
 import {
   BsCodeSlash,
   BsCpu,
@@ -45,13 +47,57 @@ function VersionInfo () {
 
 function NapCatFileHash () {
   const { data: hashData, loading: hashLoading, error: hashError } = useRequest(WebUIManager.GetNapCatFileHash);
+  const { data: loginList, loading: listLoading, error: listError } = useRequest(QQManager.getQQQuickLoginListNew);
   const { data: loginData, loading: loginLoading, error: loginError } = useRequest(QQManager.getQQLoginInfo);
 
-  const loading = hashLoading || loginLoading;
-  const error = hashError || loginError;
+  const [selectedUin, setSelectedUin] = useState<string | null>(null);
 
-  const password = hashData && loginData?.uin
-    ? CryptoJS.SHA512(hashData.hash + loginData.uin).toString()
+  const loading = hashLoading || listLoading || loginLoading;
+  const error = hashError || listError || loginError;
+
+  // 优先使用 getLoginList 返回的账号列表，回退到当前登录账号
+  const accounts: { uin: string; label: string; }[] = [];
+
+  // 添加 LoginList 账号
+  if (loginList && loginList.length > 0) {
+    loginList.forEach(item => {
+      accounts.push({
+        uin: item.uin,
+        label: item.nickName ? `${item.nickName}（${item.uin}）` : item.uin,
+      });
+    });
+  }
+
+  // 确保当前登录账号也在列表中
+  // 注意：API 返回的 uin 类型可能不一致（string/number），做一次转换比较
+  if (loginData?.uin) {
+    const isLoginAccountInList = accounts.some(acc => String(acc.uin) === String(loginData.uin));
+    if (!isLoginAccountInList) {
+      accounts.push({
+        uin: String(loginData.uin),
+        label: loginData.nick ? `${loginData.nick}（${loginData.uin}）` : String(loginData.uin)
+      });
+    }
+  }
+
+  // 自动选择第一个账号
+  useEffect(() => {
+    if (accounts.length > 0) {
+      const isSelectedValid = selectedUin && accounts.some(acc => acc.uin === selectedUin);
+
+      if (!isSelectedValid) {
+        if (loginData?.uin && accounts.some((acc) => acc.uin == loginData.uin)) {
+          setSelectedUin(loginData.uin);
+        } else {
+          setSelectedUin(accounts[0].uin);
+        }
+      }
+    }
+  }, [accounts, selectedUin, loginData]);
+
+  const currentAccount = accounts.find((acc) => acc.uin === selectedUin) || accounts[0];
+  const password = (hashData && currentAccount)
+    ? CryptoJS.SHA512(hashData.hash + currentAccount.uin).toString().substring(0, 7)
     : null;
 
   return (
@@ -62,17 +108,45 @@ function NapCatFileHash () {
       </div>
       {error ? (
         <Chip color="warning" variant="flat" size="sm">无法计算：{(error as Error).message}</Chip>
-      ) : loading ? null : password ? (
-        <Tooltip content="复制此值作为入群密码" placement="top">
-          <Snippet
-            size="sm"
-            variant="flat"
-            className="w-full text-xs"
-            symbol=""
-          >
-            {password}
-          </Snippet>
-        </Tooltip>
+      ) : loading ? null : accounts.length > 0 ? (
+        <div className="space-y-3">
+          {accounts.length > 1 && (
+            <Select
+              label="选择账号"
+              size="sm"
+              selectedKeys={selectedUin ? [selectedUin] : []}
+              onChange={(e) => setSelectedUin(e.target.value)}
+              className="max-w-full"
+            >
+              {accounts.map((acc) => (
+                <SelectItem key={acc.uin} textValue={acc.label}>
+                  {acc.label}
+                </SelectItem>
+              ))}
+            </Select>
+          )}
+
+          {password && (
+            <div className="space-y-1">
+              {accounts.length === 1 && <p className="text-xs text-default-500">{currentAccount.label}</p>}
+              <Tooltip content={`使用 ${currentAccount.label} 申请入群，以此值作为入群密码`} placement="top">
+                <Snippet
+                  size="sm"
+                  variant="flat"
+                  symbol=""
+                  codeString={password}
+                  className="w-full"
+                  classNames={{
+                    pre: 'text-xs break-all whitespace-pre-wrap font-mono',
+                  }}
+                >
+                  {password}
+                </Snippet>
+              </Tooltip>
+            </div>
+          )}
+          <p className="text-xs text-warning-500">入群密钥绑定QQ，使用对应QQ申请入群即可。</p>
+        </div>
       ) : null}
     </div>
   );
@@ -183,9 +257,6 @@ export default function AboutPage () {
             </CardHeader>
             <CardBody className="py-4 space-y-4">
               <NapCatFileHash />
-              <p className="text-xs text-default-400 px-1">
-                复制上方密码，作为加入 QQ 群的入群密码。
-              </p>
               <div className="flex flex-col gap-2">
                 {links.map((link, idx) => (
                   <Link

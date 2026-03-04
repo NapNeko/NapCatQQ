@@ -20,10 +20,12 @@ NapCat 当前正在寻找新的主要维护者，欢迎email到 nanaeonn@outlook
 
 可直接在 **WebUI 关于页面** 获取入群密码：
 
-- 点击链接加入群聊【[NapCat家族群] 欢乐一家亲】1090875633：https://qm.qq.com/q/VwpnklcXqo
-- 点击链接加入群聊【[NapCat家族群] 皇亲国戚】1059714215：https://qm.qq.com/q/gq18RH7o7S
-- 点击链接加入群聊【[NapCat家族群] 相亲相爱一家人】1085662710：https://qm.qq.com/q/XyiyGPqa42
-- 点击链接加入群聊【[NapCat家族群] 开心家族】1085359803 ：https://qm.qq.com/q/E4nfkGD6oK
+- [NapCat家族一群](https://qm.qq.com/q/VwpnklcXqo) 群号(1090875633)
+- [NapCat家族二群](https://qm.qq.com/q/gq18RH7o7S) 群号(1059714215)
+- [NapCat家族三群](https://qm.qq.com/q/XyiyGPqa42) 群号(1085662710)
+- [NapCat家族四群](https://qm.qq.com/q/E4nfkGD6oK) 群号(1085359803)
+
+> 注意：入群密钥只适合最新的100个版本，且 NapCat 版本需 >= 4.17.31，如果不符合请更新。
 
 ## 欢迎
 

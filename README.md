@@ -20,10 +20,12 @@ NapCat is currently looking for a new primary maintainer. Please email nanaeonn@
 
 You can get the join password directly from the **About** page of the WebUI.
 
-- [[NapCat Family] Happy Family] 1090875633: https://qm.qq.com/q/VwpnklcXqo
-- [[NapCat Family] Royal Relatives] 1059714215: https://qm.qq.com/q/gq18RH7o7S
-- [[NapCat Family] Loving Family] 1085662710: https://qm.qq.com/q/XyiyGPqa42
-- [[NapCat Family] Joyful Family] 1085359803: https://qm.qq.com/q/E4nfkGD6oK
+- [NapCat Family Group 1](https://qm.qq.com/q/VwpnklcXqo) Group ID(1090875633)
+- [NapCat Family Group 2](https://qm.qq.com/q/gq18RH7o7S) Group ID(1059714215)
+- [NapCat Family Group 3](https://qm.qq.com/q/XyiyGPqa42) Group ID(1085662710)
+- [NapCat Family Group 4](https://qm.qq.com/q/E4nfkGD6oK) Group ID(1085359803)
+
+> Note: The join key is only valid for the latest 100 versions, and requires NapCat version >= 4.17.31. If it fails, please update.
 
 ## Welcome
 
