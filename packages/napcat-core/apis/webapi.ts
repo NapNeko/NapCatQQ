@@ -330,10 +330,10 @@ export class NTQQWebApi {
     return (hash & 0x7FFFFFFF).toString();
   }
 
-  async getAlbumListByNTQQ (gc: string) {
+  async getAlbumListByNTQQ (gc: string, attach_info: string = '') {
     return await this.context.session.getAlbumService().getAlbumList({
       qun_id: gc,
-      attach_info: '',
+      attach_info,
       seq: 3331,
       request_time_line: {
         request_invoke_time: '0',
