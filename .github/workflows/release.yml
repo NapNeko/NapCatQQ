@@ -480,7 +480,7 @@ jobs:
 
       - name: Publish release hash
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ secrets.NAPCAT_BUILD }}
         run: |
           set -euo pipefail
           VERSION="${GITHUB_REF#refs/tags/}"
