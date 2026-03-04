@@ -14,7 +14,16 @@ _基于 NTQQ 实现的现代化协议端框架._
 ---
 
 ## 公告
-NapCat 当前正在寻找新的主要维护者，欢迎email到 nanaeonn@outlook.com ，在此期不会建立任何公开社区交流群，Napcat会保证此期间的正常更新。
+NapCat 当前正在寻找新的主要维护者，欢迎email到 nanaeonn@outlook.com 。
+
+### 交流群
+
+可直接在 **WebUI 关于页面** 获取入群密码：
+
+- 点击链接加入群聊【[NapCat家族群] 欢乐一家亲】1090875633：https://qm.qq.com/q/VwpnklcXqo
+- 点击链接加入群聊【[NapCat家族群] 皇亲国戚】1059714215：https://qm.qq.com/q/gq18RH7o7S
+- 点击链接加入群聊【[NapCat家族群] 相亲相爱一家人】1085662710：https://qm.qq.com/q/XyiyGPqa42
+- 点击链接加入群聊【[NapCat家族群] 开心家族】1085359803 ：https://qm.qq.com/q/E4nfkGD6oK
 
 ## 欢迎
 
@@ -49,6 +58,9 @@ NapCat 当前正在寻找新的主要维护者，欢迎email到 nanaeonn@outlook
 
 | DeepWiki | [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/NapNeko/NapCatQQ) |
 |:-:|:-:|
+
+| QQ 群 | [欢乐一家亲](https://qm.qq.com/q/VwpnklcXqo) | [皇亲国戚](https://qm.qq.com/q/gq18RH7o7S) | [相亲相爱一家人](https://qm.qq.com/q/XyiyGPqa42) | [开心家族](https://qm.qq.com/q/E4nfkGD6oK) |
+|:-:|:-:|:-:|:-:|:-:|
 
 > 请不要在其余社区提及本项目(包括其余协议端/相关应用端项目)引发争论，如有建议到达官方交流群讨论或PR。
 

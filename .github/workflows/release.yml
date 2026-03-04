@@ -478,3 +478,31 @@ jobs:
           --header 'Content-Type: application/json' \
           --data-binary @apifox_payload.json
 
+      - name: Publish release hash
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          set -euo pipefail
+          VERSION="${GITHUB_REF#refs/tags/}"
+          HASH_REPO="NapNeko/napcat-release-hash"
+          CLONE_URL="https://x-access-token:${GH_TOKEN}@github.com/${HASH_REPO}.git"
+
+          git clone "$CLONE_URL" hash-repo
+
+          node .github/scripts/publish-release-hash.mjs \
+            --version    "$VERSION" \
+            --shell      "./artifacts/NapCat.Shell/napcat.mjs" \
+            --framework  "./artifacts/NapCat.Framework/napcat.mjs" \
+            --file       "./hash-repo/release.json"
+
+          cd hash-repo
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add release.json
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: update release hash for ${VERSION}"
+            git push origin HEAD:main || git push origin HEAD:master
+          fi
+

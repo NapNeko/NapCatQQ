@@ -14,7 +14,16 @@ _NTQQをベースにした最新のプロトコル側フレームワーク._
 ---
 
 ## お知らせ
-NapCat は現在、新しいメインメンテナーを募集しています。nanaeonn@outlook.com までメールでご連絡ください。この期間中、公開コミュニティグループは設立しませんが、NapCat は通常通りの更新を保証します。
+NapCat は現在、新しいメインメンテナーを募集しています。nanaeonn@outlook.com までメールでご連絡ください。
+
+### コミュニティグループ
+
+**WebUI の「について」ページ** から参加パスワードを直接取得できます：
+
+- [NapCat Family] Happy Family 1090875633：https://qm.qq.com/q/VwpnklcXqo
+- [NapCat Family] Royal Relatives 1059714215：https://qm.qq.com/q/gq18RH7o7S
+- [NapCat Family] Loving Family 1085662710：https://qm.qq.com/q/XyiyGPqa42
+- [NapCat Family] Joyful Family 1085359803：https://qm.qq.com/q/E4nfkGD6oK
 
 ## ようこそ
 
@@ -49,6 +58,9 @@ NapCat は現在、新しいメインメンテナーを募集しています。n
 
 | DeepWiki | [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/NapNeko/NapCatQQ) |
 |:-:|:-:|
+
+| QQ グループ | [Happy Family](https://qm.qq.com/q/VwpnklcXqo) | [Royal Relatives](https://qm.qq.com/q/gq18RH7o7S) | [Loving Family](https://qm.qq.com/q/XyiyGPqa42) | [Joyful Family](https://qm.qq.com/q/E4nfkGD6oK) |
+|:-:|:-:|:-:|:-:|:-:|
 
 > 他のコミュニティでこのプロジェクト（他のプロトコル側/関連アプリケーション側のプロジェクトを含む）に言及して論争を引き起こさないでください。提案がある場合は、公式交流グループで議論するか、PRを提出してください。
 

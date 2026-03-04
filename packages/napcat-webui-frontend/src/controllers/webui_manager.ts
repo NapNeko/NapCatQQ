@@ -340,4 +340,11 @@ export default class WebUIManager {
     );
     return data.data;
   }
+
+  public static async GetNapCatFileHash () {
+    const { data } = await serverRequest.get<ServerResponse<{ hash: string; file: string; algorithm: string; }>>(
+      '/base/GetNapCatFileHash'
+    );
+    return data.data;
+  }
 }

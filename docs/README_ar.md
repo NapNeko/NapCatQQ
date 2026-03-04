@@ -16,7 +16,16 @@ _إطار عمل حديث على جانب البروتوكول مبني على N
 ---
 
 ## إعلان
-يبحث NapCat حالياً عن مشرف رئيسي جديد. يرجى التواصل عبر البريد الإلكتروني nanaeonn@outlook.com. لن يتم إنشاء مجموعات مجتمع عامة خلال هذه الفترة، لكن NapCat يضمن استمرار التحديثات المنتظمة.
+يبحث NapCat حالياً عن مشرف رئيسي جديد. يرجى التواصل عبر البريد الإلكتروني nanaeonn@outlook.com.
+
+### مجموعات المجتمع
+
+يمكنك الحصول على كلمة مرور الانضمام مباشرةً من **صفحة "حول" في WebUI**：
+
+- [NapCat Family] Happy Family 1090875633：https://qm.qq.com/q/VwpnklcXqo
+- [NapCat Family] Royal Relatives 1059714215：https://qm.qq.com/q/gq18RH7o7S
+- [NapCat Family] Loving Family 1085662710：https://qm.qq.com/q/XyiyGPqa42
+- [NapCat Family] Joyful Family 1085359803：https://qm.qq.com/q/E4nfkGD6oK
 
 ## مرحباً
 
@@ -51,6 +60,9 @@ _إطار عمل حديث على جانب البروتوكول مبني على N
 
 | DeepWiki | [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/NapNeko/NapCatQQ) |
 |:-:|:-:|
+
+| مجموعات QQ | [Happy Family](https://qm.qq.com/q/VwpnklcXqo) | [Royal Relatives](https://qm.qq.com/q/gq18RH7o7S) | [Loving Family](https://qm.qq.com/q/XyiyGPqa42) | [Joyful Family](https://qm.qq.com/q/E4nfkGD6oK) |
+|:-:|:-:|:-:|:-:|:-:|
 
 > يرجى عدم ذكر هذا المشروع في مجتمعات أخرى (بما في ذلك مشاريع البروتوكول الأخرى / مشاريع التطبيقات ذات الصلة) لتجنب الخلافات. إذا كانت لديك اقتراحات، يرجى مناقشتها في المجموعة الرسمية أو تقديم PR.
 

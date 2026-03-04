@@ -1,11 +1,14 @@
 import { RequestHandler } from 'express';
 import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
 
-import { sendSuccess } from '@/napcat-webui-backend/src/utils/response';
-import { WebUiConfig } from '@/napcat-webui-backend/index';
+import { sendSuccess, sendError } from '@/napcat-webui-backend/src/utils/response';
+import { WebUiConfig, webUiPathWrapper } from '@/napcat-webui-backend/index';
 import { getLatestTag, getAllTags, compareSemVer } from 'napcat-common/src/helper';
 import { getLatestActionArtifacts, getMirrorConfig } from '@/napcat-common/src/mirror';
 import { NapCatCoreWorkingEnv } from '@/napcat-webui-backend/src/types';
+import crypto from 'crypto';
+import fs from 'fs';
+import path from 'path';
 
 export const GetNapCatVersion: RequestHandler = (_, res) => {
   const data = WebUiDataRuntime.GetNapCatVersion();
@@ -177,4 +180,15 @@ export const SetThemeConfigHandler: RequestHandler = async (req, res) => {
 export const GetMirrorsHandler: RequestHandler = (_, res) => {
   const config = getMirrorConfig();
   sendSuccess(res, { mirrors: config.fileMirrors });
+};
+
+export const GetNapCatFileHashHandler: RequestHandler = (_, res) => {
+  try {
+    const filePath = path.join(webUiPathWrapper.binaryPath, 'napcat.mjs');
+    const fileBuffer = fs.readFileSync(filePath);
+    const hash = crypto.createHash('sha512').update(fileBuffer).digest('hex');
+    sendSuccess(res, { hash, file: 'napcat.mjs', algorithm: 'sha512' });
+  } catch (error) {
+    sendError(res, `无法计算 napcat.mjs 的 hash：${(error as Error).message}`);
+  }
 };

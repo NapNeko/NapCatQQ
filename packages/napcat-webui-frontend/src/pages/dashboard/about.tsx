@@ -3,7 +3,9 @@ import { Chip } from '@heroui/chip';
 import { Divider } from '@heroui/divider';
 import { Image } from '@heroui/image';
 import { Link } from '@heroui/link';
+import { Snippet } from '@heroui/snippet';
 import { Spinner } from '@heroui/spinner';
+import { Tooltip } from '@heroui/tooltip';
 import { useRequest } from 'ahooks';
 import {
   BsCodeSlash,
@@ -16,7 +18,10 @@ import {
 } from 'react-icons/bs';
 import { IoDocument, IoRocketSharp } from 'react-icons/io5';
 
+import CryptoJS from 'crypto-js';
+
 import logo from '@/assets/images/logo.png';
+import QQManager from '@/controllers/qq_manager';
 import WebUIManager from '@/controllers/webui_manager';
 
 function VersionInfo () {
@@ -34,6 +39,41 @@ function VersionInfo () {
           <Chip size="sm" color="primary" variant="flat">Core {data?.version}</Chip>
         </div>
       )}
+    </div>
+  );
+}
+
+function NapCatFileHash () {
+  const { data: hashData, loading: hashLoading, error: hashError } = useRequest(WebUIManager.GetNapCatFileHash);
+  const { data: loginData, loading: loginLoading, error: loginError } = useRequest(QQManager.getQQLoginInfo);
+
+  const loading = hashLoading || loginLoading;
+  const error = hashError || loginError;
+
+  const password = hashData && loginData?.uin
+    ? CryptoJS.SHA512(hashData.hash + loginData.uin).toString()
+    : null;
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2 text-sm font-medium text-default-700">
+        <span>入群密码</span>
+        {loading && <Spinner size="sm" color="default" />}
+      </div>
+      {error ? (
+        <Chip color="warning" variant="flat" size="sm">无法计算：{(error as Error).message}</Chip>
+      ) : loading ? null : password ? (
+        <Tooltip content="复制此值作为入群密码" placement="top">
+          <Snippet
+            size="sm"
+            variant="flat"
+            className="w-full text-xs"
+            symbol=""
+          >
+            {password}
+          </Snippet>
+        </Tooltip>
+      ) : null}
     </div>
   );
 }
@@ -69,8 +109,10 @@ export default function AboutPage () {
   const links = [
     { icon: <BsGithub />, name: 'GitHub', href: 'https://github.com/NapNeko/NapCatQQ' },
     { icon: <BsTelegram />, name: 'Telegram', href: 'https://t.me/napcatqq' },
-    { icon: <BsTencentQq />, name: 'QQ 群 1', href: 'https://qm.qq.com/q/F9cgs1N3Mc' },
-    { icon: <BsTencentQq />, name: 'QQ 群 2', href: 'https://qm.qq.com/q/hSt0u9PVn' },
+    { icon: <BsTencentQq />, name: '交流群 欢乐一家亲', href: 'https://qm.qq.com/q/VwpnklcXqo' },
+    { icon: <BsTencentQq />, name: '交流群 皇亲国戚', href: 'https://qm.qq.com/q/gq18RH7o7S' },
+    { icon: <BsTencentQq />, name: '交流群 相亲相爱一家人', href: 'https://qm.qq.com/q/XyiyGPqa42' },
+    { icon: <BsTencentQq />, name: '交流群 开心家族', href: 'https://qm.qq.com/q/E4nfkGD6oK' },
     { icon: <IoDocument />, name: '文档', href: 'https://napcat.napneko.icu/' },
   ];
 
@@ -139,7 +181,11 @@ export default function AboutPage () {
             <CardHeader className="pb-0 pt-4 px-4">
               <h2 className="text-lg font-bold">相关资源</h2>
             </CardHeader>
-            <CardBody className="py-4">
+            <CardBody className="py-4 space-y-4">
+              <NapCatFileHash />
+              <p className="text-xs text-default-400 px-1">
+                复制上方密码，作为加入 QQ 群的入群密码。
+              </p>
               <div className="flex flex-col gap-2">
                 {links.map((link, idx) => (
                   <Link

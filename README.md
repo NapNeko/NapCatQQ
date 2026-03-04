@@ -14,7 +14,16 @@ English | [简体中文](./docs/README_zh-CN.md) | [繁體中文](./docs/README_
 ---
 
 ## Notice
-NapCat is currently looking for a new primary maintainer. Please email nanaeonn@outlook.com if you are interested. No public community groups will be established during this period, but NapCat will continue to receive regular updates.
+NapCat is currently looking for a new primary maintainer. Please email nanaeonn@outlook.com if you are interested.
+
+### Community Groups
+
+You can get the join password directly from the **About** page of the WebUI.
+
+- [[NapCat Family] Happy Family] 1090875633: https://qm.qq.com/q/VwpnklcXqo
+- [[NapCat Family] Royal Relatives] 1059714215: https://qm.qq.com/q/gq18RH7o7S
+- [[NapCat Family] Loving Family] 1085662710: https://qm.qq.com/q/XyiyGPqa42
+- [[NapCat Family] Joyful Family] 1085359803: https://qm.qq.com/q/E4nfkGD6oK
 
 ## Welcome
 
@@ -49,6 +58,9 @@ Download the latest version from the [Release](https://github.com/NapNeko/NapCat
 
 | DeepWiki | [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/NapNeko/NapCatQQ) |
 |:-:|:-:|
+
+| QQ Groups | [Happy Family](https://qm.qq.com/q/VwpnklcXqo) | [Royal Relatives](https://qm.qq.com/q/gq18RH7o7S) | [Loving Family](https://qm.qq.com/q/XyiyGPqa42) | [Joyful Family](https://qm.qq.com/q/E4nfkGD6oK) |
+|:-:|:-:|:-:|:-:|:-:|
 
 > Please do not mention this project in other communities (including other protocol-side or related application-side projects) to avoid disputes. If you have suggestions, please discuss them in the official group or submit a PR.
 

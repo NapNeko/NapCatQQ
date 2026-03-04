@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { GetThemeConfigHandler, GetNapCatVersion, QQVersionHandler, SetThemeConfigHandler, getLatestTagHandler, getAllReleasesHandler, GetMirrorsHandler } from '../api/BaseInfo';
+import { GetThemeConfigHandler, GetNapCatVersion, QQVersionHandler, SetThemeConfigHandler, getLatestTagHandler, getAllReleasesHandler, GetMirrorsHandler, GetNapCatFileHashHandler } from '../api/BaseInfo';
 import { StatusRealTimeHandler } from '@/napcat-webui-backend/src/api/Status';
 import { GetProxyHandler } from '../api/Proxy';
 
@@ -14,5 +14,6 @@ router.get('/GetSysStatusRealTime', StatusRealTimeHandler);
 router.get('/proxy', GetProxyHandler);
 router.get('/Theme', GetThemeConfigHandler);
 router.post('/SetTheme', SetThemeConfigHandler);
+router.get('/GetNapCatFileHash', GetNapCatFileHashHandler);
 
 export { router as BaseRouter };
