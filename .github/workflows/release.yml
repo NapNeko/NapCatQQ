@@ -437,8 +437,9 @@ jobs:
           cat CHANGELOG.md
 
       - name: Create Release Draft and Upload Artifacts
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.ref_name }}
           name: NapCat ${{ github.ref_name }}
           token: ${{ secrets.GITHUB_TOKEN }}
           body_path: CHANGELOG.md
