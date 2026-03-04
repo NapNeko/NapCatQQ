@@ -716,24 +716,6 @@ export async function NCoreInitShell () {
 
   logger.logDebug('本账号数据/缓存目录：', accountDataPath);
 
-  // // [测试代码 - 已禁用] 使用捕获的 passphrase 读取 nt_msg.db 的表信息
-  // if (dbPassphrase) {
-  //   const sqliteOk = await checkSqliteAvailable();
-  //   if (!sqliteOk) {
-  //     logger.logWarn('[NapCat] [Database] node:sqlite 不可用，跳过数据库读取');
-  //   } else {
-  //     const ntDbDir = path.resolve(dataPath, selfInfo.uin, 'nt_qq', 'nt_db');
-  //     const dbCacheDir = path.resolve(accountDataPath, 'decrypted_db');
-  //     const ntMsgDbPath = path.resolve(ntDbDir, 'nt_msg.db');
-  //     try {
-  //       const result = readSingleDatabase(ntMsgDbPath, Buffer.from(dbPassphrase), { cacheDir: dbCacheDir });
-  //       logger.log('[NapCat] [Database] 读取完成:\n' + formatScanResults([result]));
-  //     } catch (e) {
-  //       logger.logError('[NapCat] [Database] 读取失败:', e);
-  //     }
-  //   }
-  // }
-
   const shell = new NapCatShell(
     wrapper,
     session,
@@ -780,6 +762,23 @@ export class NapCatShell {
 
   async InitNapCat () {
     await this.core.initCore();
+
+    // 测试 DatabaseApi
+    if (this.core.dbPassphrase) {
+      const dbApi = this.core.apis.DatabaseApi;
+      const sqliteOk = await dbApi.isSqliteAvailable();
+      if (sqliteOk) {
+        try {
+          const result = dbApi.readDatabase('nt_msg.db');
+          if (result) {
+            this.context.logger.log('[NapCat] [Database] nt_msg.db:\n' + dbApi.formatResults([result]));
+          }
+        } catch (e) {
+          this.context.logger.logError('[NapCat] [Database] 读取失败:', e);
+        }
+      }
+    }
+
     // 监听下线通知并同步到 WebUI
     this.core.event.on('KickedOffLine', (tips: string) => {
       WebUiDataRuntime.setQQLoginError(tips);

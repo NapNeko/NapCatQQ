@@ -2,6 +2,9 @@ export { deriveKeys, type DerivedKeys } from './crypto';
 export { decryptDatabase, decryptDatabaseFile, isEncryptedNTDB } from './decrypt';
 export {
   checkSqliteAvailable,
+  DatabaseHandle,
+  openDatabase,
+  decryptAndOpen,
   listTablesFromBuffer,
   listTablesFromFile,
   readSingleDatabase,

@@ -5,6 +5,7 @@ import { decryptDatabase, decryptDatabaseFile, isEncryptedNTDB } from './decrypt
 
 type DatabaseSyncType = import('node:sqlite').DatabaseSync;
 type DatabaseSyncCtor = new (path: string, options?: { readOnly?: boolean; }) => DatabaseSyncType;
+type SQLInputValue = import('node:sqlite').SQLInputValue;
 
 let _DatabaseSync: DatabaseSyncCtor | null = null;
 let _sqliteChecked = false;
@@ -36,6 +37,165 @@ function getDatabaseSync (): DatabaseSyncCtor {
 export async function checkSqliteAvailable (): Promise<boolean> {
   const ctor = await loadSqlite();
   return ctor !== null;
+}
+
+// ======================== 数据库连接管理 ========================
+
+/** 数据库连接句柄，封装 DatabaseSync 实例 */
+export class DatabaseHandle {
+  private db: DatabaseSyncType;
+  private _closed = false;
+  readonly filePath: string;
+  readonly readOnly: boolean;
+
+  constructor (filePath: string, readOnly = false) {
+    const DB = getDatabaseSync();
+    this.db = new DB(filePath, { readOnly });
+    this.filePath = filePath;
+    this.readOnly = readOnly;
+  }
+
+  /** 数据库是否已关闭 */
+  get closed (): boolean {
+    return this._closed;
+  }
+
+  private ensureOpen (): void {
+    if (this._closed) throw new Error('数据库已关闭');
+  }
+
+  /**
+   * 执行 SELECT 查询，返回所有结果行
+   * @param sql    SQL 语句
+   * @param params 绑定参数 (位置参数数组 或 命名参数对象)
+   */
+  query<T = Record<string, unknown>> (sql: string, params?: SQLInputValue[] | Record<string, SQLInputValue>): T[] {
+    this.ensureOpen();
+    const stmt = this.db.prepare(sql);
+    if (params) {
+      if (Array.isArray(params)) {
+        return stmt.all(...params) as T[];
+      }
+      return stmt.all(params) as T[];
+    }
+    return stmt.all() as T[];
+  }
+
+  /**
+   * 执行 SELECT 查询，仅返回第一行
+   * @param sql    SQL 语句
+   * @param params 绑定参数
+   */
+  queryOne<T = Record<string, unknown>> (sql: string, params?: SQLInputValue[] | Record<string, SQLInputValue>): T | undefined {
+    this.ensureOpen();
+    const stmt = this.db.prepare(sql);
+    if (params) {
+      if (Array.isArray(params)) {
+        return stmt.get(...params) as T | undefined;
+      }
+      return stmt.get(params) as T | undefined;
+    }
+    return stmt.get() as T | undefined;
+  }
+
+  /**
+   * 执行非查询 SQL (INSERT/UPDATE/DELETE/CREATE 等)
+   * @param sql    SQL 语句
+   * @param params 绑定参数
+   * @returns      受影响的行数信息
+   */
+  execute (sql: string, params?: SQLInputValue[] | Record<string, SQLInputValue>): { changes: number | bigint; lastInsertRowid: number | bigint; } {
+    this.ensureOpen();
+    const stmt = this.db.prepare(sql);
+    if (params) {
+      if (Array.isArray(params)) {
+        return stmt.run(...params);
+      }
+      return stmt.run(params);
+    }
+    return stmt.run();
+  }
+
+  /** 列出所有表的信息 */
+  listTables (): TableInfo[] {
+    this.ensureOpen();
+    return extractTablesInfo(this.db);
+  }
+
+  /** 获取指定表的列信息 */
+  getTableColumns (tableName: string): ColumnInfo[] {
+    this.ensureOpen();
+    const cols = this.db.prepare(`PRAGMA table_info([${tableName}])`).all() as {
+      cid: number; name: string; type: string; notnull: number; pk: number;
+    }[];
+    return cols.map(col => ({
+      cid: col.cid,
+      name: col.name,
+      type: col.type,
+      notnull: col.notnull === 1,
+      pk: col.pk === 1,
+    }));
+  }
+
+  /** 获取表的行数 */
+  getRowCount (tableName: string): number {
+    this.ensureOpen();
+    const cnt = this.db.prepare(`SELECT count(*) as cnt FROM [${tableName}]`).get() as { cnt: number; } | undefined;
+    return cnt?.cnt ?? 0;
+  }
+
+  /** 关闭数据库连接 */
+  close (): void {
+    if (!this._closed) {
+      this.db.close();
+      this._closed = true;
+    }
+  }
+}
+
+/**
+ * 打开一个已解密的 SQLite 数据库文件
+ * @param filePath  解密后的 .db 文件路径
+ * @param readOnly  是否以只读模式打开 (默认 true)
+ */
+export function openDatabase (filePath: string, readOnly = true): DatabaseHandle {
+  return new DatabaseHandle(filePath, readOnly);
+}
+
+/**
+ * 解密并打开一个加密的 NTQQ 数据库
+ * @param dbPath     加密数据库路径
+ * @param passphrase 密钥口令
+ * @param cacheDir   解密缓存目录 (可选)
+ * @param readOnly   是否只读 (默认 true)
+ */
+export function decryptAndOpen (
+  dbPath: string,
+  passphrase: Buffer,
+  cacheDir?: string,
+  readOnly = true
+): DatabaseHandle {
+  const filename = path.basename(dbPath);
+
+  if (cacheDir) {
+    const cachedPath = path.join(cacheDir, filename);
+    // 已存在缓存直接打开
+    if (fs.existsSync(cachedPath)) {
+      return new DatabaseHandle(cachedPath, readOnly);
+    }
+    fs.mkdirSync(cacheDir, { recursive: true });
+    const outPath = decryptDatabaseFile(dbPath, passphrase, cachedPath);
+    if (!outPath) throw new Error(`解密失败: ${dbPath}`);
+    return new DatabaseHandle(outPath, readOnly);
+  }
+
+  // 无缓存目录: 解密到临时文件
+  const tmpPath = path.join(os.tmpdir(), `napcat_db_${Date.now()}_${Math.random().toString(36).slice(2)}.db`);
+  const fileData = fs.readFileSync(dbPath);
+  const decryptedBuf = decryptDatabase(fileData, passphrase);
+  if (!decryptedBuf) throw new Error(`解密失败: ${dbPath}`);
+  fs.writeFileSync(tmpPath, decryptedBuf);
+  return new DatabaseHandle(tmpPath, readOnly);
 }
 
 /** 单个数据库表信息 */
