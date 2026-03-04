@@ -67,8 +67,10 @@ export function decryptDatabase (fileData: Buffer, passphrase: Buffer): Buffer |
       decrypted.copy(output, 16);
       // 修正 page_size 字段 (offset 16-17, big-endian)
       output.writeUInt16BE(PAGE_SIZE, 16);
-      // 清零 reserved space 标志 (offset 20)
-      output[20] = 0;
+      // 保留原始 reserved-bytes-per-page 值 (byte 20)
+      // NTQQ SQLCipher 使用 reserved=80 用于 B-tree 布局 (usable=4016)
+      // 即使加密保留区 (IV+HMAC) 实际只有 48 字节
+      // 清零会导致 SQLite 误判溢出指针，报 "database disk image is malformed"
       offset = PAGE_SIZE;
     } else {
       decrypted.copy(output, offset);
