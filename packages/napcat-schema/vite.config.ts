@@ -9,7 +9,7 @@ const external = [
   'express',
   'electron'
 ];
-const nodeModules = [...builtinModules, builtinModules.map((m) => `node:${m}`)].flat();
+const nodeModules = [...builtinModules, builtinModules.map((m) => `node:${m}`), 'node:sqlite'].flat();
 
 export default defineConfig({
   resolve: {
