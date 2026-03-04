@@ -3,7 +3,7 @@ import store from 'napcat-common/src/store';
 import type { WebUiCredentialJson, WebUiCredentialInnerJson } from '@/napcat-webui-backend/src/types';
 export class AuthHelper {
   private static readonly secretKey = process.env['NAPCAT_WEBUI_JWT_SECRET_KEY'] || Math.random().toString(36).slice(2);
-  private static readonly ONE_HOUR_SECONDS = 3600;
+  private static readonly MAX_CREDENTIAL_VALID_SECONDS = 3600;
 
   public static getSecretKey (): string {
     return AuthHelper.secretKey;
@@ -62,13 +62,9 @@ export class AuthHelper {
     }
 
     const currentTimeSeconds = Math.floor(Date.now() / 1000);
-    const rawCreatedTime = Number(credentialJson.Data.CreatedTime);
-    // note: 旧版本可能写入毫秒时间戳，转换
-    const createdTimeSeconds = rawCreatedTime > 1e12
-      ? Math.floor(rawCreatedTime / 1000)
-      : Math.floor(rawCreatedTime);
+    const createdTimeSeconds = Math.floor(Number(credentialJson.Data.CreatedTime));
     const timeDifferenceSeconds = currentTimeSeconds - createdTimeSeconds;
-    const isWithinOneHour = timeDifferenceSeconds >= 0 && timeDifferenceSeconds <= AuthHelper.ONE_HOUR_SECONDS;
+    const isWithinOneHour = timeDifferenceSeconds >= 0 && timeDifferenceSeconds <= AuthHelper.MAX_CREDENTIAL_VALID_SECONDS;
     return isWithinOneHour && credentialJson.Data.HashEncoded === AuthHelper.generatePasswordHash(token);
   }
 
