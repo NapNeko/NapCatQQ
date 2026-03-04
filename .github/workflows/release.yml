@@ -435,7 +435,7 @@ jobs:
           echo "=== generated release note ==="
           cat CHANGELOG.md
 
-      - name: Create Release Draft and Upload Artifacts
+      - name: Create Release and Upload Artifacts
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
@@ -447,7 +447,7 @@ jobs:
             NapCat.Framework.zip
             NapCat.Shell.zip
             NapCat.Shell.Windows.OneKey.zip
-          draft: true
+          draft: false
 
       
       - name: Update apifox
