@@ -9,8 +9,8 @@ on:
 permissions: write-all
 
 env:
-  OPENROUTER_API_URL: https://91vip.futureppo.top/v1/chat/completions
-  OPENROUTER_MODEL: "deepseek-v3.2-chat"
+  OPENAI_API_URL: https://openrouter.ai/api/v1/chat/completions
+  OPENAI_MODEL: "stepfun/step-3.5-flash:free"
   RELEASE_NAME: "NapCat"
 
 jobs:
@@ -218,11 +218,11 @@ jobs:
             [ -d NapCat.Shell.Windows.Node ] && (cd NapCat.Shell.Windows.Node && zip -qr ../../NapCat.Shell.Windows.Node.zip .)
             cd ..
 
-      - name: Generate release note via OpenRouter
+      - name: Generate release note
         env:
           OPENAI_KEY: ${{ secrets.OPENAI_KEY }}
-          OPENROUTER_API_URL: ${{ env.OPENROUTER_API_URL }}
-          OPENROUTER_MODEL: ${{ env.OPENROUTER_MODEL }}
+          OPENAI_API_URL: ${{ env.OPENAI_API_URL }}
+          OPENAI_MODEL: ${{ env.OPENAI_MODEL }}
           GITHUB_OWNER: "NapNeko"   # 替换成你的 repo owner
           GITHUB_REPO: "NapCatQQ"   # 替换成你的 repo 名
         run: |
@@ -395,20 +395,19 @@ jobs:
           BODY=$(jq -n \
             --arg system "$SYSTEM_PROMPT" \
             --arg user "$USER_CONTENT" \
-            --arg model "$OPENROUTER_MODEL" \
+            --arg model "$OPENAI_MODEL" \
             '{model: $model, messages:[{role:"system", content:$system},{role:"user", content:$user}], temperature:0.2, max_tokens:5000}')
 
-          echo "=== OpenRouter request body ==="
+          echo "=== request body ==="
           echo "$BODY" | jq .
 
-          # 调用 OpenRouter
-          if RESPONSE=$(curl -s -X POST "$OPENROUTER_API_URL" \
+          if RESPONSE=$(curl -s -X POST "$OPENAI_API_URL" \
             -H "Authorization: Bearer $OPENAI_KEY" \
             -H "Content-Type: application/json" \
             -d "$BODY"); then
             echo "=== raw response ==="
             echo "$RESPONSE"  
-            echo "=== OpenRouter raw response ==="
+            echo "=== parsed response ==="
             if echo "$RESPONSE" | jq . >/dev/null 2>&1; then
               echo "$RESPONSE" | jq .
             else
@@ -419,7 +418,7 @@ jobs:
             RELEASE_BODY=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // .choices[0].text // ""' 2>/dev/null || echo "")
 
             if [ -z "$RELEASE_BODY" ]; then
-              echo "❌ OpenRouter failed to generate release note, using default.md"
+              echo "❌ LLM failed to generate release note, using default.md"
               # 替换默认模板中的版本占位符
               sed "s/{VERSION}/$CURRENT_TAG/g" .github/prompt/default.md > CHANGELOG.md
             else
