@@ -3,6 +3,7 @@ import store from 'napcat-common/src/store';
 import type { WebUiCredentialJson, WebUiCredentialInnerJson } from '@/napcat-webui-backend/src/types';
 export class AuthHelper {
   private static readonly secretKey = process.env['NAPCAT_WEBUI_JWT_SECRET_KEY'] || Math.random().toString(36).slice(2);
+  private static readonly ONE_HOUR_SECONDS = 3600;
 
   public static getSecretKey (): string {
     return AuthHelper.secretKey;
@@ -15,7 +16,8 @@ export class AuthHelper {
      */
   public static signCredential (hash: string): WebUiCredentialJson {
     const innerJson: WebUiCredentialInnerJson = {
-      CreatedTime: Date.now(),
+      // 统一使用秒级时间戳，避免与校验逻辑出现单位不一致
+      CreatedTime: Math.floor(Date.now() / 1000),
       HashEncoded: hash,
     };
     const jsonString = JSON.stringify(innerJson);
@@ -59,10 +61,15 @@ export class AuthHelper {
       return false;
     }
 
-    const currentTime = Date.now() / 1000;
-    const createdTime = credentialJson.Data.CreatedTime;
-    const timeDifference = currentTime - createdTime;
-    return timeDifference <= 3600 && credentialJson.Data.HashEncoded === AuthHelper.generatePasswordHash(token);
+    const currentTimeSeconds = Math.floor(Date.now() / 1000);
+    const rawCreatedTime = Number(credentialJson.Data.CreatedTime);
+    // note: 旧版本可能写入毫秒时间戳，转换
+    const createdTimeSeconds = rawCreatedTime > 1e12
+      ? Math.floor(rawCreatedTime / 1000)
+      : Math.floor(rawCreatedTime);
+    const timeDifferenceSeconds = currentTimeSeconds - createdTimeSeconds;
+    const isWithinOneHour = timeDifferenceSeconds >= 0 && timeDifferenceSeconds <= AuthHelper.ONE_HOUR_SECONDS;
+    return isWithinOneHour && credentialJson.Data.HashEncoded === AuthHelper.generatePasswordHash(token);
   }
 
   /**
