@@ -69,11 +69,12 @@ const SideBar: React.FC<SideBarProps> = (props) => {
       >
         <motion.div className='w-64 flex flex-col items-stretch h-full transition-transform duration-300 ease-in-out z-30 relative float-right p-4'>
           <div className='flex items-center justify-start gap-3 px-2 my-8 ml-2'>
-            <div className="h-5 w-1 bg-primary rounded-full shadow-sm" />
+            <div className='h-5 w-1 bg-primary rounded-full shadow-sm' />
             <div className={clsx(
-              "text-xl font-bold tracking-wide select-none",
+              'text-xl font-bold tracking-wide select-none',
               hasBackground ? 'text-white' : 'text-default-900 dark:text-white'
-            )}>
+            )}
+            >
               NapCat
             </div>
           </div>

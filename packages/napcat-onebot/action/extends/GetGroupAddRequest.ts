@@ -37,8 +37,8 @@ export default class GetGroupAddRequest extends OneBotAction<void, ReturnType> {
       group_name: '群名称',
       checked: false,
       actor: 0,
-      requester_nick: '请求者'
-    }
+      requester_nick: '请求者',
+    },
   ];
 
   async _handle (): Promise<ReturnType> {

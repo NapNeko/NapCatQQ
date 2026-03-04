@@ -26,12 +26,13 @@ export class GetGroupSystemMsg extends OneBotAction<GetGroupSystemMsgPayload, Ge
   override actionDescription = '获取群系统消息';
   override actionTags = ['系统接口'];
   override payloadExample = {
-    count: 50
+    count: 50,
   };
+
   override returnExample = {
     invited_requests: [],
     InvitedRequest: [],
-    join_requests: []
+    join_requests: [],
   };
 
   async _handle (params: GetGroupSystemMsgPayload): Promise<GetGroupSystemMsgReturn> {

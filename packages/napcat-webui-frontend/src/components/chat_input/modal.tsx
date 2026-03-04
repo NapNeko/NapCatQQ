@@ -19,18 +19,20 @@ export default function ChatInputModal ({ children }: ChatInputModalProps) {
 
   return (
     <>
-      {children ? children(onOpen) : (
-        <Button
-          onPress={onOpen}
-          color='primary'
-          radius='full'
-          variant='flat'
-          size='sm'
-          className="bg-primary/10 text-primary"
-        >
-          构造消息
-        </Button>
-      )}
+      {children
+        ? children(onOpen)
+        : (
+          <Button
+            onPress={onOpen}
+            color='primary'
+            radius='full'
+            variant='flat'
+            size='sm'
+            className='bg-primary/10 text-primary'
+          >
+            构造消息
+          </Button>
+        )}
       <Modal
         size='4xl'
         scrollBehavior='inside'

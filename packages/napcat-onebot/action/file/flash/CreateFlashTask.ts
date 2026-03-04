@@ -26,10 +26,11 @@ export class CreateFlashTask extends OneBotAction<CreateFlashTaskPayload, any> {
   override actionTags = ['文件扩展'];
   override payloadExample = {
     files: 'C:\\test.jpg',
-    name: 'test_task'
+    name: 'test_task',
   };
+
   override returnExample = {
-    task_id: 'task_123'
+    task_id: 'task_123',
   };
 
   async _handle (payload: CreateFlashTaskPayload) {

@@ -33,7 +33,7 @@ const AddButton: React.FC<AddButtonProps> = (props) => {
     >
       <DropdownTrigger>
         <Button
-          className="bg-default-100/50 hover:bg-default-200/50 text-default-700 backdrop-blur-md"
+          className='bg-default-100/50 hover:bg-default-200/50 text-default-700 backdrop-blur-md'
           startContent={<IoAddCircleOutline className='text-2xl' />}
         >
           新建

@@ -33,7 +33,7 @@ export class NTQQFileApi {
       'http://ss.xingzhige.com/music_card/rkey',
       'https://secret-service.bietiaop.com/rkeys',
     ],
-      this.context.logger
+    this.context.logger
     );
   }
 

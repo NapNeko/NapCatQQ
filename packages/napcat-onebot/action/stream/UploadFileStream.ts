@@ -78,15 +78,17 @@ export class UploadFileStream extends OneBotAction<UploadFileStreamPayload, Stre
     chunk_data: 'SGVsbG8gV29ybGQ=',
     chunk_index: 0,
     total_chunks: 1,
-    file_size: 11
+    file_size: 11,
   };
+
   override returnExample = {
     type: 'stream',
     stream_id: 'uuid-1234-5678',
     status: 'chunk_received',
     received_chunks: 1,
-    total_chunks: 1
+    total_chunks: 1,
   };
+
   override useStream = true;
 
   private static streams = new Map<string, StreamState>();

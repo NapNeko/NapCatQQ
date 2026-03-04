@@ -22,11 +22,13 @@ export class SetMsgEmojiLike extends OneBotAction<PayloadType, ReturnType> {
   override payloadExample = {
     message_id: 12345,
     emoji_id: '123',
-    set: true
+    set: true,
   };
+
   override returnExample = {
-    result: true
+    result: true,
   };
+
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
 

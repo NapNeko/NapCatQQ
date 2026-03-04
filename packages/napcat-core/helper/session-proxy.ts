@@ -6,13 +6,13 @@ import { NTEventWrapper } from './event';
  * 创建 Service 方法的代理
  * 拦截所有方法调用，通过 EventWrapper 进行调用
  */
-function createServiceMethodProxy<S extends keyof ServiceNamingMapping>(
+function createServiceMethodProxy<S extends keyof ServiceNamingMapping> (
   serviceName: S,
   originalService: ServiceNamingMapping[S],
   eventWrapper: NTEventWrapper
 ): ServiceNamingMapping[S] {
   return new Proxy(originalService as object, {
-    get(target, prop, receiver) {
+    get (target, prop, receiver) {
       const originalValue = Reflect.get(target, prop, receiver);
 
       // 如果不是函数，直接返回原始值
@@ -50,7 +50,7 @@ function createServiceMethodProxy<S extends keyof ServiceNamingMapping>(
  * 第一层：拦截 getXXXService 方法
  * 第二层：拦截 Service 上的具体方法调用
  */
-export function createSessionProxy(
+export function createSessionProxy (
   session: NodeIQQNTWrapperSession,
   eventWrapper: NTEventWrapper
 ): NodeIQQNTWrapperSession {
@@ -58,7 +58,7 @@ export function createSessionProxy(
   const serviceProxyCache = new Map<string, unknown>();
 
   return new Proxy(session, {
-    get(target, prop, receiver) {
+    get (target, prop, receiver) {
       const propName = prop as string;
 
       // 检查是否是 getXXXService 方法
@@ -105,7 +105,7 @@ export function createSessionProxy(
 /**
  * 检查 Service 名称是否在已知的映射中
  */
-function isKnownService(serviceName: string): serviceName is keyof ServiceNamingMapping {
+function isKnownService (serviceName: string): serviceName is keyof ServiceNamingMapping {
   const knownServices: string[] = [
     'NodeIKernelAvatarService',
     'NodeIKernelBuddyService',
@@ -132,7 +132,7 @@ function isKnownService(serviceName: string): serviceName is keyof ServiceNaming
  * 创建带有 EventWrapper 集成的 InstanceContext
  * 这是推荐的使用方式，在创建 context 时自动代理 session
  */
-export function createProxiedSession(
+export function createProxiedSession (
   session: NodeIQQNTWrapperSession,
   eventWrapper: NTEventWrapper
 ): NodeIQQNTWrapperSession {

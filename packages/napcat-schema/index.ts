@@ -75,15 +75,15 @@ const BaseResponseSchema: JsonObject = {
     stream: {
       type: 'string',
       description: '流式响应',
-      enum: ['stream-action', 'normal-action']
-    }
+      enum: ['stream-action', 'normal-action'],
+    },
   },
-  required: ['status', 'retcode']
+  required: ['status', 'retcode'],
 };
 
 const EmptyDataSchema: JsonObject = {
   description: '无数据',
-  type: 'null'
+  type: 'null',
 };
 
 const DEFAULT_SUCCESS_EXAMPLE_VALUE = {
@@ -92,7 +92,7 @@ const DEFAULT_SUCCESS_EXAMPLE_VALUE = {
   data: {},
   message: '',
   wording: '',
-  stream: 'normal-action'
+  stream: 'normal-action',
 } as const;
 
 const DEFAULT_ERROR_EXAMPLE_DEFINITIONS = ActionExamples.Common.errors;
@@ -287,7 +287,7 @@ function sanitizeSchemaForOpenAPI<T> (schema: T): T {
             ...new Set(currentType
               .filter((t): t is string => typeof t === 'string')
               .map(t => (t === 'void' || t === 'undefined') ? 'null' : t)
-              .concat('null'))
+              .concat('null')),
           ];
           next['type'] = normalizedTypes.length === 1 ? normalizedTypes[0] : normalizedTypes;
         } else if (!('anyOf' in next) && !('oneOf' in next) && !('allOf' in next) && !('$ref' in next)) {
@@ -298,18 +298,18 @@ function sanitizeSchemaForOpenAPI<T> (schema: T): T {
 
       // 兜底：仅有描述/元信息但缺少 type 时，补 object，避免严格校验失败
       if (
-        !('type' in next)
-        && !('$ref' in next)
-        && !('anyOf' in next)
-        && !('oneOf' in next)
-        && !('allOf' in next)
-        && !('enum' in next)
-        && !('properties' in next)
-        && !('items' in next)
+        !('type' in next) &&
+        !('$ref' in next) &&
+        !('anyOf' in next) &&
+        !('oneOf' in next) &&
+        !('allOf' in next) &&
+        !('enum' in next) &&
+        !('properties' in next) &&
+        !('items' in next)
       ) {
         const schemaMetaKeys = [
           'description', 'title', 'default', 'examples', 'example',
-          'deprecated', 'readOnly', 'writeOnly', 'x-schema-id'
+          'deprecated', 'readOnly', 'writeOnly', 'x-schema-id',
         ];
 
         if (schemaMetaKeys.some(key => key in next)) {
@@ -338,7 +338,7 @@ function registerSchemasFromModule (
   source: Record<string, unknown>,
   sourceName: string
 ) {
-  const components = ((openapi['components'] as JsonObject)['schemas'] as JsonObject);
+  const components = (openapi['components'] as JsonObject)['schemas'] as JsonObject;
   let registeredCount = 0;
   let duplicatedCount = 0;
 
@@ -396,9 +396,9 @@ function replaceComponentInlineSchemasWithRefs (openapi: JsonObject) {
       const schemaId = obj['x-schema-id'];
 
       if (
-        typeof schemaId === 'string'
-        && schemaId !== ownerSchemaId
-        && availableSchemaIds.has(schemaId)
+        typeof schemaId === 'string' &&
+        schemaId !== ownerSchemaId &&
+        availableSchemaIds.has(schemaId)
       ) {
         replacedCount += 1;
         return { $ref: `#/components/schemas/${schemaId}` };
@@ -490,7 +490,7 @@ export function initSchemas () {
       tags: action.actionTags,
       payloadExample: action.payloadExample,
       returnExample: action.returnExample,
-      errorExamples: action.errorExamples
+      errorExamples: action.errorExamples,
     };
   });
 
@@ -509,7 +509,7 @@ export function initSchemas () {
       tags: action.actionTags,
       payloadExample: action.payloadExample,
       returnExample: action.returnExample,
-      errorExamples: action.errorExamples
+      errorExamples: action.errorExamples,
     };
   });
 }
@@ -522,8 +522,8 @@ function createOpenAPIDocument (): Record<string, unknown> {
   const componentExamples: Record<string, unknown> = {
     [SUCCESS_DEFAULT_EXAMPLE_KEY]: {
       summary: '成功响应',
-      value: DEFAULT_SUCCESS_EXAMPLE_VALUE
-    }
+      value: DEFAULT_SUCCESS_EXAMPLE_VALUE,
+    },
   };
 
   DEFAULT_ERROR_EXAMPLE_DEFINITIONS.forEach(error => {
@@ -535,8 +535,8 @@ function createOpenAPIDocument (): Record<string, unknown> {
         data: null,
         message: error.description,
         wording: error.description,
-        stream: 'normal-action'
-      }
+        stream: 'normal-action',
+      },
     };
   });
 
@@ -545,27 +545,27 @@ function createOpenAPIDocument (): Record<string, unknown> {
     info: {
       title: 'NapCat OneBot 11 HTTP API',
       description: 'NapCatOneBot11 HTTP POST 接口文档',
-      version: napCatVersion
+      version: napCatVersion,
     },
     tags: [
       { name: '消息接口', description: '发送、删除、获取消息相关接口' },
       { name: '群组接口', description: '群组管理、成员管理相关接口' },
       { name: '用户接口', description: '好友管理、个人信息相关接口' },
       { name: '系统接口', description: '状态获取、重启、缓存清理相关接口' },
-      { name: '文件接口', description: '文件上传下载、预览相关接口' }
+      { name: '文件接口', description: '文件上传下载、预览相关接口' },
     ],
     paths: {} as Record<string, unknown>,
     components: {
       schemas: {
         BaseResponse: BaseResponseSchema,
-        EmptyData: EmptyDataSchema
+        EmptyData: EmptyDataSchema,
       },
       examples: componentExamples,
       responses: {},
-      securitySchemes: {}
+      securitySchemes: {},
     },
     servers: [],
-    security: []
+    security: [],
   };
 }
 
@@ -582,9 +582,9 @@ function buildResponseExamples (schemas: ActionSchemaInfo): Record<string, unkno
           data: successData,
           message: '',
           wording: '',
-          stream: 'normal-action'
-        }
-      }
+          stream: 'normal-action',
+        },
+      },
   };
 
   if (schemas.errorExamples) {
@@ -600,15 +600,15 @@ function buildResponseExamples (schemas: ActionSchemaInfo): Record<string, unkno
             data: null,
             message: error.description,
             wording: error.description,
-            stream: 'normal-action'
-          }
+            stream: 'normal-action',
+          },
         };
     });
     return examples;
   }
 
   examples['Generic_Error'] = {
-    $ref: '#/components/examples/Error_1400'
+    $ref: '#/components/examples/Error_1400',
   };
 
   return examples;
@@ -645,14 +645,14 @@ function appendActionPaths (openapi: Record<string, unknown>) {
               examples: {
                 Default: {
                   summary: '默认请求示例',
-                  value: schemas.payloadExample || {}
-                }
-              }
-            }
-          }
+                  value: schemas.payloadExample || {},
+                },
+              },
+            },
+          },
         },
         responses: {
-          '200': {
+          200: {
             description: '业务响应',
             content: {
               'application/json': {
@@ -665,19 +665,19 @@ function appendActionPaths (openapi: Record<string, unknown>) {
                       properties: {
                         data: {
                           ...(typeof cleanReturn === 'object' && cleanReturn ? cleanReturn : {}),
-                          description: '业务数据'
-                        }
-                      }
-                    }
-                  ]
+                          description: '业务数据',
+                        },
+                      },
+                    },
+                  ],
                 },
-                examples: buildResponseExamples(schemas)
-              }
-            }
-          }
+                examples: buildResponseExamples(schemas),
+              },
+            },
+          },
         },
-        security: []
-      }
+        security: [],
+      },
     };
   }
 }

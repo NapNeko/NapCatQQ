@@ -22,8 +22,9 @@ export default class SetGroupRemark extends OneBotAction<PayloadType, ReturnType
   override actionTags = ['群组扩展'];
   override payloadExample = {
     group_id: '123456',
-    remark: '测试群备注'
+    remark: '测试群备注',
   };
+
   override returnExample = null;
 
   async _handle (payload: PayloadType): Promise<ReturnType> {

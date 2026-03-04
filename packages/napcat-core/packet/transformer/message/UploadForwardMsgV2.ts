@@ -14,7 +14,7 @@ class UploadForwardMsgV2 extends PacketTransformer<typeof proto.SendLongMsgResp>
       actionCommand: item.actionCommand,
       actionData: {
         msgBody: this.msgBuilder.buildFakeMsg(selfUid, item.actionMsg),
-      }
+      },
     }));
     const longMsgResultData = new NapProtoMsg(proto.LongMsgResult).encode(
       {

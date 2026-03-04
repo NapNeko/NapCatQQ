@@ -29,19 +29,22 @@ const SystemStatusItem: React.FC<SystemStatusItemProps> = ({
     <div
       className={clsx(
         'py-1.5 text-sm transition-colors',
-        size === 'lg' ? 'col-span-2' : 'col-span-1 flex justify-between items-center',
+        size === 'lg' ? 'col-span-2' : 'col-span-1 flex justify-between items-center'
       )}
     >
       <div className={clsx(
         'w-24 font-medium',
         hasBackground ? 'text-white/90' : 'text-default-600 dark:text-gray-300'
-      )}>{title}</div>
+      )}
+      >{title}
+      </div>
       <div className={clsx(
         'font-mono text-xs',
         hasBackground ? 'text-white/80' : 'text-default-500'
-      )}>
+      )}
+      >
         {value}
-        {unit && <span className="ml-0.5 opacity-70">{unit}</span>}
+        {unit && <span className='ml-0.5 opacity-70'>{unit}</span>}
       </div>
     </div>
   );
@@ -70,7 +73,8 @@ const SystemStatusDisplay: React.FC<SystemStatusDisplayProps> = ({ data }) => {
     <Card className={clsx(
       'backdrop-blur-sm border border-white/40 dark:border-white/10 shadow-sm col-span-1 lg:col-span-2 relative overflow-hidden',
       hasBackground ? 'bg-white/10 dark:bg-black/10' : 'bg-white/60 dark:bg-black/40'
-    )}>
+    )}
+    >
       <div className='absolute h-full right-0 top-0'>
         <Image
           src={bkg}
@@ -87,7 +91,8 @@ const SystemStatusDisplay: React.FC<SystemStatusDisplayProps> = ({ data }) => {
           <h2 className={clsx(
             'text-lg font-semibold flex items-center gap-2 mb-2',
             hasBackground ? 'text-white drop-shadow-sm' : 'text-default-700 dark:text-gray-200'
-          )}>
+          )}
+          >
             <GiCpu className='text-xl opacity-80' />
             <span>CPU</span>
           </h2>
@@ -111,7 +116,8 @@ const SystemStatusDisplay: React.FC<SystemStatusDisplayProps> = ({ data }) => {
           <h2 className={clsx(
             'text-lg font-semibold flex items-center gap-2 mb-2 mt-4',
             hasBackground ? 'text-white drop-shadow-sm' : 'text-default-700 dark:text-gray-200'
-          )}>
+          )}
+          >
             <BiSolidMemoryCard className='text-xl opacity-80' />
             <span>内存</span>
           </h2>

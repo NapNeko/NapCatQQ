@@ -28,8 +28,8 @@ export class GetFriendWithCategory extends OneBotAction<void, ReturnType> {
       categoryId: 1,
       categoryName: '我的好友',
       categoryMbCount: 1,
-      buddyList: []
-    }
+      buddyList: [],
+    },
   ];
 
   async _handle () {

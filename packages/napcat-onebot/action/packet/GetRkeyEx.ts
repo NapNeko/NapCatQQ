@@ -23,8 +23,8 @@ export class GetRkeyEx extends GetPacketStatusDepends<void, GetRkeyExReturn> {
       type: 'private',
       rkey: 'rkey_123',
       created_at: 1734567890,
-      ttl: 3600
-    }
+      ttl: 3600,
+    },
   ];
 
   async _handle () {

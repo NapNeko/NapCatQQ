@@ -145,7 +145,7 @@ export class GoCQHTTPGetForwardMsgAction extends OneBotAction<PayloadType, Retur
 
     if (rootMsg) {
       // 5. 获取消息内容
-      const data = await this.core.apis.MsgApi.getMsgHistory(rootMsg.Peer, rootMsg.MsgId, 1);//getMsgsIncludeSelf
+      const data = await this.core.apis.MsgApi.getMsgHistory(rootMsg.Peer, rootMsg.MsgId, 1);// getMsgsIncludeSelf
 
       if (data && data.result === 0 && data.msgList.length > 0) {
         const singleMsg = data.msgList[0];

@@ -15,9 +15,9 @@ export class GetRkey extends GetPacketStatusDepends<void, ReturnType> {
   override payloadExample = {};
   override returnExample = [
     {
-      "key": "rkey_value",
-      "expired": 1734567890
-    }
+      key: 'rkey_value',
+      expired: 1734567890,
+    },
   ];
 
   async _handle () {

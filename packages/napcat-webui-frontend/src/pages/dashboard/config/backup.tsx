@@ -35,7 +35,6 @@ const handleImportConfig = async (event: React.ChangeEvent<HTMLInputElement>) =>
     } else {
       toast.error(`配置导入失败: ${result.data?.message || '未知错误'}`);
     }
-
   } catch (error) {
     const msg = (error as Error).message;
     toast.error(`导入配置失败: ${msg}`);
@@ -88,26 +87,26 @@ const BackupConfigCard: React.FC = () => {
         <div className='flex flex-wrap gap-3'>
           <Button
             isIconOnly
-            className="bg-primary hover:bg-primary/90 text-white"
+            className='bg-primary hover:bg-primary/90 text-white'
             radius='full'
             onPress={handleExportConfig}
-            title="导出配置"
+            title='导出配置'
           >
             <LuDownload size={20} />
           </Button>
-          <label className="cursor-pointer">
+          <label className='cursor-pointer'>
             <input
-              type="file"
-              accept=".zip"
+              type='file'
+              accept='.zip'
               onChange={handleImportConfig}
-              className="hidden"
+              className='hidden'
             />
             <Button
               isIconOnly
-              className="bg-primary hover:bg-primary/90 text-white"
+              className='bg-primary hover:bg-primary/90 text-white'
               radius='full'
-              as="span"
-              title="导入配置"
+              as='span'
+              title='导入配置'
             >
               <LuUpload size={20} />
             </Button>

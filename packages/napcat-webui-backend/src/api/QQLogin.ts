@@ -20,7 +20,7 @@ function oidbRequest (uid: string, body: Record<string, unknown>): Promise<Recor
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(postData),
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
-        'Accept': 'application/json, text/plain, */*',
+        Accept: 'application/json, text/plain, */*',
       },
     }, (res) => {
       let data = '';
@@ -554,5 +554,3 @@ export const QQPollNewDeviceQRHandler: RequestHandler = async (req, res) => {
     return sendError(res, `Failed to poll QR status: ${(e as Error).message}`);
   }
 };
-
-

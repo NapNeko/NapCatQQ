@@ -164,8 +164,6 @@ export class NTQQWebApi {
     imgWidth: number = 540,
     imgHeight: number = 300
   ) {
-
-
     const cookieObject = await this.core.apis.UserApi.getCookies('qun.qq.com');
 
     try {
@@ -477,10 +475,10 @@ export class NTQQWebApi {
     const client_key = Date.now() * 1000;
     return await this.context.session.getAlbumService().doQunComment(
       random_seq, {
-      map_info: [],
-      map_bytes_info: [],
-      map_user_account: [],
-    },
+        map_info: [],
+        map_bytes_info: [],
+        map_user_account: [],
+      },
       qunId,
       2,
       createAlbumMediaFeed(uin, albumId, lloc),
@@ -511,13 +509,13 @@ export class NTQQWebApi {
     const uin = this.core.selfInfo.uin || '10001';
     return await this.context.session.getAlbumService().doQunLike(
       random_seq, {
-      map_info: [],
-      map_bytes_info: [],
-      map_user_account: [],
-    }, {
-      id,
-      status: 1,
-    },
+        map_info: [],
+        map_bytes_info: [],
+        map_user_account: [],
+      }, {
+        id,
+        status: 1,
+      },
       createAlbumFeedPublish(qunId, uin, albumId, lloc)
     );
   }

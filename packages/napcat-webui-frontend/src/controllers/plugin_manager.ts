@@ -184,7 +184,7 @@ export default class PluginManager {
    */
   public static async getPluginConfig (id: string): Promise<PluginConfigResponse> {
     const { data } = await serverRequest.get<ServerResponse<PluginConfigResponse>>('/Plugin/Config', {
-      params: { id }
+      params: { id },
     });
     return data.data;
   }
@@ -218,7 +218,7 @@ export default class PluginManager {
       sessionId,
       key,
       value,
-      currentConfig
+      currentConfig,
     });
   }
 

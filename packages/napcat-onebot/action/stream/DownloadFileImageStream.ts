@@ -20,11 +20,13 @@ export class DownloadFileImageStream extends BaseDownloadStream<DownloadFileImag
   override actionSummary = '下载图片文件流';
   override actionTags = ['流式传输扩展'];
   override payloadExample = {
-    file: 'image_file_id'
+    file: 'image_file_id',
   };
+
   override returnExample = {
-    file: 'temp_image_path'
+    file: 'temp_image_path',
   };
+
   override payloadSchema = DownloadFileImageStreamPayloadSchema;
   override returnSchema = Type.Any({ description: '下载结果 (流式)' });
   override useStream = true;

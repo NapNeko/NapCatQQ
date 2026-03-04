@@ -10,8 +10,9 @@ export class CleanStreamTempFile extends OneBotAction<void, void> {
   override actionTags = ['流式传输扩展'];
   override payloadExample = {};
   override returnExample = {
-    message: 'success'
+    message: 'success',
   };
+
   override payloadSchema = Type.Object({});
   override returnSchema = Type.Null();
 

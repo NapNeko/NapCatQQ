@@ -10,7 +10,6 @@ type SQLInputValue = import('node:sqlite').SQLInputValue;
 let _DatabaseSync: DatabaseSyncCtor | null = null;
 let _sqliteChecked = false;
 
-
 async function loadSqlite (): Promise<DatabaseSyncCtor | null> {
   if (_sqliteChecked) return _DatabaseSync;
   _sqliteChecked = true;
@@ -298,7 +297,6 @@ export function listTablesFromFile (filePath: string): TableInfo[] {
     db.close();
   }
 }
-
 
 export function listTablesFromBuffer (data: Buffer): TableInfo[] {
   const tmpPath = path.join(os.tmpdir(), `napcat_db_${Date.now()}_${Math.random().toString(36).slice(2)}.db`);

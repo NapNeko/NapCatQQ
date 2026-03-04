@@ -32,7 +32,7 @@ export async function auth (req: Request, res: Response, next: NextFunction) {
   }
   // 判断是否有Authorization头
   if (hash) {
-    //if (!hash) return sendError(res, 'Unauthorized');
+    // if (!hash) return sendError(res, 'Unauthorized');
     // 解析token
     let Credential: WebUiCredentialJson;
     try {

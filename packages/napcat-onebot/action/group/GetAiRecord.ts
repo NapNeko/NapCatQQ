@@ -25,8 +25,9 @@ export class GetAiRecord extends GetPacketStatusDepends<PayloadType, ReturnType>
   override payloadExample = {
     character: 'ai_char_1',
     group_id: '123456',
-    text: '你好'
+    text: '你好',
   };
+
   override returnExample = 'http://example.com/ai_voice.silk';
 
   async _handle (payload: PayloadType) {

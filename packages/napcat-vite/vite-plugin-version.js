@@ -43,7 +43,7 @@ function validateVersion (version) {
 
 /**
  * NapCat Vite Plugin: fetches latest GitHub tag (not release) and injects into import.meta.env
- * 
+ *
  * 版本号来源优先级:
  * 1. 环境变量 NAPCAT_VERSION (用于 CI 构建)
  * 2. 缓存的 GitHub tag

@@ -22,7 +22,7 @@ export async function encodeSilk (filePath: string, TEMP_DIR: string, logger: Lo
       return {
         converted: true,
         path: pttPath,
-        duration: duration,
+        duration,
       };
     } else {
       let duration = 0;

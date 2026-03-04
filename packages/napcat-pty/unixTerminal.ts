@@ -21,7 +21,7 @@ export const pty: any = new Proxy({}, {
       _pty = pty_loader();
     }
     return _pty[prop];
-  }
+  },
 });
 
 let helperPath: string;

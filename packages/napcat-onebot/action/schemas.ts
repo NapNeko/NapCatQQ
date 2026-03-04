@@ -94,5 +94,5 @@ export const OB11MessageSchema = Type.Intersect([
       emoji_type: Type.String({ description: '表情符号类型' }),
       likes_cnt: Type.String({ description: '点赞数' }),
     })),
-  }, { description: 'OneBot 11 消息信息' })
+  }, { description: 'OneBot 11 消息信息' }),
 ], { $id: 'OB11ActionMessage', description: 'OneBot 11 消息信息' });

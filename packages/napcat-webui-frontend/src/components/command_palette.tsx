@@ -64,9 +64,9 @@ export default function CommandPalette (props: CommandPaletteProps) {
     const list = !q
       ? commands
       : commands.filter((c) => {
-          const hay = `${c.id} ${c.title} ${c.subtitle ?? ''} ${c.group ?? ''}`.toLowerCase();
-          return hay.includes(q);
-        });
+        const hay = `${c.id} ${c.title} ${c.subtitle ?? ''} ${c.group ?? ''}`.toLowerCase();
+        return hay.includes(q);
+      });
 
     // 简单：优先 path 前缀命中
     if (!q) return list;
@@ -125,7 +125,8 @@ export default function CommandPalette (props: CommandPaletteProps) {
             <ModalHeader className={clsx(
               'flex items-center gap-2',
               mobile ? 'border-b border-default-200/50' : ''
-            )}>
+            )}
+            >
               <span className='text-sm font-semibold'>命令面板</span>
               <span className='text-xs text-default-400 font-normal hidden md:inline'>Ctrl/Cmd + K</span>
             </ModalHeader>
@@ -149,11 +150,13 @@ export default function CommandPalette (props: CommandPaletteProps) {
               <div className={clsx(
                 'rounded-xl border border-default-200/50 dark:border-default-100/20 overflow-hidden',
                 mobile ? 'flex-1 min-h-0' : 'max-h-[420px]'
-              )}>
+              )}
+              >
                 <div className={clsx(
                   'divide-y divide-default-200/50 dark:divide-default-100/20 overflow-y-auto no-scrollbar',
                   mobile ? 'h-full' : 'max-h-[420px]'
-                )}>
+                )}
+                >
                   {filtered.length === 0 && (
                     <div className='p-6 text-sm text-default-400'>没有匹配的接口</div>
                   )}

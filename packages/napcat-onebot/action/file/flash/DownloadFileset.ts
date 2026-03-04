@@ -15,8 +15,9 @@ export class DownloadFileset extends OneBotAction<DownloadFilesetPayload, any> {
   override actionSummary = '下载文件集';
   override actionTags = ['文件扩展'];
   override payloadExample = {
-    fileset_id: 'set_123'
+    fileset_id: 'set_123',
   };
+
   override returnExample = null;
 
   async _handle (payload: DownloadFilesetPayload) {
