@@ -67,6 +67,7 @@ export class MessageTransport implements RpcTransport {
     resolve: (response: RpcResponse) => void;
     reject: (error: Error) => void;
   }>();
+
   private callbackHandler?: (callbackId: string, args: SerializedValue[]) => Promise<SerializedValue>;
   private sendMessage: (message: string) => void | Promise<void>;
 
@@ -113,15 +114,25 @@ export class MessageTransport implements RpcTransport {
   }
 
   async send (request: RpcRequest): Promise<RpcResponse> {
-    return new Promise((resolve, reject) => {
-      this.pendingRequests.set(request.id, { resolve, reject });
+    // eslint-disable-next-line no-async-promise-executor
+    return new Promise(async (resolve, _reject) => {
+      const id = request.id;
+      const reject = (error: any) => {
+        this.pendingRequests.delete(id);
+        _reject(error);
+      };
+      this.pendingRequests.set(id, { resolve, reject });
 
       const message = JSON.stringify({
         type: 'request',
         request,
       });
 
-      Promise.resolve(this.sendMessage(message)).catch(reject);
+      try {
+        await this.sendMessage(message);
+      } catch (error) {
+        reject(error);
+      }
     });
   }
 

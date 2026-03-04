@@ -84,7 +84,13 @@ class TerminalManager {
 
         ws.on('message', (data) => {
           if (instance) {
-            const result = JSON.parse(data.toString());
+            let text: string;
+            if (Array.isArray(data)) {
+              text = Buffer.concat(data).toString();
+            } else {
+              text = data.toString();
+            }
+            const result = JSON.parse(text);
             if (result.type === 'input') {
               instance.pty.write(result.data);
             }
