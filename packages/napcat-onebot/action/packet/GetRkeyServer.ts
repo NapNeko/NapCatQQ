@@ -22,7 +22,6 @@ export class GetRkeyServer extends GetPacketStatusDepends<void, GetRkeyServerRet
     expired_time: 1694560000,
     name: 'NapCat 4',
   };
-
   override payloadSchema = Type.Object({});
   override returnSchema = GetRkeyServerReturnSchema;
 

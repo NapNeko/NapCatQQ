@@ -46,7 +46,7 @@ export async function NCoreInitFramework (
   const nativePacketHandler = new NativePacketHandler({ logger }); // 初始化 NativePacketHandler 用于后续使用
   const napi2nativeLoader = new Napi2NativeLoader({ logger }); // 初始化 Napi2NativeLoader 用于后续使用
   const napcatConfig = loadNapcatConfig(pathWrapper.configPath);
-  // console.log('[NapCat] [Napi2NativeLoader]', napi2nativeLoader.nativeExports.enableAllBypasses?.());
+  //console.log('[NapCat] [Napi2NativeLoader]', napi2nativeLoader.nativeExports.enableAllBypasses?.());
   if (process.env['NAPCAT_DISABLE_BYPASS'] !== '1') {
     const bypassOptions = napcatConfig.bypass ?? {};
     const bypassEnabled = napi2nativeLoader.nativeExports.enableAllBypasses?.(bypassOptions);
@@ -60,7 +60,7 @@ export async function NCoreInitFramework (
   // nativePacketHandler.onAll((packet) => {
   //     console.log('[Packet]', packet.uin, packet.cmd, packet.hex_data);
   // });
-  await nativePacketHandler.init(basicInfoWrapper.getFullQQVersion(), napcatConfig.o3HookMode === 1);
+  await nativePacketHandler.init(basicInfoWrapper.getFullQQVersion(), napcatConfig.o3HookMode === 1 ? true : false);
   // 在 init 之后注册监听器
 
   // 登录前监听 OidbSvcTrpcTcp.0xcde_2 数据包，获取数据库 passphrase

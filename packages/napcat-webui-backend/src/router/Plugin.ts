@@ -13,13 +13,13 @@ import {
   PluginConfigSSEHandler,
   PluginConfigChangeHandler,
   // ImportLocalPluginHandler,
-  GetPluginIconHandler,
+  GetPluginIconHandler
 } from '@/napcat-webui-backend/src/api/Plugin';
 import {
   GetPluginStoreListHandler,
   GetPluginStoreDetailHandler,
   InstallPluginFromStoreHandler,
-  InstallPluginFromStoreSSEHandler,
+  InstallPluginFromStoreSSEHandler
 } from '@/napcat-webui-backend/src/api/PluginStore';
 import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
 import { NapCatOneBot11Adapter } from '@/napcat-onebot/index';

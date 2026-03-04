@@ -253,6 +253,7 @@ export async function getAllTags (mirror?: string): Promise<{ tags: string[], mi
   return getAllTagsFromMirror('NapNeko', 'NapCatQQ', mirror);
 }
 
+
 export async function getLatestTag (mirror?: string): Promise<string> {
   const { tags } = await getAllTags(mirror);
 

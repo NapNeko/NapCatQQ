@@ -121,7 +121,7 @@ export const GetPluginListHandler: RequestHandler = async (_req, res) => {
     homepage?: string;
     repository?: string;
     icon?: string;
-  }> = [];
+  }> = new Array();
 
   // 收集所有插件的扩展页面
   const extensionPages: Array<{
@@ -175,11 +175,12 @@ export const GetPluginListHandler: RequestHandler = async (_req, res) => {
           path: page.path,
           title: page.title,
           icon: page.icon,
-          description: page.description,
+          description: page.description
         });
       }
     }
   }
+
 
   return sendSuccess(res, { plugins: AllPlugins, pluginManagerNotFound: false, extensionPages });
 };
@@ -341,7 +342,7 @@ export const PluginConfigSSEHandler: RequestHandler = (req, res): void => {
     hideField: (key: string) => {
       sendSSE('schema', { type: 'hideField', key });
     },
-    getCurrentConfig: () => currentConfig,
+    getCurrentConfig: () => currentConfig
   };
 
   // 存储会话
@@ -422,30 +423,30 @@ export const PluginConfigChangeHandler: RequestHandler = async (req, res) => {
   if (plugin.runtime.module?.plugin_on_config_change) {
     const uiController = {
       updateSchema: (schema: any[]) => {
-        session.res.write('event: schema\n');
+        session.res.write(`event: schema\n`);
         session.res.write(`data: ${JSON.stringify({ type: 'full', schema })}\n\n`);
       },
       updateField: (fieldKey: string, field: any) => {
-        session.res.write('event: schema\n');
+        session.res.write(`event: schema\n`);
         session.res.write(`data: ${JSON.stringify({ type: 'updateField', key: fieldKey, field })}\n\n`);
       },
       removeField: (fieldKey: string) => {
-        session.res.write('event: schema\n');
+        session.res.write(`event: schema\n`);
         session.res.write(`data: ${JSON.stringify({ type: 'removeField', key: fieldKey })}\n\n`);
       },
       addField: (field: any, afterKey?: string) => {
-        session.res.write('event: schema\n');
+        session.res.write(`event: schema\n`);
         session.res.write(`data: ${JSON.stringify({ type: 'addField', field, afterKey })}\n\n`);
       },
       showField: (fieldKey: string) => {
-        session.res.write('event: schema\n');
+        session.res.write(`event: schema\n`);
         session.res.write(`data: ${JSON.stringify({ type: 'showField', key: fieldKey })}\n\n`);
       },
       hideField: (fieldKey: string) => {
-        session.res.write('event: schema\n');
+        session.res.write(`event: schema\n`);
         session.res.write(`data: ${JSON.stringify({ type: 'hideField', key: fieldKey })}\n\n`);
       },
-      getCurrentConfig: () => session.currentConfig,
+      getCurrentConfig: () => session.currentConfig
     };
 
     try {
@@ -459,7 +460,7 @@ export const PluginConfigChangeHandler: RequestHandler = async (req, res) => {
         );
       }
     } catch (e: any) {
-      session.res.write('event: error\n');
+      session.res.write(`event: error\n`);
       session.res.write(`data: ${JSON.stringify({ message: e.message })}\n\n`);
     }
   }

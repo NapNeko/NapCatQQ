@@ -19,9 +19,8 @@ export class SendOnlineFolder extends OneBotAction<SendOnlineFolderPayload, any>
   override actionTags = ['文件扩展'];
   override payloadExample = {
     user_id: '123456789',
-    folder_path: 'C:\\path\\to\\folder',
+    folder_path: 'C:\\path\\to\\folder'
   };
-
   override returnExample = null;
 
   async _handle (payload: SendOnlineFolderPayload) {

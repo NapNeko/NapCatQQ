@@ -24,9 +24,8 @@ export class SetOnlineStatus extends OneBotAction<PayloadType, ReturnType> {
   override payloadExample = {
     status: 11,
     ext_status: 0,
-    battery_status: 100,
+    battery_status: 100
   };
-
   override returnExample = null;
 
   async _handle (payload: PayloadType) {

@@ -20,24 +20,24 @@ const EXTERNAL_TYPE_REPLACEMENTS = {
   'express.Express': 'any',
   'express.Application': 'any',
   'express.Router': 'any',
-  Express: 'any',
-  Request: 'any',
-  Response: 'any',
-  NextFunction: 'any',
+  'Express': 'any',
+  'Request': 'any',
+  'Response': 'any',
+  'NextFunction': 'any',
   // ws
-  WebSocket: 'any',
-  WebSocketServer: 'any',
-  RawData: 'any',
+  'WebSocket': 'any',
+  'WebSocketServer': 'any',
+  'RawData': 'any',
   // ajv
-  Ajv: 'any',
-  AnySchema: 'any',
-  ValidateFunction: 'any',
+  'Ajv': 'any',
+  'AnySchema': 'any',
+  'ValidateFunction': 'any',
   'ValidateFunction<T>': 'any',
   // inversify
-  Container: 'any',
+  'Container': 'any',
   // napcat-protobuf
-  NapProtoDecodeStructType: 'any',
-  NapProtoEncodeStructType: 'any',
+  'NapProtoDecodeStructType': 'any',
+  'NapProtoEncodeStructType': 'any',
   'NapProtoDecodeStructType<T>': 'any',
   'NapProtoEncodeStructType<T>': 'any',
 };
@@ -141,7 +141,7 @@ async function processFile (filePath) {
   const newPath = filePath.replace(/\.d\.ts$/, '.ts');
   await rename(filePath, newPath);
 
-  // console.log(`Processed: ${basename(filePath)} -> ${basename(newPath)}`);
+  //console.log(`Processed: ${basename(filePath)} -> ${basename(newPath)}`);
 }
 
 console.log('Starting post-build processing...');

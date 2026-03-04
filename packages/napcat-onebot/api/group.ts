@@ -207,7 +207,6 @@ export class OneBotGroupApi {
     }
     return undefined;
   }
-
   async parseOtherJsonEvent (msg: RawMessage, jsonGrayTipElement: GrayTipElement['jsonGrayTipElement'], context: InstanceContext) {
     let json: { items?: { txt?: string; param?: string[] }[] };
     try {

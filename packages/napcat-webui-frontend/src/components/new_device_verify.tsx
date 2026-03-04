@@ -114,26 +114,22 @@ const NewDeviceVerify: React.FC<NewDeviceVerifyProps> = ({
       </p>
 
       <div className='flex flex-col items-center gap-3' style={{ minHeight: 280 }}>
-        {status === 'loading'
-          ? (
-            <div className='flex items-center justify-center' style={{ height: 240 }}>
-              <Spinner size='lg' />
-            </div>
-          )
-          : status === 'error'
-            ? (
-              <div className='flex flex-col items-center justify-center gap-3' style={{ height: 240 }}>
-                <p className='text-danger text-sm'>{errorMsg}</p>
-                <Button color='primary' variant='flat' onPress={fetchQRCode}>
-                  重新获取
-                </Button>
-              </div>
-            )
-            : (
-              <div className='p-3 bg-white rounded-lg'>
-                <QRCodeSVG value={qrUrl} size={220} />
-              </div>
-            )}
+        {status === 'loading' ? (
+          <div className='flex items-center justify-center' style={{ height: 240 }}>
+            <Spinner size='lg' />
+          </div>
+        ) : status === 'error' ? (
+          <div className='flex flex-col items-center justify-center gap-3' style={{ height: 240 }}>
+            <p className='text-danger text-sm'>{errorMsg}</p>
+            <Button color='primary' variant='flat' onPress={fetchQRCode}>
+              重新获取
+            </Button>
+          </div>
+        ) : (
+          <div className='p-3 bg-white rounded-lg'>
+            <QRCodeSVG value={qrUrl} size={220} />
+          </div>
+        )}
 
         <p className={`text-sm ${statusColor[status]}`}>
           {statusText[status]}

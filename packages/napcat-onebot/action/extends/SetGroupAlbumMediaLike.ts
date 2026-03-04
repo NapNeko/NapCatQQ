@@ -26,11 +26,9 @@ export class SetGroupAlbumMediaLike extends OneBotAction<PayloadType, ReturnType
     lloc: 'media_id_1',
     id: '123456',
   };
-
   override returnExample = {
-    result: {},
+    result: {}
   };
-
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
 

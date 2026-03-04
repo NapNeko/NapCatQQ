@@ -21,9 +21,8 @@ class MarkMsgAsRead extends OneBotAction<PayloadType, ReturnType> {
   override actionDescription = '标记指定渠道的消息为已读';
   override actionTags = ['消息接口'];
   override payloadExample = {
-    message_id: 12345,
+    message_id: 12345
   };
-
   override returnExample = null;
 
   async getPeer (payload: PayloadType): Promise<Peer> {

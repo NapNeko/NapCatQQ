@@ -84,8 +84,8 @@ export function generateBuildingComment (prSha: string, targets: string[]): stri
     '',
     '## 📋 构建信息',
     '',
-    '| 项目 | 值 |',
-    '| :--- | :--- |',
+    `| 项目 | 值 |`,
+    `| :--- | :--- |`,
     `| 📝 提交 | \`${shortSha}\` |`,
     `| 🕐 开始时间 | ${time} |`,
     '',
@@ -165,8 +165,8 @@ export function generateResultComment (
     '',
     '## 📋 构建信息',
     '',
-    '| 项目 | 值 |',
-    '| :--- | :--- |',
+    `| 项目 | 值 |`,
+    `| :--- | :--- |`,
     ...(version ? [`| 🏷️ 版本号 | \`${version}\` |`] : []),
     `| 📝 提交 | \`${shortSha}\` |`,
     `| 🔗 构建日志 | [查看详情](${runUrl}) |`,
@@ -179,7 +179,7 @@ export function generateResultComment (
     lines.push('', '---', '', '## ⚠️ 错误详情', '');
     for (const target of failedTargets) {
       lines.push(
-        '<details>',
+        `<details>`,
         `<summary>🔴 <b>${target.name}</b> 构建错误</summary>`,
         '',
         '```',
@@ -228,3 +228,4 @@ export function generateResultComment (
 
   return lines.join('\n');
 }
+

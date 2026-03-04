@@ -102,7 +102,6 @@ function createTestObject (): TestObject {
       greet () {
         return `Instance: ${this.name}`;
       }
-
       getName () {
         return this.name;
       }
@@ -1442,7 +1441,6 @@ describe('napcat-rpc RPC', () => {
             { id: 2, name: 'item2' },
           ];
         }
-
         getItem (index: number) {
           return { id: index, getValue: () => `item${index}` };
         }

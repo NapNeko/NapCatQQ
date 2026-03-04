@@ -156,9 +156,9 @@ const TencentCaptchaModal: React.FC<TencentCaptchaProps> = ({
   }, [proofWaterUrl, handleResult]);
 
   return (
-    <div className='flex items-center justify-center py-8 gap-3'>
-      <Spinner size='lg' />
-      <span className='text-default-500'>正在加载验证码...</span>
+    <div className="flex items-center justify-center py-8 gap-3">
+      <Spinner size="lg" />
+      <span className="text-default-500">正在加载验证码...</span>
     </div>
   );
 };

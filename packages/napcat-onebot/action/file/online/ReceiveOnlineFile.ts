@@ -20,9 +20,8 @@ export class ReceiveOnlineFile extends OneBotAction<ReceiveOnlineFilePayload, an
   override payloadExample = {
     user_id: '123456789',
     msg_id: '123',
-    save_path: 'C:\\save',
+    save_path: 'C:\\save'
   };
-
   override returnExample = null;
 
   async _handle (payload: ReceiveOnlineFilePayload) {

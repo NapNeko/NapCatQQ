@@ -27,12 +27,10 @@ export class ClickInlineKeyboardButton extends OneBotAction<PayloadType, ReturnT
     bot_appid: '1234567890',
     button_id: 'btn_1',
     callback_data: '',
-    msg_seq: '10086',
+    msg_seq: '10086'
   };
-
   override returnExample = {
   };
-
   async _handle (payload: PayloadType) {
     return await this.core.apis.MsgApi.clickInlineKeyboardButton({
       buttonId: payload.button_id,

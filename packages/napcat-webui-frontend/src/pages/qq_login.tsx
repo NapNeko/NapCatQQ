@@ -321,7 +321,7 @@ export default function QQLoginPage () {
                 </div>
               </div>
               <div className='absolute right-4 top-4 flex items-center gap-2'>
-                <Button isIconOnly variant='light' aria-label='Settings' onPress={() => setShowGUIDManager(true)}>
+                <Button isIconOnly variant="light" aria-label="Settings" onPress={() => setShowGUIDManager(true)}>
                   <MdSettings size={22} />
                 </Button>
                 <ThemeSwitch />

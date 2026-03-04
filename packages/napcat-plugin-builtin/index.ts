@@ -6,7 +6,8 @@ import fs from 'fs';
 import path from 'path';
 import { NetworkAdapterConfig } from 'napcat-types/napcat-onebot/config/config';
 
-const startTime: number = Date.now();
+
+let startTime: number = Date.now();
 let logger: PluginLogger | null = null;
 
 interface BuiltinPluginConfig {
@@ -23,8 +24,9 @@ interface BuiltinPluginConfig {
 let currentConfig: BuiltinPluginConfig = {
   prefix: '#napcat',
   enableReply: true,
-  description: '这是一个内置插件的配置示例',
+  description: '这是一个内置插件的配置示例'
 };
+
 
 export let plugin_config_ui: PluginConfigSchema = [];
 
@@ -40,12 +42,12 @@ const plugin_init: PluginModule['plugin_init'] = async (ctx) => {
     ctx.NapCatConfig.select('theme', 'Theme Selection', [
       { label: 'Light Mode', value: 'light' },
       { label: 'Dark Mode', value: 'dark' },
-      { label: 'Auto', value: 'auto' },
+      { label: 'Auto', value: 'auto' }
     ], 'light', 'Select a theme for the response (Demo purpose only)'),
     ctx.NapCatConfig.multiSelect('features', 'Enabled Features', [
       { label: 'Version Info', value: 'version' },
       { label: 'Status Report', value: 'status' },
-      { label: 'Debug Log', value: 'debug' },
+      { label: 'Debug Log', value: 'debug' }
     ], ['version'], 'Select features to enable'),
     ctx.NapCatConfig.text('description', 'Description', '这是一个内置插件的配置示例', 'A multi-line text area for notes')
   );
@@ -78,14 +80,14 @@ const plugin_init: PluginModule['plugin_init'] = async (ctx) => {
         pluginName: ctx.pluginName,
         generatedAt: new Date().toISOString(),
         uptime: Date.now() - startTime,
-        config: currentConfig,
-      }, null, 2),
+        config: currentConfig
+      }, null, 2)
     },
     {
       path: '/readme.txt',
       contentType: 'text/plain',
-      content: `NapCat Builtin Plugin\n=====================\nThis is a demonstration of the staticOnMem feature.\nPlugin: ${ctx.pluginName}\nPath: ${ctx.pluginPath}`,
-    },
+      content: `NapCat Builtin Plugin\n=====================\nThis is a demonstration of the staticOnMem feature.\nPlugin: ${ctx.pluginName}\nPath: ${ctx.pluginPath}`
+    }
   ]);
 
   // 注册 API 路由（需要鉴权，挂载到 /api/Plugin/ext/{pluginId}/）
@@ -99,15 +101,15 @@ const plugin_init: PluginModule['plugin_init'] = async (ctx) => {
         uptimeFormatted: formatUptime(uptime),
         config: currentConfig,
         platform: process.platform,
-        arch: process.arch,
-      },
+        arch: process.arch
+      }
     });
   });
 
   ctx.router.get('/config', (_req, res) => {
     res.json({
       code: 0,
-      data: currentConfig,
+      data: currentConfig
     });
   });
 
@@ -139,8 +141,8 @@ const plugin_init: PluginModule['plugin_init'] = async (ctx) => {
         pluginName: ctx.pluginName,
         uptime,
         uptimeFormatted: formatUptime(uptime),
-        platform: process.platform,
-      },
+        platform: process.platform
+      }
     });
   });
 
@@ -150,8 +152,8 @@ const plugin_init: PluginModule['plugin_init'] = async (ctx) => {
       code: 0,
       data: {
         status: 'ok',
-        timestamp: new Date().toISOString(),
-      },
+        timestamp: new Date().toISOString()
+      }
     });
   });
 
@@ -163,7 +165,7 @@ const plugin_init: PluginModule['plugin_init'] = async (ctx) => {
     if (!pluginId) {
       res.status(400).json({
         code: -1,
-        message: 'Plugin ID is required',
+        message: 'Plugin ID is required'
       });
       return;
     }
@@ -174,7 +176,7 @@ const plugin_init: PluginModule['plugin_init'] = async (ctx) => {
     if (!targetPlugin) {
       res.status(404).json({
         code: -1,
-        message: `Plugin '${pluginId}' not found or not loaded`,
+        message: `Plugin '${pluginId}' not found or not loaded`
       });
       return;
     }
@@ -190,7 +192,7 @@ const plugin_init: PluginModule['plugin_init'] = async (ctx) => {
         hasCleanup: typeof targetPlugin.plugin_cleanup === 'function',
         hasConfigSchema: Array.isArray(targetPlugin.plugin_config_schema),
         hasConfigUI: Array.isArray(targetPlugin.plugin_config_ui),
-      },
+      }
     });
   });
 
@@ -200,7 +202,7 @@ const plugin_init: PluginModule['plugin_init'] = async (ctx) => {
     title: '插件仪表盘',
     icon: '📊',
     htmlFile: 'webui/dashboard.html',
-    description: '查看内置插件的运行状态和配置',
+    description: '查看内置插件的运行状态和配置'
   });
 
   logger.info('WebUI 路由已注册:');
@@ -285,7 +287,7 @@ async function loadEndpointsForUrl (ui: PluginConfigUIController, apiUrl: string
     // 更新现有字段的选项
     ui.updateField('apiEndpoints', {
       options: mockEndpoints,
-      description: `从 ${apiUrl} 加载的端点`,
+      description: `从 ${apiUrl} 加载的端点`
     });
   } else {
     // 添加新字段
@@ -295,7 +297,7 @@ async function loadEndpointsForUrl (ui: PluginConfigUIController, apiUrl: string
       label: 'API Endpoints',
       description: `从 ${apiUrl} 加载的端点`,
       options: mockEndpoints,
-      default: [],
+      default: []
     }, 'apiUrl');
   }
 }

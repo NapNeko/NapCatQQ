@@ -19,13 +19,11 @@ export class DoGroupAlbumComment extends OneBotAction<DoGroupAlbumCommentPayload
     group_id: '123456',
     album_id: 'album_id_1',
     lloc: 'media_id_1',
-    content: '很有意思',
+    content: '很有意思'
   };
-
   override returnExample = {
-    result: {},
+    result: {}
   };
-
   override payloadSchema = DoGroupAlbumCommentPayloadSchema;
   override returnSchema = Type.Any({ description: '评论结果' });
 

@@ -53,7 +53,6 @@ export class NodeIKernelLoginListener {
 
   onLoginState (..._args: any[]): any {
   }
-
   onLoginRecordUpdate (..._args: any[]): any {
   }
 }
