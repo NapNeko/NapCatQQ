@@ -1,2 +1,11 @@
 packages:
-  - 'packages/*'
+  - packages/*
+
+onlyBuiltDependencies:
+  - '@heroui/shared-utils'
+  - '@homebridge/node-pty-prebuilt-multiarch'
+  - '@swc/core'
+  - esbuild
+  - sharp
+  - ttf2woff2
+  - unrs-resolver
