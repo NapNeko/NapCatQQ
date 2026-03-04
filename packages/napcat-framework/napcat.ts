@@ -121,21 +121,21 @@ export async function NCoreInitFramework (
   WebUiDataRuntime.setQQDataPath(loaderObject.core.dataPath);
   InitWebUi(logger, pathWrapper, logSubscription, statusHelperSubscription).then().catch(e => logger.logError(e));
 
-  // 测试 DatabaseApi
-  if (dbPassphrase) {
-    const dbApi = loaderObject.core.apis.DatabaseApi;
-    const sqliteOk = await dbApi.isSqliteAvailable();
-    if (sqliteOk) {
-      try {
-        const result = dbApi.readDatabase('nt_msg.db');
-        if (result) {
-          logger.log('[NapCat] [Database] nt_msg.db:\n' + dbApi.formatResults([result]));
-        }
-      } catch (e) {
-        logger.logError('[NapCat] [Database] 读取失败:', e);
-      }
-    }
-  }
+  // // 测试 DatabaseApi
+  // if (dbPassphrase) {
+  //   const dbApi = loaderObject.core.apis.DatabaseApi;
+  //   const sqliteOk = await dbApi.isSqliteAvailable();
+  //   if (sqliteOk) {
+  //     try {
+  //       const result = dbApi.readDatabase('nt_msg.db');
+  //       if (result) {
+  //         logger.log('[NapCat] [Database] nt_msg.db:\n' + dbApi.formatResults([result]));
+  //       }
+  //     } catch (e) {
+  //       logger.logError('[NapCat] [Database] 读取失败:', e);
+  //     }
+  //   }
+  // }
 
   // 使用 NapCatAdapterManager 统一管理协议适配器
   const adapterManager = new NapCatAdapterManager(loaderObject.core, loaderObject.context, pathWrapper);

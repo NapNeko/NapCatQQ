@@ -763,21 +763,21 @@ export class NapCatShell {
   async InitNapCat () {
     await this.core.initCore();
 
-    // 测试 DatabaseApi
-    if (this.core.dbPassphrase) {
-      const dbApi = this.core.apis.DatabaseApi;
-      const sqliteOk = await dbApi.isSqliteAvailable();
-      if (sqliteOk) {
-        try {
-          const result = dbApi.readDatabase('nt_msg.db');
-          if (result) {
-            this.context.logger.log('[NapCat] [Database] nt_msg.db:\n' + dbApi.formatResults([result]));
-          }
-        } catch (e) {
-          this.context.logger.logError('[NapCat] [Database] 读取失败:', e);
-        }
-      }
-    }
+    // // 测试 DatabaseApi
+    // if (this.core.dbPassphrase) {
+    //   const dbApi = this.core.apis.DatabaseApi;
+    //   const sqliteOk = await dbApi.isSqliteAvailable();
+    //   if (sqliteOk) {
+    //     try {
+    //       const result = dbApi.readDatabase('nt_msg.db');
+    //       if (result) {
+    //         this.context.logger.log('[NapCat] [Database] nt_msg.db:\n' + dbApi.formatResults([result]));
+    //       }
+    //     } catch (e) {
+    //       this.context.logger.logError('[NapCat] [Database] 读取失败:', e);
+    //     }
+    //   }
+    // }
 
     // 监听下线通知并同步到 WebUI
     this.core.event.on('KickedOffLine', (tips: string) => {
