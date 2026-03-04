@@ -1,16 +1,6 @@
 # {VERSION}
 [使用文档](https://napneko.github.io/)
 
-## Windows 一键包
-我们提供了轻量化的一键部署方案
-相对于普通需要安装QQ的方案,下面已内置QQ和Napcat 阅读使用文档参考
-
-你可以下载 
-
-NapCat.Shell.Windows.OneKey.zip (无头)
-
-启动后可自动化部署一键包,教程参考使用文档安装部分
-
 ## 警告
 **注意QQ版本推荐使用 40768+ 版本 最低可以使用40768版本**
 **默认WebUi密钥为随机密码 控制台查看**
