@@ -113,15 +113,25 @@ export class MessageTransport implements RpcTransport {
   }
 
   async send (request: RpcRequest): Promise<RpcResponse> {
-    return new Promise((resolve, reject) => {
-      this.pendingRequests.set(request.id, { resolve, reject });
+    return new Promise(async (resolve, _reject) => {
+      const id = request.id;
+      const reject = (error: any) => {
+        this.pendingRequests.delete(id);
+        _reject(error);
+      };
+      this.pendingRequests.set(id, { resolve, reject });
+
 
       const message = JSON.stringify({
         type: 'request',
         request,
       });
 
-      Promise.resolve(this.sendMessage(message)).catch(reject);
+      try {
+        await this.sendMessage(message);
+      } catch (error) {
+        reject(error);
+      }
     });
   }
 
