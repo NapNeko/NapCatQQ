@@ -2,6 +2,7 @@ import { RequestHandler } from 'express';
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { webUiPathWrapper } from '@/napcat-webui-backend/index';
+import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
 import { sendError, sendSuccess } from '@/napcat-webui-backend/src/utils/response';
 import json5 from 'json5';
 
@@ -83,6 +84,63 @@ export const NapCatSetConfigHandler: RequestHandler = (req, res) => {
     }
 
     writeNapcatConfig(mergedConfig);
+    return sendSuccess(res, null);
+  } catch (e) {
+    return sendError(res, 'Config Set Error: ' + (e as Error).message);
+  }
+};
+
+// ============================================================
+// Per-UIN 配置（napcat_{uin}.json）—— 登录后配置
+// ============================================================
+
+function readUinConfig (uin: string): Record<string, unknown> {
+  const uinPath = resolve(webUiPathWrapper.configPath, `./napcat_${uin}.json`);
+  const fallbackPath = resolve(webUiPathWrapper.configPath, './napcat.json');
+  const configPath = existsSync(uinPath) ? uinPath : fallbackPath;
+  try {
+    if (existsSync(configPath)) {
+      const content = readFileSync(configPath, 'utf-8');
+      return { ...getDefaultNapcatConfig(), ...json5.parse(content) };
+    }
+  } catch (_e) {
+    // ignore
+  }
+  return { ...getDefaultNapcatConfig() };
+}
+
+function writeUinConfig (uin: string, config: Record<string, unknown>): void {
+  const configPath = resolve(webUiPathWrapper.configPath, `./napcat_${uin}.json`);
+  mkdirSync(webUiPathWrapper.configPath, { recursive: true });
+  writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8');
+}
+
+// 获取 per-uin NapCat 配置
+export const NapCatGetUinConfigHandler: RequestHandler = (_, res) => {
+  try {
+    const isLogin = WebUiDataRuntime.getQQLoginStatus();
+    if (!isLogin) return sendError(res, 'Not Login');
+    const uin = WebUiDataRuntime.getQQLoginUin();
+    return sendSuccess(res, readUinConfig(uin));
+  } catch (e) {
+    return sendError(res, 'Config Get Error: ' + (e as Error).message);
+  }
+};
+
+// 设置 per-uin NapCat 配置
+export const NapCatSetUinConfigHandler: RequestHandler = (req, res) => {
+  try {
+    const isLogin = WebUiDataRuntime.getQQLoginStatus();
+    if (!isLogin) return sendError(res, 'Not Login');
+    const uin = WebUiDataRuntime.getQQLoginUin();
+
+    const newConfig = req.body;
+    if (!newConfig || typeof newConfig !== 'object') {
+      return sendError(res, 'config is empty or invalid');
+    }
+    const currentConfig = readUinConfig(uin);
+    const mergedConfig = { ...currentConfig, ...newConfig };
+    writeUinConfig(uin, mergedConfig);
     return sendSuccess(res, null);
   } catch (e) {
     return sendError(res, 'Config Set Error: ' + (e as Error).message);

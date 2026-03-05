@@ -1,6 +1,7 @@
 import { Input } from '@heroui/input';
 import { Button } from '@heroui/button';
 import { Divider } from '@heroui/divider';
+import { Avatar } from '@heroui/avatar';
 import { useRequest } from 'ahooks';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -16,6 +17,8 @@ import { waitForBackendReady } from '@/utils/process_utils';
 
 const LoginConfigCard = () => {
   const [isRestarting, setIsRestarting] = useState(false);
+  const [loginList, setLoginList] = useState<LoginListItem[]>([]);
+  const [loginListLoading, setLoginListLoading] = useState(false);
   const {
     data: quickLoginData,
     loading: quickLoginLoading,
@@ -27,6 +30,7 @@ const LoginConfigCard = () => {
     handleSubmit: handleOnebotSubmit,
     formState: { isSubmitting },
     setValue: setOnebotValue,
+    watch,
   } = useForm<{
     quickLoginQQ: string;
   }>({
@@ -35,8 +39,23 @@ const LoginConfigCard = () => {
     },
   });
 
+  const currentQQ = watch('quickLoginQQ');
+
   const reset = () => {
     setOnebotValue('quickLoginQQ', quickLoginData ?? '');
+  };
+
+  const fetchLoginList = async () => {
+    try {
+      setLoginListLoading(true);
+      const list = await QQManager.getQQQuickLoginListNew();
+      setLoginList(list ?? []);
+    } catch (error) {
+      const msg = (error as Error).message;
+      toast.error(`获取账号列表失败: ${msg}`);
+    } finally {
+      setLoginListLoading(false);
+    }
   };
 
   const onSubmit = handleOnebotSubmit(async (data) => {
@@ -96,8 +115,8 @@ const LoginConfigCard = () => {
 
   return (
     <>
-      <title>OneBot配置 - NapCat WebUI</title>
-      <div className='flex-shrink-0 w-full'>快速登录QQ</div>
+      <title>登录配置 - NapCat WebUI</title>
+      <div className='flex-shrink-0 w-full font-bold text-default-600 dark:text-default-400 px-1'>快速登录QQ</div>
       <Controller
         control={control}
         name='quickLoginQQ'
@@ -108,9 +127,74 @@ const LoginConfigCard = () => {
             placeholder='请输入QQ号'
             isDisabled={!!quickLoginError}
             errorMessage={quickLoginError ? '获取快速登录QQ失败' : undefined}
+            classNames={{
+              inputWrapper:
+                'bg-default-100/50 dark:bg-white/5 backdrop-blur-md border border-transparent hover:bg-default-200/50 dark:hover:bg-white/10 transition-all shadow-sm data-[hover=true]:border-default-300',
+              input: 'bg-transparent text-default-700 placeholder:text-default-400',
+            }}
           />
         )}
       />
+
+      <div className='flex flex-col gap-2'>
+        <div className='flex items-center gap-2'>
+          <Button
+            size='sm'
+            color='primary'
+            variant='flat'
+            onPress={fetchLoginList}
+            isLoading={loginListLoading}
+          >
+            获取已登录账号列表
+          </Button>
+          {loginList.length > 0 && (
+            <span className='text-xs text-default-400'>
+              共 {loginList.length} 个账号，点击选择
+            </span>
+          )}
+        </div>
+        {loginList.length > 0 && (
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-2'>
+            {loginList.filter(item => item.isQuickLogin).map((item) => (
+              <button
+                key={item.uin}
+                type='button'
+                onClick={() => setOnebotValue('quickLoginQQ', item.uin)}
+                className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer text-left
+                  ${currentQQ === item.uin
+                    ? 'border-primary bg-primary/10 dark:bg-primary/20 shadow-sm'
+                    : 'border-default-200 dark:border-default-100/10 bg-default-100/50 dark:bg-white/5 hover:bg-default-200/50 dark:hover:bg-white/10'
+                  }`}
+              >
+                <Avatar
+                  src={item.faceUrl}
+                  name={item.nickName?.charAt(0) || item.uin.charAt(0)}
+                  size='sm'
+                  className='flex-shrink-0'
+                />
+                <div className='flex flex-col min-w-0'>
+                  <span className='text-sm font-medium text-default-700 truncate'>
+                    {item.nickName || '未知昵称'}
+                  </span>
+                  <span className='text-xs text-default-400 truncate'>
+                    {item.uin}
+                  </span>
+                </div>
+                {currentQQ === item.uin && (
+                  <span className='ml-auto text-xs text-primary font-medium flex-shrink-0'>已选择</span>
+                )}
+              </button>
+            ))}
+            {loginList.filter(item => !item.isQuickLogin).length > 0 && (
+              <div className='col-span-full text-xs text-default-400 mt-1'>
+                以下账号不支持快速登录：
+                {loginList.filter(item => !item.isQuickLogin).map(item => item.uin).join('、')}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
       <SaveButtons
         onSubmit={onSubmit}
         reset={reset}

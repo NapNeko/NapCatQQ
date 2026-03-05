@@ -15,5 +15,6 @@ interface NapCatConfig {
   packetBackend: string;
   packetServer: string;
   o3HookMode: number;
+  autoTimeSync: boolean;
   bypass?: BypassOptions;
 }

@@ -279,5 +279,21 @@ export default class QQManager {
       config
     );
   }
+
+  // per-uin 配置（napcat_{uin}.json）
+
+  public static async getNapCatUinConfig () {
+    const { data } = await serverRequest.get<ServerResponse<NapCatConfig>>(
+      '/NapCatConfig/GetUinConfig'
+    );
+    return data.data;
+  }
+
+  public static async setNapCatUinConfig (config: Partial<NapCatConfig>) {
+    await serverRequest.post<ServerResponse<null>>(
+      '/NapCatConfig/SetUinConfig',
+      config
+    );
+  }
 }
 
