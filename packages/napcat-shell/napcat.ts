@@ -52,6 +52,9 @@ interface WorkerMessage {
 
 
 const logger = new LogWrapper(pathWrapper.logsPath);
+if (!ENV.isWorkerProcess && !ENV.isMultiProcessDisabled) {
+  logger.setFileLogEnabled(false);
+}
 
 // 进程管理器和当前 Worker 进程引用
 let processManager: IProcessManager | null = null;

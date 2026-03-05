@@ -581,6 +581,9 @@ export async function NCoreInitShell () {
   console.log('NapCat Shell App Loading...');
   const pathWrapper = new NapCatPathWrapper();
   const logger = new LogWrapper(pathWrapper.logsPath);
+  if (process.env['NAPCAT_WORKER_PROCESS'] !== '1' && process.env['NAPCAT_DISABLE_MULTI_PROCESS'] !== '1') {
+    logger.setFileLogEnabled(false);
+  }
   handleUncaughtExceptions(logger);
   await applyPendingUpdates(pathWrapper, logger);
 
