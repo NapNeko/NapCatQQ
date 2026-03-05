@@ -38,6 +38,7 @@ import { Napi2NativeLoader } from './packet/handler/napi2nativeLoader';
 import { container, ReceiverServiceRegistry } from './packet/handler/serviceRegister';
 import { appEvent } from './packet/handler/eventList';
 import { TypedEventEmitter } from './packet/handler/typeEvent';
+import { hookGlobalDateNow } from './helper/server-time';
 export * from './wrapper';
 export * from './types/index';
 export * from './services/index';
@@ -50,6 +51,7 @@ export * from './helper/config';
 export * from './helper/config-base';
 export * from './helper/proxy-handler';
 export * from './helper/session-proxy';
+export * from './helper/server-time';
 
 export enum NapCatCoreWorkingEnv {
   Unknown = 0,
@@ -172,6 +174,17 @@ export class NapCatCore {
     // 创建临时目录
     if (!fs.existsSync(this.NapCatTempPath)) {
       fs.mkdirSync(this.NapCatTempPath, { recursive: true });
+    }
+    // 通过 getServerTime 全局 hook Date.now() 矫正本地时间偏差
+    try {
+      const offsetMs = hookGlobalDateNow(() => this.context.session.getMSFService().getServerTime());
+      if (Math.abs(offsetMs) > 1000) {
+        this.context.logger.logWarn(`[ServerTime] 本地时间与服务器时间偏差 ${(offsetMs / 1000).toFixed(1)}s，已自动矫正`);
+      } else {
+        this.context.logger.log(`[ServerTime] 时间同步完成，偏差 ${offsetMs}ms`);
+      }
+    } catch (e) {
+      this.context.logger.logError('[ServerTime] 时间矫正失败', e);
     }
     // 遍历this.apis[i].initApi 如果存在该函数进行async 调用
     for (const apiKey in this.apis) {
