@@ -1,12 +1,12 @@
 import { OB11BaseMetaEvent } from '@/napcat-onebot/event/meta/OB11BaseMetaEvent';
 import { OB11BaseNoticeEvent } from '@/napcat-onebot/event/notice/OB11BaseNoticeEvent';
-import { OB11Message } from '@/napcat-onebot/types/message';
+import { OB11Message, OB11MessageMixType } from '@/napcat-onebot/types/message';
 
 export type QuickActionEvent = OB11Message | OB11BaseMetaEvent | OB11BaseNoticeEvent;
 export type PostEventType = OB11Message | OB11BaseMetaEvent | OB11BaseNoticeEvent;
 
 export interface QuickActionPrivateMessage {
-  reply?: string;
+  reply?: OB11MessageMixType;
   auto_escape?: boolean;
 }
 
@@ -30,7 +30,7 @@ export interface QuickActionGroupRequest {
 }
 
 export type QuickAction =
-    QuickActionPrivateMessage
-    & QuickActionGroupMessage
-    & QuickActionFriendRequest
-    & QuickActionGroupRequest;
+  QuickActionPrivateMessage
+  & QuickActionGroupMessage
+  & QuickActionFriendRequest
+  & QuickActionGroupRequest;

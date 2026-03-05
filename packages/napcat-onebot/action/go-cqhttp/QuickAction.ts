@@ -3,6 +3,7 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { QuickAction, QuickActionEvent } from '@/napcat-onebot/types';
 import { Static, Type } from '@sinclair/typebox';
 import { GoCQHTTPActionsExamples } from '../example/GoCQHTTPActionsExamples';
+import { OB11MessageMixTypeSchema } from '@/napcat-onebot/types/message';
 
 const SenderSchema = Type.Object({
   user_id: Type.String({ description: '用户ID' }),
@@ -16,7 +17,7 @@ const SenderSchema = Type.Object({
 
 // 定义 QuickAction 的详细 Schema
 const QuickActionSchema = Type.Object({
-  reply: Type.Optional(Type.String({ description: '回复内容' })),
+  reply: Type.Optional(OB11MessageMixTypeSchema),
   auto_escape: Type.Optional(Type.Boolean({ description: '是否作为纯文本发送' })),
   at_sender: Type.Optional(Type.Boolean({ description: '是否 @ 发送者' })),
   delete: Type.Optional(Type.Boolean({ description: '是否撤回该消息' })),
