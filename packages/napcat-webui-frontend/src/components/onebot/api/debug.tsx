@@ -169,7 +169,7 @@ const OneBotApiDebug = forwardRef<OneBotApiDebugRef, OneBotApiDebugProps>((props
       setActiveTab('request');
       setRequestBody(value);
       // 直接用 override 发送，避免 setState 异步导致拿到旧值
-      void sendRequest(value);
+      sendRequest(value);
     },
     focusRequestEditor: () => {
       setActiveTab('request');

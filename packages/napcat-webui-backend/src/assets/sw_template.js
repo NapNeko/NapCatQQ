@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /**
  * NapCat WebUI Service Worker
  *
@@ -157,6 +158,7 @@ self.addEventListener('activate', (event) => {
             console.log('[SW] Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
+          return undefined;
         })
       );
       // 立即接管所有客户端
