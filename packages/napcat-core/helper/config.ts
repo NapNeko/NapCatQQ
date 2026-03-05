@@ -23,6 +23,7 @@ export const NapcatConfigSchema = Type.Object({
   packetBackend: Type.String({ default: 'auto' }),
   packetServer: Type.String({ default: '' }),
   o3HookMode: Type.Number({ default: 0 }),
+  autoTimeSync: Type.Boolean({ default: true }),
   bypass: Type.Optional(BypassOptionsSchema),
 });
 
