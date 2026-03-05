@@ -94,7 +94,7 @@ export const OB11MessageFileBaseSchema = Type.Object({
 export const OB11MessageImageSchema = Type.Object({
   type: Type.Literal(OB11MessageDataType.image),
   data: Type.Intersect([
-    FileBaseDataSchema,
+    Type.Omit(FileBaseDataSchema, []),
     Type.Object({
       summary: Type.Optional(Type.String({ description: '图片摘要' })),
       sub_type: Type.Optional(Type.Number({ description: '图片子类型' })),

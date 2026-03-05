@@ -85,7 +85,7 @@ export const lastestMessageSchema = Type.Object({
 }, { $id: 'OB11LatestMessage', description: '最后一条消息' });
 
 export const OB11MessageSchema = Type.Intersect([
-  lastestMessageSchema,
+  Type.Omit(lastestMessageSchema, []),
   Type.Object({
     message_id: Type.Number({ description: '消息ID' }),
     message_seq: Type.Number({ description: '消息序列号' }),
