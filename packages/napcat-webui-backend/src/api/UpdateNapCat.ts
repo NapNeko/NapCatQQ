@@ -169,7 +169,7 @@ export const UpdateNapCatHandler: RequestHandler = async (req, res) => {
           customMirror: mirror,
         });
         webUiLogger?.log(`[NapCat Update] Using download URL: ${downloadUrl}`);
-      } catch (error) {
+      } catch (_error) {
         // 如果镜像都不可用，直接使用原始 URL
         webUiLogger?.logWarn('[NapCat Update] All nightly.link mirrors failed, using original URL');
         downloadUrl = baseUrl;

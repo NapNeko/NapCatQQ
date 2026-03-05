@@ -246,7 +246,7 @@ export const GetPluginConfigHandler: RequestHandler = async (req, res) => {
   if (plugin.runtime.module?.plugin_get_config && plugin.runtime.context) {
     try {
       config = await plugin.runtime.module?.plugin_get_config(plugin.runtime.context);
-    } catch (e) { }
+    } catch (_e) { }
   } else {
     // Default behavior: read from default config path
     try {
@@ -254,7 +254,7 @@ export const GetPluginConfigHandler: RequestHandler = async (req, res) => {
       if (fs.existsSync(configPath)) {
         config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
       }
-    } catch (e) { }
+    } catch (_e) { }
   }
 
   // 获取静态 schema
@@ -312,7 +312,7 @@ export const PluginConfigSSEHandler: RequestHandler = (req, res): void => {
   if (initialConfigStr) {
     try {
       currentConfig = JSON.parse(initialConfigStr);
-    } catch (e) { }
+    } catch (_e) { }
   }
 
   // 发送 SSE 消息的辅助函数
@@ -387,7 +387,7 @@ export const PluginConfigSSEHandler: RequestHandler = (req, res): void => {
     if (session?.cleanup) {
       try {
         session.cleanup();
-      } catch (e) { }
+      } catch (_e) { }
     }
     activeConfigSessions.delete(sessionId);
   });

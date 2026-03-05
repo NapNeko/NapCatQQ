@@ -325,7 +325,7 @@ const VersionSelectDialogContent: React.FC<VersionSelectDialogProps> = ({
       } else {
         setMirrorLatency(null);
       }
-    } catch (e) {
+    } catch (_e) {
       setMirrorLatency(null);
     } finally {
       setMirrorTesting(false);
@@ -672,8 +672,8 @@ const VersionSelectDialogContent: React.FC<VersionSelectDialogProps> = ({
                           <div className='flex items-center gap-2'>
                             <span className='truncate max-w-[300px]'>
                               {version.type === 'action'
-                  ? (version.workflowTitle || version.artifactName || version.tag)
-                  : version.tag}
+                                ? (version.workflowTitle || version.artifactName || version.tag)
+                                : version.tag}
                             </span>
                             {version.type === 'prerelease' && (
                               <Chip size='sm' color='secondary' variant='flat'>预发布</Chip>

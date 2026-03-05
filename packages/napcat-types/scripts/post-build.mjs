@@ -1,5 +1,5 @@
 import { readdir, readFile, writeFile, rename } from 'node:fs/promises';
-import { join, extname, basename } from 'node:path';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = fileURLToPath(new URL('../', import.meta.url));
@@ -11,6 +11,7 @@ const ALLOWED_PACKAGES = [
   'node:',  // node: 前缀的内置模块
 ];
 
+/*
 // 外部包类型到 any 的映射
 const EXTERNAL_TYPE_REPLACEMENTS = {
   // winston
@@ -41,6 +42,7 @@ const EXTERNAL_TYPE_REPLACEMENTS = {
   'NapProtoDecodeStructType<T>': 'any',
   'NapProtoEncodeStructType<T>': 'any',
 };
+*/
 
 function isAllowedImport (importPath) {
   return ALLOWED_PACKAGES.some(pkg => importPath.startsWith(pkg));
@@ -87,7 +89,7 @@ function replaceExternalTypes (content) {
   // 使用类型上下文的模式匹配
   const typeContextPatterns = [
     // : Type
-    /:\s*(WebSocket|WebSocketServer|RawData|Ajv|AnySchema|ValidateFunction|Container|NapProtoDecodeStructType|NapProtoEncodeStructType|Express|Request|Response|NextFunction)(?=\s*[;,)\]\}|&]|$)/g,
+    /:\s*(WebSocket|WebSocketServer|RawData|Ajv|AnySchema|ValidateFunction|Container|NapProtoDecodeStructType|NapProtoEncodeStructType|Express|Request|Response|NextFunction)(?=\s*[;,)\]}|&]|$)/g,
     // <Type>
     /<(WebSocket|WebSocketServer|RawData|Ajv|AnySchema|ValidateFunction|Container|NapProtoDecodeStructType|NapProtoEncodeStructType|Express|Request|Response|NextFunction)>/g,
     // Type[]

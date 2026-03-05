@@ -133,24 +133,24 @@ const PasswordLogin: React.FC<PasswordLoginProps> = ({ onSubmit, onCaptchaSubmit
                       >
                         {(item) => (
                           <DropdownItem key={item.uin} textValue={item.uin}>
-                  <div className='flex items-center gap-2'>
-                          <Avatar
-                            alt={item.uin}
-                            className='flex-shrink-0'
-                            size='sm'
-                            src={
+                            <div className='flex items-center gap-2'>
+                              <Avatar
+                                alt={item.uin}
+                                className='flex-shrink-0'
+                                size='sm'
+                                src={
                               isQQQuickNewItem(item)
                                 ? item.faceUrl
                                 : `https://q1.qlogo.cn/g?b=qq&nk=${item.uin}&s=1`
                             }
-                          />
-                          <div className='flex flex-col'>
-                            {isQQQuickNewItem(item)
-                              ? `${item.nickName}(${item.uin})`
-                              : item.uin}
-                          </div>
-                        </div>
-                </DropdownItem>
+                              />
+                              <div className='flex flex-col'>
+                                {isQQQuickNewItem(item)
+                                  ? `${item.nickName}(${item.uin})`
+                                  : item.uin}
+                              </div>
+                            </div>
+                          </DropdownItem>
                         )}
                       </DropdownMenu>
                     </Dropdown>

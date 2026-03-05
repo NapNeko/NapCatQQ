@@ -326,7 +326,7 @@ async function getVersionInfo (actions: ActionMap, adapter: string, config: Netw
   if (!actions) return null;
 
   try {
-    const data = await actions.call('get_version_info', void 0, adapter, config);
+    const data = await actions.call('get_version_info', undefined, adapter, config);
     return {
       appName: data.app_name,
       appVersion: data.app_version,

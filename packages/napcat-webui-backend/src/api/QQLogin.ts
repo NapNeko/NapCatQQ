@@ -271,7 +271,7 @@ export const QQResetDeviceIDHandler: RequestHandler = async (_, res) => {
     // 自动备份
     try {
       await Registry20Utils.backup(registryPath);
-    } catch (e) {
+    } catch (_e) {
       // 忽略备份错误（例如文件不存在）
     }
 

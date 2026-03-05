@@ -286,7 +286,7 @@ export class PluginLoader {
           if (pkg.name === pluginId) {
             return item.name;
           }
-        } catch (e) { }
+        } catch (_e) { }
       }
 
       // 如果目录名就是 ID

@@ -90,7 +90,7 @@ function NapCatFileHash () {
       const isSelectedValid = selectedUin && accounts.some(acc => acc.uin === selectedUin);
 
       if (!isSelectedValid) {
-        if (loginData?.uin && accounts.some((acc) => acc.uin == loginData.uin)) {
+        if (loginData?.uin && accounts.some((acc) => acc.uin === loginData.uin)) {
           setSelectedUin(loginData.uin);
         } else {
           setSelectedUin(accounts[0].uin);

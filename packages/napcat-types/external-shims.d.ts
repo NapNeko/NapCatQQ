@@ -68,10 +68,10 @@ declare module 'napcat-protobuf' {
     encode (value: any): Uint8Array;
   }
   export function ProtoField (...args: any[]): any;
-  export type NapProtoEncodeStructType<T> = any;
-  export type NapProtoDecodeStructType<T> = any;
-  export type ScalarProtoFieldType<T> = any;
-  export type MessageProtoFieldType<T> = any;
+  export type NapProtoEncodeStructType<_T> = any;
+  export type NapProtoDecodeStructType<_T> = any;
+  export type ScalarProtoFieldType<_T> = any;
+  export type MessageProtoFieldType<_T> = any;
   export const ScalarType: {
     STRING: any;
     INT64: any;
@@ -91,7 +91,7 @@ declare module 'inversify' {
   }
   export function injectable (...args: any[]): any;
   export function inject (...args: any[]): any;
-  export interface ServiceIdentifier<T = any> { }
+  export interface ServiceIdentifier<_T = any> { }
   const _inversify_default: any;
   export default _inversify_default;
 }

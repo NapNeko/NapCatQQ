@@ -17,7 +17,6 @@ const envPath = path.join(__dirname, 'config', '.env');
 if (fs.existsSync(envPath)) {
   try {
     const data = fs.readFileSync(envPath, 'utf8');
-    let loadedCount = 0;
     data.split(/\r?\n/).forEach(line => {
       line = line.trim();
       if (line && !line.startsWith('#')) {
@@ -26,7 +25,6 @@ if (fs.existsSync(envPath)) {
         const value = parts.slice(1).join('=').trim();
         if (key && value) {
           process.env[key] = value;
-          loadedCount++;
         }
       }
     });

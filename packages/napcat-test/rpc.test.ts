@@ -611,7 +611,7 @@ describe('napcat-rpc RPC', () => {
       const proxy = createDeepProxy<typeof target>({ transport });
 
       const processor = vi.fn(async (x: number) => {
-        await new Promise(r => setTimeout(r, 1));
+        await new Promise(resolve => setTimeout(resolve, 1));
         return x * 10;
       });
 
@@ -781,7 +781,7 @@ describe('napcat-rpc RPC', () => {
           return { id, name: `User${id}` };
         },
         async delay (ms: number) {
-          await new Promise(r => setTimeout(r, ms));
+          await new Promise(resolve => setTimeout(resolve, ms));
           return 'done';
         },
       });
