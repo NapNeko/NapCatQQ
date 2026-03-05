@@ -230,8 +230,8 @@ export class PacketOperationContext {
   }
   async UploadForwardMsgV2 (msg: UploadForwardMsgParams[], groupUin: number = 0) {
     //await this.SendPreprocess(msg, groupUin);
-    // 遍历上传资源
-    await Promise.allSettled(msg.map(async (item) => { return await this.SendPreprocess(item.actionMsg, groupUin); }));
+    // 遍历上传资源（跳过已有原始数据的项）
+    await Promise.allSettled(msg.filter(item => item.actionMsg).map(async (item) => { return await this.SendPreprocess(item.actionMsg!, groupUin); }));
     const req = trans.UploadForwardMsgV2.build(this.context.napcore.basicInfo.uid, msg, groupUin);
     const resp = await this.context.client.sendOidbPacket(req, true);
     const res = trans.UploadForwardMsg.parse(resp);
@@ -310,6 +310,15 @@ export class PacketOperationContext {
       if (!res.msgInfo) continue;
       return res.msgInfo;
     }
+  }
+
+  async FetchForwardMsgRaw (resId: string) {
+    const req = trans.DownloadForwardMsg.build(this.context.napcore.basicInfo.uid, resId);
+    const resp = await this.context.client.sendOidbPacket(req, true);
+    const res = trans.DownloadForwardMsg.parse(resp);
+    const inflate = gunzipSync(res.result.payload);
+    const result = new NapProtoMsg(LongMsgResult).decode(inflate);
+    return result.action;
   }
 
   async FetchForwardMsg (res_id: string): Promise<RawMessage[]> {

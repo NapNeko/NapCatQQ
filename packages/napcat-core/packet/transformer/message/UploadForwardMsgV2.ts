@@ -1,19 +1,20 @@
 import zlib from 'node:zlib';
 import * as proto from '@/napcat-core/packet/transformer/proto';
-import { NapProtoMsg } from 'napcat-protobuf';
+import { NapProtoEncodeStructType, NapProtoMsg } from 'napcat-protobuf';
 import { OidbPacket, PacketBufBuilder, PacketTransformer } from '@/napcat-core/packet/transformer/base';
 import { PacketMsg } from '@/napcat-core/packet/message/message';
 
 export interface UploadForwardMsgParams {
   actionCommand: string;
-  actionMsg: PacketMsg[];
+  actionMsg?: PacketMsg[];
+  actionMsgBody?: NapProtoEncodeStructType<typeof proto.PushMsgBody>[];
 }
 class UploadForwardMsgV2 extends PacketTransformer<typeof proto.SendLongMsgResp> {
   build (selfUid: string, msg: UploadForwardMsgParams[], groupUin: number = 0): OidbPacket {
     const reqdata = msg.map((item) => ({
       actionCommand: item.actionCommand,
       actionData: {
-        msgBody: this.msgBuilder.buildFakeMsg(selfUid, item.actionMsg),
+        msgBody: item.actionMsgBody ?? this.msgBuilder.buildFakeMsg(selfUid, item.actionMsg ?? []),
       }
     }));
     const longMsgResultData = new NapProtoMsg(proto.LongMsgResult).encode(

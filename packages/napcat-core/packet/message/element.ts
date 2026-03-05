@@ -1,3 +1,4 @@
+import * as crypto from 'node:crypto';
 import * as zlib from 'node:zlib';
 import { NapProtoDecodeStructType, NapProtoEncodeStructType, NapProtoMsg } from 'napcat-protobuf';
 import {
@@ -665,11 +666,13 @@ export class PacketMsgMarkDownElement extends IPacketMsgElement<SendMarkdownElem
 export class PacketMultiMsgElement extends IPacketMsgElement<SendMultiForwardMsgElement> {
   resid: string;
   message: PacketMsg[];
+  uuid: string;
 
   constructor (rawElement: SendMultiForwardMsgElement, message?: PacketMsg[]) {
     super(rawElement);
     this.resid = rawElement.multiForwardMsgElement.resId;
     this.message = message ?? [];
+    this.uuid = rawElement.multiForwardMsgElement.fileName || crypto.randomUUID();
   }
 
   override buildElement (): NapProtoEncodeStructType<typeof Elem>[] {
@@ -677,7 +680,7 @@ export class PacketMultiMsgElement extends IPacketMsgElement<SendMultiForwardMsg
       lightAppElem: {
         data: Buffer.concat([
           Buffer.from([0x01]),
-          zlib.deflateSync(Buffer.from(JSON.stringify(ForwardMsgBuilder.fromPacketMsg(this.resid, this.message)), 'utf-8')),
+          zlib.deflateSync(Buffer.from(JSON.stringify(ForwardMsgBuilder.fromPacketMsg(this.resid, this.message, undefined, undefined, undefined, undefined, this.uuid)), 'utf-8')),
         ]),
       },
     }];

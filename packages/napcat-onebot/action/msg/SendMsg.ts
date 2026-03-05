@@ -215,11 +215,11 @@ export class SendMsgBase extends OneBotAction<SendMsgPayload, ReturnDataType> {
     uuid?: string,
     packetMsg: PacketMsg[],
     deleteAfterSentFiles: string[],
-    innerPacketMsg?: Array<{ uuid: string, packetMsg: PacketMsg[]; }>;
+    innerPacketMsg?: Array<{ uuid: string, packetMsg?: PacketMsg[], actionMsgBody?: UploadForwardMsgParams['actionMsgBody']; }>;
   } | null> {
     const packetMsg: PacketMsg[] = [];
     const delFiles: string[] = [];
-    const innerMsg: Array<{ uuid: string, packetMsg: PacketMsg[]; }> = new Array();
+    const innerMsg: Array<{ uuid: string, packetMsg?: PacketMsg[], actionMsgBody?: UploadForwardMsgParams['actionMsgBody']; }> = new Array();
     for (const node of messageNodes) {
       if (dp >= 3) {
         this.core.context.logger.logWarn('转发消息深度超过3层，将停止解析！');
@@ -240,7 +240,7 @@ export class SendMsgBase extends OneBotAction<SendMsgPayload, ReturnDataType> {
           if (uploadReturnData?.uuid) {
             innerMsg.push({ uuid: uploadReturnData.uuid, packetMsg: uploadReturnData.packetMsg });
             uploadReturnData.innerPacketMsg?.forEach(m => {
-              innerMsg.push({ uuid: m.uuid, packetMsg: m.packetMsg });
+              innerMsg.push(m);
             });
           }
 
@@ -274,6 +274,37 @@ export class SendMsgBase extends OneBotAction<SendMsgPayload, ReturnDataType> {
           const msgCache = await this.core.apis.FileApi.downloadRawMsgMedia([msg]);
           delFiles.push(...msgCache);
           const transformedMsg = this.core.apis.PacketApi.pkt.msgConverter.rawMsgToPacketMsg(msg, msgPeer);
+          // 检测嵌套合并转发消息，拉取内层protobuf数据
+          for (const element of msg.elements) {
+            let resId: string | undefined;
+            let uuid: string | undefined;
+            if (element.multiForwardMsgElement?.resId) {
+              resId = element.multiForwardMsgElement.resId;
+              uuid = element.multiForwardMsgElement.fileName;
+            } else if (element.arkElement?.bytesData) {
+              try {
+                const json = JSON.parse(element.arkElement.bytesData);
+                if (json.app === 'com.tencent.multimsg') {
+                  resId = json.meta?.detail?.resid;
+                  uuid = json.meta?.detail?.uniseq || json.extra?.filename;
+                }
+              } catch { /* not a valid json */ }
+            }
+            if (resId && uuid) {
+              try {
+                const rawActions = await this.core.apis.PacketApi.pkt.operation.FetchForwardMsgRaw(resId);
+                for (const action of rawActions) {
+                  if (action.actionCommand === 'MultiMsg') {
+                    innerMsg.push({ uuid, actionMsgBody: action.actionData.msgBody });
+                  } else {
+                    innerMsg.push({ uuid: action.actionCommand, actionMsgBody: action.actionData.msgBody });
+                  }
+                }
+              } catch (e) {
+                this.core.context.logger.logError(`获取合并转发内层消息失败: ${(e as Error)?.stack}`);
+              }
+            }
+          }
           this.core.context.logger.logDebug(`handleForwardedNodesPacket[PureRaw] 转换为 ${stringifyWithBigInt(transformedMsg)}`);
           packetMsg.push(transformedMsg);
         }
@@ -289,10 +320,11 @@ export class SendMsgBase extends OneBotAction<SendMsgPayload, ReturnDataType> {
       actionCommand: 'MultiMsg',
       actionMsg: packetMsg,
     }];
-    innerMsg.forEach(({ uuid, packetMsg: msg }) => {
+    innerMsg.forEach(({ uuid, packetMsg: msg, actionMsgBody: raw }) => {
       uploadMsgData.push({
         actionCommand: uuid,
         actionMsg: msg,
+        actionMsgBody: raw,
       });
     });
     const resid = await this.core.apis.PacketApi.pkt.operation.UploadForwardMsgV2(uploadMsgData, msgPeer.chatType === ChatType.KCHATTYPEGROUP ? +msgPeer.peerUid : 0);
