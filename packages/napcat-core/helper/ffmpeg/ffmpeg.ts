@@ -64,10 +64,12 @@ export class FFmpegService {
     }
     return this.adapter;
   }
+
   public static async convertToNTSilkTct (inputFile: string, outputFile: string): Promise<void> {
     const adapter = await this.getAdapter();
     await adapter.convertToNTSilkTct(inputFile, outputFile);
   }
+
   /**
      * 设置 FFmpeg 路径并更新适配器
      * @deprecated 建议使用 init() 方法初始化

@@ -15,8 +15,9 @@ export class GetShareLink extends OneBotAction<GetShareLinkPayload, any> {
   override actionSummary = '获取文件分享链接';
   override actionTags = ['文件扩展'];
   override payloadExample = {
-    fileset_id: 'set_123'
+    fileset_id: 'set_123',
   };
+
   override returnExample = 'http://example.com/share';
 
   async _handle (payload: GetShareLinkPayload) {

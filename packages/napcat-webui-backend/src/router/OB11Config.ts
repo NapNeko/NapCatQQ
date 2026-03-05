@@ -8,7 +8,7 @@ const router: Router = Router();
 
 // 使用内存存储，配合流式处理
 const upload = multer({
-  storage: multer.memoryStorage()
+  storage: multer.memoryStorage(),
 });
 
 // router:读取配置
@@ -21,4 +21,3 @@ router.get('/ExportConfig', BackupExportConfigHandler);
 router.post('/ImportConfig', upload.single('configFile'), BackupImportConfigHandler);
 
 export { router as OB11ConfigRouter };
-

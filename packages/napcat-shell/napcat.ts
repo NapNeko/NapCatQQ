@@ -42,14 +42,12 @@ const ENV = {
   isPipeDisabled: process.env['NAPCAT_DISABLE_PIPE'] === '1',
 } as const;
 
-
 // Worker 消息类型
 interface WorkerMessage {
   type: 'restart' | 'restart-prepare' | 'shutdown' | 'login-success';
   secretKey?: string;
   port?: number;
 }
-
 
 const logger = new LogWrapper(pathWrapper.logsPath);
 if (!ENV.isWorkerProcess && !ENV.isMultiProcessDisabled) {
@@ -67,7 +65,6 @@ let isShuttingDown = false;
 const recentCrashTimestamps: number[] = [];
 const CRASH_TIME_WINDOW = 10000; // 10秒时间窗口
 const MAX_CRASHES_IN_WINDOW = 3; // 最大崩溃次数
-
 
 /**
  * 获取进程类型名称（用于日志）
@@ -112,7 +109,7 @@ function forceKillProcess (pid: number): void {
         logger.logError(`[NapCat] [Process] 强制终止进程失败: PID ${pid}`);
       }
     } else {
-      logger.logError(`[NapCat] [Process] 强制终止进程失败:`, error);
+      logger.logError('[NapCat] [Process] 强制终止进程失败:', error);
     }
   }
 }
@@ -414,7 +411,7 @@ async function startWorkerProcess (): Promise<void> {
       logger.logError('[NapCat] [Process] 发送重启请求失败:', e);
       return {
         result: false,
-        message: '发送重启请求失败: ' + (e as Error).message
+        message: '发送重启请求失败: ' + (e as Error).message,
       };
     }
   });

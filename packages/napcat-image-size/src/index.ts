@@ -158,7 +158,7 @@ function bufferToReadStream (buffer: Buffer): ReadStream {
     read () {
       this.push(buffer);
       this.push(null);
-    }
+    },
   });
   return readable as unknown as ReadStream;
 }

@@ -114,7 +114,7 @@ export class NTQQOnlineApi {
       fileElement: {
         fileName: actualFolderName,
         filePath: folderPath,
-        fileSize: "",
+        fileSize: '',
       },
     };
 

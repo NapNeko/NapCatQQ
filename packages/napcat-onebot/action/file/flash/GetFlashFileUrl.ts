@@ -17,10 +17,11 @@ export class GetFlashFileUrl extends OneBotAction<GetFlashFileUrlPayload, any> {
   override actionSummary = '获取闪传文件链接';
   override actionTags = ['文件扩展'];
   override payloadExample = {
-    fileset_id: 'set_123'
+    fileset_id: 'set_123',
   };
+
   override returnExample = {
-    url: 'http://example.com/flash.jpg'
+    url: 'http://example.com/flash.jpg',
   };
 
   async _handle (payload: GetFlashFileUrlPayload) {

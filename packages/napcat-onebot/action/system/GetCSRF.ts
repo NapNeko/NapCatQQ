@@ -17,7 +17,7 @@ export class GetCSRF extends OneBotAction<void, GetCSRFReturnType> {
   override actionTags = ['系统接口'];
   override payloadExample = {};
   override returnExample = {
-    token: 123456789
+    token: 123456789,
   };
 
   async _handle () {

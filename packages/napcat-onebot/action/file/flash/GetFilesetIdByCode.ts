@@ -12,15 +12,17 @@ export class GetFilesetId extends OneBotAction<GetFilesetIdPayload, { fileset_id
   override actionName = ActionName.GetFilesetId;
   override payloadSchema = GetFilesetIdPayloadSchema;
   override returnSchema = Type.Object({
-    fileset_id: Type.String({ description: '文件集 ID' })
+    fileset_id: Type.String({ description: '文件集 ID' }),
   });
+
   override actionSummary = '获取文件集 ID';
   override actionTags = ['文件扩展'];
   override payloadExample = {
-    share_code: '123456'
+    share_code: '123456',
   };
+
   override returnExample = {
-    fileset_id: 'set_123'
+    fileset_id: 'set_123',
   };
 
   async _handle (payload: GetFilesetIdPayload) {

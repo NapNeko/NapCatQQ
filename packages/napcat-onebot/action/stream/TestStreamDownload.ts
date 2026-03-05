@@ -15,11 +15,13 @@ export class TestDownloadStream extends OneBotAction<TestDownloadStreamPayload, 
   override actionSummary = '测试下载流';
   override actionTags = ['流式传输扩展'];
   override payloadExample = {
-    url: 'http://example.com/file'
+    url: 'http://example.com/file',
   };
+
   override returnExample = {
-    success: true
+    success: true,
   };
+
   override payloadSchema = TestDownloadStreamPayloadSchema;
   override returnSchema = Type.Any({ description: '测试流数据' });
   override useStream = true;

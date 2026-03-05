@@ -22,8 +22,9 @@ export class SetInputStatus extends OneBotAction<PayloadType, ReturnType> {
   override actionTags = ['系统扩展'];
   override payloadExample = {
     user_id: '123456789',
-    event_type: 1
+    event_type: 1,
   };
+
   override returnExample = null;
 
   async _handle (payload: PayloadType) {

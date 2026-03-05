@@ -112,11 +112,11 @@ export class ForwardMsgBuilder {
         preview: m.valid ? m.toPreview() : '[该消息类型暂不支持查看]',
       })),
     })),
-      source,
-      news,
-      summary,
-      prompt,
-      uuid,
+    source,
+    news,
+    summary,
+    prompt,
+    uuid
     );
   }
 }

@@ -21,7 +21,7 @@ export default class GetVersionInfo extends OneBotAction<void, ReturnType> {
   override returnExample = {
     app_name: 'NapCat.Onebot',
     protocol_version: 'v11',
-    app_version: '1.0.0'
+    app_version: '1.0.0',
   };
 
   async _handle (): Promise<ReturnType> {

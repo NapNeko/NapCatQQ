@@ -22,11 +22,13 @@ export class GetGroupAlbumMediaList extends OneBotAction<PayloadType, ReturnType
     group_id: '123456',
     album_id: 'album_id_1',
   };
+
   override returnExample = {
     media_list: [
-      { media_id: 'media_id_1', url: 'http://example.com/1.jpg' }
-    ]
+      { media_id: 'media_id_1', url: 'http://example.com/1.jpg' },
+    ],
   };
+
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
 

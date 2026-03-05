@@ -91,7 +91,8 @@ const HistoryLogs: React.FC<HistoryLogsProps> = (props) => {
       <Card className={clsx(
         'max-w-full h-full backdrop-blur-sm border border-white/40 dark:border-white/10 shadow-sm',
         hasBackground ? 'bg-white/20 dark:bg-black/10' : 'bg-white/60 dark:bg-black/40'
-      )}>
+      )}
+      >
         <CardHeader className='flex-row justify-start gap-3'>
           <Select
             label='选择日志'

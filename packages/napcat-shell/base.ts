@@ -601,7 +601,7 @@ export async function NCoreInitShell () {
   const wrapper = loadQQWrapper(basicInfoWrapper.QQMainPath, basicInfoWrapper.getFullQQVersion());
   // wrapper.node 加载后再初始化 hook，按 schema 读取配置
   const napcatConfig = loadNapcatConfig(pathWrapper.configPath);
-  await nativePacketHandler.init(basicInfoWrapper.getFullQQVersion(), napcatConfig.o3HookMode === 1 ? true : false);
+  await nativePacketHandler.init(basicInfoWrapper.getFullQQVersion(), napcatConfig.o3HookMode === 1);
 
   // 登录前监听 OidbSvcTrpcTcp.0xcde_2 数据包，获取数据库 passphrase
   let dbPassphrase: string | undefined;

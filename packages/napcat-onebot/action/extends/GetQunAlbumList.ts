@@ -2,7 +2,6 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
-
 const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
   attach_info: Type.String({ default: '', description: '附加信息（用于分页，从上一次返回结果中获取）' }),
@@ -26,18 +25,20 @@ export class GetQunAlbumList extends OneBotAction<PayloadType, GetQunAlbumListRe
     group_id: '123456',
     attach_info: '',
   };
+
   override returnExample = {
     album_list: [
       {
         album_id: 'album_1',
         album_name: '测试相册',
         cover_url: 'http://example.com/cover.jpg',
-        create_time: 1734567890
-      }
+        create_time: 1734567890,
+      },
     ],
     attach_info: '',
     has_more: false,
   };
+
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
 

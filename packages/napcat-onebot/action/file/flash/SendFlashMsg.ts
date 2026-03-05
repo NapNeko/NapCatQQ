@@ -19,10 +19,11 @@ export class SendFlashMsg extends OneBotAction<SendFlashMsgPayload, any> {
   override actionTags = ['文件扩展'];
   override payloadExample = {
     fileset_id: 'set_123',
-    user_id: '123456789'
+    user_id: '123456789',
   };
+
   override returnExample = {
-    message_id: 123456
+    message_id: 123456,
   };
 
   async _handle (payload: SendFlashMsgPayload) {

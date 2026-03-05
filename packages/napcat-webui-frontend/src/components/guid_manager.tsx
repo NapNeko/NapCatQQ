@@ -363,15 +363,17 @@ const GUIDManager: React.FC<GUIDManagerProps> = ({ showRestart = true, compact =
         <div className='flex flex-col gap-2'>
           <div className='text-sm font-medium text-default-700'>当前设备 GUID</div>
           <div className='flex items-center gap-2'>
-            {currentLinuxGUID ? (
-              <Chip variant='flat' color='primary' className='font-mono text-xs max-w-full'>
-                {currentLinuxGUID}
-              </Chip>
-            ) : (
-              <Chip variant='flat' color='warning' className='text-xs'>
-                未设置 / 不存在
-              </Chip>
-            )}
+            {currentLinuxGUID
+              ? (
+                <Chip variant='flat' color='primary' className='font-mono text-xs max-w-full'>
+                  {currentLinuxGUID}
+                </Chip>
+              )
+              : (
+                <Chip variant='flat' color='warning' className='text-xs'>
+                  未设置 / 不存在
+                </Chip>
+              )}
             {currentLinuxGUID && (
               <Button
                 isIconOnly
@@ -417,15 +419,17 @@ const GUIDManager: React.FC<GUIDManagerProps> = ({ showRestart = true, compact =
         <div className='flex flex-col gap-2'>
           <div className='text-sm font-medium text-default-700'>当前 MAC 地址</div>
           <div className='flex items-center gap-2'>
-            {currentMAC ? (
-              <Chip variant='flat' color='secondary' className='font-mono text-xs max-w-full'>
-                {currentMAC}
-              </Chip>
-            ) : (
-              <Chip variant='flat' color='warning' className='text-xs'>
-                未设置 / 不存在
-              </Chip>
-            )}
+            {currentMAC
+              ? (
+                <Chip variant='flat' color='secondary' className='font-mono text-xs max-w-full'>
+                  {currentMAC}
+                </Chip>
+              )
+              : (
+                <Chip variant='flat' color='warning' className='text-xs'>
+                  未设置 / 不存在
+                </Chip>
+              )}
             {currentMAC && (
               <Button
                 isIconOnly
@@ -571,15 +575,17 @@ const GUIDManager: React.FC<GUIDManagerProps> = ({ showRestart = true, compact =
       <div className='flex flex-col gap-2'>
         <div className='text-sm font-medium text-default-700'>当前设备 GUID</div>
         <div className='flex items-center gap-2'>
-          {currentGUID ? (
-            <Chip variant='flat' color='primary' className='font-mono text-xs max-w-full'>
-              {currentGUID}
-            </Chip>
-          ) : (
-            <Chip variant='flat' color='warning' className='text-xs'>
-              未设置 / 不存在
-            </Chip>
-          )}
+          {currentGUID
+            ? (
+              <Chip variant='flat' color='primary' className='font-mono text-xs max-w-full'>
+                {currentGUID}
+              </Chip>
+            )
+            : (
+              <Chip variant='flat' color='warning' className='text-xs'>
+                未设置 / 不存在
+              </Chip>
+            )}
           {currentGUID && (
             <Button
               isIconOnly

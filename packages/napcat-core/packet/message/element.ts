@@ -511,14 +511,14 @@ export class PacketMsgPttElement extends IPacketMsgElement<SendPttElement> {
   }
 
   override buildElement (): NapProtoEncodeStructType<typeof Elem>[] {
-    //return [];
+    // return [];
     if (!this.msgInfo) return [];
     return [{
       commonElem: {
         serviceType: 48,
         pbElem: new NapProtoMsg(MsgInfo).encode(this.msgInfo),
         businessType: 22,
-      }
+      },
     }];
   }
 

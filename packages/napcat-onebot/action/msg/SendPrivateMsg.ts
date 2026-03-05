@@ -9,10 +9,11 @@ class SendPrivateMsg extends SendMsgBase {
   override actionTags = ['消息接口'];
   override payloadExample = {
     user_id: '123456789',
-    message: 'hello'
+    message: 'hello',
   };
+
   override returnExample = {
-    message_id: 123456
+    message_id: 123456,
   };
 
   protected override async check (payload: SendMsgPayload): Promise<BaseCheckResult> {

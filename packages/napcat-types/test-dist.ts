@@ -34,5 +34,3 @@ if (ChatType.KCHATTYPEGROUP === 2 && ElementType.TEXT === 1) {
   console.error('\n❌ TESTS FAILED: Enum value mismatch.');
   throw new Error('Test Failed');
 }
-
-

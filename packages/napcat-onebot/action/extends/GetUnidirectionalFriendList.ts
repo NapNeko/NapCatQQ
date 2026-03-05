@@ -30,8 +30,8 @@ export class GetUnidirectionalFriendList extends OneBotAction<void, ReturnType> 
       uid: 'u_123',
       nick_name: '单向好友',
       age: 20,
-      source: '来源'
-    }
+      source: '来源',
+    },
   ];
 
   async pack_data (data: string): Promise<Uint8Array> {

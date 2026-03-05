@@ -19,10 +19,11 @@ export class FetchCustomFace extends OneBotAction<PayloadType, ReturnType> {
   override actionSummary = '获取自定义表情';
   override actionTags = ['系统扩展'];
   override payloadExample = {
-    count: 10
+    count: 10,
   };
+
   override returnExample = [
-    'http://example.com/face1.png'
+    'http://example.com/face1.png',
   ];
 
   async _handle (payload: PayloadType) {
@@ -30,4 +31,3 @@ export class FetchCustomFace extends OneBotAction<PayloadType, ReturnType> {
     return ret.emojiInfoList.map(e => e.url);
   }
 }
-

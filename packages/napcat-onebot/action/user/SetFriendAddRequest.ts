@@ -20,8 +20,9 @@ export default class SetFriendAddRequest extends OneBotAction<SetFriendAddReques
   override payloadExample = {
     flag: 'flag_12345',
     approve: true,
-    remark: '新朋友'
+    remark: '新朋友',
   };
+
   override returnExample = {};
 
   async _handle (payload: SetFriendAddRequestPayload): Promise<void> {

@@ -10,9 +10,9 @@ export const ActionExamples = {
     errors: [
       { code: 1400, description: '请求参数错误或业务逻辑执行失败' },
       { code: 1401, description: '权限不足' },
-      { code: 1404, description: '资源不存在' }
-    ]
-  }
+      { code: 1404, description: '资源不存在' },
+    ],
+  },
 };
 
 export class OB11Response {

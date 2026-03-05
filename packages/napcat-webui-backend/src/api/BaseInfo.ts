@@ -154,7 +154,7 @@ export const getAllReleasesHandler: RequestHandler = async (req, res) => {
         total,
         totalPages,
       },
-      mirror: usedMirror
+      mirror: usedMirror,
     });
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch releases' });

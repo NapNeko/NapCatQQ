@@ -102,7 +102,7 @@ const renderItems = (items: MenuItem[], children = false) => {
                       ? 'bg-primary-500 animate-nav-spin'
                       : 'bg-primary-200 dark:bg-white shadow-lg'
                   )}
-                  aria-hidden="true"
+                  aria-hidden='true'
                 />
               )
           }

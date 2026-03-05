@@ -52,13 +52,15 @@ export class GetMiniAppArk extends GetPacketStatusDepends<PayloadType, ReturnTyp
     title: '测试标题',
     desc: '测试描述',
     picUrl: 'http://example.com/pic.jpg',
-    jumpUrl: 'http://example.com'
+    jumpUrl: 'http://example.com',
   };
+
   override returnExample = {
     data: {
-      ark: 'ark_content'
-    }
+      ark: 'ark_content',
+    },
   };
+
   async _handle (payload: PayloadType) {
     let reqParam: MiniAppReqParams;
     const customParams: MiniAppReqCustomParams = {

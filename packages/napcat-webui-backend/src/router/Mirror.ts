@@ -3,7 +3,7 @@ import {
   GetMirrorListHandler,
   SetCustomMirrorHandler,
   TestMirrorsSSEHandler,
-  TestSingleMirrorHandler
+  TestSingleMirrorHandler,
 } from '@/napcat-webui-backend/src/api/Mirror';
 
 const router: Router = Router();

@@ -24,7 +24,7 @@ export interface NodeIKernelStorageCleanService {
   //   "C:\\Users\\nanaeo\\AppData\\Roaming\\QQ\\Partitions\\qqnt_9212"
   // ]
   // ]
-  addCacheScanedPaths (paths: Map<`tmp` | `SilentCacheappSessionPartation9212` | `hotUpdate`, unknown>): unknown;
+  addCacheScanedPaths (paths: Map<'tmp' | 'SilentCacheappSessionPartation9212' | 'hotUpdate', unknown>): unknown;
 
   addFilesScanedPaths (arg: unknown): unknown;
 

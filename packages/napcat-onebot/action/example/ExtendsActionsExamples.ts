@@ -9,9 +9,9 @@ export const ExtendsActionsExamples = {
       {
         type: 'string',
         characters: [
-          { character_id: 'id', character_name: 'name', preview_url: 'url' }
-        ]
-      }
+          { character_id: 'id', character_name: 'name', preview_url: 'url' },
+        ],
+      },
     ],
   },
   GetClientkey: {

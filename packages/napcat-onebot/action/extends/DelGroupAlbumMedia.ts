@@ -23,9 +23,11 @@ export class DelGroupAlbumMedia extends OneBotAction<PayloadType, ReturnType> {
     album_id: 'album_id_1',
     lloc: 'media_id_1',
   };
+
   override returnExample = {
-    result: {}
+    result: {},
   };
+
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
 

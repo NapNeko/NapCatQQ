@@ -55,7 +55,7 @@ const XTerm = forwardRef<XTermRef, XTermProps>((props, ref) => {
         'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", "JetBrains Mono", monospace',
       cursorInactiveStyle: 'outline',
       drawBoldTextInBrightColors: false,
-      fontSize: fontSize,
+      fontSize,
       lineHeight: 1.2,
     });
     terminalRef.current = terminal;

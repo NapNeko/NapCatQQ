@@ -18,10 +18,11 @@ export class GoCQHTTPSendForwardMsg extends GoCQHTTPSendForwardMsgBase {
   override actionTags = ['Go-CQHTTP'];
   override payloadExample = {
     group_id: '123456789',
-    messages: []
+    messages: [],
   };
+
   override returnExample = {
-    message_id: 123456
+    message_id: 123456,
   };
 
   protected override async check (payload: GoCQHTTPSendForwardMsgPayload) {
@@ -35,11 +36,13 @@ export class GoCQHTTPSendPrivateForwardMsg extends GoCQHTTPSendForwardMsgBase {
   override actionTags = ['Go-CQHTTP'];
   override payloadExample = {
     user_id: '123456789',
-    messages: []
+    messages: [],
   };
+
   override returnExample = {
-    message_id: 123456
+    message_id: 123456,
   };
+
   override async _handle (payload: GoCQHTTPSendForwardMsgPayload): Promise<ReturnDataType> {
     return this.base_handle(payload, ContextMode.Private);
   }
@@ -51,11 +54,13 @@ export class GoCQHTTPSendGroupForwardMsg extends GoCQHTTPSendForwardMsgBase {
   override actionTags = ['Go-CQHTTP'];
   override payloadExample = {
     group_id: '123456789',
-    messages: []
+    messages: [],
   };
+
   override returnExample = {
-    message_id: 123456
+    message_id: 123456,
   };
+
   override async _handle (payload: GoCQHTTPSendForwardMsgPayload): Promise<ReturnDataType> {
     return this.base_handle(payload, ContextMode.Group);
   }

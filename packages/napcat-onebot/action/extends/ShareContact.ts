@@ -15,7 +15,6 @@ const ReturnSchema = Type.Any({ description: '分享结果' });
 type ReturnType = Static<typeof ReturnSchema>;
 
 export class SharePeerBase extends OneBotAction<PayloadType, ReturnType> {
-
   override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
   override actionSummary = '分享用户 (Ark)';
@@ -23,10 +22,11 @@ export class SharePeerBase extends OneBotAction<PayloadType, ReturnType> {
   override actionTags = ['消息扩展'];
   override payloadExample = {
     user_id: '123456',
-    phone_number: ''
+    phone_number: '',
   };
+
   override returnExample = {
-    ark: '...'
+    ark: '...',
   };
 
   async _handle (payload: PayloadType) {
@@ -58,8 +58,9 @@ export class ShareGroupExBase extends OneBotAction<PayloadTypeGroupEx, ReturnTyp
   override actionDescription = '获取群分享的 Ark 内容';
   override actionTags = ['消息扩展'];
   override payloadExample = {
-    group_id: '123456'
+    group_id: '123456',
   };
+
   override returnExample = '{"app": "com.tencent.structmsg", ...}';
 
   async _handle (payload: PayloadTypeGroupEx) {

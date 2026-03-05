@@ -52,7 +52,6 @@ export const BackupExportConfigHandler: RequestHandler = async (_req, res) => {
         sendError(res, '流式压缩失败');
       }
     });
-
   } catch (error) {
     const msg = (error as Error).message;
     console.error('导出配置失败:', error);
@@ -140,9 +139,8 @@ export const BackupImportConfigHandler: RequestHandler = async (req, res) => {
     return sendSuccess(res, {
       message: '配置导入成功，重启后生效~',
       filesImported: extractedFiles.size,
-      filesBackedUp: backupFiles.size
+      filesBackedUp: backupFiles.size,
     });
-
   } catch (error) {
     console.error('导入配置失败:', error);
     const msg = (error as Error).message;

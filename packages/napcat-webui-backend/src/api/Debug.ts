@@ -3,7 +3,7 @@ import { WebSocket, WebSocketServer, RawData } from 'ws';
 import { sendError, sendSuccess } from '@/napcat-webui-backend/src/utils/response';
 import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
 import { IncomingMessage } from 'http';
-import { OB11Response } from '@/napcat-onebot/action/OneBotAction';
+import { OB11Response, OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { OB11LifeCycleEvent, LifeCycleSubType } from '@/napcat-onebot/event/meta/OB11LifeCycleEvent';
 import { IOB11NetworkAdapter } from '@/napcat-onebot/network/adapter';
@@ -12,7 +12,7 @@ import { ActionMap } from '@/napcat-onebot/action';
 import { NapCatCore } from '@/napcat-core/index';
 import { NapCatOneBot11Adapter } from '@/napcat-onebot/index';
 import { OB11EmitEventContent, OB11NetworkReloadType } from '@/napcat-onebot/network/index';
-import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
+
 import json5 from 'json5';
 
 type ActionNameType = typeof ActionName[keyof typeof ActionName];
@@ -82,7 +82,7 @@ class DebugAdapter extends IOB11NetworkAdapter<WebsocketServerConfig> {
       token: '',
       enableForcePushEvent: true,
       debug: true,
-      heartInterval: 0
+      heartInterval: 0,
     };
 
     super(`debug-${sessionId}`, config, core, obContext, actions);
@@ -161,9 +161,9 @@ class DebugAdapter extends IOB11NetworkAdapter<WebsocketServerConfig> {
     this.updateActivity();
     let receiveData: { action: ActionNameType, params?: Record<string, unknown>, echo?: unknown; } = {
       action: ActionName.Unknown,
-      params: {}
+      params: {},
     };
-    let echo: unknown = undefined;
+    let echo: unknown;
 
     try {
       receiveData = json5.parse(message.toString());
@@ -332,7 +332,7 @@ router.post('/create', async (_req: Request, res: Response) => {
  */
 const handleCallApi = async (req: Request, res: Response) => {
   try {
-    let adapterName = req.params['adapterName'] || req.body.adapterName || DEFAULT_ADAPTER_NAME;
+    const adapterName = req.params['adapterName'] || req.body.adapterName || DEFAULT_ADAPTER_NAME;
 
     let adapter = debugAdapterManager.getAdapter(adapterName);
 
