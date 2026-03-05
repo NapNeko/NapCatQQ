@@ -384,6 +384,26 @@ export class OneBotMsgApi {
         this.core.context.logger.logError('所有查找方法均失败，获取不到旧客户端的引用消息', element.replayMsgSeq);
       }
 
+      // 协议兜底：尝试通过协议直接获取消息
+      if (this.core.apis.PacketApi.packetStatus) {
+        try {
+          const msgSeq = +element.replayMsgSeq;
+          const fetchedMsgs = msg.chatType === ChatType.KCHATTYPEGROUP
+            ? await this.core.apis.PacketApi.pkt.operation.FetchGroupMessage(+msg.peerUin, msgSeq, msgSeq)
+            : await this.core.apis.PacketApi.pkt.operation.FetchC2CMessage(msg.peerUid, msgSeq, msgSeq);
+
+          const targetMsg = fetchedMsgs.find(m => (m.contentHead.sequence ?? 0) === msgSeq);
+          if (targetMsg?.contentHead?.newId) {
+            const msgId = String(targetMsg.contentHead.newId);
+            this.core.context.logger.logWarn('通过协议兜底成功获取引用消息', msgId);
+            return createReplyData(msgId);
+          }
+          this.core.context.logger.logWarn('协议兜底未找到匹配的引用消息');
+        } catch (e) {
+          this.core.context.logger.logError('协议兜底获取引用消息失败', (e as Error).stack);
+        }
+      }
+
       return null;
     },
     videoElement: async (element, msg, elementWrapper, { disableGetUrl }) => {
