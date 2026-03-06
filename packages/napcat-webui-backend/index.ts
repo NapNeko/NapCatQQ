@@ -301,6 +301,12 @@ export async function InitWebUi (logger: ILogWrapper, pathWrapper: NapCatPathWra
     }
   });
 
+  // /webui 不带尾斜杠时重定向到 /webui/
+  app.get('/webui', (c) => {
+    const url = new URL(c.req.url);
+    return c.redirect('/webui/' + url.search, 301);
+  });
+
   // ---- 静态文件 ----
   app.use('/webui/*', serveStatic({
     root: pathWrapper.staticPath,

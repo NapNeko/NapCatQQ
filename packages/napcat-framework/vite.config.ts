@@ -52,6 +52,10 @@ const FrameworkBaseConfig = () =>
         '@/napcat-adapter': resolve(__dirname, '../napcat-adapter'),
       },
     },
+    define: {
+      'process.env.WS_NO_BUFFER_UTIL': JSON.stringify('1'),
+      'process.env.WS_NO_UTF_8_VALIDATE': JSON.stringify('1'),
+    },
     build: {
       sourcemap: false,
       target: 'esnext',
