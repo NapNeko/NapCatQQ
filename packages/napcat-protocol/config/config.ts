@@ -1,5 +1,6 @@
 import { Type, Static } from '@sinclair/typebox';
-import Ajv from 'ajv';
+import { TypeCompiler } from '@sinclair/typebox/compiler';
+import { Value } from '@sinclair/typebox/value';
 
 // WebSocket 服务端配置
 const WebsocketServerConfigSchema = Type.Object({
@@ -56,11 +57,14 @@ export type NetworkAdapterConfig = HttpServerConfig | WebsocketServerConfig | We
 export type NetworkConfigKey = keyof NapCatProtocolConfig['network'];
 
 export function loadConfig (config: Partial<NapCatProtocolConfig>): NapCatProtocolConfig {
-  const ajv = new Ajv({ useDefaults: true, coerceTypes: true });
-  const validate = ajv.compile(NapCatProtocolConfigSchema);
-  const valid = validate(config);
+  let data = config;
+  data = Value.Default(NapCatProtocolConfigSchema, data) as Partial<NapCatProtocolConfig>;
+  data = Value.Convert(NapCatProtocolConfigSchema, data) as Partial<NapCatProtocolConfig>;
+  const validate = TypeCompiler.Compile(NapCatProtocolConfigSchema);
+  const valid = validate.Check(data);
   if (!valid) {
-    throw new Error(ajv.errorsText(validate.errors));
+    const errorMsg = [...validate.Errors(data)].map(e => e.message).join(', ');
+    throw new Error(errorMsg);
   }
-  return config as NapCatProtocolConfig;
+  return data as NapCatProtocolConfig;
 }

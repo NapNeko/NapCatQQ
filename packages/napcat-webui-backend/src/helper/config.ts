@@ -1,6 +1,7 @@
 import { webUiPathWrapper, getInitialWebUiToken } from '@/napcat-webui-backend/index';
 import { Type, Static } from '@sinclair/typebox';
-import Ajv from 'ajv';
+import { TypeCompiler } from '@sinclair/typebox/compiler';
+import { Value } from '@sinclair/typebox/value';
 import fs, { constants } from 'node:fs/promises';
 
 import { resolve } from 'node:path';
@@ -41,8 +42,14 @@ export class WebUiConfigWrapper {
   WebUiConfigData: WebUiConfigType | undefined = undefined;
 
   private validateAndApplyDefaults (config: Partial<WebUiConfigType>): WebUiConfigType {
-    new Ajv({ coerceTypes: true, useDefaults: true }).compile(WebUiConfigSchema)(config);
-    return config as WebUiConfigType;
+    let data = config;
+    data = Value.Default(WebUiConfigSchema, data) as Partial<WebUiConfigType>;
+    data = Value.Convert(WebUiConfigSchema, data) as Partial<WebUiConfigType>;
+    const validate = TypeCompiler.Compile(WebUiConfigSchema);
+    if (!validate.Check(data)) {
+      // Return original if validation failed, or throw
+    }
+    return data as WebUiConfigType;
   }
 
   private async ensureConfigFileExists (configPath: string): Promise<void> {

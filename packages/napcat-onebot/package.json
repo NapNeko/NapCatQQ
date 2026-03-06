@@ -16,29 +16,28 @@
         }
     },
     "dependencies": {
-        "napcat.protobuf": "^1.1.4",
-        "fast-xml-parser": "^4.3.6",
-        "type-is": "^1.6.7",
-        "on-finished": "^2.3.5",
-        "ajv": "^8.13.0",
         "@sinclair/typebox": "^0.34.38",
         "cors": "^2.8.5",
         "express": "^5.0.0",
-        "ws": "^8.18.3",
+        "fast-xml-parser": "^4.3.6",
         "file-type": "^21.0.0",
-        "napcat-protobuf": "workspace:*",
         "json5": "^2.2.3",
+        "napcat-common": "workspace:*",
         "napcat-core": "workspace:*",
-        "napcat-webui-backend": "workspace:*",
         "napcat-image-size": "workspace:*",
-        "napcat-common": "workspace:*"
+        "napcat-protobuf": "workspace:*",
+        "napcat-webui-backend": "workspace:*",
+        "napcat.protobuf": "^1.1.4",
+        "on-finished": "^2.3.5",
+        "type-is": "^1.6.7",
+        "ws": "^8.18.3"
     },
     "devDependencies": {
         "@types/cors": "^2.8.17",
-        "@types/type-is": "^1.6.7",
-        "@types/on-finished": "^2.3.4",
         "@types/express": "^5.0.0",
-        "@types/node": "^22.0.1"
+        "@types/node": "^22.0.1",
+        "@types/on-finished": "^2.3.4",
+        "@types/type-is": "^1.6.7"
     },
     "engines": {
         "node": ">=18.0.0"

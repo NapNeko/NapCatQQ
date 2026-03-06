@@ -11,38 +11,6 @@ const ALLOWED_PACKAGES = [
   'node:',  // node: 前缀的内置模块
 ];
 
-/*
-// 外部包类型到 any 的映射
-const EXTERNAL_TYPE_REPLACEMENTS = {
-  // winston
-  'winston.Logger': 'any',
-  'winston.transport': 'any',
-  // express
-  'express.Express': 'any',
-  'express.Application': 'any',
-  'express.Router': 'any',
-  Express: 'any',
-  Request: 'any',
-  Response: 'any',
-  NextFunction: 'any',
-  // ws
-  WebSocket: 'any',
-  WebSocketServer: 'any',
-  RawData: 'any',
-  // ajv
-  Ajv: 'any',
-  AnySchema: 'any',
-  ValidateFunction: 'any',
-  'ValidateFunction<T>': 'any',
-  // inversify
-  Container: 'any',
-  // napcat-protobuf
-  NapProtoDecodeStructType: 'any',
-  NapProtoEncodeStructType: 'any',
-  'NapProtoDecodeStructType<T>': 'any',
-  'NapProtoEncodeStructType<T>': 'any',
-};
-*/
 
 function isAllowedImport (importPath) {
   return ALLOWED_PACKAGES.some(pkg => importPath.startsWith(pkg));
@@ -89,15 +57,15 @@ function replaceExternalTypes (content) {
   // 使用类型上下文的模式匹配
   const typeContextPatterns = [
     // : Type
-    /:\s*(WebSocket|WebSocketServer|RawData|Ajv|AnySchema|ValidateFunction|Container|NapProtoDecodeStructType|NapProtoEncodeStructType|Express|Request|Response|NextFunction)(?=\s*[;,)\]}|&]|$)/g,
+    /:\s*(WebSocket|WebSocketServer|RawData|Container|NapProtoDecodeStructType|NapProtoEncodeStructType|Express|Request|Response|NextFunction)(?=\s*[;,)\]}|&]|$)/g,
     // <Type>
-    /<(WebSocket|WebSocketServer|RawData|Ajv|AnySchema|ValidateFunction|Container|NapProtoDecodeStructType|NapProtoEncodeStructType|Express|Request|Response|NextFunction)>/g,
+    /<(WebSocket|WebSocketServer|RawData|Container|NapProtoDecodeStructType|NapProtoEncodeStructType|Express|Request|Response|NextFunction)>/g,
     // Type[]
-    /(WebSocket|WebSocketServer|RawData|Ajv|AnySchema|ValidateFunction|Container|NapProtoDecodeStructType|NapProtoEncodeStructType|Express|Request|Response|NextFunction)\[\]/g,
+    /(WebSocket|WebSocketServer|RawData|Container|NapProtoDecodeStructType|NapProtoEncodeStructType|Express|Request|Response|NextFunction)\[\]/g,
     // extends Type
-    /extends\s+(WebSocket|WebSocketServer|RawData|Ajv|AnySchema|ValidateFunction|Container|NapProtoDecodeStructType|NapProtoEncodeStructType|Express|Request|Response|NextFunction)(?=\s*[{,])/g,
+    /extends\s+(WebSocket|WebSocketServer|RawData|Container|NapProtoDecodeStructType|NapProtoEncodeStructType|Express|Request|Response|NextFunction)(?=\s*[{,])/g,
     // implements Type
-    /implements\s+(WebSocket|WebSocketServer|RawData|Ajv|AnySchema|ValidateFunction|Container|NapProtoDecodeStructType|NapProtoEncodeStructType|Express|Request|Response|NextFunction)(?=\s*[{,])/g,
+    /implements\s+(WebSocket|WebSocketServer|RawData|Container|NapProtoDecodeStructType|NapProtoEncodeStructType|Express|Request|Response|NextFunction)(?=\s*[{,])/g,
   ];
 
   for (const pattern of typeContextPatterns) {

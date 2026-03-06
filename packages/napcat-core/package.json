@@ -16,19 +16,18 @@
     }
   },
   "dependencies": {
-    "winston": "^3.17.0",
-    "json5": "^2.2.3",
-    "inversify": "^7.10.4",
-    "reflect-metadata": "^0.2.2",
     "@protobuf-ts/runtime": "^2.11.1",
-    "ajv": "^8.13.0",
     "@sinclair/typebox": "^0.34.38",
-    "file-type": "^21.0.0",
     "compressing": "^1.10.1",
-    "napcat-image-size": "workspace:*",
+    "file-type": "^21.0.0",
+    "inversify": "^7.10.4",
+    "json5": "^2.2.3",
     "napcat-common": "workspace:*",
     "napcat-database": "workspace:*",
-    "napcat-protobuf": "workspace:*"
+    "napcat-image-size": "workspace:*",
+    "napcat-protobuf": "workspace:*",
+    "reflect-metadata": "^0.2.2",
+    "winston": "^3.17.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.1"

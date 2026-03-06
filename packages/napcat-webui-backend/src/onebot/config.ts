@@ -1,5 +1,6 @@
 import { Type, Static } from '@sinclair/typebox';
-import Ajv from 'ajv';
+import { TypeCompiler } from '@sinclair/typebox/compiler';
+import { Value } from '@sinclair/typebox/value';
 const HttpServerConfigSchema = Type.Object({
   name: Type.String({ default: 'http-server' }),
   enable: Type.Boolean({ default: false }),
@@ -97,11 +98,14 @@ export type NetworkAdapterConfig = HttpServerConfig | HttpSseServerConfig | Http
 export type NetworkConfigKey = keyof OneBotConfig['network'];
 
 export function loadConfig (config: Partial<OneBotConfig>): OneBotConfig {
-  const ajv = new Ajv({ useDefaults: true, coerceTypes: true });
-  const validate = ajv.compile(OneBotConfigSchema);
-  const valid = validate(config);
+  let data = config;
+  data = Value.Default(OneBotConfigSchema, data) as Partial<OneBotConfig>;
+  data = Value.Convert(OneBotConfigSchema, data) as Partial<OneBotConfig>;
+  const validate = TypeCompiler.Compile(OneBotConfigSchema);
+  const valid = validate.Check(data);
   if (!valid) {
-    throw new Error(ajv.errorsText(validate.errors));
+    const errorMsg = [...validate.Errors(data)].map(e => e.message).join(', ');
+    throw new Error(errorMsg);
   }
-  return config as OneBotConfig;
+  return data as OneBotConfig;
 }

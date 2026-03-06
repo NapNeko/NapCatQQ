@@ -1,7 +1,9 @@
 import { ConfigBase } from '@/napcat-core/helper/config-base';
 import { NapCatCore } from '@/napcat-core/index';
 import { Type, Static } from '@sinclair/typebox';
-import Ajv, { AnySchema } from 'ajv';
+
+import { Value } from '@sinclair/typebox/value';
+import { TSchema } from '@sinclair/typebox';
 import path from 'node:path';
 import fs from 'node:fs';
 import json5 from 'json5';
@@ -34,8 +36,6 @@ export type NapcatConfig = Static<typeof NapcatConfigSchema>;
  * 用于登录前（无 NapCatCore 实例时）的早期配置读取
  */
 export function loadNapcatConfig (configPath: string): NapcatConfig {
-  const ajv = new Ajv({ useDefaults: true, coerceTypes: true });
-  const validate = ajv.compile<NapcatConfig>(NapcatConfigSchema);
   let data: Record<string, unknown> = {};
   try {
     const configFile = path.join(configPath, 'napcat.json');
@@ -45,12 +45,13 @@ export function loadNapcatConfig (configPath: string): NapcatConfig {
   } catch {
     // 读取失败时使用 schema 默认值
   }
-  validate(data);
+  data = Value.Default(NapcatConfigSchema, data) as Record<string, unknown>;
+  data = Value.Convert(NapcatConfigSchema, data) as Record<string, unknown>;
   return data as NapcatConfig;
 }
 
 export class NapCatConfigLoader extends ConfigBase<NapcatConfig> {
-  constructor (core: NapCatCore, configPath: string, schema: AnySchema) {
+  constructor (core: NapCatCore, configPath: string, schema: TSchema) {
     super('napcat', core, configPath, schema);
   }
 }

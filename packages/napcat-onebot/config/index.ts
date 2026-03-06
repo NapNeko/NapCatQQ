@@ -1,12 +1,12 @@
 import { ConfigBase } from 'napcat-core/helper/config-base';
 import type { NapCatCore } from 'napcat-core';
 import { OneBotConfig } from './config';
-import { AnySchema } from 'ajv';
+import { TSchema } from '@sinclair/typebox';
 
 export * from './config';
 
 export class OB11ConfigLoader extends ConfigBase<OneBotConfig> {
-  constructor (core: NapCatCore, configPath: string, schema: AnySchema) {
+  constructor (core: NapCatCore, configPath: string, schema: TSchema) {
     super('onebot11', core, configPath, schema);
   }
 }

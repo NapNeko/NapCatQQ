@@ -1,5 +1,6 @@
 import { ActionName, BaseCheckResult } from './router';
-import Ajv, { ErrorObject, ValidateFunction } from 'ajv';
+import { TypeCompiler, TypeCheck } from '@sinclair/typebox/compiler';
+import { Value } from '@sinclair/typebox/value';
 import { NapCatCore } from 'napcat-core';
 import { NapCatOneBot11Adapter, OB11Return } from '@/napcat-onebot/index';
 import { NetworkAdapterConfig } from '../config/config';
@@ -46,7 +47,7 @@ export abstract class OneBotRequestToolkit {
 export abstract class OneBotAction<PayloadType, ReturnDataType> {
   actionName: typeof ActionName[keyof typeof ActionName] = ActionName.Unknown;
   core: NapCatCore;
-  private validate?: ValidateFunction<unknown> = undefined;
+  private validate?: TypeCheck<TSchema> = undefined;
   payloadSchema?: TSchema = undefined;
   returnSchema?: TSchema = undefined;
   payloadExample?: unknown = undefined;
@@ -64,15 +65,24 @@ export abstract class OneBotAction<PayloadType, ReturnDataType> {
   }
 
   protected async check (payload: PayloadType): Promise<BaseCheckResult> {
-    if (this.payloadSchema) {
-      this.validate = new Ajv({ allowUnionTypes: true, useDefaults: true, coerceTypes: true }).compile(this.payloadSchema);
+    if (!this.payloadSchema) return { valid: true };
+    try {
+      this.validate = TypeCompiler.Compile(this.payloadSchema);
+      let data = payload;
+      data = Value.Default(this.payloadSchema, data) as PayloadType;
+      data = Value.Convert(this.payloadSchema, data) as PayloadType;
+      if (typeof payload === 'object' && payload !== null && data !== null) {
+        Object.assign(payload, data);
+      }
+    } catch (e: any) {
+      return { valid: false, message: `Schema compilation error: ${e.message}` };
     }
-    if (this.validate && !this.validate(payload)) {
-      const errors = this.validate.errors as ErrorObject[];
-      const errorMessages = errors.map(e => `Key: ${e.instancePath.split('/').slice(1).join('.')}, Message: ${e.message}`);
+    if (this.validate && !this.validate.Check(payload)) {
+      const errors = [...this.validate.Errors(payload)];
+      const errorMessages = errors.map(e => `Key: ${e.path.split('/').slice(1).join('.')}, Message: ${e.message}`);
       return {
         valid: false,
-        message: errorMessages.join('\n') ?? '未知错误',
+        message: errorMessages.length > 0 ? errorMessages.join('\n') : '未知错误',
       };
     }
     return { valid: true };

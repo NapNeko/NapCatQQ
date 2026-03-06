@@ -6,16 +6,13 @@ import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
 import { sendError, sendSuccess } from '@/napcat-webui-backend/src/utils/response';
 import json5 from 'json5';
 
-import Ajv from 'ajv';
+import { Value } from '@sinclair/typebox/value';
 import { NapcatConfigSchema } from '@/napcat-core/helper/config';
 
 // 动态获取 NapCat 配置默认值
 function getDefaultNapcatConfig (): Record<string, unknown> {
-  const ajv = new Ajv({ useDefaults: true, coerceTypes: true });
-  const validate = ajv.compile(NapcatConfigSchema);
   const data = {};
-  validate(data);
-  return data;
+  return Value.Default(NapcatConfigSchema, data) as Record<string, unknown>;
 }
 
 /**

@@ -16,14 +16,13 @@
     }
   },
   "dependencies": {
-    "ajv": "^8.13.0",
     "@sinclair/typebox": "^0.34.38",
     "cors": "^2.8.5",
     "express": "^5.0.0",
-    "ws": "^8.18.3",
     "json5": "^2.2.3",
+    "napcat-common": "workspace:*",
     "napcat-core": "workspace:*",
-    "napcat-common": "workspace:*"
+    "ws": "^8.18.3"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

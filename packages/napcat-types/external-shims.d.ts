@@ -96,33 +96,6 @@ declare module 'inversify' {
   export default _inversify_default;
 }
 
-declare module 'ajv' {
-  export interface AnySchema { [key: string]: any; }
-
-  export interface ErrorObject {
-    keyword: string;
-    instancePath: string;
-    schemaPath: string;
-    params: any;
-    message?: string;
-  }
-
-  export interface ValidateFunction<T = any> {
-    (data: any): data is T;
-    errors: ErrorObject[] | null;
-  }
-
-  class Ajv {
-    constructor (...args: any[]);
-    compile<T = any> (schema: any): ValidateFunction<T>;
-    validate (schemaOrRef: any, data: any): boolean;
-    errorsText (errors?: any, options?: any): string;
-    errors: ErrorObject[] | null;
-  }
-
-  export default Ajv;
-  export { Ajv, ValidateFunction, ErrorObject };
-}
 
 declare module 'ip' {
   export function toBuffer (ip: any, buffer?: Buffer, offset?: number): Buffer;
