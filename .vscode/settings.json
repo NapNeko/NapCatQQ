@@ -6,7 +6,7 @@
     "vite.config.ts": "vite*.ts",
     "README.md": "CODE_OF_CONDUCT.md, RELEASES.md, CONTRIBUTING.md, CHANGELOG.md, SECURITY.md",
     "tsconfig.json": "tsconfig.*.json, env.d.ts",
-    "package.json": "package-lock.json, eslint*, .prettier*, .editorconfig, manifest.json, logo.png, .gitignore, LICENSE"
+    "package.json": "package-lock.json, eslint*, .prettier*, .editorconfig, logo.png, .gitignore, LICENSE"
   },
   "css.customData": [
     ".vscode/tailwindcss.json"

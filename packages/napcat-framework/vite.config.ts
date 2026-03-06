@@ -27,7 +27,6 @@ const FrameworkBaseConfigPlugin: PluginOption[] = [
       { src: './manifest.json', dest: 'dist' },
       { src: '../napcat-core/external/napcat.json', dest: 'dist/config/' },
       { src: '../napcat-webui-frontend/dist/', dest: 'dist/static/', flatten: false },
-      { src: './liteloader.cjs', dest: 'dist' },
       { src: './napcat.cjs', dest: 'dist' },
       { src: './nativeLoader.cjs', dest: 'dist' },
       { src: './preload.cjs', dest: 'dist' },
