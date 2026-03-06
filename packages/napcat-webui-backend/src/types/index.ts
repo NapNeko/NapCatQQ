@@ -1,4 +1,7 @@
 import type { OneBotConfig } from '@/napcat-webui-backend/src/onebot/config';
+import type { HttpBindings } from '@hono/node-server';
+
+export type AppEnv = { Bindings: HttpBindings };
 export interface LoginListItem {
   uin: string;
   uid: string;

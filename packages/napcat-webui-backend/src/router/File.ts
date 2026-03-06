@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import type { Context, Next } from 'hono';
+import { getClientIP } from '@/napcat-webui-backend/src/middleware/cors';
 import {
   ListFilesHandler,
   CreateDirHandler,
@@ -26,7 +27,7 @@ const WINDOW_MS = 60 * 1000;
 const MAX_REQUESTS = 60;
 
 const apiLimiter = async (c: Context, next: Next) => {
-  const ip = (c.env as any)?.incoming?.socket?.remoteAddress || 'unknown';
+  const ip = getClientIP(c) || 'unknown';
   const now = Date.now();
   const entry = rateLimitMap.get(ip);
 

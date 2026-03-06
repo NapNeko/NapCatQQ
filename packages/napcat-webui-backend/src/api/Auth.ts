@@ -5,6 +5,7 @@ import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
 import { sendSuccess, sendError } from '@/napcat-webui-backend/src/utils/response';
 import { isEmpty } from '@/napcat-webui-backend/src/utils/check';
 import { WebUiConfig, getInitialWebUiToken, setInitialWebUiToken } from '@/napcat-webui-backend/index';
+import { getClientIP } from '@/napcat-webui-backend/src/middleware/cors';
 
 // 登录
 export const LoginHandler = async (c: Context) => {
@@ -13,10 +14,8 @@ export const LoginHandler = async (c: Context) => {
   // 获取请求体中的hash
   const body = await c.req.json().catch(() => ({}));
   const { hash } = body as { hash?: string };
-  // 获取客户端IP
-  const clientIP = (c.env as any)?.incoming?.socket?.remoteAddress || '';
+  const clientIP = getClientIP(c);
 
-  // 如果token为空，返回错误信息
   if (isEmpty(hash)) {
     return sendError(c, 'token is empty');
   }
@@ -232,8 +231,7 @@ export const VerifyPasskeyAuthenticationHandler = async (c: Context) => {
 
     // 获取WebUI配置用于限速检查
     const WebUiConfigData = await WebUiConfig.GetWebUIConfig();
-    // 获取客户端IP
-    const clientIP = (c.env as any)?.incoming?.socket?.remoteAddress || '';
+    const clientIP = getClientIP(c);
 
     // 检查登录频率
     if (!WebUiDataRuntime.checkLoginRate(clientIP, WebUiConfigData.loginRate)) {

@@ -4,6 +4,7 @@ import { sendError, sendSuccess } from '@/napcat-webui-backend/src/utils/respons
 import { isEmpty } from '@/napcat-webui-backend/src/utils/check';
 import { existsSync, promises as fsProm } from 'node:fs';
 import { join } from 'node:path';
+import { getClientIP } from '@/napcat-webui-backend/src/middleware/cors';
 
 // 获取WebUI基础配置
 export const GetWebUIConfigHandler = async (c: Context) => {
@@ -66,10 +67,10 @@ export const GetClientIPHandler = async (c: Context) => {
       if (typeof forwardedFor === 'string') {
         clientIP = forwardedFor.split(',')[0]?.trim() || '';
       } else {
-        clientIP = (c.env as any)?.incoming?.socket?.remoteAddress || '';
+        clientIP = getClientIP(c);
       }
     } else {
-      clientIP = (c.env as any)?.incoming?.socket?.remoteAddress || '';
+      clientIP = getClientIP(c);
     }
 
     // 标准化 IP（移除 IPv4-mapped IPv6 前缀，但保留纯 IPv6）

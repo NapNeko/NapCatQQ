@@ -1,4 +1,5 @@
 import type { Context, Next } from 'hono';
+import type { AppEnv } from '@/napcat-webui-backend/src/types';
 import { WebUiConfig } from '@/napcat-webui-backend/index';
 
 function normalizeIP (ip: string): string {
@@ -158,9 +159,8 @@ function isIPInList (ip: string, ipList: string[]): boolean {
   return ipList.some(rule => matchIPRule(ip, rule));
 }
 
-export function getClientIP (c: Context): string {
-  const incoming = (c.env as any)?.incoming;
-  return incoming?.socket?.remoteAddress || '';
+export function getClientIP (c: Context<AppEnv>): string {
+  return c.env.incoming?.socket?.remoteAddress || '';
 }
 
 export const corsMiddleware = async (c: Context, next: Next) => {
