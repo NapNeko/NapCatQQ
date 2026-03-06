@@ -288,10 +288,13 @@ export async function InitWebUi (logger: ILogWrapper, pathWrapper: NapCatPathWra
       let swContent = readFileSync(templatePath, 'utf-8');
       swContent = swContent.replace('{{VERSION}}', napCatVersion);
 
-      c.header('Content-Type', 'application/javascript');
-      c.header('Service-Worker-Allowed', '/webui/');
-      c.header('Cache-Control', 'no-cache, no-store, must-revalidate');
-      return c.text(swContent);
+      return new Response(swContent, {
+        headers: {
+          'Content-Type': 'application/javascript',
+          'Service-Worker-Allowed': '/webui/',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+        },
+      });
     } catch (error) {
       console.error('[NapCat] [WebUi] Error generating sw.js', error);
       return c.text('Error generating service worker', 500);
@@ -363,10 +366,9 @@ export async function InitWebUi (logger: ILogWrapper, pathWrapper: NapCatPathWra
     return routerRegistry.handleApiNoAuthRequest(c, `/plugin/${pluginId}/api`);
   });
 
-  // 插件页面
-  app.get('/plugin/:pluginId/page/:pagePath', (c) => {
+  // 插件页面及页面引用的静态资源
+  app.get('/plugin/:pluginId/page/*', (c) => {
     const pluginId = c.req.param('pluginId');
-    const pagePath = c.req.param('pagePath');
     if (!pluginId) return c.json({ code: -1, message: 'Plugin ID is required' }, 400);
 
     const ob11 = WebUiDataRuntime.getOneBotContext() as NapCatOneBot11Adapter | null;
@@ -376,28 +378,74 @@ export async function InitWebUi (logger: ILogWrapper, pathWrapper: NapCatPathWra
     if (!pluginManager) return c.json({ code: -1, message: 'Plugin manager not available' }, 503);
 
     const routerRegistry = pluginManager.getPluginRouter(pluginId);
-    if (!routerRegistry || !routerRegistry.hasPages()) {
-      return c.json({ code: -1, message: `Plugin '${pluginId}' has no registered pages` }, 404);
+    if (!routerRegistry) {
+      return c.json({ code: -1, message: `Plugin '${pluginId}' not found` }, 404);
     }
 
-    const pages = routerRegistry.getPages();
-    const page = pages.find(p => p.path === '/' + pagePath || p.path === pagePath);
-    if (!page) {
-      return c.json({ code: -1, message: `Page '${pagePath}' not found in plugin '${pluginId}'` }, 404);
+    const url = new URL(c.req.url);
+    const subPath = url.pathname.replace(`/plugin/${pluginId}/page/`, '');
+    const firstSegment = subPath.split('/')[0];
+
+    if (routerRegistry.hasPages()) {
+      const pages = routerRegistry.getPages();
+      const page = pages.find(p => p.path === '/' + firstSegment || p.path === firstSegment);
+
+      if (page && subPath === firstSegment) {
+        const pluginPath = routerRegistry.getPluginPath();
+        if (!pluginPath) {
+          return c.json({ code: -1, message: 'Plugin path not available' }, 500);
+        }
+        const htmlFilePath = join(pluginPath, page.htmlFile);
+        if (!existsSync(htmlFilePath)) {
+          return c.json({ code: -1, message: `HTML file not found: ${page.htmlFile}` }, 404);
+        }
+        const content = readFileSync(htmlFilePath, 'utf-8');
+        return c.html(content);
+      }
+
+      const pluginPath = routerRegistry.getPluginPath();
+      if (pluginPath) {
+        const mimeMap: Record<string, string> = {
+          '.html': 'text/html', '.js': 'application/javascript', '.css': 'text/css',
+          '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg',
+          '.gif': 'image/gif', '.svg': 'image/svg+xml', '.woff': 'font/woff',
+          '.woff2': 'font/woff2', '.ttf': 'font/ttf', '.otf': 'font/otf',
+          '.ico': 'image/x-icon', '.txt': 'text/plain', '.map': 'application/json',
+        };
+        const tryServe = (filePath: string): Response | null => {
+          const normalized = path.normalize(filePath);
+          if (!normalized.startsWith(path.normalize(pluginPath))) return null;
+          if (fs.existsSync(normalized) && fs.statSync(normalized).isFile()) {
+            const ext = path.extname(normalized).toLowerCase();
+            return new Response(fs.readFileSync(normalized), {
+              headers: { 'Content-Type': mimeMap[ext] || 'application/octet-stream' },
+            });
+          }
+          return null;
+        };
+
+        const staticRoutes = routerRegistry.getStaticRoutes() || [];
+        for (const { urlPath, localPath } of staticRoutes) {
+          const prefix = urlPath.startsWith('/') ? urlPath.substring(1) : urlPath;
+          if (subPath.startsWith(prefix + '/') || subPath === prefix) {
+            const relativePath = subPath.substring(prefix.length).replace(/^\//, '');
+            const resp = tryServe(path.join(localPath, relativePath));
+            if (resp) return resp;
+          }
+        }
+
+        for (const p of pages) {
+          const htmlDir = path.dirname(join(pluginPath, p.htmlFile));
+          const resp = tryServe(join(htmlDir, subPath));
+          if (resp) return resp;
+        }
+
+        const resp = tryServe(join(pluginPath, subPath));
+        if (resp) return resp;
+      }
     }
 
-    const pluginPath = routerRegistry.getPluginPath();
-    if (!pluginPath) {
-      return c.json({ code: -1, message: 'Plugin path not available' }, 500);
-    }
-
-    const htmlFilePath = join(pluginPath, page.htmlFile);
-    if (!existsSync(htmlFilePath)) {
-      return c.json({ code: -1, message: `HTML file not found: ${page.htmlFile}` }, 404);
-    }
-
-    const content = readFileSync(htmlFilePath, 'utf-8');
-    return c.html(content);
+    return c.json({ code: -1, message: 'Page or asset not found' }, 404);
   });
 
   // 插件文件系统静态资源

@@ -9,10 +9,6 @@ import react from '@vitejs/plugin-react-swc';
 
 // 依赖排除
 const external = [
-  'ws',
-  'hono',
-  '@hono/node-server',
-  '@hono/node-ws',
   'electron',
 ];
 

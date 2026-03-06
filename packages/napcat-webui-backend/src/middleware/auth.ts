@@ -7,12 +7,13 @@ import { sendError } from '@/napcat-webui-backend/src/utils/response';
 import type { WebUiCredentialJson } from '@/napcat-webui-backend/src/types';
 
 export async function auth (c: Context, next: Next) {
-  const url = new URL(c.req.url).pathname;
-  if (url === '/auth/login') {
+  // Hono 的 c.req.path 在 app.route() 子应用中仍是完整路径，用 endsWith 匹配
+  const pathname = c.req.path;
+  if (pathname.endsWith('/auth/login')) {
     return next();
   }
-  if (url === '/auth/passkey/generate-authentication-options' ||
-    url === '/auth/passkey/verify-authentication') {
+  if (pathname.endsWith('/auth/passkey/generate-authentication-options') ||
+    pathname.endsWith('/auth/passkey/verify-authentication')) {
     return next();
   }
   let hash: string | undefined;

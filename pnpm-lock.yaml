@@ -17,9 +17,6 @@ importers:
       hono:
         specifier: ^4.12.5
         version: 4.12.5
-      ws:
-        specifier: ^8.18.3
-        version: 8.18.3
     devDependencies:
       '@rollup/plugin-node-resolve':
         specifier: ^16.0.3

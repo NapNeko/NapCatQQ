@@ -1,90 +1,82 @@
 import { OB11EmitEventContent, OB11NetworkReloadType } from './index';
-import { URL } from 'url';
-import { RawData, WebSocket, WebSocketServer } from 'ws';
+import { Hono } from 'hono';
+import { serve, type ServerType } from '@hono/node-server';
+import { createNodeWebSocket } from '@hono/node-ws';
+import type { Context } from 'hono';
+import type { WSContext } from 'hono/ws';
 import { OB11Response } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { NapCatCore } from 'napcat-core';
 import { OB11HeartbeatEvent } from '@/napcat-onebot/event/meta/OB11HeartbeatEvent';
-import { IncomingMessage } from 'http';
-import { ActionMap } from '@/napcat-onebot/action';
 import { LifeCycleSubType, OB11LifeCycleEvent } from '@/napcat-onebot/event/meta/OB11LifeCycleEvent';
 import { WebsocketServerConfig } from '@/napcat-onebot/config/config';
-import { NapCatOneBot11Adapter } from '@/napcat-onebot/index';
 import { IOB11NetworkAdapter } from '@/napcat-onebot/network/adapter';
 import json5 from 'json5';
 
 export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketServerConfig> {
-  wsServer?: WebSocketServer;
-  wsClients: WebSocket[] = [];
+  private server?: ServerType;
+  wsClients: WSContext[] = [];
   private heartbeatIntervalId: NodeJS.Timeout | null = null;
-  wsClientWithEvent: WebSocket[] = [];
+  wsClientWithEvent: WSContext[] = [];
 
   override get isActive (): boolean {
     return this.isEnable && this.wsClientWithEvent.length > 0;
   }
 
-  constructor (
-    name: string, config: WebsocketServerConfig, core: NapCatCore, obContext: NapCatOneBot11Adapter, actions: ActionMap
-  ) {
-    super(name, config, core, obContext, actions);
-    this.wsServer = new WebSocketServer({
-      port: this.config.port,
-      host: this.config.host === '0.0.0.0' ? '' : this.config.host,
-      maxPayload: 50 * 1024 * 1024, // 50 MB
-    });
-    this.createServer(this.wsServer);
-  }
+  private createHonoApp () {
+    const app = new Hono();
+    const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({ app });
 
-  createServer (newServer: WebSocketServer) {
-    newServer.on('connection', async (wsClient, wsReq) => {
-      if (!this.isEnable) {
-        wsClient.close();
-        return;
-      }
-      // 鉴权 close 不会立刻销毁 当前返回可避免挂载message事件 close 并未立刻关闭 而是存在timer操作后关闭
-      // 引发高危漏洞
-      if (!this.authorize(this.config.token, wsClient, wsReq)) {
-        return;
-      }
-      const paramUrl = wsReq.url?.indexOf('?') !== -1 ? wsReq.url?.substring(0, wsReq.url?.indexOf('?')) : wsReq.url;
+    app.get('/*', upgradeWebSocket((c) => {
+      const paramUrl = new URL(c.req.url).pathname;
       const isApiConnect = paramUrl === '/api' || paramUrl === '/api/';
-      if (!isApiConnect) {
-        this.connectEvent(this.core, wsClient);
-      }
 
-      wsClient.on('error', (err) => this.logger.log('[OneBot] [WebSocket Server] Client Error:', err.message));
-      wsClient.on('message', (message) => {
-        this.handleMessage(wsClient, message).then().catch(e => this.logger.logError(e));
-      });
-      wsClient.on('pong', () => {
-        // this.logger.logDebug('[OneBot] [WebSocket Server] Pong received');
-      });
-      wsClient.once('close', () => {
-        const NormolIndex = this.wsClients.indexOf(wsClient);
-        if (NormolIndex !== -1) {
-          this.wsClients.splice(NormolIndex, 1);
-        }
-        const EventIndex = this.wsClientWithEvent.indexOf(wsClient);
-        if (EventIndex !== -1) {
-          this.wsClientWithEvent.splice(EventIndex, 1);
-        }
-        if (this.wsClientWithEvent.length === 0) {
-          this.stopHeartbeat();
-        }
-      });
-      if (!isApiConnect) {
-        this.wsClientWithEvent.push(wsClient);
-      }
-      this.wsClients.push(wsClient);
-      if (this.wsClientWithEvent.length > 0) {
-        this.startHeartbeat();
-      }
-    }).on('error', (err) => this.logger.log('[OneBot] [WebSocket Server] Server Error:', err.message));
+      return {
+        onOpen: (_event, ws) => {
+          if (!this.isEnable) {
+            ws.close();
+            return;
+          }
+          if (!this.authorizeWS(this.config.token, ws, c)) {
+            return;
+          }
+          if (!isApiConnect) {
+            this.connectEvent(this.core, ws);
+            this.wsClientWithEvent.push(ws);
+          }
+          this.wsClients.push(ws);
+          if (this.wsClientWithEvent.length > 0) {
+            this.startHeartbeat();
+          }
+        },
+        onMessage: (event, ws) => {
+          this.handleMessage(ws, event.data).then().catch(e => this.logger.logError(e));
+        },
+        onClose: (_event, ws) => {
+          const normalIndex = this.wsClients.indexOf(ws);
+          if (normalIndex !== -1) {
+            this.wsClients.splice(normalIndex, 1);
+          }
+          const eventIndex = this.wsClientWithEvent.indexOf(ws);
+          if (eventIndex !== -1) {
+            this.wsClientWithEvent.splice(eventIndex, 1);
+          }
+          if (this.wsClientWithEvent.length === 0) {
+            this.stopHeartbeat();
+          }
+        },
+        onError: (event) => {
+          this.logger.log('[OneBot] [WebSocket Server] Client Error:', String(event));
+        },
+      };
+    }));
+
+    return { app, injectWebSocket };
   }
 
-  connectEvent (core: NapCatCore, wsClient: WebSocket) {
+  connectEvent (core: NapCatCore, wsClient: WSContext) {
     try {
-      this.checkStateAndReply<unknown>(new OB11LifeCycleEvent(core, LifeCycleSubType.CONNECT), wsClient).catch(e => this.logger.logError('[OneBot] [WebSocket Server] 发送生命周期失败', e));
+      wsClient.send(JSON.stringify(new OB11LifeCycleEvent(core, LifeCycleSubType.CONNECT)));
     } catch (e) {
       this.logger.logError('[OneBot] [WebSocket Server] 发送生命周期失败', e);
     }
@@ -93,10 +85,10 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
   async onEvent<T extends OB11EmitEventContent> (event: T) {
     const promises = this.wsClientWithEvent.map((wsClient) => {
       return new Promise<void>((resolve, reject) => {
-        if (wsClient.readyState === WebSocket.OPEN) {
+        try {
           wsClient.send(JSON.stringify(event));
           resolve();
-        } else {
+        } catch {
           reject(new Error('WebSocket is not open'));
         }
       });
@@ -109,15 +101,26 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
       this.logger.logError('[OneBot] [WebSocket Server] Cannot open a opened WebSocket server');
       return;
     }
-    const addressInfo = this.wsServer?.address();
-    this.logger.log('[OneBot] [WebSocket Server] Server Started', typeof (addressInfo) === 'string' ? addressInfo : addressInfo?.address + ':' + addressInfo?.port);
-
+    this.startServer();
     this.isEnable = true;
+  }
+
+  private startServer () {
+    const { app, injectWebSocket } = this.createHonoApp();
+    this.server = serve({
+      fetch: app.fetch,
+      port: this.config.port,
+      hostname: this.config.host === '0.0.0.0' ? '' : this.config.host,
+    }) as ServerType;
+    injectWebSocket(this.server);
+
+    const addressInfo = this.server?.address();
+    this.logger.log('[OneBot] [WebSocket Server] Server Started', typeof (addressInfo) === 'string' ? addressInfo : (addressInfo as any)?.address + ':' + (addressInfo as any)?.port);
   }
 
   async close () {
     this.isEnable = false;
-    this.wsServer?.close((err) => {
+    this.server?.close((err) => {
       if (err) {
         this.logger.logError('[OneBot] [WebSocket Server] Error closing server:', err.message);
       } else {
@@ -134,9 +137,9 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
     if (this.heartbeatIntervalId || this.config.heartInterval <= 0) return;
     this.heartbeatIntervalId = setInterval(() => {
       this.wsClientWithEvent.forEach((wsClient) => {
-        if (wsClient.readyState === WebSocket.OPEN) {
+        try {
           wsClient.send(JSON.stringify(new OB11HeartbeatEvent(this.core, this.config.heartInterval, this.core.selfInfo.online ?? true, true)));
-        }
+        } catch { /* ignore closed connections */ }
       });
     }, this.config.heartInterval);
   }
@@ -148,56 +151,53 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
     }
   }
 
-  private authorize (token: string | undefined, wsClient: WebSocket, wsReq: IncomingMessage) {
-    if (!token || token.length === 0) return true;// 客户端未设置密钥
-    const url = new URL(wsReq?.url || '', `http://${wsReq.headers.host}`);
+  private authorizeWS (token: string | undefined, ws: WSContext, c: Context) {
+    if (!token || token.length === 0) return true;
+    const url = new URL(c.req.url);
     const QueryClientToken = url.searchParams.get('access_token');
-    const HeaderClientToken = wsReq.headers.authorization?.split('Bearer ').pop() || '';
+    const HeaderClientToken = c.req.header('authorization')?.split('Bearer ').pop() || '';
     const ClientToken = typeof (QueryClientToken) === 'string' && QueryClientToken !== '' ? QueryClientToken : HeaderClientToken;
     if (ClientToken === token) {
       return true;
     }
-    wsClient.send(JSON.stringify(OB11Response.res(null, 'failed', 1403, 'token验证失败')));
-    wsClient.close();
+    ws.send(JSON.stringify(OB11Response.res(null, 'failed', 1403, 'token验证失败')));
+    ws.close();
     return false;
   }
 
-  private async checkStateAndReply<T> (data: T, wsClient: WebSocket) {
-    return await new Promise<void>((resolve, reject) => {
-      if (wsClient.readyState === WebSocket.OPEN) {
-        wsClient.send(JSON.stringify(data));
-        resolve();
-      } else {
-        reject(new Error('WebSocket is not open'));
-      }
-    });
+  private checkStateAndReply<T> (data: T, wsClient: WSContext) {
+    try {
+      wsClient.send(JSON.stringify(data));
+    } catch {
+      // connection may be closed
+    }
   }
 
-  private async handleMessage (wsClient: WebSocket, message: RawData) {
+  private async handleMessage (wsClient: WSContext, message: string | ArrayBuffer) {
     let receiveData: { action: typeof ActionName[keyof typeof ActionName], params?: any, echo?: any; } = { action: ActionName.Unknown, params: {} };
     let echo;
     try {
-      receiveData = json5.parse(message.toString());
+      const msgStr = typeof message === 'string' ? message : new TextDecoder().decode(message);
+      receiveData = json5.parse(msgStr);
       echo = receiveData.echo;
-      // this.logger.logDebug('收到正向Websocket消息', receiveData);
     } catch {
-      await this.checkStateAndReply<unknown>(OB11Response.error('json解析失败,请检查数据格式', 1400, echo), wsClient);
+      this.checkStateAndReply<unknown>(OB11Response.error('json解析失败,请检查数据格式', 1400, echo), wsClient);
       return;
     }
-    receiveData.params = (receiveData?.params) ? receiveData.params : {};// 兼容类型验证 不然类型校验爆炸
+    receiveData.params = (receiveData?.params) ? receiveData.params : {};
 
     const action = this.actions.get(receiveData.action as any);
     if (!action) {
-      this.logger.logError('[OneBot] [WebSocket Client] 发生错误', '不支持的API ' + receiveData.action);
-      await this.checkStateAndReply<unknown>(OB11Response.error('不支持的API ' + receiveData.action, 1404, echo), wsClient);
+      this.logger.logError('[OneBot] [WebSocket Server] 发生错误', '不支持的API ' + receiveData.action);
+      this.checkStateAndReply<unknown>(OB11Response.error('不支持的API ' + receiveData.action, 1404, echo), wsClient);
       return;
     }
     const retdata = await action.websocketHandle(receiveData.params, echo ?? '', this.name, this.config, {
       send: async (data: object) => {
-        await this.checkStateAndReply<unknown>({ ...OB11Response.ok(data, echo ?? '', true) }, wsClient);
+        this.checkStateAndReply<unknown>({ ...OB11Response.ok(data, echo ?? '', true) }, wsClient);
       },
     });
-    await this.checkStateAndReply<unknown>({ ...retdata }, wsClient);
+    this.checkStateAndReply<unknown>({ ...retdata }, wsClient);
   }
 
   async reload (newConfig: WebsocketServerConfig) {
@@ -216,13 +216,7 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
     }
 
     if (oldPort !== newConfig.port || oldHost !== newConfig.host) {
-      this.close();
-      this.wsServer = new WebSocketServer({
-        port: newConfig.port,
-        host: newConfig.host === '0.0.0.0' ? '' : newConfig.host,
-        maxPayload: 50 * 1024 * 1024, // 50 MB
-      });
-      this.createServer(this.wsServer);
+      await this.close();
       if (newConfig.enable) {
         this.open();
       }

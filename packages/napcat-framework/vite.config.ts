@@ -7,11 +7,7 @@ import { builtinModules } from 'module';
 import react from '@vitejs/plugin-react-swc';
 import napcatVersion from 'napcat-vite/vite-plugin-version.js';
 // 依赖排除
-const external = [
-  'ws',
-  'hono',
-  '@hono/node-server',
-  '@hono/node-ws',
+const external: string[] = [
 ];
 const nodeModules = [...builtinModules, builtinModules.map((m) => `node:${m}`), 'node:sqlite'].flat();
 const FrameworkBaseConfigPlugin: PluginOption[] = [
