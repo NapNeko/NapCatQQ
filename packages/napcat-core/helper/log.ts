@@ -196,8 +196,8 @@ export class LogWrapper implements ILogWrapper {
         // eslint-disable-next-line no-control-regex
         this.logger.log(level, message.replace(/\x1B[@-_][0-?]*[ -/]*[@-~]/g, ''));
       }
+      logSubscription.notify(JSON.stringify({ level, message }));
     }
-    logSubscription.notify(JSON.stringify({ level, message }));
   }
 
   log (...args: any[]) {
