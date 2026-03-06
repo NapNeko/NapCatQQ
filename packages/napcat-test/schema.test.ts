@@ -43,8 +43,7 @@ describe('NapCat Schemas Validation & Coercion', () => {
     };
 
     let data: unknown = structuredClone(payload);
-    data = Value.Default(OB11PostSendMsgSchema, data);
-    data = Value.Convert(OB11PostSendMsgSchema, data);
+    data = Value.Parse(OB11PostSendMsgSchema, data);
 
     const compiler = TypeCompiler.Compile(OB11PostSendMsgSchema);
     expect(compiler.Check(data)).toBe(true);
@@ -59,8 +58,7 @@ describe('NapCat Schemas Validation & Coercion', () => {
     };
 
     let data: unknown = structuredClone(payload);
-    data = Value.Default(OB11PostSendMsgSchema, data);
-    data = Value.Convert(OB11PostSendMsgSchema, data);
+    data = Value.Parse(OB11PostSendMsgSchema, data);
 
     const compiler = TypeCompiler.Compile(OB11PostSendMsgSchema);
     expect(compiler.Check(data)).toBe(true);
@@ -106,8 +104,7 @@ describe('NapCat Configuration Loaders', () => {
     }).not.toThrow();
 
     let data: unknown = {};
-    data = Value.Default(NapcatConfigSchema, data);
-    data = Value.Convert(NapcatConfigSchema, data);
+    data = Value.Parse(NapcatConfigSchema, data);
 
     expect(compiled?.Check(data)).toBe(true);
     const resolved = data as Record<string, unknown>;

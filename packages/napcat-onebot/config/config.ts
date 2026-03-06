@@ -99,8 +99,7 @@ export type NetworkConfigKey = keyof OneBotConfig['network'];
 
 export function loadConfig (config: Partial<OneBotConfig>): OneBotConfig {
   let data = config;
-  data = Value.Default(OneBotConfigSchema, data) as Partial<OneBotConfig>;
-  data = Value.Convert(OneBotConfigSchema, data) as Partial<OneBotConfig>;
+  data = Value.Parse(OneBotConfigSchema, data) as Partial<OneBotConfig>;
   const validate = TypeCompiler.Compile(OneBotConfigSchema);
   const valid = validate.Check(data);
   if (!valid) {

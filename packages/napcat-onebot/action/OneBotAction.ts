@@ -69,8 +69,7 @@ export abstract class OneBotAction<PayloadType, ReturnDataType> {
     try {
       this.validate = TypeCompiler.Compile(this.payloadSchema);
       let data = payload;
-      data = Value.Default(this.payloadSchema, data) as PayloadType;
-      data = Value.Convert(this.payloadSchema, data) as PayloadType;
+      data = Value.Parse(this.payloadSchema, data) as PayloadType;
       if (typeof payload === 'object' && payload !== null && data !== null) {
         Object.assign(payload, data);
       }

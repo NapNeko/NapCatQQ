@@ -43,8 +43,7 @@ export class WebUiConfigWrapper {
 
   private validateAndApplyDefaults (config: Partial<WebUiConfigType>): WebUiConfigType {
     let data = config;
-    data = Value.Default(WebUiConfigSchema, data) as Partial<WebUiConfigType>;
-    data = Value.Convert(WebUiConfigSchema, data) as Partial<WebUiConfigType>;
+    data = Value.Parse(WebUiConfigSchema, data) as Partial<WebUiConfigType>;
     const validate = TypeCompiler.Compile(WebUiConfigSchema);
     if (!validate.Check(data)) {
       // Return original if validation failed, or throw

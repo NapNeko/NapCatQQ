@@ -58,8 +58,7 @@ export type NetworkConfigKey = keyof NapCatProtocolConfig['network'];
 
 export function loadConfig (config: Partial<NapCatProtocolConfig>): NapCatProtocolConfig {
   let data = config;
-  data = Value.Default(NapCatProtocolConfigSchema, data) as Partial<NapCatProtocolConfig>;
-  data = Value.Convert(NapCatProtocolConfigSchema, data) as Partial<NapCatProtocolConfig>;
+  data = Value.Parse(NapCatProtocolConfigSchema, data) as Partial<NapCatProtocolConfig>;
   const validate = TypeCompiler.Compile(NapCatProtocolConfigSchema);
   const valid = validate.Check(data);
   if (!valid) {

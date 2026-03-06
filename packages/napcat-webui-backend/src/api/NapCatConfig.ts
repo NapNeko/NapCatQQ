@@ -12,7 +12,7 @@ import { NapcatConfigSchema } from '@/napcat-core/helper/config';
 // 动态获取 NapCat 配置默认值
 function getDefaultNapcatConfig (): Record<string, unknown> {
   const data = {};
-  return Value.Default(NapcatConfigSchema, data) as Record<string, unknown>;
+  return Value.Parse(NapcatConfigSchema, data) as Record<string, unknown>;
 }
 
 /**

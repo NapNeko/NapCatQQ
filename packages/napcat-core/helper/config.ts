@@ -45,8 +45,7 @@ export function loadNapcatConfig (configPath: string): NapcatConfig {
   } catch {
     // 读取失败时使用 schema 默认值
   }
-  data = Value.Default(NapcatConfigSchema, data) as Record<string, unknown>;
-  data = Value.Convert(NapcatConfigSchema, data) as Record<string, unknown>;
+  data = Value.Parse(NapcatConfigSchema, data) as Record<string, unknown>;
   return data as NapcatConfig;
 }
 

@@ -46,8 +46,7 @@ export abstract class ConfigBase<T> {
     try {
       const newConfigData = json5.parse(fs.readFileSync(configPath, 'utf-8'));
       let data: unknown = newConfigData;
-      data = Value.Default(this.configSchema, data);
-      data = Value.Convert(this.configSchema, data);
+      data = Value.Parse(this.configSchema, data);
       if (!this.validate.Check(data)) {
         throw new Error([...this.validate.Errors(data)].map(e => e.message).join(', '));
       }
@@ -63,8 +62,7 @@ export abstract class ConfigBase<T> {
   save (newConfigData: T = this.configData): void {
     const configPath = this.getConfigPath(this.core.selfInfo.uin);
     let data: unknown = newConfigData;
-    data = Value.Default(this.configSchema, data);
-    data = Value.Convert(this.configSchema, data);
+    data = Value.Parse(this.configSchema, data);
     if (!this.validate.Check(data)) {
       throw new Error([...this.validate.Errors(data)].map(e => e.message).join(', '));
     }
