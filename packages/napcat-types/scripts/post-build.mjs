@@ -11,7 +11,6 @@ const ALLOWED_PACKAGES = [
   'node:',  // node: 前缀的内置模块
 ];
 
-
 function isAllowedImport (importPath) {
   return ALLOWED_PACKAGES.some(pkg => importPath.startsWith(pkg));
 }

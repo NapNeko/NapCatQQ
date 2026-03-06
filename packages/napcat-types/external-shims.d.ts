@@ -96,7 +96,6 @@ declare module 'inversify' {
   export default _inversify_default;
 }
 
-
 declare module 'ip' {
   export function toBuffer (ip: any, buffer?: Buffer, offset?: number): Buffer;
   export function toString (buffer: any, offset?: number, length?: number): string;

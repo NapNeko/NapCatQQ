@@ -28,7 +28,7 @@ describe('NapCat Schemas Compilation', () => {
   test('should compile QuickAction hybrid schema without error', () => {
     const QASchema = Type.Object({
       message: OB11PostSendMsgSchema,
-      quick_action: OB11ActionMessageSchema
+      quick_action: OB11ActionMessageSchema,
     });
     expect(() => TypeCompiler.Compile(QASchema)).not.toThrow();
   });
@@ -39,7 +39,7 @@ describe('NapCat Schemas Validation & Coercion', () => {
     const payload = {
       message_type: 'private',
       user_id: 123456,
-      message: [{ type: 'text', data: { text: 'hello' } }]
+      message: [{ type: 'text', data: { text: 'hello' } }],
     };
 
     let data: unknown = structuredClone(payload);
@@ -53,8 +53,8 @@ describe('NapCat Schemas Validation & Coercion', () => {
   test('should validate complex mixed messages correctly', () => {
     const payload = {
       message_type: 'group',
-      group_id: "654321",
-      message: 'this is a string message'
+      group_id: '654321',
+      message: 'this is a string message',
     };
 
     let data: unknown = structuredClone(payload);
@@ -82,14 +82,14 @@ describe('NapCat Configuration Loaders', () => {
           enableWebsocket: false,
           messagePostFormat: 'array',
           token: '',
-          debug: false
+          debug: false,
         }],
         httpSseServers: [],
         httpClients: [],
         websocketServers: [],
         websocketClients: [],
-        plugins: []
-      }
+        plugins: [],
+      },
     };
     const loaded = loadOneBotConfig(partialConfig);
     expect(loaded.network.httpServers[0]?.host).toBe('127.0.0.1');

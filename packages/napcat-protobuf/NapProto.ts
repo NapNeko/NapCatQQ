@@ -10,14 +10,14 @@ export type CamelCaseHelper<
   IsFirstChar extends boolean
 > = S extends `${infer F}${infer R}`
   ? F extends '_'
-  ? CamelCaseHelper<R, true, false>
-  : F extends `${number}`
-  ? `${F}${CamelCaseHelper<R, true, false>}`
-  : CapNext extends true
-  ? `${Uppercase<F>}${CamelCaseHelper<R, false, false>}`
-  : IsFirstChar extends true
-  ? `${Lowercase<F>}${CamelCaseHelper<R, false, false>}`
-  : `${F}${CamelCaseHelper<R, false, false>}`
+    ? CamelCaseHelper<R, true, false>
+    : F extends `${number}`
+      ? `${F}${CamelCaseHelper<R, true, false>}`
+      : CapNext extends true
+        ? `${Uppercase<F>}${CamelCaseHelper<R, false, false>}`
+        : IsFirstChar extends true
+          ? `${Lowercase<F>}${CamelCaseHelper<R, false, false>}`
+          : `${F}${CamelCaseHelper<R, false, false>}`
   : '';
 
 export type ScalarTypeToTsType<T extends ScalarType> = T extends
@@ -30,14 +30,14 @@ export type ScalarTypeToTsType<T extends ScalarType> = T extends
   | ScalarType.SINT32
   ? number
   : T extends ScalarType.INT64 | ScalarType.UINT64 | ScalarType.FIXED64 | ScalarType.SFIXED64 | ScalarType.SINT64
-  ? bigint
-  : T extends ScalarType.BOOL
-  ? boolean
-  : T extends ScalarType.STRING
-  ? string
-  : T extends ScalarType.BYTES
-  ? Uint8Array
-  : never;
+    ? bigint
+    : T extends ScalarType.BOOL
+      ? boolean
+      : T extends ScalarType.STRING
+        ? string
+        : T extends ScalarType.BYTES
+          ? Uint8Array
+          : never;
 
 export interface BaseProtoFieldType<T, O extends boolean, R extends O extends true ? false : boolean> {
   kind: 'scalar' | 'message';
@@ -93,25 +93,25 @@ export function ProtoField (
 
 export type ProtoFieldReturnType<T, E extends boolean> =
   NonNullable<T> extends ScalarProtoFieldType<infer S, infer _O, infer _R>
-  ? ScalarTypeToTsType<S>
-  : T extends NonNullable<MessageProtoFieldType<infer S, infer _O, infer _R>>
-  ? NonNullable<NapProtoStructType<ReturnType<S>, E>>
-  : never;
+    ? ScalarTypeToTsType<S>
+    : T extends NonNullable<MessageProtoFieldType<infer S, infer _O, infer _R>>
+      ? NonNullable<NapProtoStructType<ReturnType<S>, E>>
+      : never;
 
 export type RequiredFieldsBaseType<T, E extends boolean> = {
   [K in keyof T as T[K] extends { optional: true; } ? never : LowerCamelCase<K & string>]: T[K] extends {
     repeat: true;
   }
-  ? ProtoFieldReturnType<T[K], E>[]
-  : ProtoFieldReturnType<T[K], E>;
+    ? ProtoFieldReturnType<T[K], E>[]
+    : ProtoFieldReturnType<T[K], E>;
 };
 
 export type OptionalFieldsBaseType<T, E extends boolean> = {
   [K in keyof T as T[K] extends { optional: true; } ? LowerCamelCase<K & string> : never]?: T[K] extends {
     repeat: true;
   }
-  ? ProtoFieldReturnType<T[K], E>[]
-  : ProtoFieldReturnType<T[K], E>;
+    ? ProtoFieldReturnType<T[K], E>[]
+    : ProtoFieldReturnType<T[K], E>;
 };
 
 export type RequiredFieldsType<T, E extends boolean> = E extends true

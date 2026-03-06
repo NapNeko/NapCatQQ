@@ -1,9 +1,9 @@
 import { ConfigBase } from '@/napcat-core/helper/config-base';
 import { NapCatCore } from '@/napcat-core/index';
-import { Type, Static } from '@sinclair/typebox';
+import { Type, Static, TSchema } from '@sinclair/typebox';
 
 import { Value } from '@sinclair/typebox/value';
-import { TSchema } from '@sinclair/typebox';
+
 import path from 'node:path';
 import fs from 'node:fs';
 import json5 from 'json5';
