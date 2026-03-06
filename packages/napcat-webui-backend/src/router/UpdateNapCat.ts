@@ -1,13 +1,8 @@
-/**
- * @file UpdateNapCat路由
- */
-
-import { Router } from 'express';
+import { Hono } from 'hono';
 import { UpdateNapCatHandler } from '@/napcat-webui-backend/src/api/UpdateNapCat';
 
-const router: Router = Router();
+const router = new Hono();
 
-// POST /api/UpdateNapCat/update - 更新NapCat
 router.post('/update', UpdateNapCatHandler);
 
 export { router as UpdateNapCatRouter };

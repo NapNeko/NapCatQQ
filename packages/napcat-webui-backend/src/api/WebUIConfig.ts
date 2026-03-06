@@ -1,4 +1,4 @@
-import { RequestHandler } from 'express';
+import type { Context } from 'hono';
 import { WebUiConfig, webUiPathWrapper } from '@/napcat-webui-backend/index';
 import { sendError, sendSuccess } from '@/napcat-webui-backend/src/utils/response';
 import { isEmpty } from '@/napcat-webui-backend/src/utils/check';
@@ -6,10 +6,10 @@ import { existsSync, promises as fsProm } from 'node:fs';
 import { join } from 'node:path';
 
 // 获取WebUI基础配置
-export const GetWebUIConfigHandler: RequestHandler = async (_, res) => {
+export const GetWebUIConfigHandler = async (c: Context) => {
   try {
     const config = await WebUiConfig.GetWebUIConfig();
-    return sendSuccess(res, {
+    return sendSuccess(c, {
       host: config.host,
       port: config.port,
       loginRate: config.loginRate,
@@ -21,56 +21,55 @@ export const GetWebUIConfigHandler: RequestHandler = async (_, res) => {
     });
   } catch (error) {
     const msg = (error as Error).message;
-    return sendError(res, `获取WebUI配置失败: ${msg}`);
+    return sendError(c, `获取WebUI配置失败: ${msg}`);
   }
 };
 
 // 获取是否禁用WebUI
-export const GetDisableWebUIHandler: RequestHandler = async (_, res) => {
+export const GetDisableWebUIHandler = async (c: Context) => {
   try {
     const disable = await WebUiConfig.GetDisableWebUI();
-    return sendSuccess(res, disable);
+    return sendSuccess(c, disable);
   } catch (error) {
     const msg = (error as Error).message;
-    return sendError(res, `获取WebUI禁用状态失败: ${msg}`);
+    return sendError(c, `获取WebUI禁用状态失败: ${msg}`);
   }
 };
 
 // 更新是否禁用WebUI
-export const UpdateDisableWebUIHandler: RequestHandler = async (req, res) => {
+export const UpdateDisableWebUIHandler = async (c: Context) => {
   try {
-    const { disable } = req.body;
+    const body = await c.req.json().catch(() => ({}));
+    const { disable } = body as { disable?: boolean };
 
     if (typeof disable !== 'boolean') {
-      return sendError(res, 'disable参数必须是布尔值');
+      return sendError(c, 'disable参数必须是布尔值');
     }
 
     await WebUiConfig.UpdateDisableWebUI(disable);
-    return sendSuccess(res, null);
+    return sendSuccess(c, null);
   } catch (error) {
     const msg = (error as Error).message;
-    return sendError(res, `更新WebUI禁用状态失败: ${msg}`);
+    return sendError(c, `更新WebUI禁用状态失败: ${msg}`);
   }
 };
 
 // 获取当前客户端IP
-export const GetClientIPHandler: RequestHandler = async (req, res) => {
+export const GetClientIPHandler = async (c: Context) => {
   try {
     const config = await WebUiConfig.GetWebUIConfig();
 
     // 根据配置决定如何获取客户端IP（与 CORS 中间件逻辑一致）
     let clientIP: string;
     if (config.enableXForwardedFor) {
-      const forwardedFor = req.headers['x-forwarded-for'];
+      const forwardedFor = c.req.header('x-forwarded-for');
       if (typeof forwardedFor === 'string') {
         clientIP = forwardedFor.split(',')[0]?.trim() || '';
-      } else if (Array.isArray(forwardedFor) && forwardedFor.length > 0) {
-        clientIP = forwardedFor[0] || '';
       } else {
-        clientIP = req.ip || req.socket.remoteAddress || '';
+        clientIP = (c.env as any)?.incoming?.socket?.remoteAddress || '';
       }
     } else {
-      clientIP = req.ip || req.socket.remoteAddress || '';
+      clientIP = (c.env as any)?.incoming?.socket?.remoteAddress || '';
     }
 
     // 标准化 IP（移除 IPv4-mapped IPv6 前缀，但保留纯 IPv6）
@@ -83,86 +82,95 @@ export const GetClientIPHandler: RequestHandler = async (req, res) => {
       }
     }
 
-    return sendSuccess(res, { ip: normalizedIP });
+    return sendSuccess(c, { ip: normalizedIP });
   } catch (error) {
     const msg = (error as Error).message;
-    return sendError(res, `获取客户端IP失败: ${msg}`);
+    return sendError(c, `获取客户端IP失败: ${msg}`);
   }
 };
 
 // 更新WebUI基础配置
-export const UpdateWebUIConfigHandler: RequestHandler = async (req, res) => {
+export const UpdateWebUIConfigHandler = async (c: Context) => {
   try {
-    const { host, port, loginRate, disableWebUI, accessControlMode, ipWhitelist, ipBlacklist, enableXForwardedFor } = req.body;
+    const body = await c.req.json().catch(() => ({}));
+    const bodyObj = body as Record<string, unknown>;
+    const host = bodyObj['host'];
+    const port = bodyObj['port'];
+    const loginRate = bodyObj['loginRate'];
+    const disableWebUI = bodyObj['disableWebUI'];
+    const accessControlMode = bodyObj['accessControlMode'];
+    const ipWhitelist = bodyObj['ipWhitelist'];
+    const ipBlacklist = bodyObj['ipBlacklist'];
+    const enableXForwardedFor = bodyObj['enableXForwardedFor'];
 
-    const updateConfig: any = {};
+    const updateConfig: Record<string, unknown> = {};
 
     if (host !== undefined) {
-      if (isEmpty(host)) {
-        return sendError(res, 'host不能为空');
+      if (isEmpty(host as string)) {
+        return sendError(c, 'host不能为空');
       }
-      updateConfig.host = host;
+      updateConfig['host'] = host;
     }
 
     if (port !== undefined) {
-      if (!Number.isInteger(port) || port < 1 || port > 65535) {
-        return sendError(res, 'port必须是1-65535之间的整数');
+      if (!Number.isInteger(port) || (port as number) < 1 || (port as number) > 65535) {
+        return sendError(c, 'port必须是1-65535之间的整数');
       }
-      updateConfig.port = port;
+      updateConfig['port'] = port;
     }
 
     if (loginRate !== undefined) {
-      if (!Number.isInteger(loginRate) || loginRate < 1) {
-        return sendError(res, 'loginRate必须是大于0的整数');
+      if (!Number.isInteger(loginRate) || (loginRate as number) < 1) {
+        return sendError(c, 'loginRate必须是大于0的整数');
       }
-      updateConfig.loginRate = loginRate;
+      updateConfig['loginRate'] = loginRate;
     }
 
     if (disableWebUI !== undefined) {
       if (typeof disableWebUI !== 'boolean') {
-        return sendError(res, 'disableWebUI必须是布尔值');
+        return sendError(c, 'disableWebUI必须是布尔值');
       }
-      updateConfig.disableWebUI = disableWebUI;
+      updateConfig['disableWebUI'] = disableWebUI;
     }
 
     if (accessControlMode !== undefined) {
-      if (!['none', 'whitelist', 'blacklist'].includes(accessControlMode)) {
-        return sendError(res, 'accessControlMode必须是none、whitelist或blacklist');
+      if (!['none', 'whitelist', 'blacklist'].includes(accessControlMode as string)) {
+        return sendError(c, 'accessControlMode必须是none、whitelist或blacklist');
       }
-      updateConfig.accessControlMode = accessControlMode;
+      updateConfig['accessControlMode'] = accessControlMode;
     }
 
     if (ipWhitelist !== undefined) {
       if (!Array.isArray(ipWhitelist)) {
-        return sendError(res, 'ipWhitelist必须是数组');
+        return sendError(c, 'ipWhitelist必须是数组');
       }
-      updateConfig.ipWhitelist = ipWhitelist;
+      updateConfig['ipWhitelist'] = ipWhitelist;
     }
 
     if (ipBlacklist !== undefined) {
       if (!Array.isArray(ipBlacklist)) {
-        return sendError(res, 'ipBlacklist必须是数组');
+        return sendError(c, 'ipBlacklist必须是数组');
       }
-      updateConfig.ipBlacklist = ipBlacklist;
+      updateConfig['ipBlacklist'] = ipBlacklist;
     }
 
     if (enableXForwardedFor !== undefined) {
       if (typeof enableXForwardedFor !== 'boolean') {
-        return sendError(res, 'enableXForwardedFor必须是布尔值');
+        return sendError(c, 'enableXForwardedFor必须是布尔值');
       }
-      updateConfig.enableXForwardedFor = enableXForwardedFor;
+      updateConfig['enableXForwardedFor'] = enableXForwardedFor;
     }
 
     await WebUiConfig.UpdateWebUIConfig(updateConfig);
-    return sendSuccess(res, null);
+    return sendSuccess(c, null);
   } catch (error) {
     const msg = (error as Error).message;
-    return sendError(res, `更新WebUI配置失败: ${msg}`);
+    return sendError(c, `更新WebUI配置失败: ${msg}`);
   }
 };
 
 // 获取SSL证书状态
-export const GetSSLStatusHandler: RequestHandler = async (_, res) => {
+export const GetSSLStatusHandler = async (c: Context) => {
   try {
     const certPath = join(webUiPathWrapper.configPath, 'cert.pem');
     const keyPath = join(webUiPathWrapper.configPath, 'key.pem');
@@ -180,7 +188,7 @@ export const GetSSLStatusHandler: RequestHandler = async (_, res) => {
       keyContent = await fsProm.readFile(keyPath, 'utf-8');
     }
 
-    return sendSuccess(res, {
+    return sendSuccess(c, {
       enabled: certExists && keyExists,
       certExists,
       keyExists,
@@ -189,43 +197,44 @@ export const GetSSLStatusHandler: RequestHandler = async (_, res) => {
     });
   } catch (error) {
     const msg = (error as Error).message;
-    return sendError(res, `获取SSL状态失败: ${msg}`);
+    return sendError(c, `获取SSL状态失败: ${msg}`);
   }
 };
 
 // 保存SSL证书（通过文本内容）
-export const UploadSSLCertHandler: RequestHandler = async (req, res) => {
+export const UploadSSLCertHandler = async (c: Context) => {
   try {
-    const { cert, key } = req.body;
+    const body = await c.req.json().catch(() => ({}));
+    const { cert, key } = body as { cert?: string; key?: string };
 
     if (isEmpty(cert) || isEmpty(key)) {
-      return sendError(res, 'cert和key内容不能为空');
+      return sendError(c, 'cert和key内容不能为空');
     }
 
     // 简单验证证书格式
-    if (!cert.includes('-----BEGIN CERTIFICATE-----') || !cert.includes('-----END CERTIFICATE-----')) {
-      return sendError(res, 'cert格式不正确，应为PEM格式的证书');
+    if (!cert!.includes('-----BEGIN CERTIFICATE-----') || !cert!.includes('-----END CERTIFICATE-----')) {
+      return sendError(c, 'cert格式不正确，应为PEM格式的证书');
     }
 
-    if (!key.includes('-----BEGIN') || !key.includes('KEY-----')) {
-      return sendError(res, 'key格式不正确，应为PEM格式的私钥');
+    if (!key!.includes('-----BEGIN') || !key!.includes('KEY-----')) {
+      return sendError(c, 'key格式不正确，应为PEM格式的私钥');
     }
 
     const certPath = join(webUiPathWrapper.configPath, 'cert.pem');
     const keyPath = join(webUiPathWrapper.configPath, 'key.pem');
 
-    await fsProm.writeFile(certPath, cert, 'utf-8');
-    await fsProm.writeFile(keyPath, key, 'utf-8');
+    await fsProm.writeFile(certPath, cert!, 'utf-8');
+    await fsProm.writeFile(keyPath, key!, 'utf-8');
 
-    return sendSuccess(res, { message: 'SSL证书保存成功，重启后生效' });
+    return sendSuccess(c, { message: 'SSL证书保存成功，重启后生效' });
   } catch (error) {
     const msg = (error as Error).message;
-    return sendError(res, `保存SSL证书失败: ${msg}`);
+    return sendError(c, `保存SSL证书失败: ${msg}`);
   }
 };
 
 // 删除SSL证书
-export const DeleteSSLCertHandler: RequestHandler = async (_, res) => {
+export const DeleteSSLCertHandler = async (c: Context) => {
   try {
     const certPath = join(webUiPathWrapper.configPath, 'cert.pem');
     const keyPath = join(webUiPathWrapper.configPath, 'key.pem');
@@ -237,9 +246,9 @@ export const DeleteSSLCertHandler: RequestHandler = async (_, res) => {
       await fsProm.unlink(keyPath);
     }
 
-    return sendSuccess(res, { message: 'SSL证书已删除，重启后生效' });
+    return sendSuccess(c, { message: 'SSL证书已删除，重启后生效' });
   } catch (error) {
     const msg = (error as Error).message;
-    return sendError(res, `删除SSL证书失败: ${msg}`);
+    return sendError(c, `删除SSL证书失败: ${msg}`);
   }
 };

@@ -1,9 +1,8 @@
-import { Router } from 'express';
+import { Hono } from 'hono';
 import { RestartProcessHandler } from '../api/Process';
 
-const router: Router = Router();
+const router = new Hono();
 
-// POST /api/Process/Restart - 重启进程
 router.post('/Restart', RestartProcessHandler);
 
 export { router as ProcessRouter };

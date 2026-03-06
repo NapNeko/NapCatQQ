@@ -1,4 +1,4 @@
-import { RequestHandler } from 'express';
+import type { Context } from 'hono';
 import { sendSuccess, sendError } from '@/napcat-webui-backend/src/utils/response';
 import {
   GITHUB_FILE_MIRRORS,
@@ -84,135 +84,151 @@ async function testMirrorLatency (mirror: string, testUrl: string, timeout: numb
 /**
  * 获取所有可用的镜像列表
  */
-export const GetMirrorListHandler: RequestHandler = async (_req, res) => {
+export const GetMirrorListHandler = async (c: Context) => {
   try {
     const config = getMirrorConfig();
-    return sendSuccess(res, {
+    return sendSuccess(c, {
       fileMirrors: GITHUB_FILE_MIRRORS.filter(m => m),
       rawMirrors: GITHUB_RAW_MIRRORS,
       customMirror: config.customMirror,
       timeout: config.timeout,
     });
   } catch (e: any) {
-    return sendError(res, e.message);
+    return sendError(c, e.message);
   }
 };
 
 /**
  * 设置自定义镜像
  */
-export const SetCustomMirrorHandler: RequestHandler = async (req, res) => {
+export const SetCustomMirrorHandler = async (c: Context) => {
   try {
-    const { mirror } = req.body;
+    const body = await c.req.json().catch(() => ({}));
+    const { mirror } = body as { mirror?: string };
     setCustomMirror(mirror || '');
     clearMirrorCache();
-    return sendSuccess(res, { message: 'Mirror set successfully' });
+    return sendSuccess(c, { message: 'Mirror set successfully' });
   } catch (e: any) {
-    return sendError(res, e.message);
+    return sendError(c, e.message);
   }
 };
 
 /**
  * SSE 实时测速所有镜像
  */
-export const TestMirrorsSSEHandler: RequestHandler = async (req, res) => {
-  const { type = 'file' } = req.query;
+export const TestMirrorsSSEHandler = async (c: Context) => {
+  const type = c.req.query('type') || 'file';
 
-  // 设置 SSE 响应头
-  res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache');
-  res.setHeader('Connection', 'keep-alive');
-  res.flushHeaders();
+  let cleanup: (() => void) | undefined;
+  const stream = new ReadableStream({
+    start(controller) {
+      const sendProgress = (data: any) => {
+        try {
+          controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(data)}\n\n`));
+        } catch (_e) { }
+      };
 
-  const sendProgress = (data: any) => {
-    res.write(`data: ${JSON.stringify(data)}\n\n`);
-  };
+      (async () => {
+        try {
+          // 选择镜像列表
+          let mirrors: string[];
+          let testUrl: string;
 
-  try {
-    // 选择镜像列表
-    let mirrors: string[];
-    let testUrl: string;
+          if (type === 'raw') {
+            mirrors = GITHUB_RAW_MIRRORS;
+            testUrl = 'https://raw.githubusercontent.com/NapNeko/NapCatQQ/main/README.md';
+          } else {
+            mirrors = GITHUB_FILE_MIRRORS.filter(m => m);
+            testUrl = 'https://github.com/NapNeko/NapCatQQ/releases/latest';
+          }
 
-    if (type === 'raw') {
-      mirrors = GITHUB_RAW_MIRRORS;
-      testUrl = 'https://raw.githubusercontent.com/NapNeko/NapCatQQ/main/README.md';
-    } else {
-      mirrors = GITHUB_FILE_MIRRORS.filter(m => m);
-      testUrl = 'https://github.com/NapNeko/NapCatQQ/releases/latest';
-    }
+          // 添加原始 URL 测试
+          if (!mirrors.includes('')) {
+            mirrors = ['', ...mirrors];
+          }
 
-    // 添加原始 URL 测试
-    if (!mirrors.includes('')) {
-      mirrors = ['', ...mirrors];
-    }
+          sendProgress({
+            type: 'start',
+            total: mirrors.length,
+            message: `开始测试 ${mirrors.length} 个镜像源...`,
+          });
 
-    sendProgress({
-      type: 'start',
-      total: mirrors.length,
-      message: `开始测试 ${mirrors.length} 个镜像源...`,
-    });
+          const results: MirrorTestResult[] = [];
+          const timeout = 5000;
 
-    const results: MirrorTestResult[] = [];
-    const timeout = 5000;
+          // 逐个测试并实时推送结果
+          for (let i = 0; i < mirrors.length; i++) {
+            const mirror = mirrors[i] ?? '';
+            const displayName = mirror || 'https://github.com (原始)';
 
-    // 逐个测试并实时推送结果
-    for (let i = 0; i < mirrors.length; i++) {
-      const mirror = mirrors[i] ?? '';
-      const displayName = mirror || 'https://github.com (原始)';
+            sendProgress({
+              type: 'testing',
+              index: i,
+              total: mirrors.length,
+              mirror: displayName,
+              message: `正在测试: ${displayName}`,
+            });
 
-      sendProgress({
-        type: 'testing',
-        index: i,
-        total: mirrors.length,
-        mirror: displayName,
-        message: `正在测试: ${displayName}`,
-      });
+            const result = await testMirrorLatency(mirror, testUrl, timeout);
+            results.push(result);
 
-      const result = await testMirrorLatency(mirror, testUrl, timeout);
-      results.push(result);
+            sendProgress({
+              type: 'result',
+              index: i,
+              total: mirrors.length,
+              result: {
+                ...result,
+                mirror: result.mirror || 'https://github.com (原始)',
+              },
+            });
+          }
 
-      sendProgress({
-        type: 'result',
-        index: i,
-        total: mirrors.length,
-        result: {
-          ...result,
-          mirror: result.mirror || 'https://github.com (原始)',
-        },
-      });
-    }
+          // 按延迟排序
+          const sortedResults = results
+            .filter(r => r.success)
+            .sort((a, b) => a.latency - b.latency);
 
-    // 按延迟排序
-    const sortedResults = results
-      .filter(r => r.success)
-      .sort((a, b) => a.latency - b.latency);
+          const failedResults = results.filter(r => !r.success);
 
-    const failedResults = results.filter(r => !r.success);
+          sendProgress({
+            type: 'complete',
+            results: sortedResults,
+            failed: failedResults,
+            fastest: sortedResults[0] || null,
+            message: `测试完成！${sortedResults.length} 个可用，${failedResults.length} 个失败`,
+          });
 
-    sendProgress({
-      type: 'complete',
-      results: sortedResults,
-      failed: failedResults,
-      fastest: sortedResults[0] || null,
-      message: `测试完成！${sortedResults.length} 个可用，${failedResults.length} 个失败`,
-    });
+          controller.close();
+        } catch (e: any) {
+          sendProgress({
+            type: 'error',
+            error: e.message,
+          });
+          controller.close();
+        }
+      })();
+    },
+    cancel() {
+      if (cleanup) cleanup();
+    },
+  });
 
-    res.end();
-  } catch (e: any) {
-    sendProgress({
-      type: 'error',
-      error: e.message,
-    });
-    res.end();
-  }
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+    },
+  });
 };
 
 /**
  * 快速测试单个镜像
  */
-export const TestSingleMirrorHandler: RequestHandler = async (req, res) => {
+export const TestSingleMirrorHandler = async (c: Context) => {
   try {
-    const { mirror, type = 'file' } = req.body;
+    const body = await c.req.json().catch(() => ({}));
+    const { mirror, type = 'file' } = body as { mirror?: string; type?: string };
 
     let testUrl: string;
     if (type === 'raw') {
@@ -223,8 +239,8 @@ export const TestSingleMirrorHandler: RequestHandler = async (req, res) => {
 
     const result = await testMirrorLatency(mirror || '', testUrl, 5000);
 
-    return sendSuccess(res, result);
+    return sendSuccess(c, result);
   } catch (e: any) {
-    return sendError(res, e.message);
+    return sendError(c, e.message);
   }
 };

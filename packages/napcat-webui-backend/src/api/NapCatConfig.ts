@@ -1,4 +1,4 @@
-import { RequestHandler } from 'express';
+import type { Context } from 'hono';
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { webUiPathWrapper } from '@/napcat-webui-backend/index';
@@ -48,21 +48,21 @@ function writeNapcatConfig (config: Record<string, unknown>): void {
 }
 
 // 获取 NapCat 配置
-export const NapCatGetConfigHandler: RequestHandler = (_, res) => {
+export const NapCatGetConfigHandler = (c: Context) => {
   try {
     const config = readNapcatConfig();
-    return sendSuccess(res, config);
+    return sendSuccess(c, config);
   } catch (e) {
-    return sendError(res, 'Config Get Error: ' + (e as Error).message);
+    return sendError(c, 'Config Get Error: ' + (e as Error).message);
   }
 };
 
 // 设置 NapCat 配置
-export const NapCatSetConfigHandler: RequestHandler = (req, res) => {
+export const NapCatSetConfigHandler = async (c: Context) => {
   try {
-    const newConfig = req.body;
+    const newConfig = await c.req.json().catch(() => ({})) as Record<string, unknown>;
     if (!newConfig || typeof newConfig !== 'object') {
-      return sendError(res, 'config is empty or invalid');
+      return sendError(c, 'config is empty or invalid');
     }
 
     // 读取当前配置并合并
@@ -70,20 +70,20 @@ export const NapCatSetConfigHandler: RequestHandler = (req, res) => {
     const mergedConfig = { ...currentConfig, ...newConfig };
 
     // 验证 bypass 字段
-    if (mergedConfig.bypass && typeof mergedConfig.bypass === 'object') {
-      const bypass = mergedConfig.bypass as Record<string, unknown>;
+    if (mergedConfig['bypass'] && typeof mergedConfig['bypass'] === 'object') {
+      const bypass = mergedConfig['bypass'] as Record<string, unknown>;
       const validKeys = ['hook', 'window', 'module', 'process', 'container', 'js'];
       for (const key of validKeys) {
         if (key in bypass && typeof bypass[key] !== 'boolean') {
-          return sendError(res, `bypass.${key} must be boolean`);
+          return sendError(c, `bypass.${key} must be boolean`);
         }
       }
     }
 
     writeNapcatConfig(mergedConfig);
-    return sendSuccess(res, null);
+    return sendSuccess(c, null);
   } catch (e) {
-    return sendError(res, 'Config Set Error: ' + (e as Error).message);
+    return sendError(c, 'Config Set Error: ' + (e as Error).message);
   }
 };
 
@@ -113,33 +113,33 @@ function writeUinConfig (uin: string, config: Record<string, unknown>): void {
 }
 
 // 获取 per-uin NapCat 配置
-export const NapCatGetUinConfigHandler: RequestHandler = (_, res) => {
+export const NapCatGetUinConfigHandler = (c: Context) => {
   try {
     const isLogin = WebUiDataRuntime.getQQLoginStatus();
-    if (!isLogin) return sendError(res, 'Not Login');
+    if (!isLogin) return sendError(c, 'Not Login');
     const uin = WebUiDataRuntime.getQQLoginUin();
-    return sendSuccess(res, readUinConfig(uin));
+    return sendSuccess(c, readUinConfig(uin));
   } catch (e) {
-    return sendError(res, 'Config Get Error: ' + (e as Error).message);
+    return sendError(c, 'Config Get Error: ' + (e as Error).message);
   }
 };
 
 // 设置 per-uin NapCat 配置
-export const NapCatSetUinConfigHandler: RequestHandler = (req, res) => {
+export const NapCatSetUinConfigHandler = async (c: Context) => {
   try {
     const isLogin = WebUiDataRuntime.getQQLoginStatus();
-    if (!isLogin) return sendError(res, 'Not Login');
+    if (!isLogin) return sendError(c, 'Not Login');
     const uin = WebUiDataRuntime.getQQLoginUin();
 
-    const newConfig = req.body;
+    const newConfig = await c.req.json().catch(() => ({})) as Record<string, unknown>;
     if (!newConfig || typeof newConfig !== 'object') {
-      return sendError(res, 'config is empty or invalid');
+      return sendError(c, 'config is empty or invalid');
     }
     const currentConfig = readUinConfig(uin);
     const mergedConfig = { ...currentConfig, ...newConfig };
     writeUinConfig(uin, mergedConfig);
-    return sendSuccess(res, null);
+    return sendSuccess(c, null);
   } catch (e) {
-    return sendError(res, 'Config Set Error: ' + (e as Error).message);
+    return sendError(c, 'Config Set Error: ' + (e as Error).message);
   }
 };

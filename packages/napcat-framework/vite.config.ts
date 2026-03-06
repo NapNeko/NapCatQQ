@@ -9,7 +9,9 @@ import napcatVersion from 'napcat-vite/vite-plugin-version.js';
 // 依赖排除
 const external = [
   'ws',
-  'express',
+  'hono',
+  '@hono/node-server',
+  '@hono/node-ws',
 ];
 const nodeModules = [...builtinModules, builtinModules.map((m) => `node:${m}`), 'node:sqlite'].flat();
 const FrameworkBaseConfigPlugin: PluginOption[] = [

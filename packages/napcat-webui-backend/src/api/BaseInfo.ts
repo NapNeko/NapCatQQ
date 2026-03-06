@@ -1,4 +1,4 @@
-import { RequestHandler } from 'express';
+import type { Context } from 'hono';
 import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
 
 import { sendSuccess, sendError } from '@/napcat-webui-backend/src/utils/response';
@@ -10,17 +10,17 @@ import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 
-export const GetNapCatVersion: RequestHandler = (_, res) => {
+export const GetNapCatVersion = (c: Context) => {
   const data = WebUiDataRuntime.GetNapCatVersion();
-  sendSuccess(res, { version: data });
+  return sendSuccess(c, { version: data });
 };
 
-export const getLatestTagHandler: RequestHandler = async (_, res) => {
+export const getLatestTagHandler = async (c: Context) => {
   try {
     const latestTag = await getLatestTag();
-    sendSuccess(res, latestTag);
+    return sendSuccess(c, latestTag);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch latest tag', details: (error as Error).message });
+    return c.json({ error: 'Failed to fetch latest tag', details: (error as Error).message }, 500);
   }
 };
 
@@ -45,13 +45,13 @@ export interface VersionInfo {
  * 获取所有可用的版本（release + action artifacts）
  * 支持分页，懒加载：根据 type 参数只获取需要的版本类型
  */
-export const getAllReleasesHandler: RequestHandler = async (req, res) => {
+export const getAllReleasesHandler = async (c: Context) => {
   try {
-    const page = parseInt(req.query['page'] as string) || 1;
-    const pageSize = parseInt(req.query['pageSize'] as string) || 20;
-    const typeFilter = req.query['type'] as string | undefined; // 'release' | 'action' | 'all'
-    const searchQuery = (req.query['search'] as string || '').toLowerCase().trim();
-    const mirror = req.query['mirror'] as string | undefined;
+    const page = parseInt(c.req.query('page') || '1') || 1;
+    const pageSize = parseInt(c.req.query('pageSize') || '20') || 20;
+    const typeFilter = c.req.query('type'); // 'release' | 'action' | 'all'
+    const searchQuery = (c.req.query('search') || '').toLowerCase().trim();
+    const mirror = c.req.query('mirror');
 
     let versions: VersionInfo[] = [];
     let actionVersions: VersionInfo[] = [];
@@ -146,7 +146,7 @@ export const getAllReleasesHandler: RequestHandler = async (req, res) => {
     const end = start + pageSize;
     const paginatedVersions = allVersions.slice(start, end);
 
-    sendSuccess(res, {
+    return sendSuccess(c, {
       versions: paginatedVersions,
       pagination: {
         page,
@@ -157,38 +157,42 @@ export const getAllReleasesHandler: RequestHandler = async (req, res) => {
       mirror: usedMirror,
     });
   } catch (_error) {
-    res.status(500).json({ error: 'Failed to fetch releases' });
+    return c.json({ error: 'Failed to fetch releases' }, 500);
   }
 };
 
-export const QQVersionHandler: RequestHandler = (_, res) => {
+export const QQVersionHandler = (c: Context) => {
   const data = WebUiDataRuntime.getQQVersion();
-  sendSuccess(res, data);
+  return sendSuccess(c, data);
 };
 
-export const GetThemeConfigHandler: RequestHandler = async (_, res) => {
+export const GetThemeConfigHandler = async (c: Context) => {
   const data = await WebUiConfig.GetTheme();
-  sendSuccess(res, data);
+  return sendSuccess(c, data);
 };
 
-export const SetThemeConfigHandler: RequestHandler = async (req, res) => {
-  const { theme } = req.body;
-  await WebUiConfig.UpdateTheme(theme);
-  sendSuccess(res, { message: '更新成功' });
+export const SetThemeConfigHandler = async (c: Context) => {
+  const body = await c.req.json().catch(() => ({}));
+  const { theme } = body as { theme?: unknown };
+  if (theme === undefined || theme === null || typeof theme !== 'object') {
+    return sendError(c, 'theme is required and must be an object');
+  }
+  await WebUiConfig.UpdateTheme(theme as Parameters<typeof WebUiConfig.UpdateTheme>[0]);
+  return sendSuccess(c, { message: '更新成功' });
 };
 
-export const GetMirrorsHandler: RequestHandler = (_, res) => {
+export const GetMirrorsHandler = (c: Context) => {
   const config = getMirrorConfig();
-  sendSuccess(res, { mirrors: config.fileMirrors });
+  return sendSuccess(c, { mirrors: config.fileMirrors });
 };
 
-export const GetNapCatFileHashHandler: RequestHandler = (_, res) => {
+export const GetNapCatFileHashHandler = (c: Context) => {
   try {
     const filePath = path.join(webUiPathWrapper.binaryPath, 'napcat.mjs');
     const fileBuffer = fs.readFileSync(filePath);
     const hash = crypto.createHash('sha512').update(fileBuffer).digest('hex');
-    sendSuccess(res, { hash, file: 'napcat.mjs', algorithm: 'sha512' });
+    return sendSuccess(c, { hash, file: 'napcat.mjs', algorithm: 'sha512' });
   } catch (error) {
-    sendError(res, `无法计算 napcat.mjs 的 hash：${(error as Error).message}`);
+    return sendError(c, `无法计算 napcat.mjs 的 hash：${(error as Error).message}`);
   }
 };

@@ -1,4 +1,4 @@
-import { RequestHandler } from 'express';
+import type { Context } from 'hono';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { loadConfig, OneBotConfig } from '@/napcat-webui-backend/src/onebot/config';
@@ -9,12 +9,12 @@ import { isEmpty } from '@/napcat-webui-backend/src/utils/check';
 import json5 from 'json5';
 
 // 获取OneBot11配置
-export const OB11GetConfigHandler: RequestHandler = (_, res) => {
+export const OB11GetConfigHandler = (c: Context) => {
   // 获取QQ登录状态
   const isLogin = WebUiDataRuntime.getQQLoginStatus();
   // 如果未登录，返回错误
   if (!isLogin) {
-    return sendError(res, 'Not Login');
+    return sendError(c, 'Not Login');
   }
   // 获取登录的QQ号
   const uin = WebUiDataRuntime.getQQLoginUin();
@@ -29,32 +29,34 @@ export const OB11GetConfigHandler: RequestHandler = (_, res) => {
     // 解析配置文件并加载配置
     const data = loadConfig(json5.parse(configFileContent)) as OneBotConfig;
     // 返回配置文件
-    return sendSuccess(res, data);
+    return sendSuccess(c, data);
   } catch (_e) {
-    return sendError(res, 'Config Get Error');
+    return sendError(c, 'Config Get Error');
   }
 };
 
 // 写入OneBot11配置
-export const OB11SetConfigHandler: RequestHandler = async (req, res) => {
+export const OB11SetConfigHandler = async (c: Context) => {
   // 获取QQ登录状态
   const isLogin = WebUiDataRuntime.getQQLoginStatus();
   // 如果未登录，返回错误
   if (!isLogin) {
-    return sendError(res, 'Not Login');
+    return sendError(c, 'Not Login');
   }
+  const body = await c.req.json().catch(() => ({}));
+  const { config } = body as { config?: string };
   // 如果配置为空，返回错误
-  if (isEmpty(req.body.config)) {
-    return sendError(res, 'config is empty');
+  if (isEmpty(config)) {
+    return sendError(c, 'config is empty');
   }
   // 写入配置
   try {
     // 解析并加载配置
-    const config = loadConfig(json5.parse(req.body.config)) as OneBotConfig;
+    const configObj = loadConfig(json5.parse(config || '')) as OneBotConfig;
     // 写入配置
-    await WebUiDataRuntime.setOB11Config(config);
-    return sendSuccess(res, null);
+    await WebUiDataRuntime.setOB11Config(configObj);
+    return sendSuccess(c, null);
   } catch (e) {
-    return sendError(res, 'Error: ' + e);
+    return sendError(c, 'Error: ' + e);
   }
 };

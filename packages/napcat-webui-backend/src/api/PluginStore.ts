@@ -1,4 +1,4 @@
-import { RequestHandler } from 'express';
+import type { Context } from 'hono';
 import { sendError, sendSuccess } from '@/napcat-webui-backend/src/utils/response';
 import { PluginStoreList } from '@/napcat-webui-backend/src/types/PluginStore';
 import * as fs from 'fs';
@@ -379,45 +379,46 @@ async function cachePluginIcon (pluginId: string, storePlugin: PluginStoreList['
 /**
  * 获取插件商店列表
  */
-export const GetPluginStoreListHandler: RequestHandler = async (req, res) => {
+export const GetPluginStoreListHandler = async (c: Context) => {
   try {
     // 支持 forceRefresh 查询参数强制刷新缓存
-    const forceRefresh = req.query['forceRefresh'] === 'true';
+    const forceRefresh = c.req.query('forceRefresh') === 'true';
     const data = await fetchPluginList(forceRefresh);
-    return sendSuccess(res, data);
+    return sendSuccess(c, data);
   } catch (e: any) {
-    return sendError(res, 'Failed to fetch plugin store list: ' + e.message);
+    return sendError(c, 'Failed to fetch plugin store list: ' + e.message);
   }
 };
 
 /**
  * 获取单个插件详情
  */
-export const GetPluginStoreDetailHandler: RequestHandler = async (req, res) => {
+export const GetPluginStoreDetailHandler = async (c: Context) => {
   try {
-    const id = validatePluginId(req.params['id']);
+    const id = validatePluginId(c.req.param('id'));
     const data = await fetchPluginList();
     const plugin = data.plugins.find(p => p.id === id);
 
     if (!plugin) {
-      return sendError(res, 'Plugin not found');
+      return sendError(c, 'Plugin not found');
     }
 
-    return sendSuccess(res, plugin);
+    return sendSuccess(c, plugin);
   } catch (e: any) {
-    return sendError(res, 'Failed to fetch plugin detail: ' + e.message);
+    return sendError(c, 'Failed to fetch plugin detail: ' + e.message);
   }
 };
 
 /**
  * 安装插件（从商店）- 普通 POST 接口
  */
-export const InstallPluginFromStoreHandler: RequestHandler = async (req, res) => {
+export const InstallPluginFromStoreHandler = async (c: Context) => {
   try {
-    const { id: rawId, mirror } = req.body;
+    const body = await c.req.json().catch(() => ({}));
+    const { id: rawId, mirror } = body as { id?: string; mirror?: string };
 
     if (!rawId) {
-      return sendError(res, 'Plugin ID is required');
+      return sendError(c, 'Plugin ID is required');
     }
 
     const id = validatePluginId(rawId);
@@ -427,7 +428,7 @@ export const InstallPluginFromStoreHandler: RequestHandler = async (req, res) =>
     const plugin = data.plugins.find(p => p.id === id);
 
     if (!plugin) {
-      return sendError(res, 'Plugin not found in store');
+      return sendError(c, 'Plugin not found in store');
     }
 
     // 检查是否已安装相同版本
@@ -435,7 +436,7 @@ export const InstallPluginFromStoreHandler: RequestHandler = async (req, res) =>
     if (pm) {
       const installedInfo = pm.getPluginInfo(id);
       if (installedInfo && installedInfo.version === plugin.version) {
-        return sendError(res, '该插件已安装且版本相同，无需重复安装');
+        return sendError(c, '该插件已安装且版本相同，无需重复安装');
       }
     }
 
@@ -470,7 +471,7 @@ export const InstallPluginFromStoreHandler: RequestHandler = async (req, res) =>
         console.warn(`[InstallPlugin] Failed to cache icon for ${id}, skipping:`, e.message);
       }
 
-      return sendSuccess(res, {
+      return sendSuccess(c, {
         message: 'Plugin installed successfully',
         plugin,
         installPath: path.join(PLUGINS_DIR, id),
@@ -483,141 +484,147 @@ export const InstallPluginFromStoreHandler: RequestHandler = async (req, res) =>
       throw downloadError;
     }
   } catch (e: any) {
-    return sendError(res, 'Failed to install plugin: ' + e.message);
+    return sendError(c, 'Failed to install plugin: ' + e.message);
   }
 };
 
 /**
  * 安装插件（从商店）- SSE 版本，实时推送进度
  */
-export const InstallPluginFromStoreSSEHandler: RequestHandler = async (req, res) => {
-  const { id: rawId, mirror } = req.query;
+export const InstallPluginFromStoreSSEHandler = async (c: Context) => {
+  const rawId = c.req.query('id');
+  const mirror = c.req.query('mirror');
 
   if (!rawId || typeof rawId !== 'string') {
-    res.status(400).json({ error: 'Plugin ID is required' });
-    return;
+    return c.json({ error: 'Plugin ID is required' }, 400);
   }
 
   let id: string;
   try {
     id = validatePluginId(rawId);
   } catch (err: any) {
-    res.status(400).json({ error: err.message });
-    return;
+    return c.json({ error: err.message }, 400);
   }
 
-  // 设置 SSE 响应头
-  res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache');
-  res.setHeader('Connection', 'keep-alive');
-  res.flushHeaders();
+  const { readable, writable } = new TransformStream();
+  const writer = writable.getWriter();
+  const encoder = new TextEncoder();
 
-  const sendProgress = (message: string, progress?: number, detail?: any) => {
-    res.write(`data: ${JSON.stringify({ message, progress, ...detail })}\n\n`);
+  const sendProgress = async (message: string, progress?: number, detail?: any) => {
+    await writer.write(encoder.encode(`data: ${JSON.stringify({ message, progress, ...detail })}\n\n`));
   };
 
-  try {
-    sendProgress('正在获取插件信息...', 10);
+  (async () => {
+    try {
+      await sendProgress('正在获取插件信息...', 10);
 
-    // 获取插件信息
-    const data = await fetchPluginList();
-    const plugin = data.plugins.find(p => p.id === id);
+      // 获取插件信息
+      const data = await fetchPluginList();
+      const plugin = data.plugins.find(p => p.id === id);
 
-    if (!plugin) {
-      sendProgress('错误: 插件不存在', 0);
-      res.write(`data: ${JSON.stringify({ error: 'Plugin not found in store' })}\n\n`);
-      res.end();
-      return;
-    }
-
-    // 检查是否已安装相同版本
-    const pm = getPluginManager();
-    if (pm) {
-      const installedInfo = pm.getPluginInfo(id);
-      if (installedInfo && installedInfo.version === plugin.version) {
-        sendProgress('错误: 该插件已安装且版本相同', 0);
-        res.write(`data: ${JSON.stringify({ error: '该插件已安装且版本相同，无需重复安装' })}\n\n`);
-        res.end();
+      if (!plugin) {
+        await sendProgress('错误: 插件不存在', 0);
+        await writer.write(encoder.encode(`data: ${JSON.stringify({ error: 'Plugin not found in store' })}\n\n`));
+        await writer.close();
         return;
       }
-    }
 
-    sendProgress(`找到插件: ${plugin.name} v${plugin.version}`, 20);
-    sendProgress(`下载地址: ${plugin.downloadUrl}`, 25);
-
-    if (mirror && typeof mirror === 'string') {
-      sendProgress(`使用镜像: ${mirror}`, 28);
-    }
-
-    // 下载插件
-    const PLUGINS_DIR = getPluginsDir();
-    const tempZipPath = path.join(PLUGINS_DIR, `${id}.temp.zip`);
-
-    try {
-      sendProgress('正在下载插件...', 30);
-      await downloadFile(plugin.downloadUrl, tempZipPath, mirror as string | undefined, (percent, downloaded, total, speed) => {
-        const overallProgress = 30 + Math.round(percent * 0.5);
-        const downloadedMb = (downloaded / 1024 / 1024).toFixed(1);
-        const totalMb = total ? (total / 1024 / 1024).toFixed(1) : '?';
-        const speedMb = (speed / 1024 / 1024).toFixed(2);
-        const eta = (total > 0 && speed > 0) ? Math.round((total - downloaded) / speed) : -1;
-
-        sendProgress(`正在下载插件... ${percent}%`, overallProgress, {
-          downloaded,
-          total,
-          speed,
-          eta,
-          downloadedStr: `${downloadedMb}MB`,
-          totalStr: `${totalMb}MB`,
-          speedStr: `${speedMb}MB/s`,
-        });
-      }, 300000);
-
-      sendProgress('下载完成，正在解压...', 85);
-      await extractPlugin(tempZipPath, id);
-
-      sendProgress('解压完成，正在清理...', 95);
-      fs.unlinkSync(tempZipPath);
-
-      // 如果 pluginManager 存在，立即注册或重载插件
-      const pluginManager = getPluginManager();
-      if (pluginManager) {
-        // 如果插件已存在，则重载以刷新版本信息；否则注册新插件
-        if (pluginManager.getPluginInfo(id)) {
-          sendProgress('正在刷新插件信息...', 95);
-          await pluginManager.reloadPlugin(id);
-        } else {
-          sendProgress('正在注册插件...', 95);
-          await pluginManager.loadPluginById(id);
+      // 检查是否已安装相同版本
+      const pm = getPluginManager();
+      if (pm) {
+        const installedInfo = pm.getPluginInfo(id);
+        if (installedInfo && installedInfo.version === plugin.version) {
+          await sendProgress('错误: 该插件已安装且版本相同', 0);
+          await writer.write(encoder.encode(`data: ${JSON.stringify({ error: '该插件已安装且版本相同，无需重复安装' })}\n\n`));
+          await writer.close();
+          return;
         }
       }
 
-      sendProgress('安装成功！', 100);
+      await sendProgress(`找到插件: ${plugin.name} v${plugin.version}`, 20);
+      await sendProgress(`下载地址: ${plugin.downloadUrl}`, 25);
 
-      // 安装后尝试缓存插件图标（如果 package.json 没有 icon 字段）
-      cachePluginIcon(id, plugin).catch(e => {
-        console.warn(`[cachePluginIcon] Failed to cache icon for ${id}:`, e.message);
-      });
-
-      res.write(`data: ${JSON.stringify({
-        success: true,
-        message: 'Plugin installed successfully',
-        plugin,
-        installPath: path.join(PLUGINS_DIR, id),
-      })}\n\n`);
-      res.end();
-    } catch (downloadError: any) {
-      // 清理临时文件
-      if (fs.existsSync(tempZipPath)) {
-        fs.unlinkSync(tempZipPath);
+      if (mirror && typeof mirror === 'string') {
+        await sendProgress(`使用镜像: ${mirror}`, 28);
       }
-      sendProgress(`错误: ${downloadError.message}`, 0);
-      res.write(`data: ${JSON.stringify({ error: downloadError.message })}\n\n`);
-      res.end();
+
+      // 下载插件
+      const PLUGINS_DIR = getPluginsDir();
+      const tempZipPath = path.join(PLUGINS_DIR, `${id}.temp.zip`);
+
+      try {
+        await sendProgress('正在下载插件...', 30);
+        await downloadFile(plugin.downloadUrl, tempZipPath, mirror as string | undefined, (percent, downloaded, total, speed) => {
+          const overallProgress = 30 + Math.round(percent * 0.5);
+          const downloadedMb = (downloaded / 1024 / 1024).toFixed(1);
+          const totalMb = total ? (total / 1024 / 1024).toFixed(1) : '?';
+          const speedMb = (speed / 1024 / 1024).toFixed(2);
+          const eta = (total > 0 && speed > 0) ? Math.round((total - downloaded) / speed) : -1;
+
+          void sendProgress(`正在下载插件... ${percent}%`, overallProgress, {
+            downloaded,
+            total,
+            speed,
+            eta,
+            downloadedStr: `${downloadedMb}MB`,
+            totalStr: `${totalMb}MB`,
+            speedStr: `${speedMb}MB/s`,
+          });
+        }, 300000);
+
+        await sendProgress('下载完成，正在解压...', 85);
+        await extractPlugin(tempZipPath, id);
+
+        await sendProgress('解压完成，正在清理...', 95);
+        fs.unlinkSync(tempZipPath);
+
+        // 如果 pluginManager 存在，立即注册或重载插件
+        const pluginManager = getPluginManager();
+        if (pluginManager) {
+          // 如果插件已存在，则重载以刷新版本信息；否则注册新插件
+          if (pluginManager.getPluginInfo(id)) {
+            await sendProgress('正在刷新插件信息...', 95);
+            await pluginManager.reloadPlugin(id);
+          } else {
+            await sendProgress('正在注册插件...', 95);
+            await pluginManager.loadPluginById(id);
+          }
+        }
+
+        await sendProgress('安装成功！', 100);
+
+        // 安装后尝试缓存插件图标（如果 package.json 没有 icon 字段）
+        cachePluginIcon(id, plugin).catch(e => {
+          console.warn(`[cachePluginIcon] Failed to cache icon for ${id}:`, e.message);
+        });
+
+        await writer.write(encoder.encode(`data: ${JSON.stringify({
+          success: true,
+          message: 'Plugin installed successfully',
+          plugin,
+          installPath: path.join(PLUGINS_DIR, id),
+        })}\n\n`));
+      } catch (downloadError: any) {
+        // 清理临时文件
+        if (fs.existsSync(tempZipPath)) {
+          fs.unlinkSync(tempZipPath);
+        }
+        await sendProgress(`错误: ${downloadError.message}`, 0);
+        await writer.write(encoder.encode(`data: ${JSON.stringify({ error: downloadError.message })}\n\n`));
+      }
+      await writer.close();
+    } catch (e: any) {
+      await sendProgress(`错误: ${e.message}`, 0);
+      await writer.write(encoder.encode(`data: ${JSON.stringify({ error: e.message })}\n\n`));
+      await writer.close();
     }
-  } catch (e: any) {
-    sendProgress(`错误: ${e.message}`, 0);
-    res.write(`data: ${JSON.stringify({ error: e.message })}\n\n`);
-    res.end();
-  }
+  })();
+
+  return new Response(readable, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+    },
+  });
 };

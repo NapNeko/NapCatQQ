@@ -1,4 +1,4 @@
-import type { RequestHandler } from 'express';
+import type { Context } from 'hono';
 import { sendError, sendSuccess } from '../utils/response';
 import { terminalManager } from '../terminal/terminal_manager';
 import { logSubscription, WebUiConfig } from '@/napcat-webui-backend/index';
@@ -11,69 +11,81 @@ const sanitizeLog = (log: string): string => {
   return log.replace(/token=[\w\d]+/gi, 'token=***');
 };
 // 日志记录
-export const LogHandler: RequestHandler = async (req, res) => {
-  const filename = req.query['id'];
+export const LogHandler = async (c: Context) => {
+  const filename = c.req.query('id');
   if (!filename || typeof filename !== 'string') {
-    return sendError(res, 'ID不能为空');
+    return sendError(c, 'ID不能为空');
   }
 
   if (filename.includes('..')) {
-    return sendError(res, 'ID不合法');
+    return sendError(c, 'ID不合法');
   }
   const logContent = await WebUiConfig.GetLogContent(filename);
   const sanitizedLogContent = sanitizeLog(logContent);
-  return sendSuccess(res, sanitizedLogContent);
+  return sendSuccess(c, sanitizedLogContent);
 };
 
 // 日志列表
-export const LogListHandler: RequestHandler = async (_, res) => {
+export const LogListHandler = async (c: Context) => {
   const logList = await WebUiConfig.GetLogsList();
-  return sendSuccess(res, logList);
+  return sendSuccess(c, logList);
 };
 
 // 实时日志（SSE）
-export const LogRealTimeHandler: RequestHandler = async (req, res) => {
-  res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Connection', 'keep-alive');
-  const listener = (log: string) => {
-    try {
-      const sanitizedLog = sanitizeLog(log);
-      res.write(`data: ${sanitizedLog}\n\n`);
-    } catch (error) {
-      console.error('向客户端写入日志数据时出错:', error);
-    }
-  };
-  logSubscription.subscribe(listener);
-  req.on('close', () => {
-    logSubscription.unsubscribe(listener);
+export const LogRealTimeHandler = async (_c: Context) => {
+  let cleanup: (() => void) | undefined;
+  const stream = new ReadableStream({
+    start(controller) {
+      const listener = (log: string) => {
+        try {
+          const sanitizedLog = sanitizeLog(log);
+          controller.enqueue(new TextEncoder().encode(`data: ${sanitizedLog}\n\n`));
+        } catch (error) {
+          console.error('向客户端写入日志数据时出错:', error);
+        }
+      };
+      logSubscription.subscribe(listener);
+      cleanup = () => logSubscription.unsubscribe(listener);
+    },
+    cancel() {
+      if (cleanup) cleanup();
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Connection': 'keep-alive',
+    },
   });
 };
 
 // 终端相关处理器
-export const CreateTerminalHandler: RequestHandler = async (req, res) => {
+export const CreateTerminalHandler = async (c: Context) => {
   if (isMacOS) {
-    return sendError(res, 'MacOS不支持终端');
+    return sendError(c, 'MacOS不支持终端');
   }
   try {
-    const { cols, rows } = req.body;
-    const { id } = terminalManager.createTerminal(cols, rows);
-    return sendSuccess(res, { id });
+    const body = await c.req.json().catch(() => ({}));
+    const { cols, rows } = body as { cols?: number; rows?: number };
+    const { id } = terminalManager.createTerminal(cols ?? 80, rows ?? 24);
+    return sendSuccess(c, { id });
   } catch (error) {
     console.error('Failed to create terminal:', error);
-    return sendError(res, '创建终端失败');
+    return sendError(c, '创建终端失败');
   }
 };
 
-export const GetTerminalListHandler: RequestHandler = (_, res) => {
+export const GetTerminalListHandler = (c: Context) => {
   const list = terminalManager.getTerminalList();
-  return sendSuccess(res, list);
+  return sendSuccess(c, list);
 };
 
-export const CloseTerminalHandler: RequestHandler = (req, res) => {
-  const id = req.params['id'];
+export const CloseTerminalHandler = (c: Context) => {
+  const id = c.req.param('id');
   if (!id) {
-    return sendError(res, 'ID不能为空');
+    return sendError(c, 'ID不能为空');
   }
   terminalManager.closeTerminal(id);
-  return sendSuccess(res, {});
+  return sendSuccess(c, {});
 };

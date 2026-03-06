@@ -17,8 +17,9 @@
     },
     "dependencies": {
         "@sinclair/typebox": "^0.34.38",
-        "cors": "^2.8.5",
-        "express": "^5.0.0",
+        "hono": "^4.12.5",
+        "@hono/node-server": "^1.19.11",
+        "@hono/node-ws": "^1.3.0",
         "fast-xml-parser": "^4.3.6",
         "file-type": "^21.0.0",
         "json5": "^2.2.3",
@@ -28,16 +29,10 @@
         "napcat-protobuf": "workspace:*",
         "napcat-webui-backend": "workspace:*",
         "napcat.protobuf": "^1.1.4",
-        "on-finished": "^2.3.5",
-        "type-is": "^1.6.7",
         "ws": "^8.18.3"
     },
     "devDependencies": {
-        "@types/cors": "^2.8.17",
-        "@types/express": "^5.0.0",
-        "@types/node": "^22.0.1",
-        "@types/on-finished": "^2.3.4",
-        "@types/type-is": "^1.6.7"
+        "@types/node": "^22.0.1"
     },
     "engines": {
         "node": ">=18.0.0"

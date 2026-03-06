@@ -1,4 +1,5 @@
-import { Router, Request, Response } from 'express';
+import { Hono } from 'hono';
+import type { Context } from 'hono';
 import { WebSocket, WebSocketServer, RawData } from 'ws';
 import { sendError, sendSuccess } from '@/napcat-webui-backend/src/utils/response';
 import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
@@ -17,21 +18,20 @@ import json5 from 'json5';
 
 type ActionNameType = typeof ActionName[keyof typeof ActionName];
 
-const router: Router = Router();
+const router = new Hono();
 const DEFAULT_ADAPTER_NAME = 'debug-primary';
 
 /**
  * 获取所有 Action 的 Schema 信息
  */
-router.get('/schemas', async (_req: Request, res: Response) => {
+router.get('/schemas', async (c: Context) => {
   try {
     const obContext = WebUiDataRuntime.getOneBotContext();
     if (!obContext) {
-      return sendError(res, 'OneBot 未初始化');
+      return sendError(c, 'OneBot 未初始化');
     }
     const schemas: Record<string, any> = {};
 
-    // 遍历 ActionName 中定义的所有路由
     for (const key in ActionName) {
       const actionName = (ActionName as any)[key];
       if (actionName === ActionName.Unknown) continue;
@@ -49,9 +49,9 @@ router.get('/schemas', async (_req: Request, res: Response) => {
       }
     }
 
-    sendSuccess(res, schemas);
+    return sendSuccess(c, schemas);
   } catch (error: unknown) {
-    sendError(res, (error as Error).message);
+    return sendError(c, (error as Error).message);
   }
 });
 
@@ -65,7 +65,7 @@ class DebugAdapter extends IOB11NetworkAdapter<WebsocketServerConfig> {
   wsClientWithEvent: WebSocket[] = [];
   lastActivityTime: number = Date.now();
   inactivityTimer: NodeJS.Timeout | null = null;
-  readonly INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5分钟不活跃
+  readonly INACTIVITY_TIMEOUT = 5 * 60 * 1000;
 
   override get isActive (): boolean {
     return this.isEnable && this.wsClientWithEvent.length > 0;
@@ -107,13 +107,11 @@ class DebugAdapter extends IOB11NetworkAdapter<WebsocketServerConfig> {
     this.logger.log('[Debug] Adapter closing:', this.name);
     this.isEnable = false;
 
-    // 停止不活跃检查定时器
     if (this.inactivityTimer) {
       clearInterval(this.inactivityTimer);
       this.inactivityTimer = null;
     }
 
-    // 关闭所有 WebSocket 连接并移除事件监听器
     this.wsClients.forEach((client) => {
       try {
         client.removeAllListeners();
@@ -212,7 +210,6 @@ class DebugAdapter extends IOB11NetworkAdapter<WebsocketServerConfig> {
     this.wsClients.push(ws);
     this.updateActivity();
 
-    // 发送连接事件
     this.sendToClient(ws, new OB11LifeCycleEvent(this.core, LifeCycleSubType.CONNECT));
 
     ws.on('error', (err) => this.logger.log('[Debug] WebSocket Error:', err.message));
@@ -247,9 +244,7 @@ class DebugAdapter extends IOB11NetworkAdapter<WebsocketServerConfig> {
         this.logger.log(`[Debug] Adapter ${this.name} 不活跃，自动关闭`);
         const oneBotContext = WebUiDataRuntime.getOneBotContext();
         if (oneBotContext) {
-          // 先从管理器移除，避免重复销毁
           debugAdapterManager.removeAdapter(this.name);
-          // 使用 NetworkManager 标准流程关闭
           oneBotContext.networkManager.closeSomeAdapters([this]).catch((e: unknown) => {
             this.logger.logError('[Debug] 自动关闭适配器失败:', e);
           });
@@ -263,30 +258,23 @@ class DebugAdapter extends IOB11NetworkAdapter<WebsocketServerConfig> {
   }
 }
 
-/**
- * 调试适配器管理器（单例管理）
- */
 class DebugAdapterManager {
   private currentAdapter: DebugAdapter | null = null;
 
   getOrCreateAdapter (): DebugAdapter {
-    // 如果已存在且活跃，直接返回
     if (this.currentAdapter) {
       this.currentAdapter.updateActivity();
       return this.currentAdapter;
     }
 
-    // 获取 OneBot 上下文
     const oneBotContext = WebUiDataRuntime.getOneBotContext();
     if (!oneBotContext) {
       throw new Error('OneBot 未初始化，无法创建调试适配器');
     }
 
-    // 创建新实例
     const adapter = new DebugAdapter('primary', oneBotContext.core, oneBotContext, oneBotContext.actions);
     this.currentAdapter = adapter;
 
-    // 使用 NetworkManager 标准流程注册并打开适配器
     oneBotContext.networkManager.registerAdapterAndOpen(adapter).catch((e: unknown) => {
       console.error('[Debug] 注册适配器失败:', e);
     });
@@ -310,81 +298,70 @@ class DebugAdapterManager {
 
 const debugAdapterManager = new DebugAdapterManager();
 
-/**
- * 获取或创建调试会话
- */
-router.post('/create', async (_req: Request, res: Response) => {
+router.post('/create', async (c: Context) => {
   try {
     const adapter = debugAdapterManager.getOrCreateAdapter();
-    sendSuccess(res, {
+    return sendSuccess(c, {
       adapterName: adapter.name,
       token: adapter.token,
       message: '调试适配器已就绪',
     });
   } catch (error: unknown) {
     const err = error as Error;
-    sendError(res, err.message);
+    return sendError(c, err.message);
   }
 });
 
-/**
- * HTTP 调用 OneBot API (支持默认 adapter)
- */
-const handleCallApi = async (req: Request, res: Response) => {
+const handleCallApi = async (c: Context) => {
   try {
-    const adapterName = req.params['adapterName'] || req.body.adapterName || DEFAULT_ADAPTER_NAME;
+    const adapterName = c.req.param('adapterName') || (await c.req.json().catch(() => ({})) as any)?.adapterName || DEFAULT_ADAPTER_NAME;
 
     let adapter = debugAdapterManager.getAdapter(adapterName);
 
-    // 如果是默认 adapter 且不存在，尝试创建
     if (!adapter && adapterName === DEFAULT_ADAPTER_NAME) {
       adapter = debugAdapterManager.getOrCreateAdapter();
     }
 
     if (!adapter) {
-      return sendError(res, '调试适配器不存在');
+      return sendError(c, '调试适配器不存在');
     }
 
-    const { action, params } = req.body;
+    const body = await c.req.json().catch(() => ({}));
+    const { action, params } = body as { action?: string; params?: Record<string, unknown> };
     const result = await adapter.callApi(action as ActionNameType, params || {});
-    sendSuccess(res, result);
+    return sendSuccess(c, result);
   } catch (error: unknown) {
     const err = error as Error;
-    sendError(res, err.message);
+    return sendError(c, err.message);
   }
 };
 
 router.post('/call/:adapterName', handleCallApi);
 router.post('/call', handleCallApi);
 
-/**
- * 关闭调试适配器
- */
-router.post('/close/:adapterName', async (req: Request, res: Response) => {
+router.post('/close/:adapterName', async (c: Context) => {
   try {
-    const { adapterName } = req.params;
+    const adapterName = c.req.param('adapterName');
     if (!adapterName) {
-      return sendError(res, '缺少 adapterName 参数');
+      return sendError(c, '缺少 adapterName 参数');
     }
 
     const adapter = debugAdapterManager.getAdapter(adapterName);
     if (!adapter) {
-      return sendError(res, '调试适配器不存在');
+      return sendError(c, '调试适配器不存在');
     }
 
-    // 先从管理器移除，避免重复销毁
     debugAdapterManager.removeAdapter(adapterName);
 
-    // 使用 NetworkManager 标准流程关闭适配器
     const oneBotContext = WebUiDataRuntime.getOneBotContext();
     if (oneBotContext) {
       await oneBotContext.networkManager.closeSomeAdapters([adapter]);
     }
 
-    sendSuccess(res, { message: '调试适配器已关闭' });
+    return sendSuccess(c, { message: '调试适配器已关闭' });
   } catch (error: unknown) {
     const err = error as Error;
-    sendError(res, err.message);
+    return sendError(c, err.message);
   }
 });
 
@@ -397,12 +374,10 @@ export function handleDebugWebSocket (request: IncomingMessage, socket: unknown,
   let adapterName = url.searchParams.get('adapterName');
   const token = url.searchParams.get('token') || url.searchParams.get('access_token');
 
-  // 默认 adapterName
   if (!adapterName) {
     adapterName = DEFAULT_ADAPTER_NAME;
   }
 
-  // Debug session should provide token
   if (!token) {
     console.log('[Debug] WebSocket 连接被拒绝: 缺少 Token');
     (socket as { write: (data: string) => void; destroy: () => void; }).write('HTTP/1.1 401 Unauthorized\r\n\r\n');
@@ -412,7 +387,6 @@ export function handleDebugWebSocket (request: IncomingMessage, socket: unknown,
 
   let adapter = debugAdapterManager.getAdapter(adapterName);
 
-  // 如果是默认 adapter 且不存在，尝试创建
   if (!adapter && adapterName === DEFAULT_ADAPTER_NAME) {
     try {
       adapter = debugAdapterManager.getOrCreateAdapter();
@@ -438,11 +412,10 @@ export function handleDebugWebSocket (request: IncomingMessage, socket: unknown,
     return;
   }
 
-  // 创建 WebSocket 服务器
   const wsServer = new WebSocketServer({ noServer: true });
 
   wsServer.handleUpgrade(request, socket as never, head as Buffer, (ws) => {
-    adapter.addWsClient(ws).catch((e: unknown) => {
+    adapter!.addWsClient(ws).catch((e: unknown) => {
       console.error('[Debug] 添加 WebSocket 客户端失败:', e);
       ws.close();
     });

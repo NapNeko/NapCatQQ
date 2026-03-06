@@ -1,4 +1,4 @@
-import { RequestHandler } from 'express';
+import type { Context } from 'hono';
 import { sendSuccess, sendError } from '@/napcat-webui-backend/src/utils/response';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -123,10 +123,11 @@ async function downloadFile (url: string, dest: string): Promise<void> {
   });
 }
 
-export const UpdateNapCatHandler: RequestHandler = async (req, res) => {
+export const UpdateNapCatHandler = async (c: Context) => {
   try {
     // 从请求体获取目标版本（可选）
-    const { targetVersion, force, mirror } = req.body as UpdateRequestBody;
+    const body = await c.req.json().catch(() => ({}));
+    const { targetVersion, force, mirror } = body as UpdateRequestBody;
 
     // 确定要下载的文件名
     const ReleaseName = WebUiDataRuntime.getWorkingEnv() === NapCatCoreWorkingEnv.Framework ? 'NapCat.Framework.zip' : 'NapCat.Shell.zip';
@@ -313,7 +314,7 @@ export const UpdateNapCatHandler: RequestHandler = async (req, res) => {
       const message = failedFiles.length > 0
         ? `更新完成，重启应用以应用剩余${failedFiles.length}个文件的更新`
         : '更新完成';
-      sendSuccess(res, {
+      return sendSuccess(c, {
         status: 'completed',
         message,
         newVersion: actualVersion,
@@ -321,11 +322,11 @@ export const UpdateNapCatHandler: RequestHandler = async (req, res) => {
       });
     } catch (error) {
       webUiLogger?.logError('[NapCat Update] 更新失败:', error);
-      sendError(res, '更新失败: ' + (error instanceof Error ? error.message : '未知错误'));
+      return sendError(c, '更新失败: ' + (error instanceof Error ? error.message : '未知错误'));
     }
   } catch (error: any) {
     webUiLogger?.logError('[NapCat Update] 更新失败:', error);
-    sendError(res, '更新失败: ' + error.message);
+    return sendError(c, '更新失败: ' + error.message);
   }
 };
 

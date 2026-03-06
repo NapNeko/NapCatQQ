@@ -2,7 +2,7 @@
  * @file 所有路由的入口文件
  */
 
-import { Router } from 'express';
+import { Hono } from 'hono';
 
 import { OB11ConfigRouter } from '@/napcat-webui-backend/src/router/OB11Config';
 import { auth } from '@/napcat-webui-backend/src/middleware/auth';
@@ -21,40 +21,25 @@ import { PluginRouter } from './Plugin';
 import { MirrorRouter } from './Mirror';
 import { NapCatConfigRouter } from './NapCatConfig';
 
-const router: Router = Router();
+const router = new Hono();
 
-// 鉴权中间件
-router.use(auth);
+router.use('*', auth);
 
-// router:测试用
-router.all('/test', (_, res) => {
-  return sendSuccess(res);
+router.all('/test', (c) => {
+  return sendSuccess(c);
 });
-// router:基础信息相关路由
-router.use('/base', BaseRouter);
-// router:WebUI登录相关路由
-router.use('/auth', AuthRouter);
-// router:QQ登录相关路由
-router.use('/QQLogin', QQLoginRouter);
-// router:OB11配置相关路由
-router.use('/OB11Config', OB11ConfigRouter);
-// router:日志相关路由
-router.use('/Log', LogRouter);
-// file:文件相关路由
-router.use('/File', FileRouter);
-// router:WebUI配置相关路由
-router.use('/WebUIConfig', WebUIConfigRouter);
-// router:更新NapCat相关路由
-router.use('/UpdateNapCat', UpdateNapCatRouter);
-// router:调试相关路由
-router.use('/Debug', DebugRouter);
-// router:进程管理相关路由
-router.use('/Process', ProcessRouter);
-// router:插件管理相关路由
-router.use('/Plugin', PluginRouter);
-// router:镜像管理相关路由
-router.use('/Mirror', MirrorRouter);
-// router:NapCat配置相关路由
-router.use('/NapCatConfig', NapCatConfigRouter);
+router.route('/base', BaseRouter);
+router.route('/auth', AuthRouter);
+router.route('/QQLogin', QQLoginRouter);
+router.route('/OB11Config', OB11ConfigRouter);
+router.route('/Log', LogRouter);
+router.route('/File', FileRouter);
+router.route('/WebUIConfig', WebUIConfigRouter);
+router.route('/UpdateNapCat', UpdateNapCatRouter);
+router.route('/Debug', DebugRouter);
+router.route('/Process', ProcessRouter);
+router.route('/Plugin', PluginRouter);
+router.route('/Mirror', MirrorRouter);
+router.route('/NapCatConfig', NapCatConfigRouter);
 
 export { router as ALLRouter };

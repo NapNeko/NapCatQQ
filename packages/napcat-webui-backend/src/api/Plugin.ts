@@ -1,4 +1,4 @@
-import { RequestHandler } from 'express';
+import type { Context } from 'hono';
 import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
 import { sendError, sendSuccess } from '@/napcat-webui-backend/src/utils/response';
 import { NapCatOneBot11Adapter } from '@/napcat-onebot/index';
@@ -66,16 +66,16 @@ const getOneBotContext = (): NapCatOneBot11Adapter | null => {
 /**
  * 手动注册插件管理器到 NetworkManager
  */
-export const RegisterPluginManagerHandler: RequestHandler = async (_req, res) => {
+export const RegisterPluginManagerHandler = async (c: Context) => {
   const ob11 = getOneBotContext();
   if (!ob11) {
-    return sendError(res, 'OneBot context not found');
+    return sendError(c, 'OneBot context not found');
   }
 
   // 检查是否已经注册
   const existingManager = ob11.networkManager.findSomeAdapter('plugin_manager');
   if (existingManager) {
-    return sendError(res, '插件管理器已经注册');
+    return sendError(c, '插件管理器已经注册');
   }
 
   try {
@@ -95,17 +95,17 @@ export const RegisterPluginManagerHandler: RequestHandler = async (_req, res) =>
 
     await ob11.networkManager.registerAdapterAndOpen(pluginManager);
 
-    return sendSuccess(res, { message: '插件管理器注册成功' });
+    return sendSuccess(c, { message: '插件管理器注册成功' });
   } catch (e: any) {
-    return sendError(res, '注册插件管理器失败: ' + e.message);
+    return sendError(c, '注册插件管理器失败: ' + e.message);
   }
 };
 
-export const GetPluginListHandler: RequestHandler = async (_req, res) => {
+export const GetPluginListHandler = async (c: Context) => {
   const pluginManager = getPluginManager();
   if (!pluginManager) {
     // 返回成功但带特殊标记
-    return sendSuccess(res, { plugins: [], pluginManagerNotFound: true, extensionPages: [] });
+    return sendSuccess(c, { plugins: [], pluginManagerNotFound: true, extensionPages: [] });
   }
 
   const loadedPlugins = pluginManager.getAllPlugins();
@@ -181,65 +181,67 @@ export const GetPluginListHandler: RequestHandler = async (_req, res) => {
     }
   }
 
-  return sendSuccess(res, { plugins: AllPlugins, pluginManagerNotFound: false, extensionPages });
+  return sendSuccess(c, { plugins: AllPlugins, pluginManagerNotFound: false, extensionPages });
 };
 
-export const SetPluginStatusHandler: RequestHandler = async (req, res) => {
-  const { enable, id } = req.body;
+export const SetPluginStatusHandler = async (c: Context) => {
+  const body = await c.req.json().catch(() => ({}));
+  const { enable, id } = body as { enable?: boolean; id?: string };
 
-  if (!id) return sendError(res, 'Plugin id is required');
+  if (!id) return sendError(c, 'Plugin id is required');
 
   const pluginManager = getPluginManager();
   if (!pluginManager) {
-    return sendError(res, 'Plugin Manager not found');
+    return sendError(c, 'Plugin Manager not found');
   }
 
   try {
     // 设置插件状态（需要 await，因为内部会加载/卸载插件）
-    await pluginManager.setPluginStatus(id, enable);
+    await pluginManager.setPluginStatus(id, enable ?? false);
 
     // 如果启用，检查插件是否加载成功
     if (enable) {
       const plugin = pluginManager.getPluginInfo(id);
       if (!plugin || !plugin.loaded) {
-        return sendError(res, 'Plugin load failed: ' + id);
+        return sendError(c, 'Plugin load failed: ' + id);
       }
     }
 
-    return sendSuccess(res, { message: 'Status updated successfully' });
+    return sendSuccess(c, { message: 'Status updated successfully' });
   } catch (e: any) {
-    return sendError(res, 'Failed to update status: ' + e.message);
+    return sendError(c, 'Failed to update status: ' + e.message);
   }
 };
 
-export const UninstallPluginHandler: RequestHandler = async (req, res) => {
-  const { id, cleanData } = req.body;
+export const UninstallPluginHandler = async (c: Context) => {
+  const body = await c.req.json().catch(() => ({}));
+  const { id, cleanData } = body as { id?: string; cleanData?: boolean };
 
-  if (!id) return sendError(res, 'Plugin id is required');
+  if (!id) return sendError(c, 'Plugin id is required');
 
   const pluginManager = getPluginManager();
   if (!pluginManager) {
-    return sendError(res, 'Plugin Manager not found');
+    return sendError(c, 'Plugin Manager not found');
   }
 
   try {
     await pluginManager.uninstallPlugin(id, cleanData);
-    return sendSuccess(res, { message: 'Uninstalled successfully' });
+    return sendSuccess(c, { message: 'Uninstalled successfully' });
   } catch (e: any) {
-    return sendError(res, 'Failed to uninstall: ' + e.message);
+    return sendError(c, 'Failed to uninstall: ' + e.message);
   }
 };
 
-export const GetPluginConfigHandler: RequestHandler = async (req, res) => {
-  const id = req.query['id'] as string;
+export const GetPluginConfigHandler = async (c: Context) => {
+  const id = c.req.query('id') as string;
 
-  if (!id) return sendError(res, 'Plugin id is required');
+  if (!id) return sendError(c, 'Plugin id is required');
 
   const pluginManager = getPluginManager();
-  if (!pluginManager) return sendError(res, 'Plugin Manager not found');
+  if (!pluginManager) return sendError(c, 'Plugin Manager not found');
 
   const plugin = pluginManager.getPluginInfo(id);
-  if (!plugin) return sendError(res, 'Plugin not loaded');
+  if (!plugin) return sendError(c, 'Plugin not loaded');
 
   // 获取配置值
   let config: unknown = {};
@@ -263,51 +265,40 @@ export const GetPluginConfigHandler: RequestHandler = async (req, res) => {
   // 检查是否支持动态控制
   const supportReactive = !!(plugin.runtime.module?.plugin_config_controller || plugin.runtime.module?.plugin_on_config_change);
 
-  return sendSuccess(res, { schema, config, supportReactive });
+  return sendSuccess(c, { schema, config, supportReactive });
 };
 
-/** 活跃的 SSE 连接 */
+/** 活跃的 SSE 连接 - 存储 controller 用于从 PluginConfigChangeHandler 推送更新 */
 const activeConfigSessions = new Map<string, {
-  res: any;
+  enqueue: (data: string) => void;
   cleanup?: () => void;
   currentConfig: Record<string, any>;
+  heartbeatId?: ReturnType<typeof setInterval>;
 }>();
 
 /**
  * 插件配置 SSE 连接 - 用于动态更新配置界面
  */
-export const PluginConfigSSEHandler: RequestHandler = (req, res): void => {
-  const id = req.query['id'] as string;
-  const initialConfigStr = req.query['config'] as string;
+export const PluginConfigSSEHandler = async (c: Context) => {
+  const id = c.req.query('id') as string;
+  const initialConfigStr = c.req.query('config') as string;
 
   if (!id) {
-    res.status(400).json({ error: 'Plugin id is required' });
-    return;
+    return c.json({ error: 'Plugin id is required' }, 400);
   }
 
   const pluginManager = getPluginManager();
   if (!pluginManager) {
-    res.status(400).json({ error: 'Plugin Manager not found' });
-    return;
+    return c.json({ error: 'Plugin Manager not found' }, 400);
   }
 
   const plugin = pluginManager.getPluginInfo(id);
   if (!plugin) {
-    res.status(400).json({ error: 'Plugin not loaded' });
-    return;
+    return c.json({ error: 'Plugin not loaded' }, 400);
   }
 
-  // 设置 SSE 头
-  res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache');
-  res.setHeader('Connection', 'keep-alive');
-  res.setHeader('X-Accel-Buffering', 'no');
-  res.flushHeaders();
-
-  // 生成会话 ID
   const sessionId = `${id}_${Date.now()}_${Math.random().toString(36).slice(2)}`;
 
-  // 解析初始配置
   let currentConfig: Record<string, any> = {};
   if (initialConfigStr) {
     try {
@@ -315,136 +306,121 @@ export const PluginConfigSSEHandler: RequestHandler = (req, res): void => {
     } catch (_e) { }
   }
 
-  // 发送 SSE 消息的辅助函数
-  const sendSSE = (event: string, data: any) => {
-    res.write(`event: ${event}\n`);
-    res.write(`data: ${JSON.stringify(data)}\n\n`);
-  };
+  let heartbeatId: ReturnType<typeof setInterval> | undefined;
+  let cleanup: (() => void) | undefined;
 
-  // 创建 UI 控制器
-  const uiController = {
-    updateSchema: (schema: any[]) => {
-      sendSSE('schema', { type: 'full', schema });
-    },
-    updateField: (key: string, field: any) => {
-      sendSSE('schema', { type: 'updateField', key, field });
-    },
-    removeField: (key: string) => {
-      sendSSE('schema', { type: 'removeField', key });
-    },
-    addField: (field: any, afterKey?: string) => {
-      sendSSE('schema', { type: 'addField', field, afterKey });
-    },
-    showField: (key: string) => {
-      sendSSE('schema', { type: 'showField', key });
-    },
-    hideField: (key: string) => {
-      sendSSE('schema', { type: 'hideField', key });
-    },
-    getCurrentConfig: () => currentConfig,
-  };
+  const stream = new ReadableStream({
+    start(controller) {
+      const encoder = new TextEncoder();
+      const enqueue = (data: string) => {
+        try {
+          controller.enqueue(encoder.encode(data));
+        } catch (_e) { }
+      };
 
-  // 存储会话
-  activeConfigSessions.set(sessionId, { res, currentConfig });
+      const sendSSE = (event: string, data: any) => {
+        enqueue(`event: ${event}\n`);
+        enqueue(`data: ${JSON.stringify(data)}\n\n`);
+      };
 
-  // 发送连接成功消息
-  sendSSE('connected', { sessionId });
+      activeConfigSessions.set(sessionId, {
+        enqueue: (data) => controller.enqueue(encoder.encode(data)),
+        currentConfig,
+        heartbeatId,
+      });
 
-  // 调用插件的控制器初始化（异步处理）
-  (async () => {
-    let cleanup: (() => void) | undefined;
-    if (plugin.runtime.module?.plugin_config_controller && plugin.runtime.context) {
-      try {
-        const result = await plugin.runtime.module.plugin_config_controller(
-          plugin.runtime.context,
-          uiController,
-          currentConfig
-        );
-        if (typeof result === 'function') {
-          cleanup = result;
+      const uiController = {
+        updateSchema: (schema: any[]) => sendSSE('schema', { type: 'full', schema }),
+        updateField: (key: string, field: any) => sendSSE('schema', { type: 'updateField', key, field }),
+        removeField: (key: string) => sendSSE('schema', { type: 'removeField', key }),
+        addField: (field: any, afterKey?: string) => sendSSE('schema', { type: 'addField', field, afterKey }),
+        showField: (key: string) => sendSSE('schema', { type: 'showField', key }),
+        hideField: (key: string) => sendSSE('schema', { type: 'hideField', key }),
+        getCurrentConfig: () => currentConfig,
+      };
+
+      sendSSE('connected', { sessionId });
+
+      (async () => {
+        if (plugin.runtime.module?.plugin_config_controller && plugin.runtime.context) {
+          try {
+            const result = await plugin.runtime.module.plugin_config_controller(
+              plugin.runtime.context,
+              uiController,
+              currentConfig
+            );
+            if (typeof result === 'function') {
+              cleanup = result;
+            }
+          } catch (e: any) {
+            sendSSE('error', { message: e.message });
+          }
         }
-      } catch (e: any) {
-        sendSSE('error', { message: e.message });
+
+        const session = activeConfigSessions.get(sessionId);
+        if (session) session.cleanup = cleanup;
+      })();
+
+      heartbeatId = setInterval(() => sendSSE('ping', { time: Date.now() }), 30000);
+      const session = activeConfigSessions.get(sessionId);
+      if (session) session.heartbeatId = heartbeatId;
+    },
+    cancel() {
+      clearInterval(heartbeatId);
+      const session = activeConfigSessions.get(sessionId);
+      if (session?.cleanup) {
+        try { session.cleanup(); } catch (_e) { }
       }
-    }
+      activeConfigSessions.delete(sessionId);
+    },
+  });
 
-    // 更新会话的 cleanup
-    const session = activeConfigSessions.get(sessionId);
-    if (session) {
-      session.cleanup = cleanup;
-    }
-  })();
-
-  // 心跳保持连接
-  const heartbeat = setInterval(() => {
-    sendSSE('ping', { time: Date.now() });
-  }, 30000);
-
-  // 连接关闭时清理
-  req.on('close', () => {
-    clearInterval(heartbeat);
-    const session = activeConfigSessions.get(sessionId);
-    if (session?.cleanup) {
-      try {
-        session.cleanup();
-      } catch (_e) { }
-    }
-    activeConfigSessions.delete(sessionId);
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+      'X-Accel-Buffering': 'no',
+    },
   });
 };
 
 /**
  * 插件配置字段变化通知
  */
-export const PluginConfigChangeHandler: RequestHandler = async (req, res) => {
-  const { id, sessionId, key, value, currentConfig } = req.body;
+export const PluginConfigChangeHandler = async (c: Context) => {
+  const body = await c.req.json().catch(() => ({}));
+  const { id, sessionId, key, value, currentConfig } = body as { id?: string; sessionId?: string; key?: string; value?: unknown; currentConfig?: Record<string, any> };
 
   if (!id || !sessionId || !key) {
-    return sendError(res, 'Missing required parameters');
+    return sendError(c, 'Missing required parameters');
   }
 
   const pluginManager = getPluginManager();
-  if (!pluginManager) return sendError(res, 'Plugin Manager not found');
+  if (!pluginManager) return sendError(c, 'Plugin Manager not found');
 
   const plugin = pluginManager.getPluginInfo(id);
-  if (!plugin) return sendError(res, 'Plugin not loaded');
+  if (!plugin) return sendError(c, 'Plugin not loaded');
 
-  // 获取会话
   const session = activeConfigSessions.get(sessionId);
   if (!session) {
-    return sendError(res, 'Session not found');
+    return sendError(c, 'Session not found');
   }
 
-  // 更新会话中的当前配置
   session.currentConfig = currentConfig || {};
 
-  // 如果插件有响应式处理器，调用它
   if (plugin.runtime.module?.plugin_on_config_change) {
+    const sendSSE = (event: string, data: any) => {
+      session.enqueue(`event: ${event}\n`);
+      session.enqueue(`data: ${JSON.stringify(data)}\n\n`);
+    };
     const uiController = {
-      updateSchema: (schema: any[]) => {
-        session.res.write('event: schema\n');
-        session.res.write(`data: ${JSON.stringify({ type: 'full', schema })}\n\n`);
-      },
-      updateField: (fieldKey: string, field: any) => {
-        session.res.write('event: schema\n');
-        session.res.write(`data: ${JSON.stringify({ type: 'updateField', key: fieldKey, field })}\n\n`);
-      },
-      removeField: (fieldKey: string) => {
-        session.res.write('event: schema\n');
-        session.res.write(`data: ${JSON.stringify({ type: 'removeField', key: fieldKey })}\n\n`);
-      },
-      addField: (field: any, afterKey?: string) => {
-        session.res.write('event: schema\n');
-        session.res.write(`data: ${JSON.stringify({ type: 'addField', field, afterKey })}\n\n`);
-      },
-      showField: (fieldKey: string) => {
-        session.res.write('event: schema\n');
-        session.res.write(`data: ${JSON.stringify({ type: 'showField', key: fieldKey })}\n\n`);
-      },
-      hideField: (fieldKey: string) => {
-        session.res.write('event: schema\n');
-        session.res.write(`data: ${JSON.stringify({ type: 'hideField', key: fieldKey })}\n\n`);
-      },
+      updateSchema: (schema: any[]) => sendSSE('schema', { type: 'full', schema }),
+      updateField: (fieldKey: string, field: any) => sendSSE('schema', { type: 'updateField', key: fieldKey, field }),
+      removeField: (fieldKey: string) => sendSSE('schema', { type: 'removeField', key: fieldKey }),
+      addField: (field: any, afterKey?: string) => sendSSE('schema', { type: 'addField', field, afterKey }),
+      showField: (fieldKey: string) => sendSSE('schema', { type: 'showField', key: fieldKey }),
+      hideField: (fieldKey: string) => sendSSE('schema', { type: 'hideField', key: fieldKey }),
       getCurrentConfig: () => session.currentConfig,
     };
 
@@ -459,33 +435,32 @@ export const PluginConfigChangeHandler: RequestHandler = async (req, res) => {
         );
       }
     } catch (e: any) {
-      session.res.write('event: error\n');
-      session.res.write(`data: ${JSON.stringify({ message: e.message })}\n\n`);
+      sendSSE('error', { message: e.message });
     }
   }
 
-  return sendSuccess(res, { message: 'Change processed' });
+  return sendSuccess(c, { message: 'Change processed' });
 };
 
-export const SetPluginConfigHandler: RequestHandler = async (req, res) => {
-  const { id, config } = req.body;
-  if (!id || !config) return sendError(res, 'Plugin id and config required');
+export const SetPluginConfigHandler = async (c: Context) => {
+  const body = await c.req.json().catch(() => ({}));
+  const { id, config } = body as { id?: string; config?: unknown };
+  if (!id || !config) return sendError(c, 'Plugin id and config required');
 
   const pluginManager = getPluginManager();
-  if (!pluginManager) return sendError(res, 'Plugin Manager not found');
+  if (!pluginManager) return sendError(c, 'Plugin Manager not found');
 
   const plugin = pluginManager.getPluginInfo(id);
-  if (!plugin) return sendError(res, 'Plugin not loaded');
+  if (!plugin) return sendError(c, 'Plugin not loaded');
 
   if (plugin.runtime.module?.plugin_set_config && plugin.runtime.context) {
     try {
       await plugin.runtime.module.plugin_set_config(plugin.runtime.context, config);
-      return sendSuccess(res, { message: 'Config updated' });
+      return sendSuccess(c, { message: 'Config updated' });
     } catch (e: any) {
-      return sendError(res, 'Error updating config: ' + e.message);
+      return sendError(c, 'Error updating config: ' + e.message);
     }
   } else if (plugin.runtime.module?.plugin_config_schema || plugin.runtime.module?.plugin_config_ui || plugin.runtime.module?.plugin_config_controller) {
-    // Default behavior: write to default config path
     try {
       const configPath = plugin.runtime.context?.configPath || pluginManager.getPluginConfigPath(id);
 
@@ -495,41 +470,41 @@ export const SetPluginConfigHandler: RequestHandler = async (req, res) => {
       }
       fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8');
 
-      // Auto-Reload plugin to apply changes
       await pluginManager.reloadPlugin(id);
 
-      return sendSuccess(res, { message: 'Config saved and plugin reloaded' });
+      return sendSuccess(c, { message: 'Config saved and plugin reloaded' });
     } catch (e: any) {
-      return sendError(res, 'Error saving config: ' + e.message);
+      return sendError(c, 'Error saving config: ' + e.message);
     }
   } else {
-    return sendError(res, 'Plugin does not support config update');
+    return sendError(c, 'Plugin does not support config update');
   }
 };
 
 /**
  * 导入本地插件包（支持 .zip 文件）
  */
-export const ImportLocalPluginHandler: RequestHandler = async (req, res) => {
+export const ImportLocalPluginHandler = async (c: Context) => {
   const pluginManager = getPluginManager();
   if (!pluginManager) {
-    return sendError(res, 'Plugin Manager not found');
+    return sendError(c, 'Plugin Manager not found');
   }
 
-  // multer 会将文件信息放在 req.file 中
-  const file = req.file;
-  if (!file) {
-    return sendError(res, 'No file uploaded');
+  const body = await c.req.parseBody({ all: true });
+  const file = body['plugin'] as File | undefined;
+  if (!file || !(file instanceof File)) {
+    return sendError(c, 'No file uploaded');
   }
 
   const PLUGINS_DIR = webUiPathWrapper.pluginPath;
 
-  // 确保插件目录存在
   if (!fs.existsSync(PLUGINS_DIR)) {
     fs.mkdirSync(PLUGINS_DIR, { recursive: true });
   }
 
-  const tempZipPath = file.path;
+  const tempZipPath = path.join(PLUGINS_DIR, `_temp_${Date.now()}_${path.basename(file.name || 'plugin.zip')}`);
+  const arrayBuffer = await file.arrayBuffer();
+  fs.writeFileSync(tempZipPath, Buffer.from(arrayBuffer));
 
   try {
     // 创建临时解压目录
@@ -557,15 +532,16 @@ export const ImportLocalPluginHandler: RequestHandler = async (req, res) => {
 
       // 尝试从 package.json 获取插件 ID
       const packageJsonPath = path.join(tempExtractDir, 'package.json');
+      const fileName = file.name || 'plugin.zip';
       if (fs.existsSync(packageJsonPath)) {
         try {
           const pkg = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-          pluginId = pkg.name || path.basename(file.originalname, '.zip');
+          pluginId = pkg.name || path.basename(fileName, '.zip');
         } catch {
-          pluginId = path.basename(file.originalname, '.zip');
+          pluginId = path.basename(fileName, '.zip');
         }
       } else {
-        pluginId = path.basename(file.originalname, '.zip');
+        pluginId = path.basename(fileName, '.zip');
       }
     } else if (extractedItems.length === 1 && fs.statSync(path.join(tempExtractDir, extractedItems[0]!)).isDirectory()) {
       // 包含一个子目录
@@ -588,7 +564,7 @@ export const ImportLocalPluginHandler: RequestHandler = async (req, res) => {
       // 清理临时文件
       fs.rmSync(tempExtractDir, { recursive: true, force: true });
       fs.unlinkSync(tempZipPath);
-      return sendError(res, 'Invalid plugin package structure');
+      return sendError(c, 'Invalid plugin package structure');
     }
 
     // 目标插件目录
@@ -624,44 +600,56 @@ export const ImportLocalPluginHandler: RequestHandler = async (req, res) => {
     const loaded = await pluginManager.loadPluginById(pluginId);
 
     if (loaded) {
-      return sendSuccess(res, {
+      return sendSuccess(c, {
         message: 'Plugin imported and loaded successfully',
         pluginId,
         installPath: targetPluginDir,
       });
     } else {
-      return sendSuccess(res, {
+      return sendSuccess(c, {
         message: 'Plugin imported but failed to load (check plugin structure)',
         pluginId,
         installPath: targetPluginDir,
       });
     }
   } catch (e: any) {
-    // 清理临时文件
     if (fs.existsSync(tempZipPath)) {
       fs.unlinkSync(tempZipPath);
     }
-    return sendError(res, 'Failed to import plugin: ' + e.message);
+    return sendError(c, 'Failed to import plugin: ' + e.message);
   }
 };
 
 /**
  * 获取插件图标
  */
-export const GetPluginIconHandler: RequestHandler = async (req, res) => {
-  const pluginId = req.params['pluginId'];
-  if (!pluginId) return sendError(res, 'Plugin ID is required');
+export const GetPluginIconHandler = async (c: Context) => {
+  const pluginId = c.req.param('pluginId');
+  if (!pluginId) return sendError(c, 'Plugin ID is required');
 
   const pluginManager = getPluginManager();
-  if (!pluginManager) return sendError(res, 'Plugin Manager not found');
+  if (!pluginManager) return sendError(c, 'Plugin Manager not found');
 
   const plugin = pluginManager.getPluginInfo(pluginId);
-  if (!plugin) return sendError(res, 'Plugin not found');
+  if (!plugin) return sendError(c, 'Plugin not found');
 
   const iconPath = findPluginIconPath(pluginId, plugin.pluginPath, plugin.packageJson?.icon);
   if (!iconPath) {
-    return res.status(404).json({ code: -1, message: 'Icon not found' });
+    return c.json({ code: -1, message: 'Icon not found' }, 404);
   }
 
-  return res.sendFile(iconPath);
+  const content = fs.readFileSync(iconPath);
+  const ext = path.extname(iconPath).toLowerCase();
+  const mimeTypes: Record<string, string> = {
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.gif': 'image/gif',
+    '.svg': 'image/svg+xml',
+    '.webp': 'image/webp',
+  };
+  const mimeType = mimeTypes[ext] || 'application/octet-stream';
+  return new Response(content, {
+    headers: { 'Content-Type': mimeType },
+  });
 };

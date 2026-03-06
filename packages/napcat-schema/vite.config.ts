@@ -6,7 +6,9 @@ import napcatVersion from 'napcat-vite/vite-plugin-version';
 // 依赖排除
 const external = [
   'ws',
-  'express',
+  'hono',
+  '@hono/node-server',
+  '@hono/node-ws',
   'electron',
 ];
 const nodeModules = [...builtinModules, builtinModules.map((m) => `node:${m}`), 'node:sqlite'].flat();

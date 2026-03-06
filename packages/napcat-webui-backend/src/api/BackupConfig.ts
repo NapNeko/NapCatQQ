@@ -1,6 +1,7 @@
-import { RequestHandler } from 'express';
-import { existsSync, readdirSync, writeFileSync, readFileSync } from 'node:fs';
+import type { Context } from 'hono';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, normalize } from 'node:path';
+import { Readable as NodeReadable } from 'node:stream';
 import { webUiPathWrapper } from '@/napcat-webui-backend/index';
 import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
 import { sendError, sendSuccess } from '@/napcat-webui-backend/src/utils/response';
@@ -8,27 +9,23 @@ import compressing from 'compressing';
 import { Readable } from 'node:stream';
 
 // 使用compressing库进行流式压缩导出
-export const BackupExportConfigHandler: RequestHandler = async (_req, res) => {
+export const BackupExportConfigHandler = async (c: Context) => {
   const isLogin = WebUiDataRuntime.getQQLoginStatus();
   if (!isLogin) {
-    return sendError(res, 'Not Login');
+    return sendError(c, 'Not Login');
   }
 
   try {
     const configPath = webUiPathWrapper.configPath;
 
     if (!existsSync(configPath)) {
-      return sendError(res, '配置目录不存在');
+      return sendError(c, '配置目录不存在');
     }
 
     const formatDate = (date: Date) => {
       return date.toISOString().replace(/[:.]/g, '-');
     };
     const zipFileName = `config_backup_${formatDate(new Date())}.zip`;
-
-    // 设置响应头
-    res.setHeader('Content-Type', 'application/zip');
-    res.setHeader('Content-Disposition', `attachment; filename="${zipFileName}"`);
 
     // 使用compressing的Stream API进行流式压缩
     const stream = new compressing.zip.Stream();
@@ -42,22 +39,20 @@ export const BackupExportConfigHandler: RequestHandler = async (_req, res) => {
       }
     }
 
-    // 管道传输到响应
-    stream.pipe(res);
+    const headers = {
+      'Content-Type': 'application/zip',
+      'Content-Disposition': `attachment; filename="${zipFileName}"`,
+    };
 
-    // 处理流错误
-    stream.on('error', (err) => {
-      console.error('压缩流错误:', err);
-      if (!res.headersSent) {
-        sendError(res, '流式压缩失败');
-      }
+    const webStream = NodeReadable.toWeb(stream as NodeReadable) as ReadableStream;
+    return new Response(webStream, {
+      headers,
+      status: 200,
     });
   } catch (error) {
     const msg = (error as Error).message;
     console.error('导出配置失败:', error);
-    if (!res.headersSent) {
-      return sendError(res, `导出配置失败: ${msg}`);
-    }
+    return sendError(c, `导出配置失败: ${msg}`);
   }
 };
 
@@ -97,20 +92,27 @@ async function extractZipToMemory (buffer: Buffer): Promise<Map<string, Buffer>>
 }
 
 // 导入配置 - 流式处理，完全在内存中解压
-export const BackupImportConfigHandler: RequestHandler = async (req, res) => {
-  // 检查是否有文件上传（multer memoryStorage 模式下文件在 req.file.buffer）
-  if (!req.file || !req.file.buffer) {
-    return sendError(res, '请选择要导入的配置文件');
+export const BackupImportConfigHandler = async (c: Context) => {
+  // 使用 c.req.parseBody() 获取上传的文件
+  const body = await c.req.parseBody({ all: true });
+  const file = body['configFile'] as File | undefined;
+
+  if (!file || !(file instanceof File)) {
+    return sendError(c, '请选择要导入的配置文件');
   }
 
   try {
     const configPath = webUiPathWrapper.configPath;
 
+    // 从 File 对象读取为 buffer
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
     // 从内存中解压zip
-    const extractedFiles = await extractZipToMemory(req.file.buffer);
+    const extractedFiles = await extractZipToMemory(buffer);
 
     if (extractedFiles.size === 0) {
-      return sendError(res, '配置文件为空或格式不正确');
+      return sendError(c, '配置文件为空或格式不正确');
     }
 
     // 备份当前配置到内存
@@ -136,7 +138,7 @@ export const BackupImportConfigHandler: RequestHandler = async (req, res) => {
       writeFileSync(destPath, content);
     }
 
-    return sendSuccess(res, {
+    return sendSuccess(c, {
       message: '配置导入成功，重启后生效~',
       filesImported: extractedFiles.size,
       filesBackedUp: backupFiles.size,
@@ -144,6 +146,6 @@ export const BackupImportConfigHandler: RequestHandler = async (req, res) => {
   } catch (error) {
     console.error('导入配置失败:', error);
     const msg = (error as Error).message;
-    return sendError(res, `导入配置失败: ${msg}`);
+    return sendError(c, `导入配置失败: ${msg}`);
   }
 };

@@ -1,5 +1,5 @@
-import { Router, RequestHandler } from 'express';
-import rateLimit from 'express-rate-limit';
+import { Hono } from 'hono';
+import type { Context, Next } from 'hono';
 import {
   ListFilesHandler,
   CreateDirHandler,
@@ -7,29 +7,43 @@ import {
   ReadFileHandler,
   WriteFileHandler,
   CreateFileHandler,
-  BatchDeleteHandler, // 添加这一行
+  BatchDeleteHandler,
   RenameHandler,
   MoveHandler,
   BatchMoveHandler,
   DownloadHandler,
-  BatchDownloadHandler, // 新增下载处理方法
+  BatchDownloadHandler,
   UploadHandler,
   UploadWebUIFontHandler,
-  DeleteWebUIFontHandler, // 添加上传处理器
-  CheckWebUIFontExistHandler, // Add this
+  DeleteWebUIFontHandler,
+  CheckWebUIFontExistHandler,
 } from '../api/File';
 
-const router: Router = Router();
+const router = new Hono();
 
-const apiLimiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1分钟内
-  max: 60, // 最大60个请求
-  validate: {
-    xForwardedForHeader: false,
-  },
-});
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const WINDOW_MS = 60 * 1000;
+const MAX_REQUESTS = 60;
 
-router.use(apiLimiter as unknown as RequestHandler);
+const apiLimiter = async (c: Context, next: Next) => {
+  const ip = (c.env as any)?.incoming?.socket?.remoteAddress || 'unknown';
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+
+  if (!entry || now > entry.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + WINDOW_MS });
+    return next();
+  }
+
+  if (entry.count >= MAX_REQUESTS) {
+    return c.json({ code: -1, message: 'Too many requests' }, 429);
+  }
+
+  entry.count++;
+  return next();
+};
+
+router.use('*', apiLimiter);
 
 router.get('/list', ListFilesHandler);
 router.post('/mkdir', CreateDirHandler);
@@ -47,5 +61,6 @@ router.post('/upload', UploadHandler);
 
 router.post('/font/upload/webui', UploadWebUIFontHandler);
 router.post('/font/delete/webui', DeleteWebUIFontHandler);
-router.get('/font/exists/webui', CheckWebUIFontExistHandler); // Add this
+router.get('/font/exists/webui', CheckWebUIFontExistHandler);
+
 export { router as FileRouter };

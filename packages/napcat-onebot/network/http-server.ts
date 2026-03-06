@@ -1,39 +1,40 @@
 import { OB11EmitEventContent, OB11NetworkReloadType } from './index';
-import express, { Express, NextFunction, Request, Response } from 'express';
-import http, { IncomingMessage } from 'http';
+import { Hono } from 'hono';
+import { cors } from 'hono/cors';
+import { serve, type HttpBindings, type ServerType } from '@hono/node-server';
+import { createNodeWebSocket } from '@hono/node-ws';
+import type { Context } from 'hono';
+import type { WSContext } from 'hono/ws';
 import { OB11Response } from '@/napcat-onebot/action/OneBotAction';
-import cors from 'cors';
 import { HttpServerConfig } from '@/napcat-onebot/config/config';
 import { IOB11NetworkAdapter } from '@/napcat-onebot/network/adapter';
 import json5 from 'json5';
-import { isFinished } from 'on-finished';
-import typeis from 'type-is';
-import { WebSocket, WebSocketServer, RawData } from 'ws';
-import { URL } from 'url';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { OB11HeartbeatEvent } from '@/napcat-onebot/event/meta/OB11HeartbeatEvent';
 import { OB11LifeCycleEvent, LifeCycleSubType } from '@/napcat-onebot/event/meta/OB11LifeCycleEvent';
+import { stream } from 'hono/streaming';
+
+type Env = { Bindings: HttpBindings; Variables: { parsedBody: any } };
 
 export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig> {
-  private app: Express | undefined;
-  private server: http.Server | undefined;
-  private wsServer?: WebSocketServer;
-  private wsClients: WebSocket[] = [];
+  private app: Hono<Env> | undefined;
+  private server: ServerType | undefined;
+  private wsClients: WSContext[] = [];
   private heartbeatIntervalId: NodeJS.Timeout | null = null;
-  private wsClientWithEvent: WebSocket[] = [];
+  private wsClientWithEvent: WSContext[] = [];
+  private injectWebSocket: ((server: ServerType) => void) | undefined;
 
   override get isActive (): boolean {
     return this.isEnable && this.wsClientWithEvent.length > 0;
   }
 
   override async onEvent<T extends OB11EmitEventContent> (event: T) {
-    // http server is passive, no need to emit event
     const promises = this.wsClientWithEvent.map((wsClient) => {
       return new Promise<void>((resolve, reject) => {
-        if (wsClient.readyState === WebSocket.OPEN) {
+        try {
           wsClient.send(JSON.stringify(event));
           resolve();
-        } else {
+        } catch {
           reject(new Error('WebSocket is not open'));
         }
       });
@@ -64,116 +65,127 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
     this.wsClients.forEach((wsClient) => wsClient.close());
     this.wsClients = [];
     this.wsClientWithEvent = [];
-    this.wsServer?.close();
   }
 
   private initializeServer () {
-    this.app = express();
-    this.server = http.createServer(this.app);
+    this.app = new Hono<Env>();
+
     if (this.config.enableWebsocket) {
-      this.wsServer = new WebSocketServer({ server: this.server });
-      this.createWSServer(this.wsServer);
+      const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({ app: this.app });
+      this.injectWebSocket = injectWebSocket;
+
+      this.app.get('/*', upgradeWebSocket((c) => {
+        const paramUrl = new URL(c.req.url).pathname;
+        const isApiConnect = paramUrl === '/api' || paramUrl === '/api/';
+
+        return {
+          onOpen: (_event, ws) => {
+            if (!this.isEnable) {
+              ws.close();
+              return;
+            }
+            if (!this.authorizeWS(this.config.token, ws, c)) {
+              return;
+            }
+            if (!isApiConnect) {
+              this.connectEvent(this.core, ws);
+              this.wsClientWithEvent.push(ws);
+            }
+            this.wsClients.push(ws);
+            if (this.wsClientWithEvent.length > 0) {
+              this.startHeartbeat();
+            }
+          },
+          onMessage: (event, ws) => {
+            this.handleWSMessage(ws, event.data).then().catch(e => this.logger.logError(e));
+          },
+          onClose: (_event, ws) => {
+            const normalIndex = this.wsClients.indexOf(ws);
+            if (normalIndex !== -1) {
+              this.wsClients.splice(normalIndex, 1);
+            }
+            const eventIndex = this.wsClientWithEvent.indexOf(ws);
+            if (eventIndex !== -1) {
+              this.wsClientWithEvent.splice(eventIndex, 1);
+            }
+            if (this.wsClientWithEvent.length === 0) {
+              this.stopHeartbeat();
+            }
+          },
+          onError: (event) => {
+            this.logger.log('[OneBot] [HTTP WebSocket] Client Error:', String(event));
+          },
+        };
+      }));
     }
 
-    this.app.use(cors());
-    this.app.use(express.urlencoded({ extended: true, limit: '5000mb' }));
+    this.app.use('*', cors());
 
-    this.app.use((req, res, next) => {
-      if (isFinished(req)) {
-        next();
-        return;
+    this.app.use('*', async (c, next) => {
+      if (c.req.header('upgrade') === 'websocket') {
+        return next();
       }
-      if (!typeis.hasBody(req)) {
-        next();
-        return;
-      }
-      // 兼容处理没有带content-type的请求
-      req.headers['content-type'] = 'application/json';
-      let rawData = '';
-      req.on('data', (chunk) => {
-        rawData += chunk;
-      });
-      req.on('end', () => {
-        try {
-          req.body = { ...json5.parse(rawData || '{}'), ...req.body };
-          next();
-        } catch {
-          res.status(400).send('Invalid JSON');
+      const contentType = c.req.header('content-type');
+      const method = c.req.method.toUpperCase();
+      if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
+        if (contentType && contentType.includes('application/x-www-form-urlencoded')) {
+          const text = await c.req.text();
+          try {
+            c.set('parsedBody', json5.parse(text || '{}'));
+          } catch {
+            return c.text('Invalid JSON', 400);
+          }
+        } else {
+          const text = await c.req.text();
+          try {
+            c.set('parsedBody', json5.parse(text || '{}'));
+          } catch {
+            return c.text('Invalid JSON', 400);
+          }
         }
-      });
-      req.on('error', () => {
-        return res.status(400).send('Invalid JSON');
-      });
+      }
+      return next();
     });
-    this.app.use((req, res, next) => this.authorize(this.config.token, req, res, next));
-    this.app.use(async (req, res) => {
-      await this.handleRequest(req, res);
+
+    this.app.use('*', async (c, next) => {
+      if (c.req.header('upgrade') === 'websocket') {
+        return next();
+      }
+      return this.authorize(this.config.token, c, next);
     });
-    this.server.listen(this.config.port, this.config.host, () => {
-      this.core.context.logger.log(`[OneBot] [HTTP Server Adapter] Start On ${this.config.host}:${this.config.port}`);
+
+    this.app.all('/*', async (c) => {
+      return this.handleRequest(c);
     });
+
+    this.server = serve({
+      fetch: this.app.fetch,
+      port: this.config.port,
+      hostname: this.config.host,
+    }) as ServerType;
+
+    if (this.config.enableWebsocket && this.injectWebSocket) {
+      this.injectWebSocket(this.server!);
+    }
+
+    this.core.context.logger.log(`[OneBot] [HTTP Server Adapter] Start On ${this.config.host}:${this.config.port}`);
   }
 
-  private authorize (token: string | undefined, req: Request, res: Response, next: NextFunction) {
-    if (!token || token.length === 0) return next();// 客户端未设置密钥
-    const HeaderClientToken = req.headers.authorization?.split('Bearer ').pop() || '';
-    const QueryClientToken = req.query['access_token'];
+  private authorize (token: string | undefined, c: Context<Env>, next: () => Promise<void>) {
+    if (!token || token.length === 0) return next();
+    const HeaderClientToken = c.req.header('authorization')?.split('Bearer ').pop() || '';
+    const QueryClientToken = c.req.query('access_token');
     const ClientToken = typeof (QueryClientToken) === 'string' && QueryClientToken !== '' ? QueryClientToken : HeaderClientToken;
     if (ClientToken === token) {
       return next();
     } else {
-      return res.status(403).send(JSON.stringify({ message: 'token verify failed!' }));
+      return c.text(JSON.stringify({ message: 'token verify failed!' }), 403);
     }
   }
 
-  createWSServer (newServer: WebSocketServer) {
-    newServer.on('connection', async (wsClient, wsReq) => {
-      if (!this.isEnable) {
-        wsClient.close();
-        return;
-      }
-      if (!this.authorizeWS(this.config.token, wsClient, wsReq)) {
-        return;
-      }
-      const paramUrl = wsReq.url?.indexOf('?') !== -1 ? wsReq.url?.substring(0, wsReq.url?.indexOf('?')) : wsReq.url;
-      const isApiConnect = paramUrl === '/api' || paramUrl === '/api/';
-      if (!isApiConnect) {
-        this.connectEvent(this.core, wsClient);
-      }
-
-      wsClient.on('error', (err) => this.logger.log('[OneBot] [HTTP WebSocket] Client Error:', err.message));
-      wsClient.on('message', (message) => {
-        this.handleWSMessage(wsClient, message).then().catch(e => this.logger.logError(e));
-      });
-      wsClient.on('pong', () => {
-        // this.logger.logDebug('[OneBot] [HTTP WebSocket] Pong received');
-      });
-      wsClient.once('close', () => {
-        const NormolIndex = this.wsClients.indexOf(wsClient);
-        if (NormolIndex !== -1) {
-          this.wsClients.splice(NormolIndex, 1);
-        }
-        const EventIndex = this.wsClientWithEvent.indexOf(wsClient);
-        if (EventIndex !== -1) {
-          this.wsClientWithEvent.splice(EventIndex, 1);
-        }
-        if (this.wsClientWithEvent.length === 0) {
-          this.stopHeartbeat();
-        }
-      });
-      if (!isApiConnect) {
-        this.wsClientWithEvent.push(wsClient);
-      }
-      this.wsClients.push(wsClient);
-      if (this.wsClientWithEvent.length > 0) {
-        this.startHeartbeat();
-      }
-    }).on('error', (err) => this.logger.log('[OneBot] [HTTP WebSocket] Server Error:', err.message));
-  }
-
-  connectEvent (core: any, wsClient: WebSocket) {
+  connectEvent (core: any, wsClient: WSContext) {
     try {
-      this.checkStateAndReply<unknown>(new OB11LifeCycleEvent(core, LifeCycleSubType.CONNECT), wsClient).catch(e => this.logger.logError('[OneBot] [HTTP WebSocket] 发送生命周期失败', e));
+      this.checkStateAndReply<unknown>(new OB11LifeCycleEvent(core, LifeCycleSubType.CONNECT), wsClient);
     } catch (e) {
       this.logger.logError('[OneBot] [HTTP WebSocket] 发送生命周期失败', e);
     }
@@ -183,9 +195,9 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
     if (this.heartbeatIntervalId) return;
     this.heartbeatIntervalId = setInterval(() => {
       this.wsClientWithEvent.forEach((wsClient) => {
-        if (wsClient.readyState === WebSocket.OPEN) {
+        try {
           wsClient.send(JSON.stringify(new OB11HeartbeatEvent(this.core, 30000, this.core.selfInfo.online ?? true, true)));
-        }
+        } catch { /* ignore closed connections */ }
       });
     }, 30000);
   }
@@ -197,39 +209,37 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
     }
   }
 
-  private authorizeWS (token: string | undefined, wsClient: WebSocket, wsReq: IncomingMessage) {
+  private authorizeWS (token: string | undefined, ws: WSContext, c: Context<Env>) {
     if (!token || token.length === 0) return true;
-    const url = new URL(wsReq?.url || '', `http://${wsReq.headers.host}`);
+    const url = new URL(c.req.url);
     const QueryClientToken = url.searchParams.get('access_token');
-    const HeaderClientToken = wsReq.headers.authorization?.split('Bearer ').pop() || '';
+    const HeaderClientToken = c.req.header('authorization')?.split('Bearer ').pop() || '';
     const ClientToken = typeof (QueryClientToken) === 'string' && QueryClientToken !== '' ? QueryClientToken : HeaderClientToken;
     if (ClientToken === token) {
       return true;
     }
-    wsClient.send(JSON.stringify(OB11Response.res(null, 'failed', 1403, 'token验证失败')));
-    wsClient.close();
+    ws.send(JSON.stringify(OB11Response.res(null, 'failed', 1403, 'token验证失败')));
+    ws.close();
     return false;
   }
 
-  private async checkStateAndReply<T> (data: T, wsClient: WebSocket) {
-    return await new Promise<void>((resolve, reject) => {
-      if (wsClient.readyState === WebSocket.OPEN) {
-        wsClient.send(JSON.stringify(data));
-        resolve();
-      } else {
-        reject(new Error('WebSocket is not open'));
-      }
-    });
+  private checkStateAndReply<T> (data: T, wsClient: WSContext) {
+    try {
+      wsClient.send(JSON.stringify(data));
+    } catch {
+      // connection may be closed
+    }
   }
 
-  private async handleWSMessage (wsClient: WebSocket, message: RawData) {
+  private async handleWSMessage (wsClient: WSContext, message: string | ArrayBuffer) {
     let receiveData: { action: typeof ActionName[keyof typeof ActionName], params?: any, echo?: any; } = { action: ActionName.Unknown, params: {} };
     let echo;
     try {
-      receiveData = json5.parse(message.toString());
+      const msgStr = typeof message === 'string' ? message : new TextDecoder().decode(message);
+      receiveData = json5.parse(msgStr);
       echo = receiveData.echo;
     } catch {
-      await this.checkStateAndReply<unknown>(OB11Response.error('json解析失败,请检查数据格式', 1400, echo), wsClient);
+      this.checkStateAndReply<unknown>(OB11Response.error('json解析失败,请检查数据格式', 1400, echo), wsClient);
       return;
     }
     receiveData.params = (receiveData?.params) ? receiveData.params : {};
@@ -237,30 +247,35 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
     const action = this.actions.get(receiveData.action as any);
     if (!action) {
       this.logger.logError('[OneBot] [HTTP WebSocket] 发生错误', '不支持的API ' + receiveData.action);
-      await this.checkStateAndReply<unknown>(OB11Response.error('不支持的API ' + receiveData.action, 1404, echo), wsClient);
+      this.checkStateAndReply<unknown>(OB11Response.error('不支持的API ' + receiveData.action, 1404, echo), wsClient);
       return;
     }
     const retdata = await action.websocketHandle(receiveData.params, echo ?? '', this.name, this.config, {
       send: async (data: object) => {
-        await this.checkStateAndReply<unknown>({ ...OB11Response.ok(data, echo ?? '', true) }, wsClient);
+        this.checkStateAndReply<unknown>({ ...OB11Response.ok(data, echo ?? '', true) }, wsClient);
       },
     });
-    await this.checkStateAndReply<unknown>({ ...retdata }, wsClient);
+    this.checkStateAndReply<unknown>({ ...retdata }, wsClient);
   }
 
-  async httpApiRequest (req: Request, res: Response, request_sse: boolean = false) {
-    let payload = req.body;
-    if (req.method === 'get') {
-      payload = req.query;
-    } else if (req.query) {
-      payload = { ...req.body, ...req.query };
+  async httpApiRequest (c: Context<Env>, request_sse: boolean = false): Promise<Response> {
+    let payload = c.get('parsedBody') || {};
+    const method = c.req.method.toUpperCase();
+    const queries = c.req.queries('') ? Object.fromEntries(new URL(c.req.url).searchParams.entries()) : {};
+
+    if (method === 'GET') {
+      payload = queries;
+    } else if (Object.keys(queries).length > 0) {
+      payload = { ...payload, ...queries };
     }
-    if (req.path === '' || req.path === '/') {
+
+    const path = new URL(c.req.url).pathname;
+    if (path === '' || path === '/') {
       const hello = OB11Response.ok({});
       hello.message = 'NapCat4 Is Running';
-      return res.json(hello);
+      return c.json(hello);
     }
-    const actionName = req.path.split('/')[1];
+    const actionName = path.split('/')[1];
     const payload_echo = payload['echo'];
     const real_echo = payload_echo ?? Math.random().toString(36).substring(2, 15);
 
@@ -268,40 +283,39 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
     if (action) {
       const useStream = action.useStream;
       try {
+        if (useStream && !request_sse) {
+          return stream(c, async (s) => {
+            const result = await action.handle(payload, this.name, this.config, {
+              send: async (data: object) => {
+                await s.write(JSON.stringify({ ...OB11Response.ok(data, real_echo, true) }) + '\r\n\r\n');
+              },
+            }, real_echo);
+            await s.write(JSON.stringify({ ...result }) + '\r\n\r\n');
+          });
+        }
+
         const result = await action.handle(payload, this.name, this.config, {
           send: request_sse
             ? async (data: object) => {
               await this.onEvent({ ...OB11Response.ok(data, real_echo, true) } as unknown as OB11EmitEventContent);
             }
-            : async (data: object) => {
-              const newPromise = new Promise<void>((resolve, _reject) => {
-                res.write(JSON.stringify({ ...OB11Response.ok(data, real_echo, true) }) + '\r\n\r\n', () => {
-                  resolve();
-                });
-              });
-              return newPromise;
-            },
+            : async () => { },
         }, real_echo);
-        if (useStream) {
-          res.write(JSON.stringify({ ...result }) + '\r\n\r\n');
-          return res.end();
-        }
-        return res.json(result);
+        return c.json(result);
       } catch (error: unknown) {
-        return res.json(OB11Response.error((error as Error)?.stack?.toString() || (error as Error)?.message || 'Error Handle', 200, real_echo));
+        return c.json(OB11Response.error((error as Error)?.stack?.toString() || (error as Error)?.message || 'Error Handle', 200, real_echo));
       }
     } else {
-      return res.json(OB11Response.error('不支持的Api ' + actionName, 200, real_echo));
+      return c.json(OB11Response.error('不支持的Api ' + actionName, 200, real_echo));
     }
   }
 
-  async handleRequest (req: Request, res: Response) {
+  async handleRequest (c: Context<Env>): Promise<Response> {
     if (!this.isEnable) {
       this.core.context.logger.log('[OneBot] [HTTP Server Adapter] Server is closed');
-      res.json(OB11Response.error('Server is closed', 200));
-      return;
+      return c.json(OB11Response.error('Server is closed', 200));
     }
-    this.httpApiRequest(req, res);
+    return this.httpApiRequest(c);
   }
 
   async reload (newConfig: HttpServerConfig) {
