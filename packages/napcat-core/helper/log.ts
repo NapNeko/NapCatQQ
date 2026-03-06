@@ -59,13 +59,17 @@ class Subscription {
 export const logSubscription = new Subscription();
 
 export class LogWrapper implements ILogWrapper {
-  fileLogEnabled = true;
+  fileLogEnabled = false;
   consoleLogEnabled = true;
   logger: winston.Logger;
 
+  private logPath: string;
+  private fileTransportAdded = false;
+  private fileLogLevel: string = LogLevel.DEBUG;
+
   constructor (logDir: string) {
     const filename = `${getFormattedTimestamp()}.log`;
-    const logPath = path.join(logDir, filename);
+    this.logPath = path.join(logDir, filename);
 
     this.logger = winston.createLogger({
       level: 'debug',
@@ -77,12 +81,6 @@ export class LogWrapper implements ILogWrapper {
         })
       ),
       transports: [
-        new transports.File({
-          filename: logPath,
-          level: 'debug',
-          maxsize: 5 * 1024 * 1024, // 5MB
-          maxFiles: 5,
-        }),
         new transports.Console({
           format: format.combine(
             format.colorize(),
@@ -107,7 +105,7 @@ export class LogWrapper implements ILogWrapper {
         this.deleteOldLogFile(filePath, oneWeekAgo);
       });
     }).catch((err) => {
-      this.logger.error('Failed to read log directory', err);
+      this.logError('Failed to read log directory', err);
     });
   }
 
@@ -117,21 +115,22 @@ export class LogWrapper implements ILogWrapper {
         fs.unlink(filePath).catch((err) => {
           if (err) {
             if (err.code === 'ENOENT') {
-              this.logger.warn(`File already deleted: ${filePath}`);
+              this.logWarn(`File already deleted: ${filePath}`);
             } else {
-              this.logger.error('Failed to delete old log file', err);
+              this.logError('Failed to delete old log file', err);
             }
           } else {
-            this.logger.info(`Deleted old log file: ${filePath}`);
+            this.log(`Deleted old log file: ${filePath}`);
           }
         });
       }
     }).catch((err) => {
-      this.logger.error('Failed to get file stats', err);
+      this.logError('Failed to get file stats', err);
     });
   }
 
   setFileAndConsoleLogLevel (fileLogLevel: LogLevel, consoleLogLevel: LogLevel) {
+    this.fileLogLevel = fileLogLevel;
     this.logger.transports.forEach((transport) => {
       if (transport instanceof transports.File) {
         transport.level = fileLogLevel;
@@ -148,6 +147,15 @@ export class LogWrapper implements ILogWrapper {
 
   setFileLogEnabled (isEnabled: boolean) {
     this.fileLogEnabled = isEnabled;
+    if (isEnabled && !this.fileTransportAdded) {
+      this.fileTransportAdded = true;
+      this.logger.add(new transports.File({
+        filename: this.logPath,
+        level: this.fileLogLevel,
+        maxsize: 5 * 1024 * 1024, // 5MB
+        maxFiles: 5,
+      }));
+    }
     this.logger.transports.forEach((transport) => {
       if (transport instanceof transports.File) {
         transport.silent = !isEnabled;
@@ -178,14 +186,16 @@ export class LogWrapper implements ILogWrapper {
   }
 
   _log (level: LogLevel, ...args: any[]) {
-    const message = this.formatMsg(args);
-    if (this.consoleLogEnabled && this.fileLogEnabled) {
-      this.logger.log(level, message);
-    } else if (this.consoleLogEnabled) {
-      this.logger.log(level, message);
-    } else if (this.fileLogEnabled) {
-      // eslint-disable-next-line no-control-regex
-      this.logger.log(level, message.replace(/\x1B[@-_][0-?]*[ -/]*[@-~]/g, ''));
+    if (this.consoleLogEnabled || this.fileLogEnabled) {
+      const message = this.formatMsg(args);
+      if (this.consoleLogEnabled && this.fileLogEnabled) {
+        this.logger.log(level, message);
+      } else if (this.consoleLogEnabled) {
+        this.logger.log(level, message);
+      } else if (this.fileLogEnabled) {
+        // eslint-disable-next-line no-control-regex
+        this.logger.log(level, message.replace(/\x1B[@-_][0-?]*[ -/]*[@-~]/g, ''));
+      }
     }
     logSubscription.notify(JSON.stringify({ level, message }));
   }
