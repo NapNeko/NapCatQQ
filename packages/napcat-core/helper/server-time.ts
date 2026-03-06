@@ -14,15 +14,17 @@ export const OriginalDateNow: () => number = Date.now.bind(Date);
  * @returns 偏移量（毫秒）
  */
 export function hookGlobalDateNow (getServerTimeFn: () => string): number {
-  const localNow = OriginalDateNow();
+  const start = OriginalDateNow();
   const serverTimeStr = getServerTimeFn();
+  const end = OriginalDateNow();
   const serverTimeMs = parseInt(serverTimeStr, 10);
 
   if (isNaN(serverTimeMs) || serverTimeMs <= 0) {
     return 0;
   }
 
-  const offsetMs = serverTimeMs - localNow;
+  // 补偿网络延迟：假定往返时间对称，服务器时间对应本地时间的中点 (start + end) / 2
+  const offsetMs = Math.round(serverTimeMs - (start + end) / 2);
 
   if (Math.abs(offsetMs) > 5000) {
     Date.now = () => OriginalDateNow() + offsetMs;
