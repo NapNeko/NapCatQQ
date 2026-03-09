@@ -24,6 +24,8 @@ export interface WebUiConfigType {
   ipWhitelist?: string[];
   ipBlacklist?: string[];
   enableXForwardedFor?: boolean;
+  enableMetrics?: boolean;
+  metricsToken?: string;
 }
 export interface WebUiCredentialInnerJson {
   CreatedTime: number;

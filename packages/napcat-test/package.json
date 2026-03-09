@@ -12,9 +12,12 @@
   },
   "dependencies": {
     "@sinclair/typebox": "^0.34.41",
+    "napcat-common": "workspace:*",
     "napcat-core": "workspace:*",
     "napcat-image-size": "workspace:*",
     "napcat-onebot": "workspace:*",
-    "napcat-rpc": "workspace:*"
+    "napcat-rpc": "workspace:*",
+    "napcat-webui-backend": "workspace:*",
+    "prom-client": "^15.1.3"
   }
 }

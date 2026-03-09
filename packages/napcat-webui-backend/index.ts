@@ -28,6 +28,7 @@ import { napCatVersion } from 'napcat-common/src/version';
 import { fileURLToPath } from 'node:url';
 import { NapCatOneBot11Adapter } from '@/napcat-onebot/index';
 import { OB11PluginMangerAdapter } from '@/napcat-onebot/network/plugin-manger';
+import { getMetrics, register } from '@/napcat-webui-backend/src/api/Metrics';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -329,6 +330,27 @@ export async function InitWebUi (logger: ILogWrapper, pathWrapper: NapCatPathWra
     } catch (error) {
       console.error('[NapCat] [WebUi] Error generating sw.js', error);
       res.status(500).send('Error generating service worker');
+    }
+  });
+
+  // Prometheus metrics endpoint (unauthenticated)
+  app.get('/metrics', async (req, res) => {
+    const metricsConfig = await WebUiConfig.GetWebUIConfig();
+    if (metricsConfig.enableMetrics === false) {
+      return res.status(404).end('Not Found');
+    }
+    if (metricsConfig.metricsToken) {
+      const authHeader = req.headers['authorization'];
+      const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : undefined;
+      if (token !== metricsConfig.metricsToken) {
+        return res.status(401).end('Unauthorized');
+      }
+    }
+    try {
+      res.set('Content-Type', register.contentType);
+      return res.end(await getMetrics());
+    } catch (e) {
+      return res.status(500).end(String(e));
     }
   });
 

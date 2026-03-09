@@ -33,6 +33,10 @@ const WebUiConfigSchema = Type.Object({
   ipBlacklist: Type.Array(Type.String(), { default: [] }),
   // 是否启用 X-Forwarded-For 获取真实IP
   enableXForwardedFor: Type.Boolean({ default: false }),
+  // 是否启用 Prometheus metrics 端点
+  enableMetrics: Type.Boolean({ default: true }),
+  // Prometheus metrics 端点的 Bearer token（空字符串表示无需认证）
+  metricsToken: Type.String({ default: '' }),
 });
 
 export type WebUiConfigType = Static<typeof WebUiConfigSchema>;

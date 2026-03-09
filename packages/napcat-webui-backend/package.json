@@ -27,6 +27,7 @@
     "napcat-common": "workspace:*",
     "napcat-dpapi": "workspace:*",
     "napcat-pty": "workspace:*",
+    "prom-client": "^15.1.3",
     "ws": "^8.18.3"
   },
   "devDependencies": {
