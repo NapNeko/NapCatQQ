@@ -4,7 +4,7 @@ import { Static, Type } from '@sinclair/typebox';
 
 const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
-  attach_info: Type.String({ default: '', description: '附加信息（用于分页，从上一次返回结果中获取）' }),
+  attach_info: Type.Optional(Type.String({ default: '', description: '附加信息（用于分页，从上一次返回结果中获取）' })),
 });
 
 type PayloadType = Static<typeof PayloadSchema>;
