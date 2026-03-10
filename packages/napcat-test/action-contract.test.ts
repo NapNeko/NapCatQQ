@@ -110,8 +110,8 @@ describe('NapCat Action Contracts', () => {
     const response = await action.websocketHandle(payload as any, null, 'ws', {} as any);
 
     expect(response.retcode).toBe(0);
-    expect(Array.isArray(payload.message)).toBe(true);
-    expect(payload.message).toEqual([{
+    expect(Array.isArray(payload['message'])).toBe(true);
+    expect(payload['message']).toEqual([{
       type: 'node',
       data: {
         id: '654321',
@@ -123,7 +123,7 @@ describe('NapCat Action Contracts', () => {
     const action = new ForwardMixedNodeAction({} as any, createCoreStub() as any);
 
     const response = await action.websocketHandle({
-      message: [
+      messages: [
         { type: 'node', data: { id: '123' } },
         { type: 'text', data: { text: 'hello' } },
       ],

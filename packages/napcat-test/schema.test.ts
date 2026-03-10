@@ -227,6 +227,7 @@ describe('NapCat Action Metadata', () => {
 
     for (const action of actions) {
       expect(hasTopLevelProperty((action as any).payloadSchema, 'messages')).toBe(true);
+      expect(hasTopLevelProperty((action as any).payloadSchema, 'message')).toBe(false);
     }
   });
 
