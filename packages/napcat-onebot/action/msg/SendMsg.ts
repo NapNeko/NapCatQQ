@@ -139,12 +139,17 @@ export class SendMsgBase extends OneBotAction<SendMsgPayload, ReturnDataType> {
   override returnSchema: TSchema = SendMsgReturnSchema;
   override actionTags = ['消息接口'];
 
+  protected getMessageForCheck (payload: SendMsgPayload): OB11MessageMixType {
+    return payload.message;
+  }
+
   protected override async check (payload: SendMsgPayload): Promise<BaseCheckResult> {
     const base = await super.check(payload);
     if (!base.valid) {
       return base;
     }
 
+    payload.message = this.getMessageForCheck(payload);
     const messages = normalize(payload.message);
     const nodeElementLength = getSpecialMsgNum(messages, OB11MessageDataType.node);
     if (nodeElementLength > 0 && nodeElementLength !== messages.length) {

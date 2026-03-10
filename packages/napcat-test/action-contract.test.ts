@@ -119,6 +119,35 @@ describe('NapCat Action Contracts', () => {
     }]);
   });
 
+  test('send_forward_msg should copy parsed reference node ids into message', async () => {
+    const action = new ForwardMessagesOnlyAction({} as any, createCoreStub() as any);
+    const payload: Record<string, unknown> = {
+      group_id: '123456',
+      messages: [{
+        type: 'node',
+        data: {
+          id: 654321,
+        },
+      }],
+    };
+
+    const response = await action.websocketHandle(payload as any, null, 'ws', {} as any);
+
+    expect(response.retcode).toBe(0);
+    expect(payload['message']).toEqual([{
+      type: 'node',
+      data: {
+        id: '654321',
+      },
+    }]);
+    expect((response.data as any).normalized_message).toEqual([{
+      type: 'node',
+      data: {
+        id: '654321',
+      },
+    }]);
+  });
+
   test('send_forward_msg should fail mixed node payloads during check before _handle', async () => {
     const action = new ForwardMixedNodeAction({} as any, createCoreStub() as any);
 

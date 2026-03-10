@@ -26,10 +26,9 @@ type GoCQHTTPSendForwardMsgPayload = Static<typeof GoCQHTTPSendForwardPayloadSch
 export class GoCQHTTPSendForwardMsgBase extends SendMsgBase {
   override payloadSchema = GoCQHTTPSendForwardPayloadSchema;
 
-  protected override async check (payload: SendMsgPayload) {
+  protected override getMessageForCheck (payload: SendMsgPayload): OB11MessageMixType {
     const forwardPayload = payload as SendMsgPayload & GoCQHTTPSendForwardMsgPayload;
-    payload.message = normalize(forwardPayload.messages);
-    return super.check(payload);
+    return normalize(forwardPayload.messages);
   }
 }
 export class GoCQHTTPSendForwardMsg extends GoCQHTTPSendForwardMsgBase {
