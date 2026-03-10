@@ -13,7 +13,7 @@ export const GoCQHTTPUploadGroupFilePayloadSchema = Type.Object({
   name: Type.String({ description: '文件名' }),
   folder: Type.Optional(Type.String({ description: '父目录 ID' })),
   folder_id: Type.Optional(Type.String({ description: '父目录 ID (兼容性字段)' })), // 临时扩展
-  upload_file: Type.Boolean({ default: true, description: '是否执行上传' }),
+  upload_file: Type.Optional(Type.Boolean({ default: true, description: '是否执行上传' })),
 });
 
 export type GoCQHTTPUploadGroupFilePayload = Static<typeof GoCQHTTPUploadGroupFilePayloadSchema>;

@@ -5,7 +5,7 @@ import { Static, Type } from '@sinclair/typebox';
 export const SetDoubtFriendsAddRequestPayloadSchema = Type.Object({
   flag: Type.String({ description: '请求 flag' }),
   // 注意强制String 非isNumeric 不遵守则不符合设计
-  approve: Type.Boolean({ default: true, description: '是否同意 (强制为 true)' }),
+  approve: Type.Optional(Type.Boolean({ default: true, description: '是否同意 (强制为 true)' })),
   // 该字段没有语义 仅做保留 强制为True
 });
 

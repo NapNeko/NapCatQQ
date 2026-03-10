@@ -4,7 +4,7 @@ import { Static, Type } from '@sinclair/typebox';
 import { NewActionsExamples } from '../example/NewActionsExamples';
 
 export const GetDoubtFriendsAddRequestPayloadSchema = Type.Object({
-  count: Type.Number({ default: 50, description: '获取数量' }),
+  count: Type.Optional(Type.Number({ default: 50, description: '获取数量' })),
 });
 
 export type GetDoubtFriendsAddRequestPayload = Static<typeof GetDoubtFriendsAddRequestPayloadSchema>;
@@ -20,6 +20,7 @@ export class GetDoubtFriendsAddRequest extends OneBotAction<GetDoubtFriendsAddRe
   override returnExample = NewActionsExamples.GetDoubtFriendsAddRequest.response;
 
   async _handle (payload: GetDoubtFriendsAddRequestPayload) {
-    return await this.core.apis.FriendApi.getDoubtFriendRequest(payload.count);
+    const count = payload.count ?? 50;
+    return await this.core.apis.FriendApi.getDoubtFriendRequest(count);
   }
 }

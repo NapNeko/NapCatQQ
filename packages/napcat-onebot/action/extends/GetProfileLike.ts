@@ -4,8 +4,8 @@ import { Type, Static } from '@sinclair/typebox';
 
 const PayloadSchema = Type.Object({
   user_id: Type.Optional(Type.String({ description: 'QQ号' })),
-  start: Type.Union([Type.Number(), Type.String()], { default: 0, description: '起始位置' }),
-  count: Type.Union([Type.Number(), Type.String()], { default: 10, description: '获取数量' }),
+  start: Type.Optional(Type.Union([Type.Number(), Type.String()], { default: 0, description: '起始位置' })),
+  count: Type.Optional(Type.Union([Type.Number(), Type.String()], { default: 10, description: '获取数量' })),
 });
 
 type PayloadType = Static<typeof PayloadSchema>;
@@ -61,10 +61,12 @@ export class GetProfileLike extends OneBotAction<PayloadType, ReturnType> {
   };
 
   async _handle (payload: PayloadType): Promise<ReturnType> {
+    const start = payload.start ?? 0;
+    const count = payload.count ?? 10;
     const isSelf = this.core.selfInfo.uin === payload.user_id || !payload.user_id;
     const userUid = isSelf || !payload.user_id ? this.core.selfInfo.uid : await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
     const type = isSelf ? 2 : 1;
-    const ret = await this.core.apis.UserApi.getProfileLike(userUid ?? this.core.selfInfo.uid, +payload.start, +payload.count, type);
+    const ret = await this.core.apis.UserApi.getProfileLike(userUid ?? this.core.selfInfo.uid, +start, +count, type);
     const data = ret.info.userLikeInfos[0];
     if (!data) {
       throw new Error('get info error');

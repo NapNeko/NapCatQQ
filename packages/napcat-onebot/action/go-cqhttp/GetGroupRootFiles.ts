@@ -6,7 +6,7 @@ import { GoCQHTTPActionsExamples } from '../example/GoCQHTTPActionsExamples';
 
 const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
-  file_count: Type.Union([Type.Number(), Type.String()], { default: 50, description: '文件数量' }),
+  file_count: Type.Optional(Type.Union([Type.Number(), Type.String()], { default: 50, description: '文件数量' })),
 });
 
 type PayloadType = Static<typeof PayloadSchema>;
@@ -29,9 +29,10 @@ export class GetGroupRootFiles extends OneBotAction<PayloadType, ReturnType> {
   override returnExample = GoCQHTTPActionsExamples.GetGroupRootFiles.response;
 
   async _handle (payload: PayloadType) {
+    const fileCount = payload.file_count ?? 50;
     const ret = await this.core.apis.MsgApi.getGroupFileList(payload.group_id.toString(), {
       sortType: 1,
-      fileCount: +payload.file_count,
+      fileCount: +fileCount,
       startIndex: 0,
       sortOrder: 2,
       showOnlinedocFolder: 0,

@@ -11,12 +11,12 @@ import { GoCQHTTPActionsExamples } from '../example/GoCQHTTPActionsExamples';
 const PayloadSchema = Type.Object({
   user_id: Type.String({ description: '用户QQ' }),
   message_seq: Type.Optional(Type.String({ description: '起始消息序号' })),
-  count: Type.Number({ default: 20, description: '获取消息数量' }),
-  reverse_order: Type.Boolean({ default: false, description: '是否反向排序' }),
-  disable_get_url: Type.Boolean({ default: false, description: '是否禁用获取URL' }),
-  parse_mult_msg: Type.Boolean({ default: true, description: '是否解析合并消息' }),
-  quick_reply: Type.Boolean({ default: false, description: '是否快速回复' }),
-  reverseOrder: Type.Boolean({ default: false, description: '是否反向排序(旧版本兼容)' }),
+  count: Type.Optional(Type.Number({ default: 20, description: '获取消息数量' })),
+  reverse_order: Type.Optional(Type.Boolean({ default: false, description: '是否反向排序' })),
+  disable_get_url: Type.Optional(Type.Boolean({ default: false, description: '是否禁用获取URL' })),
+  parse_mult_msg: Type.Optional(Type.Boolean({ default: true, description: '是否解析合并消息' })),
+  quick_reply: Type.Optional(Type.Boolean({ default: false, description: '是否快速回复' })),
+  reverseOrder: Type.Optional(Type.Boolean({ default: false, description: '是否反向排序(旧版本兼容)' })),
 });
 
 type PayloadType = Static<typeof PayloadSchema>;
@@ -39,6 +39,10 @@ export default class GetFriendMsgHistory extends OneBotAction<PayloadType, Retur
 
   async _handle (payload: PayloadType, _adapter: string, config: NetworkAdapterConfig): Promise<ReturnType> {
     // 处理参数
+    const count = payload.count ?? 20;
+    const reverseOrder = (payload.reverse_order ?? false) || (payload.reverseOrder ?? false);
+    const parseMultMsg = payload.parse_mult_msg ?? true;
+    const disableGetUrl = payload.disable_get_url ?? false;
     const uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
     if (!uid) throw new Error(`记录${payload.user_id}不存在`);
     const friend = await this.core.apis.FriendApi.isBuddy(uid);
@@ -46,8 +50,8 @@ export default class GetFriendMsgHistory extends OneBotAction<PayloadType, Retur
     const hasMessageSeq = !payload.message_seq ? !!payload.message_seq : !(payload.message_seq?.toString() === '' || payload.message_seq?.toString() === '0');
     const startMsgId = hasMessageSeq ? (MessageUnique.getMsgIdAndPeerByShortId(+payload.message_seq!)?.MsgId ?? payload.message_seq!.toString()) : '0';
     const msgList = hasMessageSeq
-      ? (await this.core.apis.MsgApi.getMsgHistory(peer, startMsgId, +payload.count, payload.reverse_order || payload.reverseOrder)).msgList
-      : (await this.core.apis.MsgApi.getAioFirstViewLatestMsgs(peer, +payload.count)).msgList;
+      ? (await this.core.apis.MsgApi.getMsgHistory(peer, startMsgId, +count, reverseOrder)).msgList
+      : (await this.core.apis.MsgApi.getAioFirstViewLatestMsgs(peer, +count)).msgList;
     if (msgList.length === 0) throw new Error(`消息${payload.message_seq}不存在`);
     // 转换序号
     await Promise.all(msgList.map(async msg => {
@@ -55,7 +59,7 @@ export default class GetFriendMsgHistory extends OneBotAction<PayloadType, Retur
     }));
     // 烘焙消息
     const ob11MsgList = (await Promise.all(
-      msgList.map(msg => this.obContext.apis.MsgApi.parseMessage(msg, config.messagePostFormat, payload.parse_mult_msg, payload.disable_get_url)))
+      msgList.map(msg => this.obContext.apis.MsgApi.parseMessage(msg, config.messagePostFormat, parseMultMsg, disableGetUrl)))
     ).filter((msg): msg is OB11Message => msg !== undefined);
     return { messages: ob11MsgList };
   }

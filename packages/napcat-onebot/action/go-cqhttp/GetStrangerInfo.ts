@@ -8,7 +8,7 @@ import { GoCQHTTPActionsExamples } from '../example/GoCQHTTPActionsExamples';
 
 const PayloadSchema = Type.Object({
   user_id: Type.String({ description: '用户QQ' }),
-  no_cache: Type.Union([Type.Boolean(), Type.String()], { default: false, description: '是否不使用缓存' }),
+  no_cache: Type.Optional(Type.Union([Type.Boolean(), Type.String()], { default: false, description: '是否不使用缓存' })),
 });
 
 type PayloadType = Static<typeof PayloadSchema>;

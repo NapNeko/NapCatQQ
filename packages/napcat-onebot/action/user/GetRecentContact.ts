@@ -4,7 +4,7 @@ import { NetworkAdapterConfig } from '@/napcat-onebot/config/config';
 import { Static, Type } from '@sinclair/typebox';
 
 export const GetRecentContactPayloadSchema = Type.Object({
-  count: Type.Union([Type.Number(), Type.String()], { default: 10, description: '获取的数量' }),
+  count: Type.Optional(Type.Union([Type.Number(), Type.String()], { default: 10, description: '获取的数量' })),
 });
 
 export type GetRecentContactPayload = Static<typeof GetRecentContactPayloadSchema>;
@@ -45,7 +45,8 @@ export default class GetRecentContact extends OneBotAction<GetRecentContactPaylo
   ];
 
   async _handle (payload: GetRecentContactPayload, _adapter: string, config: NetworkAdapterConfig): Promise<GetRecentContactReturn> {
-    const ret = await this.core.apis.UserApi.getRecentContactListSnapShot(+payload.count);
+    const count = payload.count ?? 10;
+    const ret = await this.core.apis.UserApi.getRecentContactListSnapShot(+count);
     // 烘焙消息
     const results = await Promise.all(ret.info.changedList.map(async (t) => {
       const FastMsg = await this.core.apis.MsgApi.getMsgsByMsgId({ chatType: t.chatType, peerUid: t.peerUid }, [t.msgId]);
