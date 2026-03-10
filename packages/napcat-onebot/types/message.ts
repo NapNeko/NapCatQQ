@@ -280,13 +280,12 @@ export const OB11MessageNodeReferenceSchema = Type.Object({
   type: Type.Literal(OB11MessageDataType.node),
   data: Type.Object({
     id: Type.String({ description: '转发消息ID' }),
-  }),
+  }, { additionalProperties: false }),
 }, { description: '引用已有消息的合并转发节点' });
 
 export const OB11MessageNodeInlineSchema = Type.Object({
   type: Type.Literal(OB11MessageDataType.node),
   data: Type.Object({
-    id: Type.Optional(Type.String({ description: '转发消息ID' })),
     user_id: Type.Optional(Type.Union([Type.Number(), Type.String()], { description: '发送者QQ号' })),
     uin: Type.Optional(Type.Union([Type.Number(), Type.String()], { description: '发送者QQ号(兼容go-cqhttp)' })),
     nickname: Type.Optional(Type.String({ description: '发送者昵称' })),
@@ -300,7 +299,7 @@ export const OB11MessageNodeInlineSchema = Type.Object({
     summary: Type.Optional(Type.String({ description: '摘要' })),
     prompt: Type.Optional(Type.String({ description: '提示' })),
     time: Type.Optional(Type.Union([Type.String({ description: '时间' }), Type.Number({ description: '时间' })])),
-  }),
+  }, { additionalProperties: false }),
 }, { description: '内联合并转发消息节点' });
 
 export const OB11MessageNodeSchema = Type.Union([

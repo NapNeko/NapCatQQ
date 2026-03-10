@@ -19,6 +19,8 @@ export class GetOnlineClient extends OneBotAction<PayloadType, ReturnType> {
   override actionTags = ['Go-CQHTTP'];
   override payloadExample = {};
   override returnExample = null;
+  override supported = false;
+  override unsupportedReason = '当前版本未实现 get_online_clients';
 
   async _handle (): Promise<null> {
     throw new Error('当前版本未实现 get_online_clients');

@@ -1,6 +1,8 @@
 import {
-  OB11MessageData,
   OB11MessageDataType,
+} from '@/napcat-onebot/types';
+import type {
+  OB11MessageData,
   OB11MessageMixType,
   OB11MessageNode,
   OB11PostContext,
@@ -8,16 +10,17 @@ import {
 import { ActionName, BaseCheckResult } from '@/napcat-onebot/action/router';
 import { decodeCQCode } from '@/napcat-onebot/helper/cqcode';
 import { MessageUnique } from 'napcat-common/src/message-unique';
-import { ChatType, ElementType, NapCatCore, Peer, RawMessage, SendArkElement, SendMessageElement } from 'napcat-core';
+import { ChatType, ElementType } from 'napcat-core';
+import type { NapCatCore, Peer, RawMessage, SendArkElement, SendMessageElement } from 'napcat-core';
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ForwardMsgBuilder } from '@/napcat-core/helper/forward-msg-builder';
 import { stringifyWithBigInt } from 'napcat-common/src/helper';
-import { PacketMsg } from 'napcat-core/packet/message/message';
-import { rawMsgWithSendMsg } from 'napcat-core/packet/message/converter';
+import type { PacketMsg } from 'napcat-core/packet/message/message';
+import type { rawMsgWithSendMsg } from 'napcat-core/packet/message/converter';
 import { Static, TSchema, Type } from '@sinclair/typebox';
 import { MsgActionsExamples } from '@/napcat-onebot/action/msg/examples';
 import { OB11MessageMixTypeSchema } from '@/napcat-onebot/types/message';
-import { UploadForwardMsgParams } from '@/napcat-core/packet/transformer/message/UploadForwardMsgV2';
+import type { UploadForwardMsgParams } from '@/napcat-core/packet/transformer/message/UploadForwardMsgV2';
 
 export const SendMsgPayloadSchema = Type.Object({
   message_type: Type.Optional(Type.Union([Type.Literal('private'), Type.Literal('group')], { description: '消息类型 (private/group)' })),
@@ -128,7 +131,7 @@ function isNode (msg: OB11MessageData): msg is OB11MessageNode {
 }
 
 function hasNodeReferenceId (msg: OB11MessageNode): msg is OB11MessageNode & { data: { id: string; }; } {
-  return typeof msg.data.id === 'string' && msg.data.id.length > 0;
+  return 'id' in msg.data && typeof msg.data.id === 'string' && msg.data.id.length > 0;
 }
 
 export class SendMsgBase extends OneBotAction<SendMsgPayload, ReturnDataType> {

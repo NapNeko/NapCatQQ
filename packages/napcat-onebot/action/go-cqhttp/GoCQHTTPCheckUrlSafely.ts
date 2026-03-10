@@ -22,6 +22,8 @@ export class GoCQHTTPCheckUrlSafely extends OneBotAction<GoCQHTTPCheckUrlSafelyP
   override actionTags = ['Go-CQHTTP'];
   override payloadExample = GoCQHTTPActionsExamples.GoCQHTTPCheckUrlSafely.payload;
   override returnExample = null;
+  override supported = false;
+  override unsupportedReason = '当前版本未实现 check_url_safely';
 
   async _handle (): Promise<null> {
     throw new Error('当前版本未实现 check_url_safely');

@@ -1,50 +1,155 @@
-import { describe, expect, test } from 'vitest';
-import { readFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { describe, expect, test, vi } from 'vitest';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import { GoCQHTTPSendForwardMsgBase } from '../napcat-onebot/action/go-cqhttp/SendForwardMsg';
+import SendGroupMsg from '../napcat-onebot/action/group/SendGroupMsg';
+import SetGroupLeave from '../napcat-onebot/action/group/SetGroupLeave';
+import SendPrivateMsg from '../napcat-onebot/action/msg/SendPrivateMsg';
 
-function readSource (relativePath: string): string {
-  return readFileSync(resolve(__dirname, relativePath), 'utf8');
+vi.mock('napcat-core', () => ({
+  ChatType: {
+    KCHATTYPEGROUP: 2,
+    KCHATTYPEC2C: 1,
+    KCHATTYPETEMPC2CFROMGROUP: 3,
+  },
+  ElementType: {
+    TEXT: 'text',
+    PIC: 'pic',
+    REPLY: 'reply',
+    FILE: 'file',
+    VIDEO: 'video',
+    ARK: 'ark',
+    PTT: 'ptt',
+  },
+  NapCatCore: class {},
+}));
+
+vi.mock('napcat-core/types', () => ({
+  ChatType: {
+    KCHATTYPEGROUP: 2,
+    KCHATTYPEC2C: 1,
+    KCHATTYPETEMPC2CFROMGROUP: 3,
+  },
+}));
+
+function createCoreStub (overrides: Record<string, unknown> = {}) {
+  return {
+    context: {
+      logger: {
+        logError: vi.fn(),
+        logDebug: vi.fn(),
+        logWarn: vi.fn(),
+      },
+    },
+    selfInfo: {
+      uin: '10001',
+      uid: 'u_10001',
+    },
+    apis: {},
+    ...overrides,
+  };
+}
+
+class ForwardMessagesOnlyAction extends GoCQHTTPSendForwardMsgBase {
+  override async _handle (payload: any) {
+    return {
+      message_id: 1,
+      normalized_message: payload.message,
+    } as any;
+  }
+}
+
+class ForwardMixedNodeAction extends GoCQHTTPSendForwardMsgBase {
+  calls = 0;
+
+  override async _handle () {
+    this.calls += 1;
+    return { message_id: 1 } as any;
+  }
 }
 
 describe('NapCat Action Contracts', () => {
-  test('SendMsgBase should validate payload schema before normalizing messages', () => {
-    const source = readSource('../napcat-onebot/action/msg/SendMsg.ts');
+  test('send_private_msg should reject payloads without message during websocket validation', async () => {
+    const action = new SendPrivateMsg({} as any, createCoreStub() as any);
 
-    const superCheckIndex = source.indexOf('const base = await super.check(payload);');
-    const normalizeIndex = source.indexOf('const messages = normalize(payload.message);');
+    const response = await action.websocketHandle(
+      { user_id: '123456789' } as any,
+      null,
+      'ws',
+      {} as any
+    );
 
-    expect(superCheckIndex).toBeGreaterThan(-1);
-    expect(normalizeIndex).toBeGreaterThan(-1);
-    expect(superCheckIndex).toBeLessThan(normalizeIndex);
+    expect(response.retcode).toBe(1400);
   });
 
-  test('send_private_msg and send_group_msg should reject missing routing ids during check', () => {
-    const privateSource = readSource('../napcat-onebot/action/msg/SendPrivateMsg.ts');
-    const groupSource = readSource('../napcat-onebot/action/group/SendGroupMsg.ts');
+  test('send_group_msg should reject payloads without group_id during websocket validation', async () => {
+    const action = new SendGroupMsg({} as any, createCoreStub() as any);
 
-    expect(privateSource).toContain("message: '缺少参数 user_id'");
-    expect(groupSource).toContain("message: '缺少参数 group_id'");
+    const response = await action.websocketHandle(
+      { message: 'hello' } as any,
+      null,
+      'ws',
+      {} as any
+    );
+
+    expect(response.retcode).toBe(1400);
+    expect(response.message).toContain('group_id');
   });
 
-  test('send_forward_msg should support messages alias and still normalize before super check', () => {
-    const source = readSource('../napcat-onebot/action/go-cqhttp/SendForwardMsg.ts');
+  test('send_forward_msg should accept messages as the only message field', async () => {
+    const action = new ForwardMessagesOnlyAction({} as any, createCoreStub() as any);
+    const payload: Record<string, unknown> = {
+      group_id: '123456',
+      messages: [{
+        type: 'node',
+        data: {
+          id: '654321',
+        },
+      }],
+    };
 
-    expect(source).toContain('override payloadSchema = GoCQHTTPSendForwardPayloadSchema;');
-    expect(source).toContain('if (payload.messages) payload.message = normalize(payload.messages);');
-    expect(source).toContain('return super.check(payload);');
+    const response = await action.websocketHandle(payload as any, null, 'ws', {} as any);
+
+    expect(response.retcode).toBe(0);
+    expect(Array.isArray(payload.message)).toBe(true);
+    expect(payload.message).toEqual([{
+      type: 'node',
+      data: {
+        id: '654321',
+      },
+    }]);
   });
 
-  test('set_group_leave should branch between quit and destroy operations', () => {
-    const actionSource = readSource('../napcat-onebot/action/group/SetGroupLeave.ts');
-    const groupApiSource = readSource('../napcat-core/apis/group.ts');
+  test('send_forward_msg should fail mixed node payloads during check before _handle', async () => {
+    const action = new ForwardMixedNodeAction({} as any, createCoreStub() as any);
 
-    expect(actionSource).toContain('const isDismiss = typeof payload.is_dismiss === \'string\'');
-    expect(actionSource).toContain('await this.core.apis.GroupApi.destroyGroup(payload.group_id.toString());');
-    expect(actionSource).toContain('await this.core.apis.GroupApi.quitGroup(payload.group_id.toString());');
-    expect(groupApiSource).toContain('async destroyGroup (groupCode: string) {');
+    const response = await action.websocketHandle({
+      message: [
+        { type: 'node', data: { id: '123' } },
+        { type: 'text', data: { text: 'hello' } },
+      ],
+    } as any, null, 'ws', {} as any);
+
+    expect(response.retcode).toBe(1400);
+    expect(action.calls).toBe(0);
+  });
+
+  test('set_group_leave should call quitGroup unless is_dismiss is truthy', async () => {
+    const quitGroup = vi.fn();
+    const destroyGroup = vi.fn();
+    const action = new SetGroupLeave({} as any, createCoreStub({
+      apis: {
+        GroupApi: {
+          quitGroup,
+          destroyGroup,
+        },
+      },
+    }) as any);
+
+    await action._handle({ group_id: '123456', is_dismiss: false } as any);
+    expect(quitGroup).toHaveBeenCalledWith('123456');
+    expect(destroyGroup).not.toHaveBeenCalled();
+
+    await action._handle({ group_id: '123456', is_dismiss: 'true' } as any);
+    expect(destroyGroup).toHaveBeenCalledWith('123456');
   });
 });

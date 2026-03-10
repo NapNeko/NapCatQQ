@@ -1,10 +1,7 @@
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import { TypeCompiler } from '@sinclair/typebox/compiler';
 import { Value } from '@sinclair/typebox/value';
 import { Type } from '@sinclair/typebox';
-import { readFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 import { OB11MessageDataSchema, OB11MessageNodeSchema, OB11MessageSchema, OB11PostSendMsgSchema } from '../napcat-onebot/types/message';
 import { OB11MessageSchema as OB11ActionMessageSchema } from '../napcat-onebot/action/schemas';
@@ -12,12 +9,82 @@ import { GoCQHTTPActionsExamples } from '../napcat-onebot/action/example/GoCQHTT
 import { GuildActionsExamples } from '../napcat-onebot/action/example/GuildActionsExamples';
 import { OneBotConfigSchema, loadConfig as loadOneBotConfig, OneBotConfig } from '../napcat-onebot/config';
 import { NapcatConfigSchema } from '../napcat-core/helper/config';
+import { GoCQHTTPSendForwardMsg, GoCQHTTPSendGroupForwardMsg, GoCQHTTPSendPrivateForwardMsg } from '../napcat-onebot/action/go-cqhttp/SendForwardMsg';
+import { GetOnlineClient } from '../napcat-onebot/action/go-cqhttp/GetOnlineClient';
+import { GoCQHTTPCheckUrlSafely } from '../napcat-onebot/action/go-cqhttp/GoCQHTTPCheckUrlSafely';
+import { GoCQHTTPGetModelShow } from '../napcat-onebot/action/go-cqhttp/GoCQHTTPGetModelShow';
+import { GoCQHTTPSetModelShow } from '../napcat-onebot/action/go-cqhttp/GoCQHTTPSetModelShow';
+import { SetGroupAlbumMediaLike } from '../napcat-onebot/action/extends/SetGroupAlbumMediaLike';
+import { ReceiveOnlineFile } from '../napcat-onebot/action/file/online/ReceiveOnlineFile';
+import { GetGuildList } from '../napcat-onebot/action/guild/GetGuildList';
+import { GetGuildProfile } from '../napcat-onebot/action/guild/GetGuildProfile';
+import { MarkAllMsgAsRead } from '../napcat-onebot/action/msg/MarkMsgAsRead';
+import { SetDoubtFriendsAddRequest } from '../napcat-onebot/action/new/SetDoubtFriendsAddRequest';
+import { TestDownloadStream } from '../napcat-onebot/action/stream/TestStreamDownload';
+import GetVersionInfo from '../napcat-onebot/action/system/GetVersionInfo';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+vi.mock('napcat-core', () => ({
+  ChatType: {
+    KCHATTYPEGROUP: 2,
+    KCHATTYPEC2C: 1,
+    KCHATTYPETEMPC2CFROMGROUP: 3,
+  },
+  ElementType: {
+    TEXT: 'text',
+    PIC: 'pic',
+    REPLY: 'reply',
+    FILE: 'file',
+    VIDEO: 'video',
+    ARK: 'ark',
+    PTT: 'ptt',
+  },
+  NapCatCore: class {},
+}));
 
-function readSource (relativePath: string): string {
-  return readFileSync(resolve(__dirname, relativePath), 'utf8');
+vi.mock('napcat-core/types', () => ({
+  ChatType: {
+    KCHATTYPEGROUP: 2,
+    KCHATTYPEC2C: 1,
+    KCHATTYPETEMPC2CFROMGROUP: 3,
+  },
+}));
+
+function hasTopLevelProperty (schema: unknown, key: string): boolean {
+  if (!schema || typeof schema !== 'object') {
+    return false;
+  }
+
+  const typedSchema = schema as {
+    properties?: Record<string, unknown>,
+    allOf?: unknown[],
+    anyOf?: unknown[],
+    oneOf?: unknown[],
+  };
+
+  if (typedSchema.properties && key in typedSchema.properties) {
+    return true;
+  }
+
+  return ['allOf', 'anyOf', 'oneOf'].some((field) => {
+    const children = typedSchema[field as keyof typeof typedSchema];
+    return Array.isArray(children) && children.some(child => hasTopLevelProperty(child, key));
+  });
+}
+
+function createCoreStub () {
+  return {
+    context: {
+      logger: {
+        logError: vi.fn(),
+        logDebug: vi.fn(),
+        logWarn: vi.fn(),
+      },
+    },
+  } as any;
+}
+
+function createAction<T> (ActionClass: new (...args: any[]) => T): T {
+  return new ActionClass({} as any, createCoreStub());
 }
 
 describe('NapCat Schemas Compilation', () => {
@@ -123,33 +190,54 @@ describe('NapCat Schemas Validation & Coercion', () => {
     const compiler = TypeCompiler.Compile(OB11MessageNodeSchema);
     expect(compiler.Check(data)).toBe(true);
   });
+
+  test('should reject forward nodes that mix reference and inline payload fields', () => {
+    const payload = {
+      type: 'node',
+      data: {
+        id: '123456',
+        content: [{ type: 'text', data: { text: 'hello' } }],
+      },
+    };
+
+    const compiler = TypeCompiler.Compile(OB11MessageNodeSchema);
+    expect(compiler.Check(payload)).toBe(false);
+  });
 });
 
 describe('NapCat Action Metadata', () => {
-  test('should expose messages alias in forward message action source', () => {
-    const source = readSource('../napcat-onebot/action/go-cqhttp/SendForwardMsg.ts');
+  test('should export messages alias in forward message action schemas', () => {
+    const actions = [
+      createAction(GoCQHTTPSendForwardMsg),
+      createAction(GoCQHTTPSendPrivateForwardMsg),
+      createAction(GoCQHTTPSendGroupForwardMsg),
+    ];
 
-    expect(source).toContain('const GoCQHTTPSendForwardPayloadSchema = Type.Union([');
-    expect(source).toContain('messages: OB11MessageMixTypeSchema');
-    expect(source).toContain('override payloadSchema = GoCQHTTPSendForwardPayloadSchema;');
+    for (const action of actions) {
+      expect(hasTopLevelProperty((action as any).payloadSchema, 'messages')).toBe(true);
+    }
   });
 
-  test('should remove dead payload fields from action source', () => {
-    const doubtFriendsSource = readSource('../napcat-onebot/action/new/SetDoubtFriendsAddRequest.ts');
-    const albumLikeSource = readSource('../napcat-onebot/action/extends/SetGroupAlbumMediaLike.ts');
+  test('should remove dead payload fields from action schemas', () => {
+    const doubtFriendAction = createAction(SetDoubtFriendsAddRequest);
+    const albumLikeAction = createAction(SetGroupAlbumMediaLike);
 
-    expect(doubtFriendsSource).not.toContain('approve:');
-    expect(albumLikeSource).not.toContain('set:');
+    expect(hasTopLevelProperty((doubtFriendAction as any).payloadSchema, 'approve')).toBe(false);
+    expect(hasTopLevelProperty((albumLikeAction as any).payloadSchema, 'set')).toBe(false);
   });
 
   test('should keep examples aligned with fixed action contracts', () => {
-    const receiveOnlineFileSource = readSource('../napcat-onebot/action/file/online/ReceiveOnlineFile.ts');
-    const testStreamDownloadSource = readSource('../napcat-onebot/action/stream/TestStreamDownload.ts');
+    const receiveOnlineFileAction = createAction(ReceiveOnlineFile);
+    const testStreamDownloadAction = createAction(TestDownloadStream);
+    const getModelShowAction = createAction(GoCQHTTPGetModelShow);
 
-    expect(receiveOnlineFileSource).toContain("element_id: '456'");
-    expect(receiveOnlineFileSource).not.toContain('save_path');
-    expect(testStreamDownloadSource).toContain('error: false');
-    expect(GoCQHTTPActionsExamples.GoCQHTTPGetModelShow.response).toEqual([{
+    expect((receiveOnlineFileAction as any).payloadExample).toEqual({
+      user_id: '123456789',
+      msg_id: '123',
+      element_id: '456',
+    });
+    expect((testStreamDownloadAction as any).payloadExample).toEqual({ error: false });
+    expect((getModelShowAction as any).returnExample).toEqual([{
       variants: {
         model_show: 'napcat',
         need_pay: false,
@@ -157,19 +245,20 @@ describe('NapCat Action Metadata', () => {
     }]);
   });
 
-  test('should align shared examples and unimplemented action source', () => {
-    const filesToCheck = [
-      '../napcat-onebot/action/go-cqhttp/GoCQHTTPCheckUrlSafely.ts',
-      '../napcat-onebot/action/go-cqhttp/GetOnlineClient.ts',
-      '../napcat-onebot/action/go-cqhttp/GoCQHTTPSetModelShow.ts',
-      '../napcat-onebot/action/guild/GetGuildList.ts',
-      '../napcat-onebot/action/guild/GetGuildProfile.ts',
+  test('should mark unsupported compatibility actions in exported metadata', () => {
+    const unsupportedActions = [
+      createAction(GoCQHTTPCheckUrlSafely),
+      createAction(GetOnlineClient),
+      createAction(GoCQHTTPSetModelShow),
+      createAction(GetGuildList),
+      createAction(GetGuildProfile),
     ];
 
-    for (const file of filesToCheck) {
-      const source = readSource(file);
-      expect(source).toContain('未实现');
-      expect(source).toContain('override returnExample = null;');
+    for (const action of unsupportedActions) {
+      expect((action as any).supported).toBe(false);
+      expect((action as any).unsupportedReason).toContain('未实现');
+      expect((action as any).returnExample).toBeNull();
+      expect((action as any).returnSchema).toMatchObject({ type: 'null' });
     }
 
     expect(GoCQHTTPActionsExamples.GetOnlineClient.payload).toEqual({});
@@ -182,13 +271,11 @@ describe('NapCat Action Metadata', () => {
   });
 
   test('should add explicit empty payload schemas to no-arg actions', () => {
-    const versionInfoSource = readSource('../napcat-onebot/action/system/GetVersionInfo.ts');
-    const markAllReadSource = readSource('../napcat-onebot/action/msg/MarkMsgAsRead.ts');
+    const getVersionInfoAction = createAction(GetVersionInfo);
+    const markAllMsgAsReadAction = createAction(MarkAllMsgAsRead);
 
-    expect(versionInfoSource).toContain('const PayloadSchema = Type.Object({});');
-    expect(versionInfoSource).toContain('override payloadSchema = PayloadSchema;');
-    expect(markAllReadSource).toContain('const EmptyPayloadSchema = Type.Object({});');
-    expect(markAllReadSource).toContain('override payloadSchema = EmptyPayloadSchema;');
+    expect((getVersionInfoAction as any).payloadSchema).toMatchObject({ type: 'object' });
+    expect((markAllMsgAsReadAction as any).payloadSchema).toMatchObject({ type: 'object' });
   });
 });
 

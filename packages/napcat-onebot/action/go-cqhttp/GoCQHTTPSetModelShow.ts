@@ -12,6 +12,8 @@ export class GoCQHTTPSetModelShow extends OneBotAction<void, void> {
   override actionTags = ['Go-CQHTTP'];
   override payloadExample = {};
   override returnExample = null;
+  override supported = false;
+  override unsupportedReason = '当前版本未实现 _set_model_show';
 
   async _handle () {
     throw new Error('当前版本未实现 _set_model_show');

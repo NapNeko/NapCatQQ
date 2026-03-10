@@ -1,6 +1,7 @@
-import { OB11MessageMixType } from '@/napcat-onebot/types';
+import type { OB11MessageMixType } from '@/napcat-onebot/types';
 import { ContextMode, normalize, ReturnDataType, SendMsgBase, SendMsgPayload, SendMsgPayloadSchema } from '@/napcat-onebot/action/msg/SendMsg';
-import { ActionName, BaseCheckResult } from '@/napcat-onebot/action/router';
+import { ActionName } from '@/napcat-onebot/action/router';
+import type { BaseCheckResult } from '@/napcat-onebot/action/router';
 import { OB11MessageMixTypeSchema } from '@/napcat-onebot/types/message';
 import { Type } from '@sinclair/typebox';
 

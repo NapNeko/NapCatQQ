@@ -1,10 +1,11 @@
 import { ActionName, BaseCheckResult } from './router';
 import { TypeCompiler, TypeCheck } from '@sinclair/typebox/compiler';
 import { Value } from '@sinclair/typebox/value';
-import { NapCatCore } from 'napcat-core';
-import { NapCatOneBot11Adapter, OB11Return } from '@/napcat-onebot/index';
-import { NetworkAdapterConfig } from '../config/config';
-import { TSchema } from '@sinclair/typebox';
+import type { NapCatCore } from 'napcat-core';
+import type { NapCatOneBot11Adapter } from '@/napcat-onebot/index';
+import type { OB11Return } from '@/napcat-onebot/types';
+import type { NetworkAdapterConfig } from '../config/config';
+import type { TSchema } from '@sinclair/typebox';
 import { StreamPacket, StreamPacketBasic, StreamStatus } from './stream/StreamTypes';
 export const ActionExamples = {
   Common: {
@@ -57,6 +58,8 @@ export abstract class OneBotAction<PayloadType, ReturnDataType> {
   actionTags: string[] = [];
   obContext: NapCatOneBot11Adapter;
   useStream: boolean = false;
+  supported: boolean = true;
+  unsupportedReason?: string = undefined;
   errorExamples: Array<{ code: number, description: string; }> = ActionExamples.Common.errors;
 
   constructor (obContext: NapCatOneBot11Adapter, core: NapCatCore) {

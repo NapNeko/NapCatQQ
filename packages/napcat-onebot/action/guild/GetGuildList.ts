@@ -12,6 +12,8 @@ export class GetGuildList extends OneBotAction<void, void> {
   override actionTags = ['频道接口'];
   override payloadExample = {};
   override returnExample = null;
+  override supported = false;
+  override unsupportedReason = '当前版本未实现 get_guild_list';
 
   async _handle (): Promise<void> {
     throw new Error('当前版本未实现 get_guild_list');
