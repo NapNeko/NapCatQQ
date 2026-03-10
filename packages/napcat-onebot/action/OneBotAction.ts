@@ -5,7 +5,7 @@ import { NapCatCore } from 'napcat-core';
 import { NapCatOneBot11Adapter, OB11Return } from '@/napcat-onebot/index';
 import { NetworkAdapterConfig } from '../config/config';
 import { TSchema } from '@sinclair/typebox';
-import { StreamPacket, StreamPacketBasic, StreamStatus } from './stream/StreamBasic';
+import { StreamPacket, StreamPacketBasic, StreamStatus } from './stream/StreamTypes';
 export const ActionExamples = {
   Common: {
     errors: [

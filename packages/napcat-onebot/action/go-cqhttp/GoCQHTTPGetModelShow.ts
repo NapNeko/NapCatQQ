@@ -26,7 +26,12 @@ export class GoCQHTTPGetModelShow extends OneBotAction<GoCQHTTPGetModelShowPaylo
   override actionDescription = '获取当前账号可用的设备机型显示名称列表';
   override actionTags = ['Go-CQHTTP'];
   override payloadExample = GoCQHTTPActionsExamples.GoCQHTTPGetModelShow.payload;
-  override returnExample = GoCQHTTPActionsExamples.GoCQHTTPGetModelShow.response;
+  override returnExample = [{
+    variants: {
+      model_show: 'napcat',
+      need_pay: false,
+    },
+  }];
 
   async _handle (payload: GoCQHTTPGetModelShowPayload) {
     if (!payload.model) {

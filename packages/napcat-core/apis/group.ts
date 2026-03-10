@@ -445,6 +445,10 @@ export class NTQQGroupApi {
     return this.context.session.getGroupService().quitGroup(groupCode);
   }
 
+  async destroyGroup (groupCode: string) {
+    return this.context.session.getGroupService().destroyGroup(groupCode);
+  }
+
   async kickMember (groupCode: string, kickUids: string[], refuseForever: boolean = false, kickReason: string = '') {
     return this.context.session.getGroupService().kickMember(groupCode, kickUids, refuseForever, kickReason);
   }

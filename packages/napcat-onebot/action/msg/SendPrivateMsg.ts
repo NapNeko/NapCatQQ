@@ -18,6 +18,12 @@ class SendPrivateMsg extends SendMsgBase {
 
   protected override async check (payload: SendMsgPayload): Promise<BaseCheckResult> {
     payload.message_type = 'private';
+    if (!payload.user_id) {
+      return {
+        valid: false,
+        message: '缺少参数 user_id',
+      };
+    }
     return super.check(payload);
   }
 

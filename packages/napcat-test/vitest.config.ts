@@ -13,6 +13,8 @@ export default defineConfig({
       '@/napcat-test': resolve(__dirname, '.'),
       '@/napcat-common': resolve(__dirname, '../napcat-common'),
       '@/napcat-core': resolve(__dirname, '../napcat-core'),
+      '@/napcat-onebot': resolve(__dirname, '../napcat-onebot'),
+      '@/napcat-schema': resolve(__dirname, '../napcat-schema'),
     },
   },
 });

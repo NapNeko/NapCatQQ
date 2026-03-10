@@ -14,7 +14,7 @@ import { ForwardMsgBuilder } from '@/napcat-core/helper/forward-msg-builder';
 import { stringifyWithBigInt } from 'napcat-common/src/helper';
 import { PacketMsg } from 'napcat-core/packet/message/message';
 import { rawMsgWithSendMsg } from 'napcat-core/packet/message/converter';
-import { Static, Type } from '@sinclair/typebox';
+import { Static, TSchema, Type } from '@sinclair/typebox';
 import { MsgActionsExamples } from '@/napcat-onebot/action/msg/examples';
 import { OB11MessageMixTypeSchema } from '@/napcat-onebot/types/message';
 import { UploadForwardMsgParams } from '@/napcat-core/packet/transformer/message/UploadForwardMsgV2';
@@ -127,12 +127,21 @@ function isNode (msg: OB11MessageData): msg is OB11MessageNode {
   return msg.type === OB11MessageDataType.node;
 }
 
+function hasNodeReferenceId (msg: OB11MessageNode): msg is OB11MessageNode & { data: { id: string; }; } {
+  return typeof msg.data.id === 'string' && msg.data.id.length > 0;
+}
+
 export class SendMsgBase extends OneBotAction<SendMsgPayload, ReturnDataType> {
-  override payloadSchema = SendMsgPayloadSchema;
-  override returnSchema = SendMsgReturnSchema;
+  override payloadSchema: TSchema = SendMsgPayloadSchema;
+  override returnSchema: TSchema = SendMsgReturnSchema;
   override actionTags = ['消息接口'];
 
   protected override async check (payload: SendMsgPayload): Promise<BaseCheckResult> {
+    const base = await super.check(payload);
+    if (!base.valid) {
+      return base;
+    }
+
     const messages = normalize(payload.message);
     const nodeElementLength = getSpecialMsgNum(messages, OB11MessageDataType.node);
     if (nodeElementLength > 0 && nodeElementLength !== messages.length) {
@@ -225,8 +234,8 @@ export class SendMsgBase extends OneBotAction<SendMsgPayload, ReturnDataType> {
         this.core.context.logger.logWarn('转发消息深度超过3层，将停止解析！');
         break;
       }
-      if (!node.data.id) {
-        const OB11Data = normalize(node.type === OB11MessageDataType.node ? node.data.content : node);
+      if (!hasNodeReferenceId(node)) {
+        const OB11Data = normalize(node.data.content);
         let sendElements: SendMessageElement[];
 
         const subNodeMessages = OB11Data.filter(isNode);
@@ -260,7 +269,7 @@ export class SendMsgBase extends OneBotAction<SendMsgPayload, ReturnDataType> {
         const transformedMsg = this.core.apis.PacketApi.pkt.msgConverter.rawMsgWithSendMsgToPacketMsg(packetMsgElements);
         this.core.context.logger.logDebug(`handleForwardedNodesPacket[SendRaw] 转换为 ${stringifyWithBigInt(transformedMsg)}`);
         packetMsg.push(transformedMsg);
-      } else if (node.data.id) {
+      } else {
         const id = node.data.id;
         const nodeMsg = MessageUnique.getMsgIdAndPeerByShortId(+id) || MessageUnique.getPeerByMsgId(id);
         if (!nodeMsg) {
@@ -307,8 +316,6 @@ export class SendMsgBase extends OneBotAction<SendMsgPayload, ReturnDataType> {
           this.core.context.logger.logDebug(`handleForwardedNodesPacket[PureRaw] 转换为 ${stringifyWithBigInt(transformedMsg)}`);
           packetMsg.push(transformedMsg);
         }
-      } else {
-        this.core.context.logger.logDebug(`handleForwardedNodesPacket 跳过元素 ${stringifyWithBigInt(node)}`);
       }
     }
     if (packetMsg.length === 0) {
@@ -369,8 +376,8 @@ export class SendMsgBase extends OneBotAction<SendMsgPayload, ReturnDataType> {
     };
     let nodeMsgIds: string[] = [];
     for (const messageNode of messageNodes) {
-      const nodeId = messageNode.data.id;
-      if (nodeId) {
+      if (hasNodeReferenceId(messageNode)) {
+        const nodeId = messageNode.data.id;
         // 对Msgid和OB11ID混用情况兜底
         const nodeMsg = MessageUnique.getMsgIdAndPeerByShortId(parseInt(nodeId)) || MessageUnique.getPeerByMsgId(nodeId);
         if (!nodeMsg) {
