@@ -158,6 +158,18 @@ describe('NapCat Schemas Validation & Coercion', () => {
     expect(compiler.Check(data)).toBe(true);
   });
 
+  test('should reject forward reference nodes with empty id', () => {
+    const payload = {
+      type: 'node',
+      data: {
+        id: '',
+      },
+    };
+
+    const compiler = TypeCompiler.Compile(OB11MessageNodeSchema);
+    expect(compiler.Check(payload)).toBe(false);
+  });
+
   test('should accept inline forward nodes with name but without nickname', () => {
     const payload = {
       type: 'node',

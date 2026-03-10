@@ -279,7 +279,7 @@ export const OB11MessageFlashTransferSchema = Type.Object({
 export const OB11MessageNodeReferenceSchema = Type.Object({
   type: Type.Literal(OB11MessageDataType.node),
   data: Type.Object({
-    id: Type.String({ description: '转发消息ID' }),
+    id: Type.String({ description: '转发消息ID', minLength: 1 }),
   }, { additionalProperties: false }),
 }, { description: '引用已有消息的合并转发节点' });
 
