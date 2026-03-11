@@ -20,7 +20,6 @@ export class GetDoubtFriendsAddRequest extends OneBotAction<GetDoubtFriendsAddRe
   override returnExample = NewActionsExamples.GetDoubtFriendsAddRequest.response;
 
   async _handle (payload: GetDoubtFriendsAddRequestPayload) {
-    const count = payload.count ?? 50;
-    return await this.core.apis.FriendApi.getDoubtFriendRequest(count);
+    return await this.core.apis.FriendApi.getDoubtFriendRequest(payload.count!);
   }
 }

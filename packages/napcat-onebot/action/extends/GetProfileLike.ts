@@ -61,8 +61,8 @@ export class GetProfileLike extends OneBotAction<PayloadType, ReturnType> {
   };
 
   async _handle (payload: PayloadType): Promise<ReturnType> {
-    const start = payload.start ?? 0;
-    const count = payload.count ?? 10;
+    const start = payload.start!;
+    const count = payload.count!;
     const isSelf = this.core.selfInfo.uin === payload.user_id || !payload.user_id;
     const userUid = isSelf || !payload.user_id ? this.core.selfInfo.uid : await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
     const type = isSelf ? 2 : 1;

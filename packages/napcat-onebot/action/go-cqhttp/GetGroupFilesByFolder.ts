@@ -31,10 +31,9 @@ export class GetGroupFilesByFolder extends OneBotAction<PayloadType, ReturnType>
   override returnExample = GoCQHTTPActionsExamples.GetGroupFilesByFolder.response;
 
   async _handle (payload: PayloadType): Promise<ReturnType> {
-    const fileCount = payload.file_count ?? 50;
     const retRaw = await this.core.apis.MsgApi.getGroupFileList(payload.group_id.toString(), {
       sortType: 1,
-      fileCount: +fileCount,
+      fileCount: +payload.file_count!,
       startIndex: 0,
       sortOrder: 2,
       showOnlinedocFolder: 0,

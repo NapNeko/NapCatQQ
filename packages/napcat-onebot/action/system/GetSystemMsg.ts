@@ -36,8 +36,7 @@ export class GetGroupSystemMsg extends OneBotAction<GetGroupSystemMsgPayload, Ge
   };
 
   async _handle (params: GetGroupSystemMsgPayload): Promise<GetGroupSystemMsgReturn> {
-    const count = params.count ?? 50;
-    const SingleScreenNotifies = await this.core.apis.GroupApi.getSingleScreenNotifies(false, +count);
+    const SingleScreenNotifies = await this.core.apis.GroupApi.getSingleScreenNotifies(false, +params.count!);
     const retData: GetGroupSystemMsgReturn = { invited_requests: [], InvitedRequest: [], join_requests: [] };
 
     const notifyPromises = SingleScreenNotifies.map(async (SSNotify) => {

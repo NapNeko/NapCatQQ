@@ -31,8 +31,7 @@ export default class SetGroupAddRequest extends OneBotAction<PayloadType, Return
   async _handle (payload: PayloadType): Promise<null> {
     const flag = payload.flag.toString();
     const approve = payload.approve?.toString() !== 'false';
-    const reason = payload.reason ?? ' ';
-    const count = payload.count;
+    const count = payload.count!;
     const invite_notify = this.obContext.apis.MsgApi.notifyGroupInvite.get(flag);
     const { doubt, notify } = invite_notify
       ? {
@@ -47,12 +46,12 @@ export default class SetGroupAddRequest extends OneBotAction<PayloadType, Return
       doubt,
       notify,
       approve ? NTGroupRequestOperateTypes.KAGREE : NTGroupRequestOperateTypes.KREFUSE,
-      reason
+      payload.reason ?? undefined
     );
     return null;
   }
 
-  private async findNotify (flag: string, count: number = 100): Promise<{
+  private async findNotify (flag: string, count: number): Promise<{
     doubt: boolean,
     notify: GroupNotify | undefined;
   }> {

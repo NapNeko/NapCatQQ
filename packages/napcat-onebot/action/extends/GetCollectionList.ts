@@ -77,7 +77,6 @@ export class GetCollectionList extends OneBotAction<PayloadType, ReturnType> {
   };
 
   async _handle (payload: PayloadType) {
-    const count = payload.count ?? '50';
-    return await this.core.apis.CollectionApi.getAllCollection(+payload.category, +count);
+    return await this.core.apis.CollectionApi.getAllCollection(+payload.category, +payload.count!);
   }
 }

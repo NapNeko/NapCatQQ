@@ -59,14 +59,12 @@ export class FetchEmojiLike extends OneBotAction<PayloadType, ReturnType> {
   override returnSchema = ReturnSchema;
 
   async _handle (payload: PayloadType): Promise<ReturnType> {
-    const count = payload.count ?? 20;
-    const cookie = payload.cookie ?? '';
     const msgIdPeer = MessageUnique.getMsgIdAndPeerByShortId(+payload.message_id);
     if (!msgIdPeer) throw new Error('消息不存在');
     const msg = (await this.core.apis.MsgApi.getMsgsByMsgId(msgIdPeer.Peer, [msgIdPeer.MsgId])).msgList[0];
     if (!msg) throw new Error('消息不存在');
     const res = await this.core.apis.MsgApi.getMsgEmojiLikesList(
-      msgIdPeer.Peer, msg.msgSeq, payload.emojiId.toString(), payload.emojiType.toString(), cookie, +count
+      msgIdPeer.Peer, msg.msgSeq, payload.emojiId.toString(), payload.emojiType.toString(), payload.cookie!, +payload.count!
     );
     return res;
   }

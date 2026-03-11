@@ -46,7 +46,7 @@ export class GetEmojiLikes extends OneBotAction<PayloadType, ReturnType> {
   override returnSchema = ReturnSchema;
 
   async _handle (payload: PayloadType) {
-    const count = payload.count ?? 0;
+    const count = payload.count!;
     let peer: Peer;
     let msgId: string;
 

@@ -29,11 +29,11 @@ export class SendGroupNotice extends OneBotAction<SendGroupNoticePayload, void> 
   override returnExample = GoCQHTTPActionsExamples.SendGroupNotice.response;
 
   async _handle (payload: SendGroupNoticePayload) {
-    const pinned = payload.pinned ?? 0;
-    const type = payload.type ?? 1;
-    const confirmRequired = payload.confirm_required ?? 1;
-    const showEditCard = payload.is_show_edit_card ?? 0;
-    const tipWindowType = payload.tip_window_type ?? 0;
+    const pinned = payload.pinned!;
+    const type = payload.type!;
+    const confirmRequired = payload.confirm_required!;
+    const showEditCard = payload.is_show_edit_card!;
+    const tipWindowType = payload.tip_window_type!;
     let UploadImage: { id: string, width: number, height: number; } | undefined;
     if (payload.image) {
       // 公告图逻辑

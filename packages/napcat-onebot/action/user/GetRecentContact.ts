@@ -45,8 +45,7 @@ export default class GetRecentContact extends OneBotAction<GetRecentContactPaylo
   ];
 
   async _handle (payload: GetRecentContactPayload, _adapter: string, config: NetworkAdapterConfig): Promise<GetRecentContactReturn> {
-    const count = payload.count ?? 10;
-    const ret = await this.core.apis.UserApi.getRecentContactListSnapShot(+count);
+    const ret = await this.core.apis.UserApi.getRecentContactListSnapShot(+payload.count!);
     // 烘焙消息
     const results = await Promise.all(ret.info.changedList.map(async (t) => {
       const FastMsg = await this.core.apis.MsgApi.getMsgsByMsgId({ chatType: t.chatType, peerUid: t.peerUid }, [t.msgId]);

@@ -27,8 +27,7 @@ export class FetchCustomFace extends OneBotAction<PayloadType, ReturnType> {
   ];
 
   async _handle (payload: PayloadType) {
-    const count = payload.count ?? 48;
-    const ret = await this.core.apis.MsgApi.fetchFavEmojiList(+count);
+    const ret = await this.core.apis.MsgApi.fetchFavEmojiList(+payload.count!);
     return ret.emojiInfoList.map(e => e.url);
   }
 }

@@ -28,12 +28,10 @@ export class SetDiyOnlineStatus extends OneBotAction<PayloadType, ReturnType> {
 
   override returnExample = '';
   async _handle (payload: PayloadType) {
-    const wording = payload.wording ?? ' ';
-    const faceType = payload.face_type ?? '1';
     const ret = await this.core.apis.UserApi.setDiySelfOnlineStatus(
       payload.face_id.toString(),
-      wording,
-      faceType.toString()
+      payload.wording!,
+      payload.face_type!.toString()
     );
     if (ret.result !== 0) {
       throw new Error('设置在线状态失败');

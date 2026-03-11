@@ -39,10 +39,10 @@ export default class GetFriendMsgHistory extends OneBotAction<PayloadType, Retur
 
   async _handle (payload: PayloadType, _adapter: string, config: NetworkAdapterConfig): Promise<ReturnType> {
     // 处理参数
-    const count = payload.count ?? 20;
-    const reverseOrder = (payload.reverse_order ?? false) || (payload.reverseOrder ?? false);
-    const parseMultMsg = payload.parse_mult_msg ?? true;
-    const disableGetUrl = payload.disable_get_url ?? false;
+    const count = payload.count!;
+    const reverseOrder = payload.reverse_order! || payload.reverseOrder!;
+    const parseMultMsg = payload.parse_mult_msg!;
+    const disableGetUrl = payload.disable_get_url!;
     const uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
     if (!uid) throw new Error(`记录${payload.user_id}不存在`);
     const friend = await this.core.apis.FriendApi.isBuddy(uid);

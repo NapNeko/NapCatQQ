@@ -26,10 +26,9 @@ export default class SendLike extends OneBotAction<SendLikePayload, void> {
   ];
 
   async _handle (payload: SendLikePayload): Promise<void> {
-    const times = payload.times ?? 1;
     const qq = payload.user_id.toString();
     const uid: string = await this.core.apis.UserApi.getUidByUinV2(qq) ?? '';
-    const result = await this.core.apis.UserApi.like(uid, +times);
+    const result = await this.core.apis.UserApi.like(uid, +payload.times!);
     if (result.result !== 0) {
       throw new Error(`点赞失败 ${result.errMsg}`);
     }

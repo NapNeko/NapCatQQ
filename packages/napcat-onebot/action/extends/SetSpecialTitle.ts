@@ -27,9 +27,8 @@ export class SetSpecialTitle extends GetPacketStatusDepends<PayloadType, ReturnT
   override returnExample = ExtendsActionsExamples.SetSpecialTitle.response;
 
   async _handle (payload: PayloadType) {
-    const specialTitle = payload.special_title ?? '';
     const uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
     if (!uid) throw new Error('User not found');
-    await this.core.apis.PacketApi.pkt.operation.SetGroupSpecialTitle(+payload.group_id, uid, specialTitle);
+    await this.core.apis.PacketApi.pkt.operation.SetGroupSpecialTitle(+payload.group_id, uid, payload.special_title!);
   }
 }

@@ -3,12 +3,18 @@ import { describe, expect, test, vi } from 'vitest';
 import { GetOnlineClient } from '../napcat-onebot/action/go-cqhttp/GetOnlineClient';
 import { GoCQHTTPCheckUrlSafely } from '../napcat-onebot/action/go-cqhttp/GoCQHTTPCheckUrlSafely';
 import { GoCQHTTPSetModelShow } from '../napcat-onebot/action/go-cqhttp/GoCQHTTPSetModelShow';
+import GetFriendMsgHistory from '../napcat-onebot/action/go-cqhttp/GetFriendMsgHistory';
 import { GoCQHTTPSendForwardMsgBase } from '../napcat-onebot/action/go-cqhttp/SendForwardMsg';
+import { SendGroupNotice } from '../napcat-onebot/action/go-cqhttp/SendGroupNotice';
+import SetGroupAddRequest from '../napcat-onebot/action/group/SetGroupAddRequest';
 import SendGroupMsg from '../napcat-onebot/action/group/SendGroupMsg';
 import { GetGuildList } from '../napcat-onebot/action/guild/GetGuildList';
 import { GetGuildProfile } from '../napcat-onebot/action/guild/GetGuildProfile';
 import SetGroupLeave from '../napcat-onebot/action/group/SetGroupLeave';
 import SendPrivateMsg from '../napcat-onebot/action/msg/SendPrivateMsg';
+import SendLike from '../napcat-onebot/action/user/SendLike';
+import { OneBotAction } from '../napcat-onebot/action/OneBotAction';
+import { Static, Type } from '@sinclair/typebox';
 
 vi.mock('napcat-core', () => ({
   ChatType: {
@@ -33,6 +39,10 @@ vi.mock('napcat-core/types', () => ({
     KCHATTYPEGROUP: 2,
     KCHATTYPEC2C: 1,
     KCHATTYPETEMPC2CFROMGROUP: 3,
+  },
+  NTGroupRequestOperateTypes: {
+    KAGREE: 'agree',
+    KREFUSE: 'refuse',
   },
 }));
 
@@ -69,6 +79,25 @@ class ForwardMixedNodeAction extends GoCQHTTPSendForwardMsgBase {
   override async _handle () {
     this.calls += 1;
     return { message_id: 1 } as any;
+  }
+}
+
+const DefaultedActionPayloadSchema = Type.Object({
+  count: Type.Optional(Type.Number({ default: 20 })),
+  enabled: Type.Optional(Type.Boolean({ default: false })),
+});
+
+type DefaultedActionPayload = Static<typeof DefaultedActionPayloadSchema>;
+
+class DefaultedPayloadAction extends OneBotAction<DefaultedActionPayload, DefaultedActionPayload> {
+  override payloadSchema = DefaultedActionPayloadSchema;
+  override returnSchema = DefaultedActionPayloadSchema;
+
+  override async _handle (payload: DefaultedActionPayload) {
+    return {
+      count: payload.count!,
+      enabled: payload.enabled!,
+    };
   }
 }
 
@@ -201,6 +230,179 @@ describe('NapCat Action Contracts', () => {
 
     expect(response.retcode).toBe(1400);
     expect(action.calls).toBe(0);
+  });
+
+  test('OneBotAction should pass TypeBox-defaulted payloads into _handle', async () => {
+    const action = new DefaultedPayloadAction({} as any, createCoreStub() as any);
+    const payload: Record<string, unknown> = {};
+
+    const response = await action.websocketHandle(payload as any, null, 'ws', {} as any);
+
+    expect(response.retcode).toBe(0);
+    expect(response.data).toEqual({
+      count: 20,
+      enabled: false,
+    });
+    expect(payload).toEqual({
+      count: 20,
+      enabled: false,
+    });
+  });
+
+  test('send_like should inject default times before _handle uses non-null assertion', async () => {
+    const getUidByUinV2 = vi.fn().mockResolvedValue('u_123456');
+    const like = vi.fn().mockResolvedValue({ result: 0, errMsg: '' });
+    const action = new SendLike({} as any, createCoreStub({
+      apis: {
+        UserApi: {
+          getUidByUinV2,
+          like,
+        },
+      },
+    }) as any);
+    const payload: Record<string, unknown> = {
+      user_id: '123456',
+    };
+
+    const response = await action.websocketHandle(payload as any, null, 'ws', {} as any);
+
+    expect(response.retcode).toBe(0);
+    expect(like).toHaveBeenCalledWith('u_123456', 1);
+    expect(payload['times']).toBe(1);
+  });
+
+  test('send_group_notice should inject all default fields before _handle uses non-null assertions', async () => {
+    const setGroupNotice = vi.fn().mockResolvedValue({ ec: 0, em: '' });
+    const action = new SendGroupNotice({} as any, createCoreStub({
+      apis: {
+        WebApi: {
+          setGroupNotice,
+        },
+      },
+    }) as any);
+    const payload: Record<string, unknown> = {
+      group_id: '123456',
+      content: 'hello',
+    };
+
+    const response = await action.websocketHandle(payload as any, null, 'ws', {} as any);
+
+    expect(response.retcode).toBe(0);
+    expect(setGroupNotice).toHaveBeenCalledWith(
+      '123456',
+      'hello',
+      0,
+      1,
+      0,
+      0,
+      1,
+      undefined,
+      undefined,
+      undefined
+    );
+    expect(payload).toMatchObject({
+      pinned: 0,
+      type: 1,
+      confirm_required: 1,
+      is_show_edit_card: 0,
+      tip_window_type: 0,
+    });
+  });
+
+  test('get_friend_msg_history should inject default booleans and count before _handle uses non-null assertions', async () => {
+    const getUidByUinV2 = vi.fn().mockResolvedValue('u_123456');
+    const isBuddy = vi.fn().mockResolvedValue(true);
+    const getAioFirstViewLatestMsgs = vi.fn().mockResolvedValue({
+      msgList: [{
+        chatType: 1,
+        peerUid: 'u_123456',
+        msgId: 'msg-1',
+      }],
+    });
+    const parseMessage = vi.fn().mockResolvedValue({ type: 'text', data: { text: 'hello' } });
+    const action = new GetFriendMsgHistory({
+      apis: {
+        MsgApi: {
+          parseMessage,
+        },
+      },
+    } as any, createCoreStub({
+      apis: {
+        UserApi: {
+          getUidByUinV2,
+        },
+        FriendApi: {
+          isBuddy,
+        },
+        MsgApi: {
+          getAioFirstViewLatestMsgs,
+        },
+      },
+    }) as any);
+    const payload: Record<string, unknown> = {
+      user_id: '123456',
+    };
+
+    const response = await action.websocketHandle(payload as any, null, 'ws', { messagePostFormat: 'array' } as any);
+
+    expect(response.retcode).toBe(0);
+    expect(getAioFirstViewLatestMsgs).toHaveBeenCalledWith({
+      chatType: 1,
+      peerUid: 'u_123456',
+    }, 20);
+    expect(parseMessage).toHaveBeenCalledWith(
+      expect.objectContaining({ msgId: 'msg-1' }),
+      'array',
+      true,
+      false
+    );
+    expect(payload).toMatchObject({
+      count: 20,
+      reverse_order: false,
+      disable_get_url: false,
+      parse_mult_msg: true,
+      quick_reply: false,
+      reverseOrder: false,
+    });
+  });
+
+  test('set_group_add_request should inject default count and reason before notify lookup', async () => {
+    const notify = {
+      seq: 'flag-1',
+      type: 1,
+      group: {
+        groupCode: '123456',
+      },
+    };
+    const getSingleScreenNotifies = vi.fn().mockResolvedValue([notify]);
+    const handleGroupRequest = vi.fn().mockResolvedValue(undefined);
+    const action = new SetGroupAddRequest({
+      apis: {
+        MsgApi: {
+          notifyGroupInvite: new Map(),
+        },
+      },
+    } as any, createCoreStub({
+      apis: {
+        GroupApi: {
+          getSingleScreenNotifies,
+          handleGroupRequest,
+        },
+      },
+    }) as any);
+    const payload: Record<string, unknown> = {
+      flag: 'flag-1',
+    };
+
+    const response = await action.websocketHandle(payload as any, null, 'ws', {} as any);
+
+    expect(response.retcode).toBe(0);
+    expect(getSingleScreenNotifies).toHaveBeenCalledWith(false, 100);
+    expect(handleGroupRequest).toHaveBeenCalledWith(false, notify, 'agree', ' ');
+    expect(payload).toMatchObject({
+      count: 100,
+      reason: ' ',
+    });
   });
 
   test('set_group_leave should call quitGroup unless is_dismiss is truthy', async () => {

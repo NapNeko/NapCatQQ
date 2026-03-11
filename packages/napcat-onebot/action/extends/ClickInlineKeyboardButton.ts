@@ -34,16 +34,12 @@ export class ClickInlineKeyboardButton extends OneBotAction<PayloadType, ReturnT
   };
 
   async _handle (payload: PayloadType) {
-    const buttonId = payload.button_id ?? '';
-    const callbackData = payload.callback_data ?? '';
-    const msgSeq = payload.msg_seq ?? '10086';
-
     return await this.core.apis.MsgApi.clickInlineKeyboardButton({
-      buttonId,
+      buttonId: payload.button_id!,
       peerId: payload.group_id.toString(),
       botAppid: payload.bot_appid,
-      msgSeq,
-      callback_data: callbackData,
+      msgSeq: payload.msg_seq!,
+      callback_data: payload.callback_data!,
       dmFlag: 0,
       chatType: 2,
     });

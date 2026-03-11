@@ -37,11 +37,11 @@ export default class GoCQHTTPGetGroupMsgHistory extends OneBotAction<PayloadType
   override returnExample = GoCQHTTPActionsExamples.GetGroupMsgHistory.response;
 
   async _handle (payload: PayloadType, _adapter: string, config: NetworkAdapterConfig): Promise<ReturnType> {
-    const count = payload.count ?? 20;
-    const reverseOrder = (payload.reverse_order ?? false) || (payload.reverseOrder ?? false);
-    const parseMultMsg = payload.parse_mult_msg ?? true;
-    const disableGetUrl = payload.disable_get_url ?? false;
-    const quickReply = payload.quick_reply ?? false;
+    const count = payload.count!;
+    const reverseOrder = payload.reverse_order! || payload.reverseOrder!;
+    const parseMultMsg = payload.parse_mult_msg!;
+    const disableGetUrl = payload.disable_get_url!;
+    const quickReply = payload.quick_reply!;
     const peer: Peer = { chatType: ChatType.KCHATTYPEGROUP, peerUid: payload.group_id.toString() };
     const hasMessageSeq = !payload.message_seq ? !!payload.message_seq : !(payload.message_seq?.toString() === '' || payload.message_seq?.toString() === '0');
     // 拉取消息
