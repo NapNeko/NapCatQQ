@@ -1,16 +1,10 @@
 import { OneBotAction, OneBotRequestToolkit } from '../OneBotAction';
 import { NetworkAdapterConfig } from '@/napcat-onebot/config/config';
-export type StreamPacketBasic = {
-  type: StreamStatus;
-  data_type?: string;
-};
-export type StreamPacket<T> = T & StreamPacketBasic;
-export enum StreamStatus {
-  Stream = 'stream', // 分片流数据包
-  Response = 'response', // 流最终响应
-  Reset = 'reset', // 重置流
-  Error = 'error', // 流错误
-}
+import { StreamPacket } from './StreamTypes';
+
+export type { StreamPacketBasic, StreamPacket } from './StreamTypes';
+export { StreamStatus } from './StreamTypes';
+
 export abstract class BasicStream<T, R> extends OneBotAction<T, StreamPacket<R>> {
   abstract override _handle (_payload: T, _adaptername: string, _config: NetworkAdapterConfig, req: OneBotRequestToolkit): Promise<StreamPacket<R>>;
 }

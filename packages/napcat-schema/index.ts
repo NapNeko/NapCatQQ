@@ -21,6 +21,8 @@ interface ActionSchemaInfo {
   tags?: string[];
   payloadExample?: unknown;
   returnExample?: unknown;
+  supported?: boolean;
+  unsupportedReason?: string;
   errorExamples?: Array<{ code: number, description: string; }>;
 }
 
@@ -490,6 +492,8 @@ export function initSchemas () {
       tags: action.actionTags,
       payloadExample: action.payloadExample,
       returnExample: action.returnExample,
+      supported: action.supported,
+      unsupportedReason: action.unsupportedReason,
       errorExamples: action.errorExamples,
     };
   });
@@ -509,6 +513,8 @@ export function initSchemas () {
       tags: action.actionTags,
       payloadExample: action.payloadExample,
       returnExample: action.returnExample,
+      supported: action.supported,
+      unsupportedReason: action.unsupportedReason,
       errorExamples: action.errorExamples,
     };
   });
@@ -570,6 +576,23 @@ function createOpenAPIDocument (): Record<string, unknown> {
 }
 
 function buildResponseExamples (schemas: ActionSchemaInfo): Record<string, unknown> {
+  if (schemas.supported === false) {
+    const reason = schemas.unsupportedReason ?? '当前版本未实现该接口';
+    return {
+      Unsupported: {
+        summary: '未实现接口',
+        value: {
+          status: 'failed',
+          retcode: 200,
+          data: null,
+          message: reason,
+          wording: reason,
+          stream: 'normal-action',
+        },
+      },
+    };
+  }
+
   const successData = schemas.returnExample ?? {};
   const examples: Record<string, any> = {
     Success: isMeaninglessSuccessExampleData(successData)
@@ -632,13 +655,17 @@ function appendActionPaths (openapi: Record<string, unknown>) {
 
     paths[path] = {
       post: {
-        summary: schemas.summary || actionName,
-        deprecated: false,
-        description: schemas.description || '',
+        summary: schemas.supported === false ? `${schemas.summary || actionName} (未实现)` : (schemas.summary || actionName),
+        deprecated: schemas.supported === false,
+        description: schemas.unsupportedReason
+          ? `${schemas.description || ''}\n\n当前导出状态：未实现兼容接口，调用将返回业务错误。\n原因：${schemas.unsupportedReason}`.trim()
+          : (schemas.description || ''),
         tags: schemas.tags || [],
+        'x-supported': schemas.supported !== false,
+        ...(schemas.unsupportedReason ? { 'x-unsupported-reason': schemas.unsupportedReason } : {}),
         parameters: [],
         requestBody: {
-          description: 'API 参数',
+          description: schemas.supported === false ? '兼容占位接口参数；当前版本调用将返回业务错误' : 'API 参数',
           content: {
             'application/json': {
               schema: cleanPayload,

@@ -15,6 +15,12 @@ class SendGroupMsg extends SendMsgBase {
   protected override async check (payload: SendMsgPayload): Promise<BaseCheckResult> {
     delete payload.user_id;
     payload.message_type = 'group';
+    if (!payload.group_id) {
+      return {
+        valid: false,
+        message: '缺少参数 group_id',
+      };
+    }
     return super.check(payload);
   }
 

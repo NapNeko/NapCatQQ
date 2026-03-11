@@ -7,8 +7,8 @@ const PayloadSchema = Type.Object({
   message_id: Type.Union([Type.Number(), Type.String()], { description: '消息ID' }),
   emojiId: Type.Union([Type.Number(), Type.String()], { description: '表情ID' }),
   emojiType: Type.Union([Type.Number(), Type.String()], { description: '表情类型' }),
-  count: Type.Union([Type.Number(), Type.String()], { default: 20, description: '获取数量' }),
-  cookie: Type.String({ default: '', description: '分页Cookie' }),
+  count: Type.Optional(Type.Union([Type.Number(), Type.String()], { default: 20, description: '获取数量' })),
+  cookie: Type.Optional(Type.String({ default: '', description: '分页Cookie' })),
 });
 
 type PayloadType = Static<typeof PayloadSchema>;
@@ -64,7 +64,7 @@ export class FetchEmojiLike extends OneBotAction<PayloadType, ReturnType> {
     const msg = (await this.core.apis.MsgApi.getMsgsByMsgId(msgIdPeer.Peer, [msgIdPeer.MsgId])).msgList[0];
     if (!msg) throw new Error('消息不存在');
     const res = await this.core.apis.MsgApi.getMsgEmojiLikesList(
-      msgIdPeer.Peer, msg.msgSeq, payload.emojiId.toString(), payload.emojiType.toString(), payload.cookie, +payload.count
+      msgIdPeer.Peer, msg.msgSeq, payload.emojiId.toString(), payload.emojiType.toString(), payload.cookie!, +payload.count!
     );
     return res;
   }

@@ -4,9 +4,6 @@ import { Static, Type } from '@sinclair/typebox';
 
 export const SetDoubtFriendsAddRequestPayloadSchema = Type.Object({
   flag: Type.String({ description: '请求 flag' }),
-  // 注意强制String 非isNumeric 不遵守则不符合设计
-  approve: Type.Boolean({ default: true, description: '是否同意 (强制为 true)' }),
-  // 该字段没有语义 仅做保留 强制为True
 });
 
 export type SetDoubtFriendsAddRequestPayload = Static<typeof SetDoubtFriendsAddRequestPayloadSchema>;
@@ -16,11 +13,10 @@ export class SetDoubtFriendsAddRequest extends OneBotAction<SetDoubtFriendsAddRe
   override payloadSchema = SetDoubtFriendsAddRequestPayloadSchema;
   override returnSchema = Type.Any();
   override actionSummary = '处理可疑好友申请';
-  override actionDescription = '同意或拒绝系统的可疑好友申请';
+  override actionDescription = '同意并处理系统的可疑好友申请';
   override actionTags = ['系统接口'];
   override payloadExample = {
     flag: '12345',
-    approve: true,
   };
 
   override returnExample = null;

@@ -56,7 +56,7 @@ export const GoCQHTTPActionsExamples = {
     response: { files: [], folders: [] },
   },
   GetOnlineClient: {
-    payload: { no_cache: false },
+    payload: {},
     response: [],
   },
   GoCQHTTPCheckUrlSafely: {
@@ -69,11 +69,16 @@ export const GoCQHTTPActionsExamples = {
   },
   GoCQHTTPGetModelShow: {
     payload: { model: 'iPhone 13' },
-    response: { variants: [] },
+    response: [{
+      variants: {
+        model_show: 'napcat',
+        need_pay: false,
+      },
+    }],
   },
   GoCQHTTPSetModelShow: {
-    payload: { model: 'iPhone 13', model_show: 'iPhone 13' },
-    response: {},
+    payload: {},
+    response: null,
   },
   QuickAction: {
     payload: { context: {}, operation: {} },

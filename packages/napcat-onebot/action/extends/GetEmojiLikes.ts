@@ -9,7 +9,7 @@ const PayloadSchema = Type.Object({
   message_id: Type.String({ description: '消息ID，可以传递长ID或短ID' }),
   emoji_id: Type.String({ description: '表情ID' }),
   emoji_type: Type.Optional(Type.String({ description: '表情类型' })),
-  count: Type.Number({ default: 0, description: '数量，0代表全部' }),
+  count: Type.Optional(Type.Number({ default: 0, description: '数量，0代表全部' })),
 });
 type PayloadType = Static<typeof PayloadSchema>;
 
@@ -46,6 +46,7 @@ export class GetEmojiLikes extends OneBotAction<PayloadType, ReturnType> {
   override returnSchema = ReturnSchema;
 
   async _handle (payload: PayloadType) {
+    const count = payload.count!;
     let peer: Peer;
     let msgId: string;
 
@@ -66,7 +67,7 @@ export class GetEmojiLikes extends OneBotAction<PayloadType, ReturnType> {
     const emojiType = payload.emoji_type ?? (payload.emoji_id.length > 3 ? '2' : '1');
     const emojiLikeList: Array<{ user_id: string; nick_name: string; }> = [];
     let cookie = '';
-    const needFetchCount = payload.count === 0 ? 200 : Math.ceil(payload.count / 15);
+    const needFetchCount = count === 0 ? 200 : Math.ceil(count / 15);
     for (let page = 0; page < needFetchCount; page++) {
       const res = await this.core.apis.MsgApi.getMsgEmojiLikesList(
         peer, msg.msgSeq, payload.emoji_id.toString(), emojiType, cookie, 15
@@ -82,8 +83,8 @@ export class GetEmojiLikes extends OneBotAction<PayloadType, ReturnType> {
       cookie = res.cookie;
     }
     // 切断多余部分
-    if (payload.count > 0) {
-      emojiLikeList.splice(payload.count);
+    if (count > 0) {
+      emojiLikeList.splice(count);
     }
     return { emoji_like_list: emojiLikeList };
   }

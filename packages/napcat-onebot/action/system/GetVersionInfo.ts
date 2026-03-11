@@ -3,6 +3,10 @@ import { ActionName } from '@/napcat-onebot/action/router';
 import { napCatVersion } from 'napcat-common/src/version';
 import { Type, Static } from '@sinclair/typebox';
 
+const PayloadSchema = Type.Object({});
+
+type PayloadType = Static<typeof PayloadSchema>;
+
 const ReturnSchema = Type.Object({
   app_name: Type.String({ description: '应用名称' }),
   protocol_version: Type.String({ description: '协议版本' }),
@@ -11,8 +15,9 @@ const ReturnSchema = Type.Object({
 
 type ReturnType = Static<typeof ReturnSchema>;
 
-export default class GetVersionInfo extends OneBotAction<void, ReturnType> {
+export default class GetVersionInfo extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.GetVersionInfo;
+  override payloadSchema = PayloadSchema;
   override returnSchema = ReturnSchema;
   override actionSummary = '获取版本信息';
   override actionDescription = '获取版本信息';

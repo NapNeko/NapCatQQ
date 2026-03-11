@@ -15,6 +15,7 @@ type PayloadType = Static<typeof PayloadSchema>;
 const ReturnSchema = Type.Null({ description: '操作结果' });
 
 type ReturnType = Static<typeof ReturnSchema>;
+const EmptyPayloadSchema = Type.Object({});
 
 class MarkMsgAsRead extends OneBotAction<PayloadType, ReturnType> {
   override actionSummary = '标记消息已读';
@@ -82,8 +83,10 @@ export class GoCQHTTPMarkMsgAsRead extends MarkMsgAsRead {
   override actionSummary = '标记消息已读 (Go-CQHTTP)';
 }
 
-export class MarkAllMsgAsRead extends OneBotAction<void, null> {
+export class MarkAllMsgAsRead extends OneBotAction<Static<typeof EmptyPayloadSchema>, null> {
   override actionName = ActionName._MarkAllMsgAsRead;
+  override payloadSchema = EmptyPayloadSchema;
+  override returnSchema = ReturnSchema;
   override actionSummary = '标记所有消息已读';
   override actionTags = ['消息接口'];
   override payloadExample = {};

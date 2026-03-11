@@ -9,11 +9,11 @@ export const SendGroupNoticePayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
   content: Type.String({ description: '公告内容' }),
   image: Type.Optional(Type.String({ description: '公告图片路径或 URL' })),
-  pinned: Type.Union([Type.Number(), Type.String()], { default: 0, description: '是否置顶 (0/1)' }),
-  type: Type.Union([Type.Number(), Type.String()], { default: 1, description: '类型 (默认为 1)' }),
-  confirm_required: Type.Union([Type.Number(), Type.String()], { default: 1, description: '是否需要确认 (0/1)' }),
-  is_show_edit_card: Type.Union([Type.Number(), Type.String()], { default: 0, description: '是否显示修改群名片引导 (0/1)' }),
-  tip_window_type: Type.Union([Type.Number(), Type.String()], { default: 0, description: '弹窗类型 (默认为 0)' }),
+  pinned: Type.Optional(Type.Union([Type.Number(), Type.String()], { default: 0, description: '是否置顶 (0/1)' })),
+  type: Type.Optional(Type.Union([Type.Number(), Type.String()], { default: 1, description: '类型 (默认为 1)' })),
+  confirm_required: Type.Optional(Type.Union([Type.Number(), Type.String()], { default: 1, description: '是否需要确认 (0/1)' })),
+  is_show_edit_card: Type.Optional(Type.Union([Type.Number(), Type.String()], { default: 0, description: '是否显示修改群名片引导 (0/1)' })),
+  tip_window_type: Type.Optional(Type.Union([Type.Number(), Type.String()], { default: 0, description: '弹窗类型 (默认为 0)' })),
 });
 
 export type SendGroupNoticePayload = Static<typeof SendGroupNoticePayloadSchema>;
@@ -29,6 +29,11 @@ export class SendGroupNotice extends OneBotAction<SendGroupNoticePayload, void> 
   override returnExample = GoCQHTTPActionsExamples.SendGroupNotice.response;
 
   async _handle (payload: SendGroupNoticePayload) {
+    const pinned = payload.pinned!;
+    const type = payload.type!;
+    const confirmRequired = payload.confirm_required!;
+    const showEditCard = payload.is_show_edit_card!;
+    const tipWindowType = payload.tip_window_type!;
     let UploadImage: { id: string, width: number, height: number; } | undefined;
     if (payload.image) {
       // 公告图逻辑
@@ -55,11 +60,11 @@ export class SendGroupNotice extends OneBotAction<SendGroupNoticePayload, void> 
     const publishGroupBulletinResult = await this.core.apis.WebApi.setGroupNotice(
       payload.group_id.toString(),
       payload.content,
-      +payload.pinned,
-      +payload.type,
-      +payload.is_show_edit_card,
-      +payload.tip_window_type,
-      +payload.confirm_required,
+      +pinned,
+      +type,
+      +showEditCard,
+      +tipWindowType,
+      +confirmRequired,
       UploadImage?.id,
       UploadImage?.width,
       UploadImage?.height

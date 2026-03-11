@@ -4,8 +4,8 @@ import { Static, Type } from '@sinclair/typebox';
 
 const PayloadSchema = Type.Object({
   face_id: Type.Union([Type.Number(), Type.String()], { description: '图标ID' }), // 参考 face_config.json 的 QSid
-  face_type: Type.Union([Type.Number(), Type.String()], { default: '1', description: '图标类型' }),
-  wording: Type.String({ default: ' ', description: '状态文字内容' }),
+  face_type: Type.Optional(Type.Union([Type.Number(), Type.String()], { default: '1', description: '图标类型' })),
+  wording: Type.Optional(Type.String({ default: ' ', description: '状态文字内容' })),
 });
 
 type PayloadType = Static<typeof PayloadSchema>;
@@ -30,8 +30,8 @@ export class SetDiyOnlineStatus extends OneBotAction<PayloadType, ReturnType> {
   async _handle (payload: PayloadType) {
     const ret = await this.core.apis.UserApi.setDiySelfOnlineStatus(
       payload.face_id.toString(),
-      payload.wording,
-      payload.face_type.toString()
+      payload.wording!,
+      payload.face_type!.toString()
     );
     if (ret.result !== 0) {
       throw new Error('设置在线状态失败');

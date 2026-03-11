@@ -1,14 +1,34 @@
-import { OB11MessageMixType } from '@/napcat-onebot/types';
-import { ContextMode, normalize, ReturnDataType, SendMsgBase, SendMsgPayload } from '@/napcat-onebot/action/msg/SendMsg';
+import type { OB11MessageMixType } from '@/napcat-onebot/types';
+import {
+  ContextMode,
+  normalize,
+  ReturnDataType,
+  SendMsgBase,
+  SendMsgPayload,
+  SendMsgPayloadSchema,
+} from '@/napcat-onebot/action/msg/SendMsg';
 import { ActionName } from '@/napcat-onebot/action/router';
+import type { BaseCheckResult } from '@/napcat-onebot/action/router';
+import { OB11MessageMixTypeSchema } from '@/napcat-onebot/types/message';
+import { Static, Type } from '@sinclair/typebox';
 
-// 未验证
-type GoCQHTTPSendForwardMsgPayload = SendMsgPayload & { messages?: OB11MessageMixType; };
+const GoCQHTTPSendForwardPayloadSchema = Type.Intersect([
+  Type.Omit(SendMsgPayloadSchema, ['message']),
+  Type.Object({
+    messages: OB11MessageMixTypeSchema,
+  }),
+]);
+
+type GoCQHTTPSendForwardMsgPayload = Static<typeof GoCQHTTPSendForwardPayloadSchema> & {
+  message?: OB11MessageMixType;
+};
 
 export class GoCQHTTPSendForwardMsgBase extends SendMsgBase {
-  protected override async check (payload: GoCQHTTPSendForwardMsgPayload) {
-    if (payload.messages) payload.message = normalize(payload.messages);
-    return super.check(payload);
+  override payloadSchema = GoCQHTTPSendForwardPayloadSchema;
+
+  protected override getMessageForCheck (payload: SendMsgPayload): OB11MessageMixType {
+    const forwardPayload = payload as SendMsgPayload & GoCQHTTPSendForwardMsgPayload;
+    return normalize(forwardPayload.messages);
   }
 }
 export class GoCQHTTPSendForwardMsg extends GoCQHTTPSendForwardMsgBase {
@@ -24,11 +44,6 @@ export class GoCQHTTPSendForwardMsg extends GoCQHTTPSendForwardMsgBase {
   override returnExample = {
     message_id: 123456,
   };
-
-  protected override async check (payload: GoCQHTTPSendForwardMsgPayload) {
-    if (payload.messages) payload.message = normalize(payload.messages);
-    return super.check(payload);
-  }
 }
 export class GoCQHTTPSendPrivateForwardMsg extends GoCQHTTPSendForwardMsgBase {
   override actionName = ActionName.GoCQHTTP_SendPrivateForwardMsg;
@@ -43,7 +58,18 @@ export class GoCQHTTPSendPrivateForwardMsg extends GoCQHTTPSendForwardMsgBase {
     message_id: 123456,
   };
 
-  override async _handle (payload: GoCQHTTPSendForwardMsgPayload): Promise<ReturnDataType> {
+  protected override async check (payload: SendMsgPayload): Promise<BaseCheckResult> {
+    payload.message_type = 'private';
+    if (!payload.user_id) {
+      return {
+        valid: false,
+        message: '缺少参数 user_id',
+      };
+    }
+    return super.check(payload);
+  }
+
+  override async _handle (payload: SendMsgPayload): Promise<ReturnDataType> {
     return this.base_handle(payload, ContextMode.Private);
   }
 }
@@ -61,7 +87,18 @@ export class GoCQHTTPSendGroupForwardMsg extends GoCQHTTPSendForwardMsgBase {
     message_id: 123456,
   };
 
-  override async _handle (payload: GoCQHTTPSendForwardMsgPayload): Promise<ReturnDataType> {
+  protected override async check (payload: SendMsgPayload): Promise<BaseCheckResult> {
+    payload.message_type = 'group';
+    if (!payload.group_id) {
+      return {
+        valid: false,
+        message: '缺少参数 group_id',
+      };
+    }
+    return super.check(payload);
+  }
+
+  override async _handle (payload: SendMsgPayload): Promise<ReturnDataType> {
     return this.base_handle(payload, ContextMode.Group);
   }
 }

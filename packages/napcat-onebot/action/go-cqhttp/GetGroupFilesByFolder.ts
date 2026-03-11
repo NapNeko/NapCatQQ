@@ -8,7 +8,7 @@ const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
   folder_id: Type.Optional(Type.String({ description: '文件夹ID' })),
   folder: Type.Optional(Type.String({ description: '文件夹ID' })),
-  file_count: Type.Union([Type.Number(), Type.String()], { default: 50, description: '文件数量' }),
+  file_count: Type.Optional(Type.Union([Type.Number(), Type.String()], { default: 50, description: '文件数量' })),
 });
 
 type PayloadType = Static<typeof PayloadSchema>;
@@ -33,7 +33,7 @@ export class GetGroupFilesByFolder extends OneBotAction<PayloadType, ReturnType>
   async _handle (payload: PayloadType): Promise<ReturnType> {
     const retRaw = await this.core.apis.MsgApi.getGroupFileList(payload.group_id.toString(), {
       sortType: 1,
-      fileCount: +payload.file_count,
+      fileCount: +payload.file_count!,
       startIndex: 0,
       sortOrder: 2,
       showOnlinedocFolder: 0,
