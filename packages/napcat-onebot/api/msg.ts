@@ -89,6 +89,8 @@ function keyCanBeParsed (key: string, parser: RawToOb11Converters): key is keyof
 export class OneBotMsgApi {
   obContext: NapCatOneBot11Adapter;
   core: NapCatCore;
+  // 自适应上传带宽预估（字节/秒），初始设为 256KB/s，用于计算图片等大文件的发送超时时间
+  private adaptiveBandwidth = 256 * 1024;
   notifyGroupInvite: LRUCache<string, GroupNotify> = new LRUCache(50);
   // seq -> notify
   rawToOb11Converters: RawToOb11Converters = {
@@ -1270,16 +1272,38 @@ export class OneBotMsgApi {
       return 0;
     });
 
-    const timeout = 10000 + (totalSize / 1024 / 256 * 1000);
+    // 根据当前预估带宽计算预计耗时
+    const estimatedTimeMs = (totalSize / this.adaptiveBandwidth) * 1000;
+    // 最终超时时间 = 基础 10 秒 + 预计耗时（再加 20% 的容错余量）
+    const timeout = 10000 + estimatedTimeMs * 1.2;
+    const startTime = Date.now();
     try {
       const returnMsg = await this.core.apis.MsgApi.sendMsg(peer, sendElements, timeout);
       if (!returnMsg) throw new Error('发送消息失败');
+
+      const elapsed = Date.now() - startTime;
+      // 如果发送成功且耗时超过 1 秒，则根据本次实际表现更新带宽预估
+      if (totalSize > 0 && elapsed > 1000) {
+        const actualSpeed = totalSize / (elapsed / 1000);
+        // 使用平滑加权算法：90% 保留旧数据，10% 采用新数据，避免单次波动影响太大
+        this.adaptiveBandwidth = this.adaptiveBandwidth * 0.9 + actualSpeed * 0.1;
+        // 限制带宽预估范围在 64KB/s 到 2MB/s 之间，防止数值异常
+        this.adaptiveBandwidth = Math.max(64 * 1024, Math.min(this.adaptiveBandwidth, 2 * 1024 * 1024));
+      }
+
       returnMsg.id = MessageUnique.createUniqueMsgId({
         chatType: peer.chatType,
         guildId: '',
         peerUid: peer.peerUid,
       }, returnMsg.msgId);
       return returnMsg;
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message.includes('Timeout')) {
+        // 如果发生超时，说明当前预估太乐观，将带宽预估下调 30%
+        this.adaptiveBandwidth = Math.max(64 * 1024, this.adaptiveBandwidth * 0.7);
+        this.core.context.logger.logWarn(`[OneBot] 消息发送超时，已将预估上传速度调低至: ${Math.round(this.adaptiveBandwidth / 1024)} KB/s`);
+      }
+      throw error;
     } finally {
       cleanTaskQueue.addFiles(deleteAfterSentFiles, timeout);
       // setTimeout(async () => {
