@@ -57,11 +57,11 @@ export const GoCQHTTPActionsExamples = {
   },
   GetOnlineClient: {
     payload: {},
-    response: null,
+    response: [],
   },
   GoCQHTTPCheckUrlSafely: {
     payload: { url: 'https://example.com' },
-    response: null,
+    response: { level: 1 },
   },
   GoCQHTTPDeleteFriend: {
     payload: { user_id: '123456789' },

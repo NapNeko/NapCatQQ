@@ -9,7 +9,9 @@ export const GoCQHTTPCheckUrlSafelyPayloadSchema = Type.Object({
 
 export type GoCQHTTPCheckUrlSafelyPayload = Static<typeof GoCQHTTPCheckUrlSafelyPayloadSchema>;
 
-export const GoCQHTTPCheckUrlSafelyReturnSchema = Type.Null({ description: '当前版本未实现该兼容接口' });
+export const GoCQHTTPCheckUrlSafelyReturnSchema = Type.Object({
+  level: Type.Number({ description: '安全等级 (1: 安全, 2: 未知, 3: 危险)' }),
+});
 
 export type GoCQHTTPCheckUrlSafelyReturn = Static<typeof GoCQHTTPCheckUrlSafelyReturnSchema>;
 
@@ -18,14 +20,12 @@ export class GoCQHTTPCheckUrlSafely extends OneBotAction<GoCQHTTPCheckUrlSafelyP
   override payloadSchema = GoCQHTTPCheckUrlSafelyPayloadSchema;
   override returnSchema = GoCQHTTPCheckUrlSafelyReturnSchema;
   override actionSummary = '检查URL安全性';
-  override actionDescription = '兼容接口，当前版本未实现 check_url_safely';
+  override actionDescription = '检查指定URL的安全等级；当前兼容实现固定返回安全等级 1';
   override actionTags = ['Go-CQHTTP'];
   override payloadExample = GoCQHTTPActionsExamples.GoCQHTTPCheckUrlSafely.payload;
-  override returnExample = null;
-  override supported = false;
-  override unsupportedReason = '当前版本未实现 check_url_safely';
+  override returnExample = GoCQHTTPActionsExamples.GoCQHTTPCheckUrlSafely.response;
 
-  async _handle (): Promise<null> {
-    throw new Error('当前版本未实现 check_url_safely');
+  async _handle (): Promise<GoCQHTTPCheckUrlSafelyReturn> {
+    return { level: 1 };
   }
 }

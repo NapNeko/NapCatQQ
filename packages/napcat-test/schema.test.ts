@@ -258,8 +258,8 @@ describe('NapCat Action Metadata', () => {
     }]);
   });
 
-  test('should mark unsupported compatibility actions in exported metadata', () => {
-    const unsupportedActions = [
+  test('should keep compatibility placeholder metadata aligned with runtime responses', () => {
+    const compatibilityActions = [
       createAction(GoCQHTTPCheckUrlSafely),
       createAction(GetOnlineClient),
       createAction(GoCQHTTPSetModelShow),
@@ -267,20 +267,24 @@ describe('NapCat Action Metadata', () => {
       createAction(GetGuildProfile),
     ];
 
-    for (const action of unsupportedActions) {
-      expect((action as any).supported).toBe(false);
-      expect((action as any).unsupportedReason).toContain('未实现');
-      expect((action as any).returnExample).toBeNull();
-      expect((action as any).returnSchema).toMatchObject({ type: 'null' });
+    for (const action of compatibilityActions) {
+      expect((action as any).supported).toBe(true);
+      expect((action as any).unsupportedReason).toBeUndefined();
     }
 
     expect(GoCQHTTPActionsExamples.GetOnlineClient.payload).toEqual({});
-    expect(GoCQHTTPActionsExamples.GetOnlineClient.response).toBeNull();
-    expect(GoCQHTTPActionsExamples.GoCQHTTPCheckUrlSafely.response).toBeNull();
+    expect(GoCQHTTPActionsExamples.GetOnlineClient.response).toEqual([]);
+    expect(GoCQHTTPActionsExamples.GoCQHTTPCheckUrlSafely.response).toEqual({ level: 1 });
     expect(GoCQHTTPActionsExamples.GoCQHTTPSetModelShow.payload).toEqual({});
-    expect(GoCQHTTPActionsExamples.GoCQHTTPSetModelShow.response).toBeNull();
+    expect(GoCQHTTPActionsExamples.GoCQHTTPSetModelShow.response).toEqual(null);
     expect(GuildActionsExamples.GetGuildList).toEqual({ payload: {}, response: null });
     expect(GuildActionsExamples.GetGuildProfile).toEqual({ payload: {}, response: null });
+
+    expect((createAction(GetOnlineClient) as any).returnSchema).toMatchObject({ type: 'array' });
+    expect((createAction(GoCQHTTPCheckUrlSafely) as any).returnExample).toEqual({ level: 1 });
+    expect((createAction(GoCQHTTPSetModelShow) as any).returnSchema).toMatchObject({ type: 'null' });
+    expect((createAction(GetGuildList) as any).returnSchema).toMatchObject({ type: 'null' });
+    expect((createAction(GetGuildProfile) as any).returnSchema).toMatchObject({ type: 'null' });
   });
 
   test('should add explicit empty payload schemas to no-arg actions', () => {

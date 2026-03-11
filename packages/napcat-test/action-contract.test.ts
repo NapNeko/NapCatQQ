@@ -1,7 +1,12 @@
 import { describe, expect, test, vi } from 'vitest';
 
+import { GetOnlineClient } from '../napcat-onebot/action/go-cqhttp/GetOnlineClient';
+import { GoCQHTTPCheckUrlSafely } from '../napcat-onebot/action/go-cqhttp/GoCQHTTPCheckUrlSafely';
+import { GoCQHTTPSetModelShow } from '../napcat-onebot/action/go-cqhttp/GoCQHTTPSetModelShow';
 import { GoCQHTTPSendForwardMsgBase } from '../napcat-onebot/action/go-cqhttp/SendForwardMsg';
 import SendGroupMsg from '../napcat-onebot/action/group/SendGroupMsg';
+import { GetGuildList } from '../napcat-onebot/action/guild/GetGuildList';
+import { GetGuildProfile } from '../napcat-onebot/action/guild/GetGuildProfile';
 import SetGroupLeave from '../napcat-onebot/action/group/SetGroupLeave';
 import SendPrivateMsg from '../napcat-onebot/action/msg/SendPrivateMsg';
 
@@ -148,6 +153,42 @@ describe('NapCat Action Contracts', () => {
     }]);
   });
 
+  test('send_forward_msg should normalize nested reference node ids recursively', async () => {
+    const action = new ForwardMessagesOnlyAction({} as any, createCoreStub() as any);
+    const payload: Record<string, unknown> = {
+      group_id: '123456',
+      messages: [{
+        type: 'node',
+        data: {
+          nickname: 'outer',
+          content: [{
+            type: 'node',
+            data: {
+              id: 654321,
+            },
+          }],
+        },
+      }],
+    };
+
+    const response = await action.websocketHandle(payload as any, null, 'ws', {} as any);
+
+    expect(response.retcode).toBe(0);
+    expect(payload['message']).toEqual([{
+      type: 'node',
+      data: {
+        nickname: 'outer',
+        content: [{
+          type: 'node',
+          data: {
+            id: '654321',
+          },
+        }],
+      },
+    }]);
+    expect((response.data as any).normalized_message).toEqual(payload['message']);
+  });
+
   test('send_forward_msg should fail mixed node payloads during check before _handle', async () => {
     const action = new ForwardMixedNodeAction({} as any, createCoreStub() as any);
 
@@ -180,5 +221,34 @@ describe('NapCat Action Contracts', () => {
 
     await action._handle({ group_id: '123456', is_dismiss: 'true' } as any);
     expect(destroyGroup).toHaveBeenCalledWith('123456');
+  });
+
+  test('compatibility actions should keep returning successful placeholder responses', async () => {
+    const getOnlineClient = new GetOnlineClient({} as any, createCoreStub() as any);
+    const checkUrlSafely = new GoCQHTTPCheckUrlSafely({} as any, createCoreStub() as any);
+    const setModelShow = new GoCQHTTPSetModelShow({} as any, createCoreStub() as any);
+    const getGuildList = new GetGuildList({} as any, createCoreStub() as any);
+    const getGuildProfile = new GetGuildProfile({} as any, createCoreStub() as any);
+
+    await expect(getOnlineClient.websocketHandle({} as any, null, 'ws', {} as any)).resolves.toMatchObject({
+      retcode: 0,
+      data: [],
+    });
+    await expect(checkUrlSafely.websocketHandle({ url: 'https://example.com' } as any, null, 'ws', {} as any)).resolves.toMatchObject({
+      retcode: 0,
+      data: { level: 1 },
+    });
+    await expect(setModelShow.websocketHandle({} as any, null, 'ws', {} as any)).resolves.toMatchObject({
+      retcode: 0,
+      data: null,
+    });
+    await expect(getGuildList.websocketHandle({} as any, null, 'ws', {} as any)).resolves.toMatchObject({
+      retcode: 0,
+      data: null,
+    });
+    await expect(getGuildProfile.websocketHandle({} as any, null, 'ws', {} as any)).resolves.toMatchObject({
+      retcode: 0,
+      data: null,
+    });
   });
 });

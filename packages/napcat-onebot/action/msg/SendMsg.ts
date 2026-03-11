@@ -51,15 +51,43 @@ export enum ContextMode {
   Group = 2,
 }
 
+function normalizeMessageSegments (messages: OB11MessageData[]): OB11MessageData[] {
+  return messages.map((message) => {
+    if (message.type !== OB11MessageDataType.node) {
+      return message;
+    }
+
+    if ('id' in message.data) {
+      return {
+        ...message,
+        data: {
+          ...message.data,
+          id: message.data.id.toString(),
+        },
+      };
+    }
+
+    return {
+      ...message,
+      data: {
+        ...message.data,
+        content: normalize((message.data.content ?? []) as OB11MessageMixType),
+      },
+    };
+  });
+}
+
 // Normalizes a mixed type (CQCode/a single segment/segment array) into a segment array.
 export function normalize (message: OB11MessageMixType, autoEscape = false): OB11MessageData[] {
-  return typeof message === 'string'
+  const normalized: OB11MessageData[] = typeof message === 'string'
     ? (
       autoEscape
-        ? [{ type: OB11MessageDataType.text, data: { text: message } }]
+        ? [{ type: OB11MessageDataType.text, data: { text: message } } as OB11MessageData]
         : decodeCQCode(message)
     )
     : Array.isArray(message) ? message : [message];
+
+  return normalizeMessageSegments(normalized);
 }
 
 export async function createContext (core: NapCatCore, payload: OB11PostContext | undefined, contextMode: ContextMode = ContextMode.Normal): Promise<Peer> {
