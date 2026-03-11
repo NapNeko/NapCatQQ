@@ -288,7 +288,7 @@ export const OB11MessageNodeInlineSchema = Type.Object({
   data: Type.Object({
     user_id: Type.Optional(Type.Union([Type.Number(), Type.String()], { description: '发送者QQ号' })),
     uin: Type.Optional(Type.Union([Type.Number(), Type.String()], { description: '发送者QQ号(兼容go-cqhttp)' })),
-    nickname: Type.Optional(Type.String({ description: '发送者昵称' })),
+    nickname: Type.String({ description: '发送者昵称' }),
     name: Type.Optional(Type.String({ description: '发送者昵称(兼容go-cqhttp)' })),
     // content 使用 Any 以支持循环引用，实际类型是 OB11MessageMixType
     content: Type.Any({ description: '消息内容 (OB11MessageMixType)' }),

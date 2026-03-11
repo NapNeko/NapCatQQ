@@ -170,22 +170,6 @@ describe('NapCat Schemas Validation & Coercion', () => {
     expect(compiler.Check(payload)).toBe(false);
   });
 
-  test('should accept inline forward nodes with name but without nickname', () => {
-    const payload = {
-      type: 'node',
-      data: {
-        name: 'QQ用户',
-        content: [{ type: 'text', data: { text: 'hello' } }],
-      },
-    };
-
-    let data: unknown = structuredClone(payload);
-    data = Value.Parse(OB11MessageNodeSchema, data);
-
-    const compiler = TypeCompiler.Compile(OB11MessageNodeSchema);
-    expect(compiler.Check(data)).toBe(true);
-  });
-
   test('should accept inline forward nodes with numeric time', () => {
     const payload = {
       type: 'node',
