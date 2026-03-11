@@ -426,7 +426,14 @@ describe('NapCat Action Contracts', () => {
   });
 
   test('compatibility actions should keep returning successful placeholder responses', async () => {
-    const getOnlineClient = new GetOnlineClient({} as any, createCoreStub() as any);
+    const getOnlineDev = vi.fn();
+    const getOnlineClient = new GetOnlineClient({} as any, createCoreStub({
+      apis: {
+        SystemApi: {
+          getOnlineDev,
+        },
+      },
+    }) as any);
     const checkUrlSafely = new GoCQHTTPCheckUrlSafely({} as any, createCoreStub() as any);
     const setModelShow = new GoCQHTTPSetModelShow({} as any, createCoreStub() as any);
     const getGuildList = new GetGuildList({} as any, createCoreStub() as any);
@@ -436,6 +443,7 @@ describe('NapCat Action Contracts', () => {
       retcode: 0,
       data: [],
     });
+    expect(getOnlineDev).toHaveBeenCalled();
     await expect(checkUrlSafely.websocketHandle({ url: 'https://example.com' } as any, null, 'ws', {} as any)).resolves.toMatchObject({
       retcode: 0,
       data: { level: 1 },

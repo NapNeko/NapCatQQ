@@ -1,5 +1,6 @@
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
+import { sleep } from 'napcat-common/src/helper';
 import { Static, Type } from '@sinclair/typebox';
 import { GoCQHTTPActionsExamples } from '../example/GoCQHTTPActionsExamples';
 
@@ -22,7 +23,8 @@ export class GetOnlineClient extends OneBotAction<PayloadType, ReturnType> {
   override returnExample = GoCQHTTPActionsExamples.GetOnlineClient.response;
 
   async _handle (): Promise<ReturnType> {
-    this.core.apis.SystemApi?.getOnlineDev?.();
+    this.core.apis.SystemApi.getOnlineDev();
+    await sleep(500);
     return [];
   }
 }
