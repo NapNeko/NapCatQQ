@@ -120,35 +120,48 @@ const WebUIConfigCard = () => {
       </div>
       <div className='flex flex-col gap-2'>
         <div className='flex-shrink-0 w-full font-bold text-default-600 dark:text-default-400 px-1'>Passkey认证</div>
-        <div className='text-sm text-default-400 mb-2'>
-          注册Passkey后，您可以更便捷地登录WebUI，无需每次输入token
-        </div>
-        <div className='flex gap-2'>
-          <Button
-            color='secondary'
-            variant='flat'
-            onPress={preloadRegistrationOptions}
-            isLoading={isLoadingOptions}
-            className='w-fit'
-          >
-            {!isLoadingOptions}
-            准备选项
-          </Button>
-          <Button
-            color='primary'
-            variant='flat'
-            onPress={() => {
-              // 必须在用户手势的同步上下文中立即调用WebAuthn API
-              if (!registrationOptions) {
-                toast.error('请先点击"准备选项"按钮获取注册选项');
-                return;
-              }
+        
+        {!window.isSecureContext ? (
+          <div className='text-sm text-warning-500 bg-warning-50 p-2 rounded-md border border-warning-200'>
+            ⚠️ 当前处于非安全环境（即既非 HTTPS 也非 localhost），浏览器已禁用 WebAuthn 功能。<br/>
+            如果您是通过局域网 IP 访问 WebUI，将无法注册和使用 Passkey。
+          </div>
+        ) : (
+          <>
+            <div className='text-sm text-default-400 mb-2'>
+              注册Passkey后，您可以更便捷地登录WebUI，无需每次输入token
+            </div>
+            <div className='flex gap-2'>
+              <Button
+                color='secondary'
+                variant='flat'
+                onPress={preloadRegistrationOptions}
+                isLoading={isLoadingOptions}
+                className='w-fit'
+              >
+                {!isLoadingOptions}
+                准备选项
+              </Button>
+              <Button
+                color='primary'
+                variant='flat'
+                onPress={() => {
+                  // 必须在用户手势的同步上下文中立即调用WebAuthn API
+                  if (!registrationOptions) {
+                    toast.error('请先点击"准备选项"按钮获取注册选项');
+                    return;
+                  }
 
-              console.log('开始Passkey注册...');
-              console.log('使用预先获取的选项:', registrationOptions);
+                  console.log('开始Passkey注册...');
+                  console.log('使用预先获取的选项:', registrationOptions);
 
-              // 立即调用WebAuthn API，不要用async/await
-              navigator.credentials.create({
+                  if (!navigator.credentials || !navigator.credentials.create) {
+                    toast.error('当前浏览器环境不支持 Passkey 注册。');
+                    return;
+                  }
+
+                  // 立即调用WebAuthn API，不要用async/await
+                  navigator.credentials.create({
                 publicKey: {
                   challenge: base64UrlToUint8Array(registrationOptions.challenge) as BufferSource,
                   rp: {
@@ -232,6 +245,8 @@ const WebUIConfigCard = () => {
           <div className='text-xs text-green-600'>
             注册选项已准备就绪，可以开始注册
           </div>
+        )}
+          </>
         )}
       </div>
       <SaveButtons

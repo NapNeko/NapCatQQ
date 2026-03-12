@@ -48,6 +48,10 @@ export default function WebLoginPage () {
 
   // 自动检查并尝试passkey登录
   const tryPasskeyLogin = async () => {
+    if (!navigator.credentials || !navigator.credentials.get) {
+      // toast.error('当前浏览器/环境不支持 Passkey 登录。');
+      return;
+    }
     try {
       // 检查是否有passkey
       const options = await WebUIManager.generatePasskeyAuthenticationOptions();
