@@ -33,6 +33,7 @@ export const SendMsgPayloadSchema = Type.Object({
   news: Type.Optional(Type.Array(Type.Object({ text: Type.String() }), { description: '合并转发新闻' })),
   summary: Type.Optional(Type.String({ description: '合并转发摘要' })),
   prompt: Type.Optional(Type.String({ description: '合并转发提示' })),
+  timeout: Type.Optional(Type.Number({ description: '自定义发送超时(毫秒)，覆盖自动计算值' })),
 });
 
 export type SendMsgPayload = Static<typeof SendMsgPayloadSchema>;
@@ -245,7 +246,7 @@ export class SendMsgBase extends OneBotAction<SendMsgPayload, ReturnDataType> {
 
     const { sendElements, deleteAfterSentFiles } = await this.obContext.apis.MsgApi
       .createSendElements(messages, peer);
-    const returnMsg = await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(peer, sendElements, deleteAfterSentFiles);
+    const returnMsg = await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(peer, sendElements, deleteAfterSentFiles, payload.timeout);
     return { message_id: returnMsg.id! };
   }
 

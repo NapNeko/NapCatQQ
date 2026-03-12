@@ -78,12 +78,20 @@ const NetworkConfigSchema = Type.Object({
   plugins: Type.Array(PluginConfigSchema, { default: [] }),
 }, { default: {} });
 
+const TimeoutConfigSchema = Type.Object({
+  baseTimeout: Type.Number({ default: 10000 }),
+  uploadSpeedKBps: Type.Number({ default: 256 }),
+  downloadSpeedKBps: Type.Number({ default: 256 }),
+  maxTimeout: Type.Number({ default: 1800000 }),
+}, { default: {} });
+
 export const OneBotConfigSchema = Type.Object({
   network: NetworkConfigSchema,
   musicSignUrl: Type.String({ default: '' }),
   enableLocalFile2Url: Type.Boolean({ default: false }),
   parseMultMsg: Type.Boolean({ default: false }),
   imageDownloadProxy: Type.String({ default: '' }),
+  timeout: TimeoutConfigSchema,
 });
 
 export type OneBotConfig = Static<typeof OneBotConfigSchema>;
@@ -107,4 +115,22 @@ export function loadConfig (config: Partial<OneBotConfig>): OneBotConfig {
     throw new Error(errorMsg);
   }
   return data as OneBotConfig;
+}
+
+export function calculateTimeout (
+  config: OneBotConfig['timeout'],
+  dataSizeBytes: number,
+  speedKBps: number
+): number {
+  return Math.min(
+    config.baseTimeout + (dataSizeBytes / 1024 / Math.max(speedKBps, 1) * 1000),
+    config.maxTimeout
+  );
+}
+
+export function capTimeout (
+  config: OneBotConfig['timeout'],
+  timeoutMs: number
+): number {
+  return Math.min(timeoutMs, config.maxTimeout);
 }

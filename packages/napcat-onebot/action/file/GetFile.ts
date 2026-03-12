@@ -4,6 +4,7 @@ import { FileNapCatOneBotUUID } from 'napcat-common/src/file-uuid';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { OB11MessageImage, OB11MessageVideo } from '@/napcat-onebot/types';
 import { Static, Type } from '@sinclair/typebox';
+import { calculateTimeout } from '@/napcat-onebot/config/config';
 
 import { FileActionsExamples } from '../example/FileActionsExamples';
 
@@ -96,7 +97,10 @@ export class GetFileBase extends OneBotAction<GetFilePayload, GetFileResponse> {
     // 搜索名字模式
     const searchResult = (await this.core.apis.FileApi.searchForFile([payload.file]));
     if (searchResult) {
-      const downloadPath = await this.core.apis.FileApi.downloadFileById(searchResult.id, parseInt(searchResult.fileSize));
+      const fileSize = parseInt(searchResult.fileSize);
+      const timeoutConfig = this.obContext.configLoader.configData.timeout;
+      const estimatedTime = calculateTimeout(timeoutConfig, fileSize, timeoutConfig.downloadSpeedKBps);
+      const downloadPath = await this.core.apis.FileApi.downloadFileById(searchResult.id, fileSize, estimatedTime);
       const res: GetFileResponse = {
         file: downloadPath,
         url: downloadPath,

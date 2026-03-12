@@ -37,6 +37,7 @@ import { RequestUtil } from 'napcat-common/src/request';
 import fsPromise from 'node:fs/promises';
 import { OB11FriendAddNoticeEvent } from '@/napcat-onebot/event/notice/OB11FriendAddNoticeEvent';
 import { ForwardMsgBuilder } from '@/napcat-core/helper/forward-msg-builder';
+import { calculateTimeout, capTimeout } from '@/napcat-onebot/config/config';
 import { NapProtoMsg } from 'napcat-protobuf';
 import { OB11GroupIncreaseEvent } from '../event/notice/OB11GroupIncreaseEvent';
 import { GroupDecreaseSubType, OB11GroupDecreaseEvent } from '../event/notice/OB11GroupDecreaseEvent';
@@ -1241,36 +1242,43 @@ export class OneBotMsgApi {
     return { sendElements, deleteAfterSentFiles };
   }
 
-  async sendMsgWithOb11UniqueId (peer: Peer, sendElements: SendMessageElement[], deleteAfterSentFiles: string[]) {
+  async sendMsgWithOb11UniqueId (peer: Peer, sendElements: SendMessageElement[], deleteAfterSentFiles: string[], timeoutOverride?: number) {
     if (!sendElements.length) {
       throw new Error('消息体无法解析, 请检查是否发送了不支持的消息类型');
     }
 
-    const calculateTotalSize = async (elements: SendMessageElement[]): Promise<number> => {
-      const sizePromises = elements.map(async element => {
-        switch (element.elementType) {
-          case ElementType.PTT:
-            return (await fsPromise.stat(element.pttElement.filePath)).size;
-          case ElementType.FILE:
-            return (await fsPromise.stat(element.fileElement.filePath)).size;
-          case ElementType.VIDEO:
-            return (await fsPromise.stat(element.videoElement.filePath)).size;
-          case ElementType.PIC:
-            return (await fsPromise.stat(element.picElement.sourcePath)).size;
-          default:
-            return 0;
-        }
+    const timeoutConfig = this.obContext.configLoader.configData.timeout;
+
+    let timeout: number;
+    if (timeoutOverride !== undefined && timeoutOverride > 0) {
+      timeout = capTimeout(timeoutConfig, timeoutOverride);
+    } else {
+      const calculateTotalSize = async (elements: SendMessageElement[]): Promise<number> => {
+        const sizePromises = elements.map(async element => {
+          switch (element.elementType) {
+            case ElementType.PTT:
+              return (await fsPromise.stat(element.pttElement.filePath)).size;
+            case ElementType.FILE:
+              return (await fsPromise.stat(element.fileElement.filePath)).size;
+            case ElementType.VIDEO:
+              return (await fsPromise.stat(element.videoElement.filePath)).size;
+            case ElementType.PIC:
+              return (await fsPromise.stat(element.picElement.sourcePath)).size;
+            default:
+              return 0;
+          }
+        });
+        const sizes = await Promise.all(sizePromises);
+        return sizes.reduce((total, size) => total + size, 0);
+      };
+
+      const totalSize = await calculateTotalSize(sendElements).catch(e => {
+        this.core.context.logger.logError('发送消息计算预计时间异常', e);
+        return 0;
       });
-      const sizes = await Promise.all(sizePromises);
-      return sizes.reduce((total, size) => total + size, 0);
-    };
 
-    const totalSize = await calculateTotalSize(sendElements).catch(e => {
-      this.core.context.logger.logError('发送消息计算预计时间异常', e);
-      return 0;
-    });
-
-    const timeout = 10000 + (totalSize / 1024 / 256 * 1000);
+      timeout = calculateTimeout(timeoutConfig, totalSize, timeoutConfig.uploadSpeedKBps);
+    }
     try {
       const returnMsg = await this.core.apis.MsgApi.sendMsg(peer, sendElements, timeout);
       if (!returnMsg) throw new Error('发送消息失败');

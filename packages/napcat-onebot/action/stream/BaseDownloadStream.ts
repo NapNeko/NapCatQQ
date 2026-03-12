@@ -2,6 +2,7 @@ import { OneBotAction, OneBotRequestToolkit } from '@/napcat-onebot/action/OneBo
 import { StreamPacket, StreamStatus } from './StreamBasic';
 import fs from 'fs';
 import { FileNapCatOneBotUUID } from 'napcat-common/src/file-uuid';
+import { calculateTimeout } from '@/napcat-onebot/config/config';
 
 export interface ResolvedFileInfo {
   downloadPath: string;
@@ -64,8 +65,11 @@ export abstract class BaseDownloadStream<PayloadType, ResultType> extends OneBot
 
     const searchResult = (await this.core.apis.FileApi.searchForFile([target]));
     if (searchResult) {
-      downloadPath = await this.core.apis.FileApi.downloadFileById(searchResult.id, parseInt(searchResult.fileSize));
-      fileSize = parseInt(searchResult.fileSize);
+      const fileSizeNum = parseInt(searchResult.fileSize);
+      const timeoutConfig = this.obContext.configLoader.configData.timeout;
+      const estimatedTime = calculateTimeout(timeoutConfig, fileSizeNum, timeoutConfig.downloadSpeedKBps);
+      downloadPath = await this.core.apis.FileApi.downloadFileById(searchResult.id, fileSizeNum, estimatedTime);
+      fileSize = fileSizeNum;
       fileName = searchResult.fileName;
       return { downloadPath, fileName, fileSize };
     }

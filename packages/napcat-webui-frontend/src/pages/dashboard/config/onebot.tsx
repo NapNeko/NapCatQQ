@@ -23,6 +23,12 @@ const OneBotConfigCard = () => {
       enableLocalFile2Url: false,
       parseMultMsg: false,
       imageDownloadProxy: '',
+      timeout: {
+        baseTimeout: 10000,
+        uploadSpeedKBps: 256,
+        downloadSpeedKBps: 256,
+        maxTimeout: 1800000,
+      },
     },
   });
   const reset = () => {
@@ -30,6 +36,12 @@ const OneBotConfigCard = () => {
     setOnebotValue('enableLocalFile2Url', config.enableLocalFile2Url);
     setOnebotValue('parseMultMsg', config.parseMultMsg);
     setOnebotValue('imageDownloadProxy', config.imageDownloadProxy);
+    setOnebotValue('timeout', config.timeout ?? {
+      baseTimeout: 10000,
+      uploadSpeedKBps: 256,
+      downloadSpeedKBps: 1000,
+      maxTimeout: 1800000,
+    });
   };
 
   const onSubmit = handleOnebotSubmit(async (data) => {
@@ -114,6 +126,82 @@ const OneBotConfigCard = () => {
             {...field}
             label='图片下载代理'
             placeholder='请输入代理地址，如 http://127.0.0.1:7890'
+            classNames={{
+              inputWrapper:
+                'bg-default-100/50 dark:bg-white/5 backdrop-blur-md border border-transparent hover:bg-default-200/50 dark:hover:bg-white/10 transition-all shadow-sm data-[hover=true]:border-default-300',
+              input: 'bg-transparent text-default-700 placeholder:text-default-400',
+            }}
+          />
+        )}
+      />
+      <Controller
+        control={control}
+        name='timeout.baseTimeout'
+        render={({ field }) => (
+          <Input
+            {...field}
+            type='number'
+            label='基础超时时间(毫秒)'
+            placeholder='10000'
+            value={field.value?.toString() ?? ''}
+            onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+            classNames={{
+              inputWrapper:
+                'bg-default-100/50 dark:bg-white/5 backdrop-blur-md border border-transparent hover:bg-default-200/50 dark:hover:bg-white/10 transition-all shadow-sm data-[hover=true]:border-default-300',
+              input: 'bg-transparent text-default-700 placeholder:text-default-400',
+            }}
+          />
+        )}
+      />
+      <Controller
+        control={control}
+        name='timeout.uploadSpeedKBps'
+        render={({ field }) => (
+          <Input
+            {...field}
+            type='number'
+            label='预估上传速度(KB/s)'
+            placeholder='256'
+            value={field.value?.toString() ?? ''}
+            onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+            classNames={{
+              inputWrapper:
+                'bg-default-100/50 dark:bg-white/5 backdrop-blur-md border border-transparent hover:bg-default-200/50 dark:hover:bg-white/10 transition-all shadow-sm data-[hover=true]:border-default-300',
+              input: 'bg-transparent text-default-700 placeholder:text-default-400',
+            }}
+          />
+        )}
+      />
+      <Controller
+        control={control}
+        name='timeout.downloadSpeedKBps'
+        render={({ field }) => (
+          <Input
+            {...field}
+            type='number'
+            label='预估下载速度(KB/s)'
+            placeholder='1000'
+            value={field.value?.toString() ?? ''}
+            onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+            classNames={{
+              inputWrapper:
+                'bg-default-100/50 dark:bg-white/5 backdrop-blur-md border border-transparent hover:bg-default-200/50 dark:hover:bg-white/10 transition-all shadow-sm data-[hover=true]:border-default-300',
+              input: 'bg-transparent text-default-700 placeholder:text-default-400',
+            }}
+          />
+        )}
+      />
+      <Controller
+        control={control}
+        name='timeout.maxTimeout'
+        render={({ field }) => (
+          <Input
+            {...field}
+            type='number'
+            label='最大超时时间(毫秒)'
+            placeholder='1800000'
+            value={field.value?.toString() ?? ''}
+            onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
             classNames={{
               inputWrapper:
                 'bg-default-100/50 dark:bg-white/5 backdrop-blur-md border border-transparent hover:bg-default-200/50 dark:hover:bg-white/10 transition-all shadow-sm data-[hover=true]:border-default-300',

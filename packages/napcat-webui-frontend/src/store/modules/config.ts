@@ -19,6 +19,12 @@ const initialState: ConfigState = {
     enableLocalFile2Url: false,
     parseMultMsg: true,
     imageDownloadProxy: '',
+    timeout: {
+      baseTimeout: 10000,
+      uploadSpeedKBps: 256,
+      downloadSpeedKBps: 256,
+      maxTimeout: 1800000,
+    },
   },
 };
 

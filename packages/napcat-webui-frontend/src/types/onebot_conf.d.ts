@@ -56,10 +56,18 @@ interface NetworkConfig {
   websocketClients: Array<WebsocketClientConfig>;
 }
 
+interface TimeoutConfig {
+  baseTimeout: number;
+  uploadSpeedKBps: number;
+  downloadSpeedKBps: number;
+  maxTimeout: number;
+}
+
 interface OneBotConfig {
   network: NetworkConfig; // 网络配置
   musicSignUrl: string; // 音乐签名地址
   enableLocalFile2Url: boolean;
   parseMultMsg: boolean;
   imageDownloadProxy: string; // 图片下载代理地址
+  timeout: TimeoutConfig; // 超时预测配置
 }
