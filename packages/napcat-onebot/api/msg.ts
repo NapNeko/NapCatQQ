@@ -34,7 +34,6 @@ import { EventType } from '@/napcat-onebot/event/OneBotEvent';
 import { encodeCQCode } from '@/napcat-onebot/helper/cqcode';
 import { uriToLocalFile } from 'napcat-common/src/file';
 import { RequestUtil } from 'napcat-common/src/request';
-import fsPromise from 'node:fs/promises';
 import { OB11FriendAddNoticeEvent } from '@/napcat-onebot/event/notice/OB11FriendAddNoticeEvent';
 import { ForwardMsgBuilder } from '@/napcat-core/helper/forward-msg-builder';
 import { calculateTimeout, capTimeout } from '@/napcat-onebot/config/config';
@@ -1253,29 +1252,20 @@ export class OneBotMsgApi {
     if (timeoutOverride !== undefined && timeoutOverride > 0) {
       timeout = capTimeout(timeoutConfig, timeoutOverride);
     } else {
-      const calculateTotalSize = async (elements: SendMessageElement[]): Promise<number> => {
-        const sizePromises = elements.map(async element => {
-          switch (element.elementType) {
-            case ElementType.PTT:
-              return (await fsPromise.stat(element.pttElement.filePath)).size;
-            case ElementType.FILE:
-              return (await fsPromise.stat(element.fileElement.filePath)).size;
-            case ElementType.VIDEO:
-              return (await fsPromise.stat(element.videoElement.filePath)).size;
-            case ElementType.PIC:
-              return (await fsPromise.stat(element.picElement.sourcePath)).size;
-            default:
-              return 0;
-          }
-        });
-        const sizes = await Promise.all(sizePromises);
-        return sizes.reduce((total, size) => total + size, 0);
-      };
-
-      const totalSize = await calculateTotalSize(sendElements).catch(e => {
-        this.core.context.logger.logError('发送消息计算预计时间异常', e);
-        return 0;
-      });
+      const totalSize = sendElements.reduce((total, element) => {
+        switch (element.elementType) {
+          case ElementType.PTT:
+            return total + (parseInt(element.pttElement.fileSize) || 0);
+          case ElementType.FILE:
+            return total + (parseInt(element.fileElement.fileSize) || 0);
+          case ElementType.VIDEO:
+            return total + (parseInt(element.videoElement.fileSize) || 0);
+          case ElementType.PIC:
+            return total + (parseInt(element.picElement.fileSize) || 0);
+          default:
+            return total;
+        }
+      }, 0);
 
       timeout = calculateTimeout(timeoutConfig, totalSize, timeoutConfig.uploadSpeedKBps);
     }
