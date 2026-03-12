@@ -120,10 +120,10 @@ const WebUIConfigCard = () => {
       </div>
       <div className='flex flex-col gap-2'>
         <div className='flex-shrink-0 w-full font-bold text-default-600 dark:text-default-400 px-1'>Passkey认证</div>
-        
+
         {!window.isSecureContext ? (
           <div className='text-sm text-warning-500 bg-warning-50 p-2 rounded-md border border-warning-200'>
-            ⚠️ 当前处于非安全环境（即既非 HTTPS 也非 localhost），浏览器已禁用 WebAuthn 功能。<br/>
+            ⚠️ 当前处于非安全环境（即既非 HTTPS 也非 localhost），浏览器已禁用 WebAuthn 功能。<br />
             如果您是通过局域网 IP 访问 WebUI，将无法注册和使用 Passkey。
           </div>
         ) : (
@@ -162,90 +162,90 @@ const WebUIConfigCard = () => {
 
                   // 立即调用WebAuthn API，不要用async/await
                   navigator.credentials.create({
-                publicKey: {
-                  challenge: base64UrlToUint8Array(registrationOptions.challenge) as BufferSource,
-                  rp: {
-                    name: registrationOptions.rp.name,
-                    id: registrationOptions.rp.id,
-                  },
-                  user: {
-                    id: base64UrlToUint8Array(registrationOptions.user.id) as BufferSource,
-                    name: registrationOptions.user.name,
-                    displayName: registrationOptions.user.displayName,
-                  },
-                  pubKeyCredParams: registrationOptions.pubKeyCredParams,
-                  timeout: 30000,
-                  excludeCredentials: registrationOptions.excludeCredentials?.map((cred: any) => ({
-                    id: base64UrlToUint8Array(cred.id) as BufferSource,
-                    type: cred.type,
-                    transports: cred.transports,
-                  })) || [],
-                  attestation: registrationOptions.attestation,
-                },
-              }).then(async (credential) => {
-                console.log('✅ 注册成功！凭据已创建');
-                console.log('凭据ID:', (credential as PublicKeyCredential).id);
-                console.log('凭据类型:', (credential as PublicKeyCredential).type);
+                    publicKey: {
+                      challenge: base64UrlToUint8Array(registrationOptions.challenge) as BufferSource,
+                      rp: {
+                        name: registrationOptions.rp.name,
+                        id: registrationOptions.rp.id,
+                      },
+                      user: {
+                        id: base64UrlToUint8Array(registrationOptions.user.id) as BufferSource,
+                        name: registrationOptions.user.name,
+                        displayName: registrationOptions.user.displayName,
+                      },
+                      pubKeyCredParams: registrationOptions.pubKeyCredParams,
+                      timeout: 30000,
+                      excludeCredentials: registrationOptions.excludeCredentials?.map((cred: any) => ({
+                        id: base64UrlToUint8Array(cred.id) as BufferSource,
+                        type: cred.type,
+                        transports: cred.transports,
+                      })) || [],
+                      attestation: registrationOptions.attestation,
+                    },
+                  }).then(async (credential) => {
+                    console.log('✅ 注册成功！凭据已创建');
+                    console.log('凭据ID:', (credential as PublicKeyCredential).id);
+                    console.log('凭据类型:', (credential as PublicKeyCredential).type);
 
-                // Prepare response for verification - convert to expected format
-                const cred = credential as PublicKeyCredential;
-                const response = {
-                  id: cred.id,  // 保持为base64url字符串
-                  rawId: uint8ArrayToBase64Url(new Uint8Array(cred.rawId)),  // 转换为base64url字符串
-                  response: {
-                    attestationObject: uint8ArrayToBase64Url(new Uint8Array((cred.response as AuthenticatorAttestationResponse).attestationObject)),  // 转换为base64url字符串
-                    clientDataJSON: uint8ArrayToBase64Url(new Uint8Array(cred.response.clientDataJSON)),  // 转换为base64url字符串
-                    transports: (cred.response as AuthenticatorAttestationResponse).getTransports?.() || [],
-                  },
-                  type: cred.type,
-                };
+                    // Prepare response for verification - convert to expected format
+                    const cred = credential as PublicKeyCredential;
+                    const response = {
+                      id: cred.id,  // 保持为base64url字符串
+                      rawId: uint8ArrayToBase64Url(new Uint8Array(cred.rawId)),  // 转换为base64url字符串
+                      response: {
+                        attestationObject: uint8ArrayToBase64Url(new Uint8Array((cred.response as AuthenticatorAttestationResponse).attestationObject)),  // 转换为base64url字符串
+                        clientDataJSON: uint8ArrayToBase64Url(new Uint8Array(cred.response.clientDataJSON)),  // 转换为base64url字符串
+                        transports: (cred.response as AuthenticatorAttestationResponse).getTransports?.() || [],
+                      },
+                      type: cred.type,
+                    };
 
-                console.log('准备验证响应:', response);
+                    console.log('准备验证响应:', response);
 
-                try {
-                  // Verify registration
-                  const result = await WebUIManager.verifyPasskeyRegistration(response);
+                    try {
+                      // Verify registration
+                      const result = await WebUIManager.verifyPasskeyRegistration(response);
 
-                  if (result.verified) {
-                    toast.success('Passkey注册成功！现在您可以使用Passkey自动登录');
-                    setRegistrationOptions(null); // 清除已使用的选项
-                  } else {
-                    throw new Error('Passkey registration failed');
-                  }
-                } catch (verifyError) {
-                  console.error('❌ 验证失败:', verifyError);
-                  const err = verifyError as Error;
-                  toast.error(`Passkey验证失败: ${err.message}`);
-                }
-              }).catch((error) => {
-                console.error('❌ 注册失败:', error);
-                const err = error as Error;
-                console.error('错误名称:', err.name);
-                console.error('错误信息:', err.message);
+                      if (result.verified) {
+                        toast.success('Passkey注册成功！现在您可以使用Passkey自动登录');
+                        setRegistrationOptions(null); // 清除已使用的选项
+                      } else {
+                        throw new Error('Passkey registration failed');
+                      }
+                    } catch (verifyError) {
+                      console.error('❌ 验证失败:', verifyError);
+                      const err = verifyError as Error;
+                      toast.error(`Passkey验证失败: ${err.message}`);
+                    }
+                  }).catch((error) => {
+                    console.error('❌ 注册失败:', error);
+                    const err = error as Error;
+                    console.error('错误名称:', err.name);
+                    console.error('错误信息:', err.message);
 
-                // Provide more specific error messages
-                if (err.name === 'NotAllowedError') {
-                  toast.error('Passkey注册被拒绝。请确保您允许了生物识别认证权限。');
-                } else if (err.name === 'NotSupportedError') {
-                  toast.error('您的浏览器不支持Passkey功能。');
-                } else if (err.name === 'SecurityError') {
-                  toast.error('安全错误：请确保使用HTTPS或localhost环境。');
-                } else {
-                  toast.error(`Passkey注册失败: ${err.message}`);
-                }
-              });
-            }}
-            disabled={!registrationOptions}
-            className='w-fit'
-          >
-            注册Passkey
-          </Button>
-        </div>
-        {registrationOptions && (
-          <div className='text-xs text-green-600'>
-            注册选项已准备就绪，可以开始注册
-          </div>
-        )}
+                    // Provide more specific error messages
+                    if (err.name === 'NotAllowedError') {
+                      toast.error('Passkey注册被拒绝。请确保您允许了生物识别认证权限。');
+                    } else if (err.name === 'NotSupportedError') {
+                      toast.error('您的浏览器不支持Passkey功能。');
+                    } else if (err.name === 'SecurityError') {
+                      toast.error('安全错误：请确保使用HTTPS或localhost环境。');
+                    } else {
+                      toast.error(`Passkey注册失败: ${err.message}`);
+                    }
+                  });
+                }}
+                disabled={!registrationOptions}
+                className='w-fit'
+              >
+                注册Passkey
+              </Button>
+            </div>
+            {registrationOptions && (
+              <div className='text-xs text-green-600'>
+                注册选项已准备就绪，可以开始注册
+              </div>
+            )}
           </>
         )}
       </div>
