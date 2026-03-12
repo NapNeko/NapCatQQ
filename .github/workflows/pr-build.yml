@@ -73,14 +73,14 @@ jobs:
     steps:
       # 仅 checkout 脚本目录，加快速度
       - name: Checkout scripts
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           sparse-checkout: .github/scripts
           sparse-checkout-cone-mode: false
 
       # 使用 Node.js 24 以支持原生 TypeScript 执行
       - name: Setup Node.js 24
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 24
 
@@ -102,13 +102,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout scripts
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           sparse-checkout: .github/scripts
           sparse-checkout-cone-mode: false
 
       - name: Setup Node.js 24
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 24
 
@@ -137,7 +137,7 @@ jobs:
       # 【安全】先从 base 分支 checkout 构建脚本
       # 这样即使 PR 中修改了脚本，也不会被执行
       - name: Checkout scripts from base
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           sparse-checkout: .github/scripts
           sparse-checkout-cone-mode: false
@@ -145,7 +145,7 @@ jobs:
 
       # 将 PR 代码 checkout 到单独的 workspace 目录
       - name: Checkout PR code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: ${{ needs.check-build.outputs.pr_head_repo }}
           ref: ${{ needs.check-build.outputs.pr_sha }}
@@ -153,7 +153,7 @@ jobs:
           fetch-depth: 0  # 需要完整历史来获取 tags
 
       - name: Setup Node.js 24
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 24
 
@@ -186,7 +186,7 @@ jobs:
       # 构建成功时上传产物
       - name: Upload Artifact
         if: steps.build.outcome == 'success'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: NapCat.Framework
           path: workspace/framework-dist
@@ -208,7 +208,7 @@ jobs:
     steps:
       # 【安全】先从 base 分支 checkout 构建脚本
       - name: Checkout scripts from base
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           sparse-checkout: .github/scripts
           sparse-checkout-cone-mode: false
@@ -216,7 +216,7 @@ jobs:
 
       # 将 PR 代码 checkout 到单独的 workspace 目录
       - name: Checkout PR code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: ${{ needs.check-build.outputs.pr_head_repo }}
           ref: ${{ needs.check-build.outputs.pr_sha }}
@@ -224,7 +224,7 @@ jobs:
           fetch-depth: 0  # 需要完整历史来获取 tags
 
       - name: Setup Node.js 24
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 24
 
@@ -258,7 +258,7 @@ jobs:
       # 构建成功时上传产物
       - name: Upload Artifact
         if: steps.build.outcome == 'success'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: NapCat.Shell
           path: workspace/shell-dist
@@ -276,13 +276,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout scripts
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           sparse-checkout: .github/scripts
           sparse-checkout-cone-mode: false
 
       - name: Setup Node.js 24
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 24
 

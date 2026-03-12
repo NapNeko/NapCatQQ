@@ -12,11 +12,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Clone Main Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0  # 需要完整历史来获取 tags
       - name: Use Node.js 20.X
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 20.x
       - name: Generate Version
@@ -47,7 +47,7 @@ jobs:
           npm install --omit=dev
           rm ./package-lock.json || exit 0
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: NapCat.Framework
           path: framework-dist
@@ -55,11 +55,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Clone Main Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0  # 需要完整历史来获取 tags
       - name: Use Node.js 20.X
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 20.x
       - name: Generate Version
@@ -90,7 +90,7 @@ jobs:
           npm install --omit=dev
           rm ./package-lock.json || exit 0
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: NapCat.Shell
           path: shell-dist

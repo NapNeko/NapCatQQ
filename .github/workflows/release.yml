@@ -49,9 +49,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Clone Main Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Use Node.js 20.X
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 20.x
       - name: Build NapCat.Framework
@@ -68,7 +68,7 @@ jobs:
           npm install --omit=dev
           rm ./package-lock.json || exit 0
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: NapCat.Framework
           path: framework-dist
@@ -79,9 +79,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Clone Main Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Use Node.js 20.X
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 20.x
       - name: Build NapCat.Shell
@@ -98,7 +98,7 @@ jobs:
           npm install --omit=dev
           rm ./package-lock.json || exit 0
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: NapCat.Shell
           path: shell-dist
@@ -106,10 +106,10 @@ jobs:
     needs: Build-Shell
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Download Artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           path: ./artifacts
 
@@ -187,7 +187,7 @@ jobs:
           cp -a "$NODE_EXTRACT/node-v$NODE_VER-win-x64/node.exe" "$OUT_DIR/" || true
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: NapCat.Shell.Windows.Node
           path: NapCat.Shell.Windows.Node
@@ -197,12 +197,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
             fetch-depth: 0
 
       - name: Download Artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           path: ./artifacts
 
@@ -505,4 +505,3 @@ jobs:
             git commit -m "chore: update release hash for ${VERSION}"
             git push origin HEAD:main || git push origin HEAD:master
           fi
-
