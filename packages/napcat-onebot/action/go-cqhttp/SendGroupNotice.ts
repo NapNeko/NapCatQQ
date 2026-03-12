@@ -40,6 +40,7 @@ export class SendGroupNotice extends OneBotAction<SendGroupNoticePayload, void> 
       const {
         path,
         success,
+        isLocal,
       } = (await uriToLocalFile(this.core.NapCatTempPath, payload.image));
       if (!success) {
         throw new Error(`群公告${payload.image}设置失败,image字段可能格式不正确`);
@@ -53,7 +54,7 @@ export class SendGroupNotice extends OneBotAction<SendGroupNoticePayload, void> 
         throw new Error(`群公告${payload.image}设置失败,图片上传失败 ， 错误信息:${ImageUploadResult.errMsg}`);
       }
 
-      unlink(path).catch(() => { });
+      if (!isLocal) unlink(path).catch(() => { });
 
       UploadImage = ImageUploadResult.picInfo;
     }

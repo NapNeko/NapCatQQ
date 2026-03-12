@@ -736,32 +736,36 @@ export class OneBotMsgApi {
 
     // File service
     [OB11MessageDataType.image]: async (sendMsg, context) => {
+      const result = await this.handleOb11FileLikeMessage(sendMsg, context);
       return await this.obContext.apis.FileApi.createValidSendPicElement(
         context,
-        (await this.handleOb11FileLikeMessage(sendMsg, context)).path,
+        result.path,
         sendMsg.data.summary,
-        sendMsg.data.sub_type
+        sendMsg.data.sub_type,
+        result.isLocal
       );
     },
 
     [OB11MessageDataType.file]: async (sendMsg, context) => {
-      const { path, fileName } = await this.handleOb11FileLikeMessage(sendMsg, context);
-      return await this.obContext.apis.FileApi.createValidSendFileElement(context, path, fileName);
+      const { path, fileName, isLocal } = await this.handleOb11FileLikeMessage(sendMsg, context);
+      return await this.obContext.apis.FileApi.createValidSendFileElement(context, path, fileName, '', false, isLocal);
     },
 
     [OB11MessageDataType.video]: async (sendMsg, context) => {
-      const { path, fileName } = await this.handleOb11FileLikeMessage(sendMsg, context);
+      const { path, fileName, isLocal } = await this.handleOb11FileLikeMessage(sendMsg, context);
 
       let thumb = sendMsg.data.thumb;
       if (thumb) {
         const uri2LocalRes = await uriToLocalFile(this.core.NapCatTempPath, thumb);
         if (uri2LocalRes.success) {
           thumb = uri2LocalRes.path;
-          context.deleteAfterSentFiles.push(thumb);
+          if (!uri2LocalRes.isLocal) {
+            context.deleteAfterSentFiles.push(thumb);
+          }
         }
       }
 
-      return await this.obContext.apis.FileApi.createValidSendVideoElement(context, path, fileName, thumb);
+      return await this.obContext.apis.FileApi.createValidSendVideoElement(context, path, fileName, thumb, isLocal);
     },
 
     [OB11MessageDataType.voice]: async (sendMsg, context) =>
@@ -1255,13 +1259,13 @@ export class OneBotMsgApi {
       const totalSize = sendElements.reduce((total, element) => {
         switch (element.elementType) {
           case ElementType.PTT:
-            return total + (parseInt(element.pttElement.fileSize) || 0);
+            return total + (+(element.pttElement.fileSize || '3000'));
           case ElementType.FILE:
-            return total + (parseInt(element.fileElement.fileSize) || 0);
+            return total + (+(element.fileElement.fileSize || '3000'));
           case ElementType.VIDEO:
-            return total + (parseInt(element.videoElement.fileSize) || 0);
+            return total + (+(element.videoElement.fileSize || '3000'));
           case ElementType.PIC:
-            return total + (parseInt(element.picElement.fileSize) || 0);
+            return total + (+(element.picElement.fileSize || '3000'));
           default:
             return total;
         }
@@ -1307,13 +1311,15 @@ export class OneBotMsgApi {
     realUri = await this.handleObfuckName(realUri) ?? realUri;
     try {
       const proxy = this.obContext.configLoader.configData.imageDownloadProxy || undefined;
-      const { path, fileName, errMsg, success } = await uriToLocalFile(this.core.NapCatTempPath, realUri, undefined, undefined, proxy);
+      const { path, fileName, errMsg, success, isLocal } = await uriToLocalFile(this.core.NapCatTempPath, realUri, undefined, undefined, proxy);
       if (!success) {
         this.core.context.logger.logError('文件处理失败', errMsg);
         throw new Error('文件处理失败: ' + errMsg);
       }
-      deleteAfterSentFiles.push(path);
-      return { path, fileName: inputdata.name ?? fileName };
+      if (!isLocal) {
+        deleteAfterSentFiles.push(path);
+      }
+      return { path, fileName: inputdata.name ?? fileName, isLocal };
     } catch (e: unknown) {
       throw new Error((e as Error).message);
     }

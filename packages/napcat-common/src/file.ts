@@ -12,11 +12,12 @@ export interface HttpDownloadOptions {
   proxy?: string;
 }
 
-type Uri2LocalRes = {
+export type Uri2LocalRes = {
   success: boolean,
   errMsg: string,
   fileName: string,
   path: string;
+  isLocal: boolean; // true=用户本地文件(不可删除)，false=临时下载/解码文件(需清理)
 };
 
 // 定义一个异步函数来检查文件是否存在
@@ -416,25 +417,24 @@ export async function uriToLocalFile (dir: string, uri: string, filename: string
     case FileUriType.Local: {
       const fileExt = path.extname(HandledUri);
       const localFileName = path.basename(HandledUri, fileExt) + fileExt;
-      const tempFilePath = path.join(dir, filename + fileExt);
-      fs.copyFileSync(HandledUri, tempFilePath);
-      return { success: true, errMsg: '', fileName: localFileName, path: tempFilePath };
+      // 直接返回原始路径，不复制，避免不必要的 IO
+      return { success: true, errMsg: '', fileName: localFileName, path: HandledUri, isLocal: true };
     }
 
     case FileUriType.Remote: {
       const buffer = await httpDownload({ url: HandledUri, headers: headers ?? {}, proxy });
       fs.writeFileSync(filePath, buffer);
-      return { success: true, errMsg: '', fileName: filename, path: filePath };
+      return { success: true, errMsg: '', fileName: filename, path: filePath, isLocal: false };
     }
 
     case FileUriType.Base64: {
       const base64 = HandledUri.replace(/^base64:\/\//, '');
       const base64Buffer = Buffer.from(base64, 'base64');
       fs.writeFileSync(filePath, base64Buffer);
-      return { success: true, errMsg: '', fileName: filename, path: filePath };
+      return { success: true, errMsg: '', fileName: filename, path: filePath, isLocal: false };
     }
 
     default:
-      return { success: false, errMsg: `识别URL失败, uri= ${uri}`, fileName: '', path: '' };
+      return { success: false, errMsg: `识别URL失败, uri= ${uri}`, fileName: '', path: '', isLocal: false };
   }
 }

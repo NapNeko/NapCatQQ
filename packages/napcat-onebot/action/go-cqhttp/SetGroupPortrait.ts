@@ -30,14 +30,14 @@ export default class SetGroupPortrait extends OneBotAction<SetGroupPortraitPaylo
   override returnExample = GoCQHTTPActionsExamples.SetGroupPortrait.response;
 
   async _handle (payload: SetGroupPortraitPayload): Promise<ReturnType> {
-    const { path, success } = (await uriToLocalFile(this.core.NapCatTempPath, payload.file));
+    const { path, success, isLocal } = (await uriToLocalFile(this.core.NapCatTempPath, payload.file));
     if (!success) {
       throw new Error(`头像${payload.file}设置失败,file字段可能格式不正确`);
     }
     if (path) {
       await checkFileExistV2(path, 5000); // 文件不存在QQ会崩溃，需要提前判断
       const ret = await this.core.apis.GroupApi.setGroupAvatar(payload.group_id.toString(), path);
-      fs.unlink(path).catch(() => { });
+      if (!isLocal) fs.unlink(path).catch(() => { });
       if (!ret) {
         throw new Error(`头像${payload.file}设置失败,api无返回`);
       }
@@ -51,7 +51,6 @@ export default class SetGroupPortrait extends OneBotAction<SetGroupPortraitPaylo
         errMsg: ret.errMsg,
       };
     } else {
-      fs.unlink(path).catch(() => { });
       throw new Error(`头像${payload.file}设置失败,无法获取头像,文件可能不存在`);
     }
   }

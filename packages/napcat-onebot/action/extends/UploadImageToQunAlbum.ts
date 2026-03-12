@@ -41,7 +41,7 @@ export class UploadImageToQunAlbum extends OneBotAction<PayloadType, ReturnType>
     try {
       return await this.core.apis.WebApi.uploadImageToQunAlbum(payload.group_id, payload.album_id, payload.album_name, downloadResult.path);
     } finally {
-      if (downloadResult.path && existsSync(downloadResult.path)) {
+      if (!downloadResult.isLocal && downloadResult.path && existsSync(downloadResult.path)) {
         await unlink(downloadResult.path);
       }
     }

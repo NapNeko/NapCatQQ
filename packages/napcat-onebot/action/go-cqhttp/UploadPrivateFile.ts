@@ -61,8 +61,10 @@ export default class GoCQHTTPUploadPrivateFile extends OneBotAction<GoCQHTTPUplo
       }, ContextMode.Private),
       deleteAfterSentFiles: [],
     };
-    const sendFileEle: SendFileElement = await this.obContext.apis.FileApi.createValidSendFileElement(msgContext, downloadResult.path, payload.name, '', payload.upload_file);
-    msgContext.deleteAfterSentFiles.push(downloadResult.path);
+    const sendFileEle: SendFileElement = await this.obContext.apis.FileApi.createValidSendFileElement(msgContext, downloadResult.path, payload.name, '', payload.upload_file, downloadResult.isLocal);
+    if (!downloadResult.isLocal) {
+      msgContext.deleteAfterSentFiles.push(downloadResult.path);
+    }
     const returnMsg = await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(await this.getPeer(payload), [sendFileEle], msgContext.deleteAfterSentFiles);
 
     const fileElement = returnMsg.elements.find(ele => ele.elementType === ElementType.FILE);

@@ -10,6 +10,7 @@ import { fileTypeFromFile } from 'file-type';
 import pathLib from 'node:path';
 import fsPromises from 'fs/promises';
 import fs from 'fs';
+import { randomUUID } from 'crypto';
 import { defaultVideoThumbB64 } from '@/napcat-core/helper/ffmpeg/video';
 export class OneBotFileApi {
   obContext: NapCatOneBot11Adapter;
@@ -19,7 +20,7 @@ export class OneBotFileApi {
     this.core = core;
   }
 
-  async createValidSendFileElement (context: SendMessageContext, filePath: string, fileName: string = '', folderId: string = '', uploadGroupFile: boolean = false): Promise<SendFileElement> {
+  async createValidSendFileElement (context: SendMessageContext, filePath: string, fileName: string = '', folderId: string = '', uploadGroupFile: boolean = false, _isLocal: boolean = false): Promise<SendFileElement> {
     const {
       fileName: _fileName,
       path,
@@ -43,7 +44,7 @@ export class OneBotFileApi {
     };
   }
 
-  async createValidSendPicElement (context: SendMessageContext, picPath: string, summary: string = '', subType: PicSubType = 0): Promise<SendPicElement> {
+  async createValidSendPicElement (context: SendMessageContext, picPath: string, summary: string = '', subType: PicSubType = 0, _isLocal: boolean = false): Promise<SendPicElement> {
     const { md5, fileName, path, fileSize } = await this.core.apis.FileApi.uploadFile(picPath, ElementType.PIC, subType);
     if (fileSize === 0) {
       throw new Error('文件异常，大小为0');
@@ -71,7 +72,7 @@ export class OneBotFileApi {
     };
   }
 
-  async createValidSendVideoElement (context: SendMessageContext, filePath: string, fileName: string = '', _diyThumbPath: string = ''): Promise<SendVideoElement> {
+  async createValidSendVideoElement (context: SendMessageContext, filePath: string, fileName: string = '', _diyThumbPath: string = '', isLocal: boolean = false): Promise<SendVideoElement> {
     let videoInfo = {
       width: 1920,
       height: 1080,
@@ -87,10 +88,24 @@ export class OneBotFileApi {
     } catch (e) {
       this.core.context.logger.logError('获取文件类型失败', e);
     }
-    const newFilePath = `${filePath}.${fileExt}`;
-    fs.copyFileSync(filePath, newFilePath);
-    context.deleteAfterSentFiles.push(newFilePath);
-    filePath = newFilePath;
+    const currentExt = pathLib.extname(filePath).slice(1).toLowerCase();
+    const needsExtCopy = currentExt !== fileExt.toLowerCase();
+    if (needsExtCopy) {
+      if (isLocal) {
+        // 本地文件缺少正确扩展名：拷贝到临时目录，避免污染用户目录
+        const tempFilePath = pathLib.join(this.core.NapCatTempPath, `${randomUUID()}.${fileExt}`);
+        fs.copyFileSync(filePath, tempFilePath);
+        context.deleteAfterSentFiles.push(tempFilePath);
+        filePath = tempFilePath;
+      } else {
+        // 临时文件缺少正确扩展名：在原位置加扩展名
+        const newFilePath = `${filePath}.${fileExt}`;
+        fs.copyFileSync(filePath, newFilePath);
+        context.deleteAfterSentFiles.push(newFilePath);
+        filePath = newFilePath;
+      }
+    }
+    // 扩展名已匹配时：本地文件直接用原始路径(零拷贝)，临时文件也无需额外操作
 
     const { fileName: _fileName, path, fileSize, md5 } = await this.core.apis.FileApi.uploadFile(filePath, ElementType.VIDEO);
     context.deleteAfterSentFiles.push(path);

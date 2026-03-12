@@ -7,7 +7,7 @@ const HttpServerConfigSchema = Type.Object({
   port: Type.Number({ default: 3000 }),
   host: Type.String({ default: '127.0.0.1' }),
   enableCors: Type.Boolean({ default: true }),
-  enableWebsocket: Type.Boolean({ default: true }),
+  enableWebsocket: Type.Boolean({ default: false }),
   messagePostFormat: Type.String({ default: 'array' }),
   token: Type.String({ default: '' }),
   debug: Type.Boolean({ default: false }),
@@ -19,7 +19,7 @@ const HttpSseServerConfigSchema = Type.Object({
   port: Type.Number({ default: 3000 }),
   host: Type.String({ default: '127.0.0.1' }),
   enableCors: Type.Boolean({ default: true }),
-  enableWebsocket: Type.Boolean({ default: true }),
+  enableWebsocket: Type.Boolean({ default: false }),
   messagePostFormat: Type.String({ default: 'array' }),
   token: Type.String({ default: '' }),
   debug: Type.Boolean({ default: false }),
@@ -78,12 +78,20 @@ const NetworkConfigSchema = Type.Object({
   plugins: Type.Array(PluginConfigSchema, { default: [] }),
 }, { default: {} });
 
+const TimeoutConfigSchema = Type.Object({
+  baseTimeout: Type.Number({ default: 10000 }),
+  uploadSpeedKBps: Type.Number({ default: 256 }),
+  downloadSpeedKBps: Type.Number({ default: 256 }),
+  maxTimeout: Type.Number({ default: 1800000 }),
+}, { default: {} });
+
 export const OneBotConfigSchema = Type.Object({
   network: NetworkConfigSchema,
   musicSignUrl: Type.String({ default: '' }),
   enableLocalFile2Url: Type.Boolean({ default: false }),
   parseMultMsg: Type.Boolean({ default: false }),
   imageDownloadProxy: Type.String({ default: '' }),
+  timeout: TimeoutConfigSchema,
 });
 
 export type OneBotConfig = Static<typeof OneBotConfigSchema>;

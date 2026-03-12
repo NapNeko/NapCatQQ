@@ -27,14 +27,14 @@ export default class SetAvatar extends OneBotAction<PayloadType, ReturnType> {
   override returnExample = ExtendsActionsExamples.SetQQAvatar.response;
 
   async _handle (payload: PayloadType): Promise<ReturnType> {
-    const { path, success } = (await uriToLocalFile(this.core.NapCatTempPath, payload.file));
+    const { path, success, isLocal } = (await uriToLocalFile(this.core.NapCatTempPath, payload.file));
     if (!success) {
       throw new Error(`头像${payload.file}设置失败,file字段可能格式不正确`);
     }
     if (path) {
       await checkFileExist(path, 5000);// 避免崩溃
       const ret = await this.core.apis.UserApi.setQQAvatar(path);
-      fs.unlink(path).catch(() => { });
+      if (!isLocal) fs.unlink(path).catch(() => { });
       if (!ret) {
         throw new Error(`头像${payload.file}设置失败,api无返回`);
       }
@@ -45,7 +45,6 @@ export default class SetAvatar extends OneBotAction<PayloadType, ReturnType> {
         throw new Error(`头像${payload.file}设置失败,未知的错误,${ret.result}:${ret.errMsg}`);
       }
     } else {
-      fs.unlink(path).catch(() => { });
       throw new Error(`头像${payload.file}设置失败,无法获取头像,文件可能不存在`);
     }
     return null;

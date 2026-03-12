@@ -26,7 +26,7 @@ class OCRImageBase extends OneBotAction<PayloadType, ReturnType> {
   override returnExample = ExtendsActionsExamples.OCRImage.response;
 
   async _handle (payload: PayloadType): Promise<ReturnType> {
-    const { path, success } = await uriToLocalFile(this.core.NapCatTempPath, payload.image);
+    const { path, success, isLocal } = await uriToLocalFile(this.core.NapCatTempPath, payload.image);
     if (!success) {
       throw new Error(`OCR ${payload.image}失败, image字段可能格式不正确`);
     }
@@ -39,7 +39,7 @@ class OCRImageBase extends OneBotAction<PayloadType, ReturnType> {
         }
         return ret.result;
       } finally {
-        fs.unlink(path, () => { });
+        if (!isLocal) fs.unlink(path, () => { });
       }
     }
     throw new Error(`OCR ${payload.image}失败, 文件可能不存在`);
