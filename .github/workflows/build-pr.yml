@@ -13,7 +13,7 @@
 #   - PR 代码单独 checkout 到 workspace 目录
 # =============================================================================
 
-name: PR Build
+name: Build PR
 
 # =============================================================================
 # 触发条件
@@ -150,7 +150,7 @@ jobs:
           repository: ${{ needs.check-build.outputs.pr_head_repo }}
           ref: ${{ needs.check-build.outputs.pr_sha }}
           path: workspace
-          fetch-depth: 0  # 需要完整历史来获取 tags
+          fetch-depth: 0 # 需要完整历史来获取 tags
 
       - name: Setup Node.js 24
         uses: actions/setup-node@v6
@@ -170,6 +170,7 @@ jobs:
           SHORT_SHA="${SHORT_SHA::7}"
           VERSION="${BASE_VERSION}-pr.${{ needs.check-build.outputs.pr_number }}.${{ github.run_number }}+${SHORT_SHA}"
           echo "NAPCAT_VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "Latest tag: ${LATEST_TAG}"
           echo "Build version: ${VERSION}"
 
@@ -221,7 +222,7 @@ jobs:
           repository: ${{ needs.check-build.outputs.pr_head_repo }}
           ref: ${{ needs.check-build.outputs.pr_sha }}
           path: workspace
-          fetch-depth: 0  # 需要完整历史来获取 tags
+          fetch-depth: 0 # 需要完整历史来获取 tags
 
       - name: Setup Node.js 24
         uses: actions/setup-node@v6

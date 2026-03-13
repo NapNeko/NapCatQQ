@@ -1,10 +1,12 @@
-name: Release NapCat
+name: Release Publish
 
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - 'v*'
+    inputs:
+      version:
+        description: 'Release version tag (e.g., v4.10.7)'
+        required: true
+        type: string
 
 permissions: write-all
 
@@ -14,99 +16,55 @@ env:
   RELEASE_NAME: "NapCat"
 
 jobs:
-  # 验证版本号格式
-  validate-version:
+  build:
+    name: Build NapCat.${{ matrix.target.name }}
     runs-on: ubuntu-latest
-    outputs:
-      valid: ${{ steps.check.outputs.valid }}
-      version: ${{ steps.check.outputs.version }}
-    steps:
-      - name: Validate semantic version
-        id: check
-        run: |
-          TAG="${GITHUB_REF#refs/tags/}"
-          echo "Checking tag: $TAG"
-          
-          # 语义化版本正则表达式
-          # 支持: v1.0.0, v1.0.0-beta, v1.0.0-rc.1, v1.0.0-alpha.1+build.123
-          SEMVER_REGEX="^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*))*))?$"
-          
-          if [[ "$TAG" =~ $SEMVER_REGEX ]]; then
-            echo "✅ Valid semantic version: $TAG"
-            echo "valid=true" >> $GITHUB_OUTPUT
-            echo "version=$TAG" >> $GITHUB_OUTPUT
-          else
-            echo "❌ Invalid version format: $TAG"
-            echo "Expected format: vX.Y.Z or vX.Y.Z-prerelease"
-            echo "Examples: v1.0.0, v1.2.3-beta, v2.0.0-rc.1"
-            echo "valid=false" >> $GITHUB_OUTPUT
-            exit 1
-          fi
-
-  Build-Framework:
-    needs: validate-version
-    if: needs.validate-version.outputs.valid == 'true'
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target:
+          - name: Framework
+            build_cmd: build:framework
+            src_dir: packages/napcat-framework/dist
+            dist_dir: framework-dist
+          - name: Shell
+            build_cmd: build:shell
+            src_dir: packages/napcat-shell/dist
+            dist_dir: shell-dist
     steps:
       - name: Clone Main Repository
         uses: actions/checkout@v5
-      - name: Use Node.js 20.X
+        with:
+          ref: ${{ inputs.version }}
+      - name: Use Node.js 20.x
         uses: actions/setup-node@v6
         with:
           node-version: 20.x
-      - name: Build NapCat.Framework
+      - name: Build NapCat.${{ matrix.target.name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npm i -g pnpm
           pnpm i
           pnpm --filter napcat-webui-frontend run build || exit 1
-          pnpm run build:framework
+          pnpm run ${{ matrix.target.build_cmd }}
           pnpm --filter napcat-plugin-builtin run build || exit 1
-          mv packages/napcat-framework/dist framework-dist
-          cd framework-dist
+          mv ${{ matrix.target.src_dir }} ${{ matrix.target.dist_dir }}
+          cd ${{ matrix.target.dist_dir }}
           npm install --omit=dev
           rm ./package-lock.json || exit 0
       - name: Upload Artifact
         uses: actions/upload-artifact@v6
         with:
-          name: NapCat.Framework
-          path: framework-dist
+          name: NapCat.${{ matrix.target.name }}
+          path: ${{ matrix.target.dist_dir }}
 
-  Build-Shell:
-    needs: validate-version
-    if: needs.validate-version.outputs.valid == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Clone Main Repository
-        uses: actions/checkout@v5
-      - name: Use Node.js 20.X
-        uses: actions/setup-node@v6
-        with:
-          node-version: 20.x
-      - name: Build NapCat.Shell
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          npm i -g pnpm
-          pnpm i
-          pnpm --filter napcat-webui-frontend run build || exit 1
-          pnpm run build:shell
-          pnpm --filter napcat-plugin-builtin run build || exit 1
-          mv packages/napcat-shell/dist shell-dist
-          cd shell-dist
-          npm install --omit=dev
-          rm ./package-lock.json || exit 0
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v6
-        with:
-          name: NapCat.Shell
-          path: shell-dist
-  Download-QNX64:
-    needs: Build-Shell
+  assemble-windows-node:
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.version }}
 
       - name: Download Artifacts
         uses: actions/download-artifact@v7
@@ -118,35 +76,48 @@ jobs:
           sudo apt update
           sudo apt install -y aria2 unzip zip p7zip-full curl jq
 
-      - name: Download and Assemble NapCat.Shell.Windows.Node.zip
+      - name: Cache QQ and Node.js downloads
+        id: cache-downloads
+        uses: actions/cache@v4
+        with:
+          path: /tmp/napcat-downloads
+          key: napcat-downloads-qq9.9.27.45627-node22.11.0
+
+      - name: Download QQ and Node.js
+        if: steps.cache-downloads.outputs.cache-hit != 'true'
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/napcat-downloads
+          cd /tmp/napcat-downloads
+
+          NT_URL="https://dldir1v6.qq.com/qqfile/qq/QQNT/32876254/QQ9.9.27.45627_x64.exe"
+          echo "Downloading QQ installer..."
+          aria2c -x16 -s16 -k1M -o "QQ_x64.exe" "$NT_URL"
+
+          NODE_VER="22.11.0"
+          NODE_URL="https://nodejs.org/dist/v$NODE_VER/node-v$NODE_VER-win-x64.zip"
+          echo "Downloading Node.js $NODE_VER..."
+          aria2c -x1 -s1 -k1M -o "node-win-x64.zip" "$NODE_URL"
+
+      - name: Assemble NapCat.Shell.Windows.Node.zip
         run: |
           set -euo pipefail
           TMPDIR=$(mktemp -d)
-          cd "$TMPDIR"
+          CACHE_DIR="/tmp/napcat-downloads"
 
           # -----------------------------
-          # 1) 下载 QQ x64
+          # 1) 解压 QQ x64
           # -----------------------------
-          NT_URL="https://dldir1v6.qq.com/qqfile/qq/QQNT/32876254/QQ9.9.27.45627_x64.exe"
-          QQ_ZIP="$(basename "$NT_URL")"
-          echo "Downloading QQ installer: $QQ_ZIP"
-          aria2c -x16 -s16 -k1M -o "$QQ_ZIP" "$NT_URL"
-          
           QQ_EXTRACT="$TMPDIR/qq_extracted"
           mkdir -p "$QQ_EXTRACT"
-          7z x -y -o"$QQ_EXTRACT" "$QQ_ZIP" >/dev/null
+          7z x -y -o"$QQ_EXTRACT" "$CACHE_DIR/QQ_x64.exe" >/dev/null
 
           # -----------------------------
-          # 2) 下载 Node.js Windows x64 zip 22.11.0
+          # 2) 解压 Node.js Windows x64
           # -----------------------------
-          NODE_VER="22.11.0"
-          NODE_URL="https://nodejs.org/dist/v$NODE_VER/node-v$NODE_VER-win-x64.zip"
-          NODE_ZIP="node-v$NODE_VER-win-x64.zip"
-          aria2c -x1 -s1 -k1M -o "$NODE_ZIP" "$NODE_URL"
-
           NODE_EXTRACT="$TMPDIR/node_extracted"
           mkdir -p "$NODE_EXTRACT"
-          unzip -q "$NODE_ZIP" -d "$NODE_EXTRACT"
+          unzip -q "$CACHE_DIR/node-win-x64.zip" -d "$NODE_EXTRACT"
 
           # -----------------------------
           # 3) 创建输出目录
@@ -180,6 +151,7 @@ jobs:
           cp -a "$GITHUB_WORKSPACE/packages/napcat-develop/napcat.bat" "$OUT_DIR/" || true
           cp -a "$GITHUB_WORKSPACE/packages/napcat-develop/index.js" "$OUT_DIR/" || true
           cp -a "$GITHUB_WORKSPACE/packages/napcat-develop/QQNT.dll" "$OUT_DIR/" || true
+
           # -----------------------------
           # 7) 拷贝 Node.exe 到 NapCat.Shell.Windows.Node
           # -----------------------------
@@ -193,13 +165,13 @@ jobs:
           path: NapCat.Shell.Windows.Node
 
   release-napcat:
-    needs: [Build-Framework, Build-Shell, Download-QNX64]
+    needs: [build, assemble-windows-node]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v5
         with:
-            fetch-depth: 0
+          fetch-depth: 0
 
       - name: Download Artifacts
         uses: actions/download-artifact@v7
@@ -223,13 +195,13 @@ jobs:
           OPENAI_KEY: ${{ secrets.OPENAI_KEY }}
           OPENAI_API_URL: ${{ env.OPENAI_API_URL }}
           OPENAI_MODEL: ${{ env.OPENAI_MODEL }}
-          GITHUB_OWNER: "NapNeko"   # 替换成你的 repo owner
-          GITHUB_REPO: "NapCatQQ"   # 替换成你的 repo 名
+          GITHUB_OWNER: "NapNeko"
+          GITHUB_REPO: "NapCatQQ"
         run: |
           set -euo pipefail
 
           # 当前 tag
-          CURRENT_TAG="${GITHUB_REF#refs/tags/}"
+          CURRENT_TAG="${{ inputs.version }}"
           echo "Current tag: $CURRENT_TAG"
 
           # 从 GitHub API 获取 tag 列表
@@ -248,7 +220,7 @@ jobs:
           done
 
           if [ -z "$PREV_TAG" ]; then
-            echo "⚠️ Could not find previous tag for $CURRENT_TAG, using first commit"
+            echo "Could not find previous tag for $CURRENT_TAG, using first commit"
             PREV_TAG=$(git rev-list --max-parents=0 HEAD | head -1)
           fi
 
@@ -259,7 +231,6 @@ jobs:
           git fetch origin "refs/tags/$CURRENT_TAG:refs/tags/$CURRENT_TAG" --force || true
 
           # 获取 commit，使用更清晰的格式
-          # 格式: <type>: <subject> (<hash>)
           COMMITS=$(git log --pretty=format:'- %s (%h)' "$PREV_TAG".."$CURRENT_TAG" 2>/dev/null || git log --pretty=format:'- %s (%h)' -20)
 
           echo "Commit list from $PREV_TAG to $CURRENT_TAG:"
@@ -268,15 +239,15 @@ jobs:
           # 获取文件变化统计
           echo "Getting file change statistics..."
           FILE_STATS=$(git diff --stat "$PREV_TAG".."$CURRENT_TAG" 2>/dev/null || echo "")
-          
+
           # 获取总体统计（最后一行）
           SUMMARY_LINE=$(echo "$FILE_STATS" | tail -1)
           echo "Summary: $SUMMARY_LINE"
-          
+
           # 获取每个文件的变化（去掉最后一行汇总）
           # 截断过长的输出（最多50个文件，每行最多80字符）
           FILE_CHANGES=$(echo "$FILE_STATS" | head -n -1 | head -50 | cut -c1-80)
-          
+
           # 如果文件变化太多，进一步精简：只保留主要目录的变化
           FILE_COUNT=$(echo "$FILE_STATS" | head -n -1 | wc -l)
           if [ "$FILE_COUNT" -gt 50 ]; then
@@ -289,28 +260,27 @@ jobs:
             FILE_CHANGES="[按目录分组统计 - 共 $FILE_COUNT 个文件变更]
           $DIR_STATS"
           fi
-          
+
           echo "File changes:"
           echo "$FILE_CHANGES"
 
           # 获取具体代码变化（关键文件的diff）
           echo "Getting code diff for key files..."
-          
+
           # 定义关键目录（优先展示这些目录的变化）
           KEY_DIRS="packages/napcat-core packages/napcat-onebot packages/napcat-webui-backend"
-          
+
           # 获取变更的关键文件列表（排除测试、配置等）
-          # 使用 || true 防止 grep 无匹配时返回非零退出码
           KEY_FILES=$(git diff --name-only "$PREV_TAG".."$CURRENT_TAG" 2>/dev/null | \
             grep -E "^packages/napcat-(core|onebot|webui-backend|shell)/" || true | \
             grep -E "\.(ts|js)$" || true | \
             grep -v -E "(test|spec|\.d\.ts|config)" || true | \
             head -15) || true
-          
+
           CODE_DIFF=""
-          DIFF_CHAR_LIMIT=6000  # 总diff字符限制
+          DIFF_CHAR_LIMIT=6000
           CURRENT_CHARS=0
-          
+
           if [ -n "$KEY_FILES" ]; then
             for file in $KEY_FILES; do
               if [ "$CURRENT_CHARS" -ge "$DIFF_CHAR_LIMIT" ]; then
@@ -318,21 +288,19 @@ jobs:
           [... 更多文件变化已截断 ...]"
                 break
               fi
-              
-              # 获取单个文件的diff，限制每个文件最多50行
+
               FILE_DIFF=$(git diff "$PREV_TAG".."$CURRENT_TAG" -- "$file" 2>/dev/null | head -50) || true
               FILE_DIFF_LEN=${#FILE_DIFF}
-              
-              # 如果单个文件diff超过1500字符，截断
+
               if [ "$FILE_DIFF_LEN" -gt 1500 ]; then
                 FILE_DIFF=$(echo "$FILE_DIFF" | head -c 1500)
                 FILE_DIFF="$FILE_DIFF
           [... 文件 $file 变化已截断 ...]"
               fi
-              
+
               if [ -n "$FILE_DIFF" ]; then
                 CODE_DIFF="$CODE_DIFF
-          
+
           ### $file
           \`\`\`diff
           $FILE_DIFF
@@ -341,19 +309,19 @@ jobs:
               fi
             done
           fi
-          
+
           # 如果没有关键文件变化，获取前5个变更文件的diff
           if [ -z "$CODE_DIFF" ]; then
             echo "No key files changed, getting top changed files..."
             TOP_FILES=$(git diff --name-only "$PREV_TAG".."$CURRENT_TAG" 2>/dev/null | \
               grep -E "\.(ts|js|yml|md)$" | head -5) || true
-            
+
             if [ -n "$TOP_FILES" ]; then
               for file in $TOP_FILES; do
                 FILE_DIFF=$(git diff "$PREV_TAG".."$CURRENT_TAG" -- "$file" 2>/dev/null | head -30) || true
                 if [ -n "$FILE_DIFF" ] && [ ${#FILE_DIFF} -lt 1000 ]; then
                   CODE_DIFF="$CODE_DIFF
-          
+
           ### $file
           \`\`\`diff
           $FILE_DIFF
@@ -362,12 +330,12 @@ jobs:
               done
             fi
           fi
-          
+
           # 如果仍然没有代码变化，添加说明
           if [ -z "$CODE_DIFF" ]; then
             CODE_DIFF="[本次更新主要涉及配置文件和文档变更，无核心代码变化]"
           fi
-          
+
           echo "Code diff preview:"
           echo "$CODE_DIFF" | head -50
 
@@ -378,16 +346,16 @@ jobs:
           # 构建用户内容，传递更多上下文（包含文件变化和代码diff）
           USER_CONTENT="当前版本: $CURRENT_TAG
           上一版本: $PREV_TAG
-          
+
           ## 提交列表
           $COMMITS
-          
+
           ## 文件变化统计
           $SUMMARY_LINE
-          
+
           ## 变更文件列表
           $FILE_CHANGES
-          
+
           ## 关键代码变化
           $CODE_DIFF"
 
@@ -406,7 +374,7 @@ jobs:
             -H "Content-Type: application/json" \
             -d "$BODY"); then
             echo "=== raw response ==="
-            echo "$RESPONSE"  
+            echo "$RESPONSE"
             echo "=== parsed response ==="
             if echo "$RESPONSE" | jq . >/dev/null 2>&1; then
               echo "$RESPONSE" | jq .
@@ -418,18 +386,16 @@ jobs:
             RELEASE_BODY=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // .choices[0].text // ""' 2>/dev/null || echo "")
 
             if [ -z "$RELEASE_BODY" ]; then
-              echo "❌ LLM failed to generate release note, using default.md"
-              # 替换默认模板中的版本占位符
+              echo "LLM failed to generate release note, using default.md"
               sed "s/{VERSION}/$CURRENT_TAG/g" .github/prompt/default.md > CHANGELOG.md
             else
               # 后处理：确保版本号正确，并添加比较链接
               echo -e "$RELEASE_BODY" > CHANGELOG.md
-              # 替换可能的占位符
               sed -i "s/{VERSION}/$CURRENT_TAG/g" CHANGELOG.md
               sed -i "s/{PREV_VERSION}/$PREV_TAG/g" CHANGELOG.md
             fi
           else
-            echo "❌ Curl failed, using default.md"
+            echo "Curl failed, using default.md"
             sed "s/{VERSION}/$CURRENT_TAG/g" .github/prompt/default.md > CHANGELOG.md
           fi
           echo "=== generated release note ==="
@@ -438,8 +404,8 @@ jobs:
       - name: Create Release and Upload Artifacts
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
-          name: NapCat ${{ github.ref_name }}
+          tag_name: ${{ inputs.version }}
+          name: NapCat ${{ inputs.version }}
           token: ${{ secrets.NAPCAT_BUILD }}
           body_path: CHANGELOG.md
           files: |
@@ -449,7 +415,6 @@ jobs:
             NapCat.Shell.Windows.OneKey.zip
           draft: false
 
-      
       - name: Update apifox
         env:
           APIFOX_TOKEN: ${{ secrets.APIFOX_TOKEN }}
@@ -458,7 +423,6 @@ jobs:
           pnpm i
           pnpm run build:openapi
 
-          # 使用 jq 安全地构建大型 JSON 数据并保存到文件
           jq -n --rawfile input packages/napcat-schema/dist/openapi.json \
           '{
               input: $input,
@@ -471,7 +435,6 @@ jobs:
               }
           }' > apifox_payload.json
 
-          # 通过文件形式发送数据，避免命令行长度限制
           curl --location -g --request POST 'https://api.apifox.com/v1/projects/5348325/import-openapi?locale=zh-CN' \
           --header 'X-Apifox-Api-Version: 2024-03-28' \
           --header "Authorization: Bearer $APIFOX_TOKEN" \
@@ -483,7 +446,7 @@ jobs:
           GH_TOKEN: ${{ secrets.NAPCAT_BUILD }}
         run: |
           set -euo pipefail
-          VERSION="${GITHUB_REF#refs/tags/}"
+          VERSION="${{ inputs.version }}"
           HASH_REPO="NapNeko/napcat-release-hash"
 
           gh auth setup-git
@@ -505,3 +468,15 @@ jobs:
             git commit -m "chore: update release hash for ${VERSION}"
             git push origin HEAD:main || git push origin HEAD:master
           fi
+
+      - name: Trigger downstream release workflows
+        env:
+          GH_TOKEN: ${{ secrets.NAPCAT_BUILD }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          echo "Triggering release-downstream workflow with tag_name=${VERSION}"
+          curl -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            https://api.github.com/repos/${{ github.repository }}/actions/workflows/release-downstream.yml/dispatches \
+            -d "{\"ref\":\"main\",\"inputs\":{\"tag_name\":\"${VERSION}\"}}"
