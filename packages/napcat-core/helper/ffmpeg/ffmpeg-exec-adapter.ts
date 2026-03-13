@@ -101,7 +101,6 @@ export class FFmpegExecAdapter implements IFFmpegAdapter {
     // 获取文件大小和类型
     const [fileType, duration] = await Promise.all([
       fileTypeFromFile(videoPath).catch(() => null),
-      this.getDuration(videoPath),
     ]);
 
     // 创建临时缩略图路径
@@ -136,22 +135,24 @@ export class FFmpegExecAdapter implements IFFmpegAdapter {
   }
 
   /**
-     * 获取时长
-     */
-  async getDuration (filePath: string): Promise<number> {
-    try {
-      const { stdout } = await execFileAsync(this.ffprobePath, [
-        '-v', 'error',
-        '-show_entries', 'format=duration',
-        '-of', 'default=noprint_wrappers=1:nokey=1',
-        filePath,
-      ]);
+   * 获取时长
+   */
+  async getDuration(filePath: string): Promise<number> {
+    const { stdout } = await execFileAsync(this.ffprobePath, [
+      "-v",
+      "error",
+      "-show_entries",
+      "format=duration",
+      "-of",
+      "default=noprint_wrappers=1:nokey=1",
+      filePath,
+    ]);
 
-      const duration = parseFloat(stdout.trim());
-      return isNaN(duration) ? 60 : duration;
-    } catch {
-      return 60; // 默认时长
+    const duration = parseFloat(stdout.trim());
+    if (isNaN(duration)) {
+      throw new Error(`ffprobe 返回了无效的时长值: "${stdout.trim()}"`);
     }
+    return duration;
   }
 
   /**
