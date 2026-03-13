@@ -7,7 +7,7 @@ import { ExtendsActionsExamples } from '../example/ExtendsActionsExamples';
 const PayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
   user_id: Type.String({ description: 'QQ号' }),
-  special_title: Type.Optional(Type.String({ default: '', description: '专属头衔' })),
+  special_title: Type.String({ default: '', description: '专属头衔' }),
 });
 
 type PayloadType = Static<typeof PayloadSchema>;
@@ -29,6 +29,6 @@ export class SetSpecialTitle extends GetPacketStatusDepends<PayloadType, ReturnT
   async _handle (payload: PayloadType) {
     const uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
     if (!uid) throw new Error('User not found');
-    await this.core.apis.PacketApi.pkt.operation.SetGroupSpecialTitle(+payload.group_id, uid, payload.special_title!);
+    await this.core.apis.PacketApi.pkt.operation.SetGroupSpecialTitle(+payload.group_id, uid, payload.special_title);
   }
 }

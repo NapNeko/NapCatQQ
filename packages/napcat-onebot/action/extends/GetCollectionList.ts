@@ -4,7 +4,7 @@ import { Type, Static } from '@sinclair/typebox';
 
 const PayloadSchema = Type.Object({
   category: Type.String({ description: '分类ID' }),
-  count: Type.Optional(Type.String({ default: '50', description: '获取数量' })),
+  count: Type.String({ default: '50', description: '获取数量' }),
 });
 
 type PayloadType = Static<typeof PayloadSchema>;
@@ -77,6 +77,6 @@ export class GetCollectionList extends OneBotAction<PayloadType, ReturnType> {
   };
 
   async _handle (payload: PayloadType) {
-    return await this.core.apis.CollectionApi.getAllCollection(+payload.category, +payload.count!);
+    return await this.core.apis.CollectionApi.getAllCollection(+payload.category, +payload.count);
   }
 }

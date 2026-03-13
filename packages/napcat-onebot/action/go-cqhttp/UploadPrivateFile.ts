@@ -12,7 +12,7 @@ export const GoCQHTTPUploadPrivateFilePayloadSchema = Type.Object({
   user_id: Type.String({ description: '用户 QQ' }),
   file: Type.String({ description: '资源路径或URL' }),
   name: Type.String({ description: '文件名' }),
-  upload_file: Type.Optional(Type.Boolean({ default: true, description: '是否执行上传' })),
+  upload_file: Type.Boolean({ default: true, description: '是否执行上传' }),
 });
 
 export type GoCQHTTPUploadPrivateFilePayload = Static<typeof GoCQHTTPUploadPrivateFilePayloadSchema>;

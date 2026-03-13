@@ -276,16 +276,10 @@ export const OB11MessageFlashTransferSchema = Type.Object({
 // 但为了与原始类型完全兼容，我们使用 Type.Unknown 来表示递归部分
 
 // 合并转发消息节点
-export const OB11MessageNodeReferenceSchema = Type.Object({
+export const OB11MessageNodeSchema = Type.Object({
   type: Type.Literal(OB11MessageDataType.node),
   data: Type.Object({
-    id: Type.String({ description: '转发消息ID', minLength: 1 }),
-  }, { additionalProperties: false }),
-}, { description: '引用已有消息的合并转发节点' });
-
-export const OB11MessageNodeInlineSchema = Type.Object({
-  type: Type.Literal(OB11MessageDataType.node),
-  data: Type.Object({
+    id: Type.Optional(Type.String({ description: '转发消息ID' })),
     user_id: Type.Optional(Type.Union([Type.Number(), Type.String()], { description: '发送者QQ号' })),
     uin: Type.Optional(Type.Union([Type.Number(), Type.String()], { description: '发送者QQ号(兼容go-cqhttp)' })),
     nickname: Type.String({ description: '发送者昵称' }),
@@ -298,14 +292,9 @@ export const OB11MessageNodeInlineSchema = Type.Object({
     }))),
     summary: Type.Optional(Type.String({ description: '摘要' })),
     prompt: Type.Optional(Type.String({ description: '提示' })),
-    time: Type.Optional(Type.Union([Type.String({ description: '时间' }), Type.Number({ description: '时间' })])),
-  }, { additionalProperties: false }),
-}, { description: '内联合并转发消息节点' });
-
-export const OB11MessageNodeSchema = Type.Union([
-  OB11MessageNodeReferenceSchema,
-  OB11MessageNodeInlineSchema,
-], { $id: 'OB11MessageNode', description: '合并转发消息节点' });
+    time: Type.Optional(Type.String({ description: '时间' })),
+  }),
+}, { $id: 'OB11MessageNode', description: '合并转发消息节点' });
 
 // 合并转发消息段
 export const OB11MessageForwardSchema = Type.Object({
@@ -445,9 +434,7 @@ export type OB11MessageJson = Static<typeof OB11MessageJsonSchema>;
 export type OB11MessageXml = Static<typeof OB11MessageXmlSchema>;
 export type OB11MessageMarkdown = Static<typeof OB11MessageMarkdownSchema>;
 export type OB11MessageMiniApp = Static<typeof OB11MessageMiniAppSchema>;
-export type OB11MessageNodeReference = Static<typeof OB11MessageNodeReferenceSchema>;
-export type OB11MessageNodeInline = Static<typeof OB11MessageNodeInlineSchema>;
-export type OB11MessageNode = OB11MessageNodeReference | OB11MessageNodeInline;
+export type OB11MessageNode = Static<typeof OB11MessageNodeSchema>;
 export type OB11MessageForward = Static<typeof OB11MessageForwardSchema>;
 export type OB11MessageOnlineFile = Static<typeof OB11MessageOnlineFileSchema>;
 export type OB11MessageFlashTransfer = Static<typeof OB11MessageFlashTransferSchema>;
@@ -460,7 +447,7 @@ export type OB11Message = Static<typeof OB11MessageSchema>;
 
 // 合并转发消息节点纯文本接口定义
 export type OB11MessageNodePlain = OB11MessageNode & {
-  data: OB11MessageNode['data'] & {
+  data: {
     content?: Array<OB11MessageData>;
     message: Array<OB11MessageData>;
   };

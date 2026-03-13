@@ -1,8 +1,6 @@
 import {
-  OB11MessageDataType,
-} from '@/napcat-onebot/types';
-import type {
   OB11MessageData,
+  OB11MessageDataType,
   OB11MessageMixType,
   OB11MessageNode,
   OB11PostContext,
@@ -10,17 +8,16 @@ import type {
 import { ActionName, BaseCheckResult } from '@/napcat-onebot/action/router';
 import { decodeCQCode } from '@/napcat-onebot/helper/cqcode';
 import { MessageUnique } from 'napcat-common/src/message-unique';
-import { ChatType, ElementType } from 'napcat-core';
-import type { NapCatCore, Peer, RawMessage, SendArkElement, SendMessageElement } from 'napcat-core';
+import { ChatType, ElementType, NapCatCore, Peer, RawMessage, SendArkElement, SendMessageElement } from 'napcat-core';
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ForwardMsgBuilder } from '@/napcat-core/helper/forward-msg-builder';
 import { stringifyWithBigInt } from 'napcat-common/src/helper';
-import type { PacketMsg } from 'napcat-core/packet/message/message';
-import type { rawMsgWithSendMsg } from 'napcat-core/packet/message/converter';
-import { Static, TSchema, Type } from '@sinclair/typebox';
+import { PacketMsg } from 'napcat-core/packet/message/message';
+import { rawMsgWithSendMsg } from 'napcat-core/packet/message/converter';
+import { Static, Type } from '@sinclair/typebox';
 import { MsgActionsExamples } from '@/napcat-onebot/action/msg/examples';
 import { OB11MessageMixTypeSchema } from '@/napcat-onebot/types/message';
-import type { UploadForwardMsgParams } from '@/napcat-core/packet/transformer/message/UploadForwardMsgV2';
+import { UploadForwardMsgParams } from '@/napcat-core/packet/transformer/message/UploadForwardMsgV2';
 
 export const SendMsgPayloadSchema = Type.Object({
   message_type: Type.Optional(Type.Union([Type.Literal('private'), Type.Literal('group')], { description: '消息类型 (private/group)' })),
@@ -52,43 +49,15 @@ export enum ContextMode {
   Group = 2,
 }
 
-function normalizeMessageSegments (messages: OB11MessageData[]): OB11MessageData[] {
-  return messages.map((message) => {
-    if (message.type !== OB11MessageDataType.node) {
-      return message;
-    }
-
-    if ('id' in message.data) {
-      return {
-        ...message,
-        data: {
-          ...message.data,
-          id: message.data.id.toString(),
-        },
-      };
-    }
-
-    return {
-      ...message,
-      data: {
-        ...message.data,
-        content: normalize((message.data.content ?? []) as OB11MessageMixType),
-      },
-    };
-  });
-}
-
 // Normalizes a mixed type (CQCode/a single segment/segment array) into a segment array.
 export function normalize (message: OB11MessageMixType, autoEscape = false): OB11MessageData[] {
-  const normalized: OB11MessageData[] = typeof message === 'string'
+  return typeof message === 'string'
     ? (
       autoEscape
-        ? [{ type: OB11MessageDataType.text, data: { text: message } } as OB11MessageData]
+        ? [{ type: OB11MessageDataType.text, data: { text: message } }]
         : decodeCQCode(message)
     )
     : Array.isArray(message) ? message : [message];
-
-  return normalizeMessageSegments(normalized);
 }
 
 export async function createContext (core: NapCatCore, payload: OB11PostContext | undefined, contextMode: ContextMode = ContextMode.Normal): Promise<Peer> {
@@ -159,26 +128,12 @@ function isNode (msg: OB11MessageData): msg is OB11MessageNode {
   return msg.type === OB11MessageDataType.node;
 }
 
-function hasNodeReferenceId (msg: OB11MessageNode): msg is OB11MessageNode & { data: { id: string; }; } {
-  return 'id' in msg.data && typeof msg.data.id === 'string' && msg.data.id.length > 0;
-}
-
 export class SendMsgBase extends OneBotAction<SendMsgPayload, ReturnDataType> {
-  override payloadSchema: TSchema = SendMsgPayloadSchema;
-  override returnSchema: TSchema = SendMsgReturnSchema;
+  override payloadSchema = SendMsgPayloadSchema;
+  override returnSchema = SendMsgReturnSchema;
   override actionTags = ['消息接口'];
 
-  protected getMessageForCheck (payload: SendMsgPayload): OB11MessageMixType {
-    return payload.message;
-  }
-
   protected override async check (payload: SendMsgPayload): Promise<BaseCheckResult> {
-    const base = await super.check(payload);
-    if (!base.valid) {
-      return base;
-    }
-
-    payload.message = this.getMessageForCheck(payload);
     const messages = normalize(payload.message);
     const nodeElementLength = getSpecialMsgNum(messages, OB11MessageDataType.node);
     if (nodeElementLength > 0 && nodeElementLength !== messages.length) {
@@ -271,8 +226,8 @@ export class SendMsgBase extends OneBotAction<SendMsgPayload, ReturnDataType> {
         this.core.context.logger.logWarn('转发消息深度超过3层，将停止解析！');
         break;
       }
-      if (!hasNodeReferenceId(node)) {
-        const OB11Data = normalize(node.data.content);
+      if (!node.data.id) {
+        const OB11Data = normalize(node.type === OB11MessageDataType.node ? node.data.content : node);
         let sendElements: SendMessageElement[];
 
         const subNodeMessages = OB11Data.filter(isNode);
@@ -306,7 +261,7 @@ export class SendMsgBase extends OneBotAction<SendMsgPayload, ReturnDataType> {
         const transformedMsg = this.core.apis.PacketApi.pkt.msgConverter.rawMsgWithSendMsgToPacketMsg(packetMsgElements);
         this.core.context.logger.logDebug(`handleForwardedNodesPacket[SendRaw] 转换为 ${stringifyWithBigInt(transformedMsg)}`);
         packetMsg.push(transformedMsg);
-      } else {
+      } else if (node.data.id) {
         const id = node.data.id;
         const nodeMsg = MessageUnique.getMsgIdAndPeerByShortId(+id) || MessageUnique.getPeerByMsgId(id);
         if (!nodeMsg) {
@@ -353,6 +308,8 @@ export class SendMsgBase extends OneBotAction<SendMsgPayload, ReturnDataType> {
           this.core.context.logger.logDebug(`handleForwardedNodesPacket[PureRaw] 转换为 ${stringifyWithBigInt(transformedMsg)}`);
           packetMsg.push(transformedMsg);
         }
+      } else {
+        this.core.context.logger.logDebug(`handleForwardedNodesPacket 跳过元素 ${stringifyWithBigInt(node)}`);
       }
     }
     if (packetMsg.length === 0) {
@@ -413,8 +370,8 @@ export class SendMsgBase extends OneBotAction<SendMsgPayload, ReturnDataType> {
     };
     let nodeMsgIds: string[] = [];
     for (const messageNode of messageNodes) {
-      if (hasNodeReferenceId(messageNode)) {
-        const nodeId = messageNode.data.id;
+      const nodeId = messageNode.data.id;
+      if (nodeId) {
         // 对Msgid和OB11ID混用情况兜底
         const nodeMsg = MessageUnique.getMsgIdAndPeerByShortId(parseInt(nodeId)) || MessageUnique.getPeerByMsgId(nodeId);
         if (!nodeMsg) {

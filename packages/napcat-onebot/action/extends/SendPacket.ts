@@ -6,7 +6,7 @@ import { Static, Type } from '@sinclair/typebox';
 const PayloadSchema = Type.Object({
   cmd: Type.String({ description: '命令字' }),
   data: Type.String({ description: '十六进制数据' }),
-  rsp: Type.Optional(Type.Union([Type.String(), Type.Boolean()], { default: true, description: '是否等待响应' })),
+  rsp: Type.Union([Type.String(), Type.Boolean()], { default: true, description: '是否等待响应' }),
 });
 
 type PayloadType = Static<typeof PayloadSchema>;
