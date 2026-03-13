@@ -27,7 +27,7 @@ export const UploadFileStreamPayloadSchema = Type.Object({
   filename: Type.Optional(Type.String({ description: '文件名' })),
   reset: Type.Optional(Type.Boolean({ description: '是否重置' })),
   verify_only: Type.Optional(Type.Boolean({ description: '是否仅验证' })),
-  file_retention: Type.Optional(Type.Number({ default: 5 * 60 * 1000, description: '文件保留时间 (毫秒)' })), // 默认5分钟 回收 不设置或0为不回收
+  file_retention: Type.Number({ default: 5 * 60 * 1000, description: '文件保留时间 (毫秒)' }), // 默认5分钟 回收 不设置或0为不回收
 });
 
 export type UploadFileStreamPayload = Static<typeof UploadFileStreamPayloadSchema>;

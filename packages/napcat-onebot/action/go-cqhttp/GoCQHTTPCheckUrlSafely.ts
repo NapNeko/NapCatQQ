@@ -20,12 +20,12 @@ export class GoCQHTTPCheckUrlSafely extends OneBotAction<GoCQHTTPCheckUrlSafelyP
   override payloadSchema = GoCQHTTPCheckUrlSafelyPayloadSchema;
   override returnSchema = GoCQHTTPCheckUrlSafelyReturnSchema;
   override actionSummary = '检查URL安全性';
-  override actionDescription = '检查指定URL的安全等级；当前兼容实现固定返回安全等级 1';
+  override actionDescription = '检查指定URL的安全等级';
   override actionTags = ['Go-CQHTTP'];
   override payloadExample = GoCQHTTPActionsExamples.GoCQHTTPCheckUrlSafely.payload;
   override returnExample = GoCQHTTPActionsExamples.GoCQHTTPCheckUrlSafely.response;
 
-  async _handle (): Promise<GoCQHTTPCheckUrlSafelyReturn> {
+  async _handle () {
     return { level: 1 };
   }
 }

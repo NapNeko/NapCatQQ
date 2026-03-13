@@ -15,7 +15,7 @@ export class TestDownloadStream extends OneBotAction<TestDownloadStreamPayload, 
   override actionSummary = '测试下载流';
   override actionTags = ['流式传输扩展'];
   override payloadExample = {
-    error: false,
+    url: 'http://example.com/file',
   };
 
   override returnExample = {

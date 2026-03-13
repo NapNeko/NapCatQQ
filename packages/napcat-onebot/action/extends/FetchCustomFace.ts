@@ -3,7 +3,7 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 
 const PayloadSchema = Type.Object({
-  count: Type.Optional(Type.Union([Type.Number(), Type.String()], { default: 48, description: '获取数量' })),
+  count: Type.Union([Type.Number(), Type.String()], { default: 48, description: '获取数量' }),
 });
 
 type PayloadType = Static<typeof PayloadSchema>;
@@ -27,7 +27,7 @@ export class FetchCustomFace extends OneBotAction<PayloadType, ReturnType> {
   ];
 
   async _handle (payload: PayloadType) {
-    const ret = await this.core.apis.MsgApi.fetchFavEmojiList(+payload.count!);
+    const ret = await this.core.apis.MsgApi.fetchFavEmojiList(+payload.count);
     return ret.emojiInfoList.map(e => e.url);
   }
 }

@@ -5,7 +5,7 @@ import { Static, Type } from '@sinclair/typebox';
 import { OB11NotifySchema } from '../schemas';
 
 export const GetGroupSystemMsgPayloadSchema = Type.Object({
-  count: Type.Optional(Type.Union([Type.Number(), Type.String()], { default: 50, description: '获取的消息数量' })),
+  count: Type.Union([Type.Number(), Type.String()], { default: 50, description: '获取的消息数量' }),
 });
 
 export type GetGroupSystemMsgPayload = Static<typeof GetGroupSystemMsgPayloadSchema>;
@@ -36,7 +36,7 @@ export class GetGroupSystemMsg extends OneBotAction<GetGroupSystemMsgPayload, Ge
   };
 
   async _handle (params: GetGroupSystemMsgPayload): Promise<GetGroupSystemMsgReturn> {
-    const SingleScreenNotifies = await this.core.apis.GroupApi.getSingleScreenNotifies(false, +params.count!);
+    const SingleScreenNotifies = await this.core.apis.GroupApi.getSingleScreenNotifies(false, +params.count);
     const retData: GetGroupSystemMsgReturn = { invited_requests: [], InvitedRequest: [], join_requests: [] };
 
     const notifyPromises = SingleScreenNotifies.map(async (SSNotify) => {
