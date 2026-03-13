@@ -101,6 +101,7 @@ export class FFmpegExecAdapter implements IFFmpegAdapter {
     // 获取文件大小和类型
     const [fileType, duration] = await Promise.all([
       fileTypeFromFile(videoPath).catch(() => null),
+      this.getDuration(videoPath).catch(() => 60),
     ]);
 
     // 创建临时缩略图路径
