@@ -12,7 +12,7 @@ permissions: write-all
 
 env:
   OPENAI_API_URL: https://openrouter.ai/api/v1/chat/completions
-  OPENAI_MODEL: "stepfun/step-3.5-flash:free"
+  OPENAI_MODEL: "openrouter/hunter-alpha"
   RELEASE_NAME: "NapCat"
 
 jobs:
