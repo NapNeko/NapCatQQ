@@ -471,7 +471,7 @@ jobs:
 
       - name: Trigger downstream release workflows
         env:
-          GH_TOKEN: ${{ secrets.NAPCAT_BUILD }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ inputs.version }}
         run: |
           echo "Triggering release-downstream workflow with tag_name=${VERSION}"
