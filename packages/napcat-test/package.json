@@ -11,7 +11,7 @@
     "vitest": "^4.0.9"
   },
   "dependencies": {
-    "@sinclair/typebox": "^0.34.41",
+    "@sinclair/typebox": "^0.34.48",
     "napcat-core": "workspace:*",
     "napcat-image-size": "workspace:*",
     "napcat-onebot": "workspace:*",
