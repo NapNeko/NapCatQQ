@@ -108,7 +108,7 @@
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "5.2.3",
-    "eslint-plugin-unused-imports": "^4.1.4",
+    "eslint-plugin-unused-imports": "^4.4.1",
     "fontmin": "^0.9.9",
     "glob": "^10.3.10",
     "postcss": "^8.5.1",
