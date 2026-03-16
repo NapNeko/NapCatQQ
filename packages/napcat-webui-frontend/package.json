@@ -53,7 +53,7 @@
     "@heroui/theme": "2.4.6",
     "@heroui/tooltip": "2.2.8",
     "@monaco-editor/loader": "^1.4.0",
-    "@react-aria/visually-hidden": "^3.8.19",
+    "@react-aria/visually-hidden": "^3.8.31",
     "@reduxjs/toolkit": "^2.5.1",
     "@sinclair/typebox": "^0.34.41",
     "@uidotdev/usehooks": "^2.4.1",
