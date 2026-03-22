@@ -51,7 +51,7 @@ export class GetGroupAlbumMediaList extends OneBotAction<PayloadType, ReturnType
       payload.group_id,
       payload.album_id,
       payload.attach_info
-    )).response;
+    )) as any;
 
     // 标准化响应格式，与 GetQunAlbumList 保持一致
     const feedList = (resp as any).feed_list || [];
