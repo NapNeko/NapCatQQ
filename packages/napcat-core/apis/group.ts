@@ -24,7 +24,7 @@ export class NTQQGroupApi {
   core: NapCatCore;
   groupMemberCache: Map<string, Map<string, GroupMember>> = new Map<string, Map<string, GroupMember>>();
   essenceLRU = new LimitedHashTable<number, string>(1000);
-  // psKey 缓存，TTL 4分钟，避免频繁重复获取
+  // psKey 滑动缓存，TTL 60 秒，惰性删除（不主动清理，等下次访问检测到过期再刷新）
   private _qunPskeyCache: { value: string; expireAt: number } | null = null;
 
   constructor (context: InstanceContext, core: NapCatCore) {
@@ -32,14 +32,17 @@ export class NTQQGroupApi {
     this.core = core;
   }
 
-  /** 获取 qun.qq.com 域名的 psKey，带 4 分钟缓存 */
+  /** 获取 qun.qq.com 域名的 psKey，滑动 TTL 60 秒（每次访问顺延） */
   private async getQunPskey (): Promise<string> {
     const now = Date.now();
     if (this._qunPskeyCache && this._qunPskeyCache.expireAt > now) {
+      // 滑动 TTL：每次访问都顺延过期时间
+      this._qunPskeyCache.expireAt = now + 60 * 1000;
       return this._qunPskeyCache.value;
     }
+    // 过期或为空，惰性删除旧值（直接覆盖）并重新获取
     const psKey = (await this.core.apis.UserApi.getPSkey(['qun.qq.com'])).domainPskeyMap.get('qun.qq.com')!;
-    this._qunPskeyCache = { value: psKey, expireAt: now + 4 * 60 * 1000 };
+    this._qunPskeyCache = { value: psKey, expireAt: now + 60 * 1000 };
     return psKey;
   }
 
