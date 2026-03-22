@@ -24,10 +24,26 @@ export class NTQQGroupApi {
   core: NapCatCore;
   groupMemberCache: Map<string, Map<string, GroupMember>> = new Map<string, Map<string, GroupMember>>();
   essenceLRU = new LimitedHashTable<number, string>(1000);
+  // psKey 滑动缓存，TTL 60 秒，惰性删除（不主动清理，等下次访问检测到过期再刷新）
+  private _qunPskeyCache: { value: string; expireAt: number } | null = null;
 
   constructor (context: InstanceContext, core: NapCatCore) {
     this.context = context;
     this.core = core;
+  }
+
+  /** 获取 qun.qq.com 域名的 psKey，滑动 TTL 60 秒（每次访问顺延） */
+  private async getQunPskey (): Promise<string> {
+    const now = Date.now();
+    if (this._qunPskeyCache && this._qunPskeyCache.expireAt > now) {
+      // 滑动 TTL：每次访问都顺延过期时间
+      this._qunPskeyCache.expireAt = now + 60 * 1000;
+      return this._qunPskeyCache.value;
+    }
+    // 过期或为空，惰性删除旧值（直接覆盖）并重新获取
+    const psKey = (await this.core.apis.UserApi.getPSkey(['qun.qq.com'])).domainPskeyMap.get('qun.qq.com')!;
+    this._qunPskeyCache = { value: psKey, expireAt: now + 60 * 1000 };
+    return psKey;
   }
 
   async setGroupRemark (groupCode: string, remark: string) {
@@ -75,7 +91,7 @@ export class NTQQGroupApi {
   }
 
   async fetchGroupEssenceList (groupCode: string) {
-    const pskey = (await this.core.apis.UserApi.getPSkey(['qun.qq.com'])).domainPskeyMap.get('qun.qq.com')!;
+    const pskey = await this.getQunPskey();
     return this.context.session.getGroupService().fetchGroupEssenceList({
       groupCode,
       pageStart: 0,
@@ -319,7 +335,7 @@ export class NTQQGroupApi {
   }
 
   async deleteGroupBulletin (groupCode: string, noticeId: string) {
-    const psKey = (await this.core.apis.UserApi.getPSkey(['qun.qq.com'])).domainPskeyMap.get('qun.qq.com')!;
+    const psKey = await this.getQunPskey();
     return this.context.session.getGroupService().deleteGroupBulletin(groupCode, psKey, noticeId);
   }
 
@@ -423,7 +439,7 @@ export class NTQQGroupApi {
   }
 
   async uploadGroupBulletinPic (groupCode: string, imageurl: string) {
-    const _Pskey = (await this.core.apis.UserApi.getPSkey(['qun.qq.com'])).domainPskeyMap.get('qun.qq.com')!;
+    const _Pskey = await this.getQunPskey();
     return this.context.session.getGroupService().uploadGroupBulletinPic(groupCode, _Pskey, imageurl);
   }
 
@@ -475,7 +491,7 @@ export class NTQQGroupApi {
     width: number,
     height: number;
   } | undefined = undefined, pinned: number = 0, confirmRequired: number = 0) {
-    const psKey = (await this.core.apis.UserApi.getPSkey(['qun.qq.com'])).domainPskeyMap.get('qun.qq.com');
+    const psKey = await this.getQunPskey();
     // text是content内容url编码
     const data = {
       text: encodeURI(content),
