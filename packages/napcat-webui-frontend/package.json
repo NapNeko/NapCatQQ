@@ -51,7 +51,7 @@
     "@heroui/table": "^2.2.9",
     "@heroui/tabs": "2.2.8",
     "@heroui/theme": "2.4.6",
-    "@heroui/tooltip": "2.2.8",
+    "@heroui/tooltip": "2.2.29",
     "@monaco-editor/loader": "^1.4.0",
     "@react-aria/visually-hidden": "^3.8.19",
     "@reduxjs/toolkit": "^2.5.1",
