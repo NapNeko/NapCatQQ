@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@simplewebauthn/server": "^13.2.2",
-    "@sinclair/typebox": "^0.34.38",
+    "@sinclair/typebox": "^0.34.49",
     "compressing": "^1.10.3",
     "compression": "^1.8.1",
     "express": "^5.0.0",

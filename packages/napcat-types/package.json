@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@types/node": "^22.10.7",
-    "@sinclair/typebox": "^0.34.38"
+    "@sinclair/typebox": "^0.34.49"
   },
   "devDependencies": {
     "napcat-core": "workspace:*",
