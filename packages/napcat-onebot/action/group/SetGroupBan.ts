@@ -31,6 +31,10 @@ export default class SetGroupBan extends OneBotAction<PayloadType, ReturnType> {
     if (!uid) throw new Error('uid error');
     const member_role = (await this.core.apis.GroupApi.getGroupMemberEx(payload.group_id.toString(), uid, true))?.role;
     if (member_role === 4) throw new Error('cannot ban owner');
+    if (member_role === 3) {
+      const self_role = (await this.core.apis.GroupApi.getGroupMemberEx(payload.group_id.toString(), this.core.selfInfo.uid, true))?.role;
+      if (self_role !== 4) throw new Error('cannot ban admin');
+    }
     // 例如无管理员权限时 result为 120101005 errMsg为 'ERR_NOT_GROUP_ADMIN'
     const ret = await this.core.apis.GroupApi.banMember(payload.group_id.toString(),
       [{ uid, timeStamp: +payload.duration }]);
