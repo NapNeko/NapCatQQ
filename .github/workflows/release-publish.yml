@@ -406,7 +406,6 @@ jobs:
         with:
           tag_name: ${{ inputs.version }}
           name: NapCat ${{ inputs.version }}
-          token: ${{ secrets.NAPCAT_BUILD }}
           body_path: CHANGELOG.md
           files: |
             NapCat.Shell.Windows.Node.zip
