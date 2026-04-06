@@ -21,7 +21,7 @@
     "compressing": "^1.10.3",
     "compression": "^1.8.1",
     "express": "^5.0.0",
-    "express-rate-limit": "^7.5.0",
+    "express-rate-limit": "^8.3.2",
     "json5": "^2.2.3",
     "multer": "^2.0.1",
     "napcat-common": "workspace:*",
