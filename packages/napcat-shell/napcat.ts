@@ -36,7 +36,7 @@ if (fs.existsSync(envPath)) {
 // 环境变量配置
 const ENV = {
   isWorkerProcess: process.env['NAPCAT_WORKER_PROCESS'] === '1',
-  isMultiProcessDisabled: process.env['NAPCAT_DISABLE_MULTI_PROCESS'] === '1',
+  isMultiProcessDisabled: process.env['NAPCAT_DISABLE_MULTI_PROCESS'] === '1' || process.env['NAPCAT_DISABLE_MULTIPROCESSING'] === '1',
   isPipeDisabled: process.env['NAPCAT_DISABLE_PIPE'] === '1',
 } as const;
 
