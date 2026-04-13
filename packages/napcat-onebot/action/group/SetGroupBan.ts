@@ -35,6 +35,7 @@ export default class SetGroupBan extends OneBotAction<PayloadType, ReturnType> {
     if (member_role === NTGroupMemberRole.KOWNER) throw new Error('cannot ban owner');
     if (member_role === NTGroupMemberRole.KADMIN) {
       const self_role = (await this.core.apis.GroupApi.getGroupMemberEx(payload.group_id.toString(), this.core.selfInfo.uid, true))?.role;
+      if (self_role === undefined) throw new Error('failed to fetch bot role');
       if (self_role !== NTGroupMemberRole.KOWNER) throw new Error('cannot ban admin');
     }
     // 例如无管理员权限时 result为 120101005 errMsg为 'ERR_NOT_GROUP_ADMIN'
