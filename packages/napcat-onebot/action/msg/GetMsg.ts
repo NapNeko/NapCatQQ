@@ -1,6 +1,7 @@
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { MessageUnique } from 'napcat-common/src/message-unique';
+import { PromiseTimer } from 'napcat-common/src/helper';
 import { Static, Type } from '@sinclair/typebox';
 import { NetworkAdapterConfig } from '@/napcat-onebot/config/config';
 
@@ -49,8 +50,18 @@ class GetMsg extends OneBotAction<PayloadType, ReturnType> {
       throw new Error('消息不存在');
     }
     const peer = { guildId: '', peerUid: msgIdWithPeer?.Peer.peerUid, chatType: msgIdWithPeer.Peer.chatType };
-    const msg = (await this.core.apis.MsgApi.getMsgsByMsgId(peer, [msgIdWithPeer?.MsgId || payload.message_id.toString()])).msgList[0];
-    if (!msg) throw Error('消息不存在');
+    const getMsgTimeout = this.obContext.configLoader.configData.timeout.baseTimeout;
+    const msgRes = await PromiseTimer(
+      this.core.apis.MsgApi.getMsgsByMsgId(peer, [msgIdWithPeer?.MsgId || payload.message_id.toString()]),
+      getMsgTimeout
+    ).catch((e: unknown) => {
+      if (e instanceof Error && e.message.startsWith('PromiseTimer:')) {
+        throw new Error(`消息不存在或已被撤回: ${e.message || String(e)}`);
+      }
+      throw e;
+    });
+    const msg = msgRes.msgList[0];
+    if (!msg) throw Error('消息不存在或已被撤回');
     const retMsg = await this.obContext.apis.MsgApi.parseMessage(msg, config.messagePostFormat);
     if (!retMsg) throw Error('消息为空');
     retMsg.emoji_likes_list = [];
