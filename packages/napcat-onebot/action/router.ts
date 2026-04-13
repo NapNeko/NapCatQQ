@@ -29,6 +29,8 @@ export const ActionName = {
   UploadImageToQunAlbum: 'upload_image_to_qun_album',
   GetQunAlbumList: 'get_qun_album_list',
   SetGroupTodo: 'set_group_todo',
+  CompleteGroupTodo: 'complete_group_todo',
+  CancelGroupTodo: 'cancel_group_todo',
   SetGroupKickMembers: 'set_group_kick_members',
   SetGroupRobotAddOption: 'set_group_robot_add_option',
   SetGroupAddOption: 'set_group_add_option',

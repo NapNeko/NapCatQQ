@@ -11,4 +11,12 @@ export const PacketActionsExamples = {
     payload: { group_id: '123456', message_id: '123456789' },
     response: {},
   },
+  CompleteGroupTodo: {
+    payload: { group_id: '123456', message_id: '123456789' },
+    response: {},
+  },
+  CancelGroupTodo: {
+    payload: { group_id: '123456', message_id: '123456789' },
+    response: {},
+  },
 };

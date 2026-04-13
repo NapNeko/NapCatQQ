@@ -15,6 +15,7 @@
     "napcat-core": "workspace:*",
     "napcat-image-size": "workspace:*",
     "napcat-onebot": "workspace:*",
-    "napcat-rpc": "workspace:*"
+    "napcat-rpc": "workspace:*",
+    "napcat-protobuf": "workspace:*"
   }
 }

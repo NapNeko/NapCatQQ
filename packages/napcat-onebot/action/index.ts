@@ -127,6 +127,8 @@ import SetGroupKickMembers from './extends/SetGroupKickMembers';
 import { GetGroupDetailInfo } from './group/GetGroupDetailInfo';
 import GetGroupAddRequest from './extends/GetGroupAddRequest';
 import { GetCollectionList } from './extends/GetCollectionList';
+import { CompleteGroupTodo } from './packet/CompleteGroupTodo';
+import { CancelGroupTodo } from './packet/CancelGroupTodo';
 import { SetGroupTodo } from './packet/SetGroupTodo';
 import { GetQunAlbumList } from './extends/GetQunAlbumList';
 import { UploadImageToQunAlbum } from './extends/UploadImageToQunAlbum';
@@ -171,6 +173,8 @@ export function getAllHandlers (obContext: NapCatOneBot11Adapter, core: NapCatCo
     new GetQunAlbumList(obContext, core),
     new UploadImageToQunAlbum(obContext, core),
     new SetGroupTodo(obContext, core),
+    new CompleteGroupTodo(obContext, core),
+    new CancelGroupTodo(obContext, core),
     new GetGroupDetailInfo(obContext, core),
     new SetGroupKickMembers(obContext, core),
     new SetGroupAddOption(obContext, core),
