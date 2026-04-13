@@ -5,7 +5,7 @@
   "consoleLogLevel": "info",
   "packetBackend": "auto",
   "packetServer": "",
-  "o3HookMode": 0,
+  "o3HookMode": 1,
   "bypass": {
     "hook": false,
     "window": false,

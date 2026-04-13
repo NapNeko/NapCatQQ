@@ -66,9 +66,12 @@ function scanFilesRecursively (dirPath: string, basePath: string = dirPath): Arr
   for (const item of items) {
     const fullPath = path.join(dirPath, item);
     const relativePath = path.relative(basePath, fullPath);
-    const stat = fs.statSync(fullPath);
+    const stat = fs.lstatSync(fullPath);
 
-    if (stat.isDirectory()) {
+    if (stat.isSymbolicLink()) {
+      // 跳过符号链接，避免潜在的路径穿越风险
+      continue;
+    } else if (stat.isDirectory()) {
       // 递归扫描子目录
       files.push(...scanFilesRecursively(fullPath, basePath));
     } else if (stat.isFile()) {
@@ -270,8 +273,15 @@ export const UpdateNapCatHandler: RequestHandler = async (req, res) => {
       }> = [];
 
       // 先尝试直接替换文件
+      const resolvedBinaryPath = path.resolve(webUiPathWrapper.binaryPath);
       for (const fileInfo of allFiles) {
-        const targetFilePath = path.join(webUiPathWrapper.binaryPath, fileInfo.relativePath);
+        // 防止路径穿越攻击：确保目标路径严格位于 binaryPath 子目录内
+        const targetFilePath = path.resolve(webUiPathWrapper.binaryPath, fileInfo.relativePath);
+        if (!targetFilePath.startsWith(resolvedBinaryPath + path.sep)) {
+          webUiLogger?.logWarn(`[NapCat Update] Skipping suspicious path: ${fileInfo.relativePath}`);
+          continue;
+        }
+
         const normalizedRelativePath = path.normalize(fileInfo.relativePath);
 
         // 跳过指定的文件
