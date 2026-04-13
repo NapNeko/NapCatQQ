@@ -50,10 +50,16 @@ class GetMsg extends OneBotAction<PayloadType, ReturnType> {
       throw new Error('消息不存在');
     }
     const peer = { guildId: '', peerUid: msgIdWithPeer?.Peer.peerUid, chatType: msgIdWithPeer.Peer.chatType };
+    const getMsgTimeout = this.obContext.configLoader.configData.timeout.baseTimeout;
     const msgRes = await PromiseTimer(
       this.core.apis.MsgApi.getMsgsByMsgId(peer, [msgIdWithPeer?.MsgId || payload.message_id.toString()]),
-      5000
-    ).catch((e: unknown) => { throw new Error('消息不存在或已被撤回', { cause: e }); });
+      getMsgTimeout
+    ).catch((e: unknown) => {
+      if (e instanceof Error && e.message.startsWith('PromiseTimer:')) {
+        throw new Error(`消息不存在或已被撤回: ${e.message || String(e)}`);
+      }
+      throw e;
+    });
     const msg = msgRes.msgList[0];
     if (!msg) throw Error('消息不存在或已被撤回');
     const retMsg = await this.obContext.apis.MsgApi.parseMessage(msg, config.messagePostFormat);
