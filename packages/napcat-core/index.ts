@@ -180,16 +180,22 @@ export class NapCatCore {
     if (process.env['NAPCAT_DISABLE_TIME_SYNC'] === '1' || !this.configLoader.configData.autoTimeSync) {
       this.context.logger.log('[ServerTime] 自动对时已禁用');
     } else {
-      try {
-        const offsetMs = hookGlobalDateNow(() => this.context.session.getMSFService().getServerTime());
-        if (Math.abs(offsetMs) > 5000) {
-          this.context.logger.logWarn(`[ServerTime] 本地时间与服务器时间偏差 ${(offsetMs / 1000).toFixed(1)}s，已自动矫正`);
-        } else {
-          this.context.logger.log(`[ServerTime] 时间同步完成，偏差 ${offsetMs}ms`);
+      const doTimeSync = () => {
+        try {
+          const offsetMs = hookGlobalDateNow(() => this.context.session.getMSFService().getServerTime());
+          if (Math.abs(offsetMs) > 5000) {
+            this.context.logger.logWarn(`[ServerTime] 本地时间与服务器时间偏差 ${(offsetMs / 1000).toFixed(1)}s，已自动矫正`);
+          } else {
+            this.context.logger.log(`[ServerTime] 时间同步完成，偏差 ${offsetMs}ms`);
+          }
+        } catch (e) {
+          this.context.logger.logError('[ServerTime] 时间矫正失败', e);
         }
-      } catch (e) {
-        this.context.logger.logError('[ServerTime] 时间矫正失败', e);
-      }
+      };
+      doTimeSync();
+      // 每小时定期重同步，防止长时间运行后本地时钟漂移触发风控
+      const syncTimer = setInterval(doTimeSync, 3600000);
+      syncTimer.unref();
     }
     // 遍历this.apis[i].initApi 如果存在该函数进行async 调用
     for (const apiKey in this.apis) {
