@@ -328,6 +328,10 @@ export class NTQQWebApi {
     return (hash & 0x7FFFFFFF).toString();
   }
 
+  public getBknFromPSKey (psKey: string) {
+    return this.getBknFromSKey(psKey);
+  }
+
   async getAlbumListByNTQQ (gc: string, attach_info: string = '') {
     return await this.context.session.getAlbumService().getAlbumList({
       qun_id: gc,

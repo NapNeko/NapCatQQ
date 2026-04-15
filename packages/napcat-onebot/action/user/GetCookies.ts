@@ -35,7 +35,16 @@ export class GetCookies extends OneBotAction<GetCookiesPayload, GetCookiesRespon
     const cookiesObject = await this.core.apis.UserApi.getCookies(payload.domain);
     // 把获取到的cookiesObject转换成 k=v; 格式字符串拼接在一起
     const cookies = Object.entries(cookiesObject).map(([key, value]) => `${key}=${value}`).join('; ');
-    const bkn = cookiesObject?.['skey'] ? this.core.apis.WebApi.getBknFromCookie(cookiesObject) : '';
+    let bkn = '';
+    if (payload.domain.includes('qzone.qq.com')) {
+      if (cookiesObject?.['p_skey']) {
+        bkn = this.core.apis.WebApi.getBknFromPSKey(cookiesObject['p_skey']);
+      } else {
+        bkn = cookiesObject?.['skey'] ? this.core.apis.WebApi.getBknFromCookie(cookiesObject) : '';
+      }
+    } else {
+      bkn = cookiesObject?.['skey'] ? this.core.apis.WebApi.getBknFromCookie(cookiesObject) : '';
+    }
     return { cookies, bkn };
   }
 }
