@@ -41,6 +41,16 @@ export class PacketOperationContext {
     await this.context.client.sendOidbPacket(req, true);
   }
 
+  async CompleteGroupTodo (groupUin: number, msgSeq: string) {
+    const req = trans.CompleteGroupTodo.build(groupUin, msgSeq);
+    await this.context.client.sendOidbPacket(req, true);
+  }
+
+  async CancelGroupTodo (groupUin: number, msgSeq: string) {
+    const req = trans.CancelGroupTodo.build(groupUin, msgSeq);
+    await this.context.client.sendOidbPacket(req, true);
+  }
+
   async FetchRkey (timeout: number = 10000) {
     const req = trans.FetchRkey.build();
     const resp = await this.context.client.sendOidbPacket(req, true, timeout);

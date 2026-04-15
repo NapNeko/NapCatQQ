@@ -387,6 +387,9 @@ importers:
       napcat-onebot:
         specifier: workspace:*
         version: link:../napcat-onebot
+      napcat-protobuf:
+        specifier: workspace:*
+        version: link:../napcat-protobuf
       napcat-rpc:
         specifier: workspace:*
         version: link:../napcat-rpc

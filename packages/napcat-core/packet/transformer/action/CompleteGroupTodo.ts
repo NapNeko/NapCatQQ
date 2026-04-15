@@ -3,13 +3,13 @@ import { NapProtoMsg } from 'napcat-protobuf';
 import { OidbPacket, PacketTransformer } from '@/napcat-core/packet/transformer/base';
 import OidbBase from '@/napcat-core/packet/transformer/oidb/oidbBase';
 
-class SetGroupTodo extends PacketTransformer<typeof proto.OidbSvcTrpcTcpBase> {
+class CompleteGroupTodo extends PacketTransformer<typeof proto.OidbSvcTrpcTcpBase> {
   build (peer: number, msgSeq: string): OidbPacket {
     const data = new NapProtoMsg(proto.OidbSvcTrpcTcp0XF90).encode({
       groupUin: peer,
       msgSeq: BigInt(msgSeq),
     });
-    return OidbBase.build(0xF90, 1, data);
+    return OidbBase.build(0xF90, 2, data);
   }
 
   parse (data: Buffer) {
@@ -17,4 +17,4 @@ class SetGroupTodo extends PacketTransformer<typeof proto.OidbSvcTrpcTcpBase> {
   }
 }
 
-export default new SetGroupTodo();
+export default new CompleteGroupTodo();
