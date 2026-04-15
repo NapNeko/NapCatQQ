@@ -9,6 +9,7 @@ export const SendGroupNoticePayloadSchema = Type.Object({
   group_id: Type.String({ description: '群号' }),
   content: Type.String({ description: '公告内容' }),
   image: Type.Optional(Type.String({ description: '公告图片路径或 URL' })),
+  notice_id: Type.Optional(Type.String({ description: '公告ID，提供时修改已有公告' })),
   pinned: Type.Union([Type.Number(), Type.String()], { default: 0, description: '是否置顶 (0/1)' }),
   type: Type.Union([Type.Number(), Type.String()], { default: 1, description: '类型 (默认为 1)' }),
   confirm_required: Type.Union([Type.Number(), Type.String()], { default: 1, description: '是否需要确认 (0/1)' }),
@@ -23,7 +24,7 @@ export class SendGroupNotice extends OneBotAction<SendGroupNoticePayload, void> 
   override payloadSchema = SendGroupNoticePayloadSchema;
   override returnSchema = Type.Null();
   override actionSummary = '发送群公告';
-  override actionDescription = '在指定群聊中发布新的公告';
+  override actionDescription = '在指定群聊中发布新的公告，或通过提供 notice_id 修改已有公告';
   override actionTags = ['Go-CQHTTP'];
   override payloadExample = GoCQHTTPActionsExamples.SendGroupNotice.payload;
   override returnExample = GoCQHTTPActionsExamples.SendGroupNotice.response;
@@ -63,7 +64,8 @@ export class SendGroupNotice extends OneBotAction<SendGroupNoticePayload, void> 
       +payload.confirm_required,
       UploadImage?.id,
       UploadImage?.width,
-      UploadImage?.height
+      UploadImage?.height,
+      payload.notice_id
     );
     if (!publishGroupBulletinResult || publishGroupBulletinResult.ec !== 0) {
       throw new Error(`设置群公告失败,错误信息:${publishGroupBulletinResult?.em}`);
