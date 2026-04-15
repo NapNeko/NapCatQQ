@@ -35,7 +35,7 @@ if (fs.existsSync(envPath)) {
 
 // 环境变量配置
 const ENV = {
-  isWorkerProcess: process.env['NAPCAT_WORKER_PROCESS'] === '1',
+  isWorkerProcess: process.env['_NTAPP_SUBPROCESS'] === '1',
   isMultiProcessDisabled: process.env['NAPCAT_DISABLE_MULTI_PROCESS'] === '1' || process.env['NAPCAT_DISABLE_MULTIPROCESSING'] === '1',
   isPipeDisabled: process.env['NAPCAT_DISABLE_PIPE'] === '1',
 } as const;
@@ -242,7 +242,7 @@ async function startWorker (passQuickLogin: boolean = true, secretKey?: string, 
   const child = processManager.createWorker(workerScript, workerArgs, {
     env: {
       ...process.env,
-      NAPCAT_WORKER_PROCESS: '1',
+      _NTAPP_SUBPROCESS: '1',
       ...(secretKey ? { NAPCAT_WEBUI_JWT_SECRET_KEY: secretKey } : {}),
       ...(preferredPort ? { NAPCAT_WEBUI_PREFERRED_PORT: String(preferredPort) } : {}),
     },
