@@ -21,6 +21,7 @@ import { execSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync, mkdirSync, readdirSync } from 'node:fs';
 import { join, basename, resolve } from 'node:path';
 import { GitHubAPI, getEnv, setOutput } from './lib/github.ts';
+import { PROXY_BASE } from './lib/comment.ts';
 
 interface AssetEntry {
   name: string;
@@ -118,6 +119,7 @@ async function main (): Promise<void> {
   }
 
   // ---- 创建 Release ----
+  const proxyInstallUrl = `${downloadBase}/install.sh`.replace('https://github.com', PROXY_BASE);
   const releaseBody = [
     `## NapCat PR #${prNumber} 测试版本`,
     '',
@@ -128,10 +130,10 @@ async function main (): Promise<void> {
     '### 快速安装 (Linux)',
     '',
     '```bash',
-    `curl -sSL ${downloadBase}/install.sh | bash`,
+    `curl -sSL ${proxyInstallUrl} | bash`,
     '```',
     '',
-    '> ⚠️ 此为 PR 测试版本，约 24 小时后会被自动清理。',
+    '> ⚠️ 此为 PR 测试版本，约 5 天后会被自动清理。',
   ].join('\n');
 
   console.log('🚀 Creating release...');

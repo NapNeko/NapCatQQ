@@ -5,6 +5,9 @@
 export const COMMENT_MARKER = '<!-- napcat-pr-build -->';
 export const DOCKER_COMMENT_MARKER = '<!-- napcat-pr-docker -->';
 
+// 默认代理前缀（加速中国大陆访问 GitHub Release）
+export const PROXY_BASE = 'https://nclatest.znin.net';
+
 export type BuildStatus = 'success' | 'failure' | 'cancelled' | 'pending' | 'unknown';
 
 export interface BuildTarget {
@@ -183,6 +186,7 @@ export function generateResultComment (
 
   // 添加快速安装命令
   if (installInfo) {
+    const proxyInstallUrl = installInfo.installUrl.replace('https://github.com', PROXY_BASE);
     lines.push(
       '',
       '---',
@@ -190,11 +194,11 @@ export function generateResultComment (
       '## 🚀 快速安装 (Linux)',
       '',
       '```bash',
-      `curl -sSL ${installInfo.installUrl} | bash`,
+      `curl -sSL ${proxyInstallUrl} | bash`,
       '```',
       '',
       `> 📦 [查看 Release 页面](${installInfo.releaseUrl})`,
-      '> ⚠️ 此为 PR 测试版本，约 24 小时后会被自动清理。'
+      '> ⚠️ 此为 PR 测试版本，约 5 天后会被自动清理。'
     );
   } else if (publishFailed) {
     lines.push(
@@ -353,7 +357,7 @@ export function generateDockerResultComment (
       `docker pull ${dockerImage}`,
       '```',
       '',
-      '> ⚠️ 此为 PR 测试镜像，保留 7 天后自动清理。'
+      '> ⚠️ 此为 PR 测试镜像，保留 5 天后自动清理。'
     );
   }
 
