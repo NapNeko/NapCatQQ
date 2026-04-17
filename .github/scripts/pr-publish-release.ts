@@ -21,7 +21,7 @@ import { execSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync, mkdirSync, readdirSync } from 'node:fs';
 import { join, basename, resolve } from 'node:path';
 import { GitHubAPI, getEnv, setOutput } from './lib/github.ts';
-import { PROXY_BASE } from './lib/comment.ts';
+import { toProxyUrl } from './lib/comment.ts';
 
 interface AssetEntry {
   name: string;
@@ -119,7 +119,8 @@ async function main (): Promise<void> {
   }
 
   // ---- 创建 Release ----
-  const proxyInstallUrl = `${downloadBase}/install.sh`.replace('https://github.com', PROXY_BASE);
+  const directInstallUrl = `${downloadBase}/install.sh`;
+  const proxyInstallUrl = toProxyUrl(directInstallUrl);
   const releaseBody = [
     `## NapCat PR #${prNumber} 测试版本`,
     '',
@@ -129,6 +130,12 @@ async function main (): Promise<void> {
     '',
     '### 快速安装 (Linux)',
     '',
+    '**直连（需要能访问 GitHub）**',
+    '```bash',
+    `curl -sSL ${directInstallUrl} | bash`,
+    '```',
+    '',
+    '**加速（国内推荐，ghfast.top）**',
     '```bash',
     `curl -sSL ${proxyInstallUrl} | bash`,
     '```',

@@ -6,7 +6,13 @@ export const COMMENT_MARKER = '<!-- napcat-pr-build -->';
 export const DOCKER_COMMENT_MARKER = '<!-- napcat-pr-docker -->';
 
 // 默认代理前缀（加速中国大陆访问 GitHub Release）
-export const PROXY_BASE = 'https://nclatest.znin.net';
+// 格式：https://ghfast.top/{full-github-url}
+export const PROXY_BASE = 'https://gh.llkk.cc';
+
+/** 将 GitHub 直链转换为 ghfast.top 加速链接 */
+export function toProxyUrl (directUrl: string): string {
+  return `${PROXY_BASE}/${directUrl}`;
+}
 
 export type BuildStatus = 'success' | 'failure' | 'cancelled' | 'pending' | 'unknown';
 
@@ -186,13 +192,20 @@ export function generateResultComment (
 
   // 添加快速安装命令
   if (installInfo) {
-    const proxyInstallUrl = installInfo.installUrl.replace('https://github.com', PROXY_BASE);
+    const directUrl = installInfo.installUrl;
+    const proxyInstallUrl = toProxyUrl(directUrl);
     lines.push(
       '',
       '---',
       '',
       '## 🚀 快速安装 (Linux)',
       '',
+      '**直连（需要能访问 GitHub）**',
+      '```bash',
+      `curl -sSL ${directUrl} | bash`,
+      '```',
+      '',
+      '**加速（国内推荐，ghfast.top）**',
       '```bash',
       `curl -sSL ${proxyInstallUrl} | bash`,
       '```',
