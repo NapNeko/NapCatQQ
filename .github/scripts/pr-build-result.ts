@@ -51,12 +51,16 @@ async function main (): Promise<void> {
   // PR Release 信息（由 publish-pr-release job 传入）
   const installUrl = getEnv('INSTALL_URL');
   const releaseUrl = getEnv('RELEASE_URL');
+  const publishStatus = getEnv('PUBLISH_STATUS'); // 'success' | 'failure' | 'skipped' | ''
   const installInfo: InstallInfo | undefined =
     installUrl && releaseUrl ? { installUrl, releaseUrl } : undefined;
+  const publishFailed = publishStatus === 'failure';
 
   if (installInfo) {
     console.log(`Install URL: ${installUrl}`);
     console.log(`Release URL: ${releaseUrl}\n`);
+  } else if (publishFailed) {
+    console.log('Publish status: FAILED\n');
   }
 
   const github = new GitHubAPI(token);
@@ -92,7 +96,7 @@ async function main (): Promise<void> {
     },
   ];
 
-  const comment = generateResultComment(targets, prSha, runId, repository, version, installInfo);
+  const comment = generateResultComment(targets, prSha, runId, repository, version, installInfo, publishFailed);
 
   await github.createOrUpdateComment(owner, repo, prNumber, comment, COMMENT_MARKER);
 }

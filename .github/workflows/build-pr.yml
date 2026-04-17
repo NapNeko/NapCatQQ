@@ -304,6 +304,7 @@ jobs:
           # PR Release 信息（用于在评论中显示安装命令）
           INSTALL_URL: ${{ needs.publish-pr-release.outputs.install_url || '' }}
           RELEASE_URL: ${{ needs.publish-pr-release.outputs.release_url || '' }}
+          PUBLISH_STATUS: ${{ needs.publish-pr-release.outputs.publish_status || '' }}
         run: node --experimental-strip-types .github/scripts/pr-build-result.ts
 
   # ---------------------------------------------------------------------------
@@ -321,6 +322,7 @@ jobs:
       release_url: ${{ steps.publish.outputs.release_url }}
       release_tag: ${{ steps.publish.outputs.release_tag }}
       install_url: ${{ steps.publish.outputs.install_url }}
+      publish_status: ${{ steps.publish.outcome }} # 'success' | 'failure' | 'skipped'
     steps:
       - name: Checkout scripts
         uses: actions/checkout@v5

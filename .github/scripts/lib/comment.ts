@@ -117,7 +117,8 @@ export function generateResultComment (
   runId: string,
   repository: string,
   version?: string,
-  installInfo?: InstallInfo
+  installInfo?: InstallInfo,
+  publishFailed?: boolean
 ): string {
   const runUrl = `https://github.com/${repository}/actions/runs/${runId}`;
   const shortSha = formatSha(prSha);
@@ -194,6 +195,16 @@ export function generateResultComment (
       '',
       `> 📦 [查看 Release 页面](${installInfo.releaseUrl})`,
       '> ⚠️ 此为 PR 测试版本，约 24 小时后会被自动清理。'
+    );
+  } else if (publishFailed) {
+    lines.push(
+      '',
+      '---',
+      '',
+      '## ⚠️ Release 发布失败',
+      '',
+      '> ❌ PR Release 发布过程中出现错误，无法提供快速安装命令。',
+      `> 🔗 [查看构建日志](${runUrl}) 了解详情。`
     );
   }
 

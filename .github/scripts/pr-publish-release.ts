@@ -19,7 +19,7 @@
 
 import { execSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync, mkdirSync, readdirSync } from 'node:fs';
-import { join, basename } from 'node:path';
+import { join, basename, resolve } from 'node:path';
 import { GitHubAPI, getEnv, setOutput } from './lib/github.ts';
 
 interface AssetEntry {
@@ -52,7 +52,7 @@ async function main (): Promise<void> {
   console.log(`  SHA:      ${shortSha}\n`);
 
   const github = new GitHubAPI(token);
-  const releaseDir = './release-assets';
+  const releaseDir = resolve('./release-assets'); // 使用绝对路径，避免 zip cwd 切换后相对路径解析错误
   mkdirSync(releaseDir, { recursive: true });
 
   // ---- 打包构建产物 ----
