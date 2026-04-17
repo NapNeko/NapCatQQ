@@ -31,6 +31,21 @@ export interface Artifact {
   archive_download_url: string;
 }
 
+export interface Release {
+  id: number;
+  tag_name: string;
+  name: string;
+  upload_url: string;
+  html_url: string;
+  created_at: string;
+}
+
+export interface ReleaseAsset {
+  id: number;
+  name: string;
+  browser_download_url: string;
+}
+
 // ============== GitHub API Client ==========================
 
 export class GitHubAPI {
@@ -149,6 +164,97 @@ export class GitHubAPI {
       await this.createComment(owner, repo, issueNumber, body);
       console.log('✓ Created new comment');
     }
+  }
+
+  // ============== Release API ==============
+
+  async getReleaseByTag (owner: string, repo: string, tag: string): Promise<Release | null> {
+    try {
+      return await this.request<Release>(`/repos/${owner}/${repo}/releases/tags/${tag}`);
+    } catch {
+      return null;
+    }
+  }
+
+  async deleteRelease (owner: string, repo: string, releaseId: number): Promise<void> {
+    await this.request(`/repos/${owner}/${repo}/releases/${releaseId}`, { method: 'DELETE' });
+  }
+
+  async deleteRef (owner: string, repo: string, ref: string): Promise<void> {
+    try {
+      await this.request(`/repos/${owner}/${repo}/git/refs/${ref}`, { method: 'DELETE' });
+    } catch {
+      // ref may not exist, ignore
+    }
+  }
+
+  async createRelease (
+    owner: string,
+    repo: string,
+    tag: string,
+    name: string,
+    body: string,
+    prerelease = true
+  ): Promise<Release> {
+    return this.request<Release>(`/repos/${owner}/${repo}/releases`, {
+      method: 'POST',
+      body: JSON.stringify({ tag_name: tag, name, body, prerelease }),
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  async uploadReleaseAsset (
+    uploadUrl: string,
+    fileName: string,
+    data: Buffer,
+    contentType = 'application/octet-stream'
+  ): Promise<ReleaseAsset> {
+    const url = uploadUrl.replace(/\{[^}]*\}/g, '') + `?name=${encodeURIComponent(fileName)}`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+        Accept: 'application/vnd.github+json',
+        'Content-Type': contentType,
+        'X-GitHub-Api-Version': '2022-11-28',
+      },
+      body: data,
+    });
+    if (!response.ok) {
+      throw new Error(`Upload ${fileName} failed: ${response.status} ${response.statusText}`);
+    }
+    return response.json() as Promise<ReleaseAsset>;
+  }
+
+  // ============== Dispatch API ==============
+
+  async repositoryDispatch (
+    owner: string,
+    repo: string,
+    eventType: string,
+    clientPayload: Record<string, string>
+  ): Promise<void> {
+    const response = await fetch(`${this.baseUrl}/repos/${owner}/${repo}/dispatches`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+        Accept: 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ event_type: eventType, client_payload: clientPayload }),
+    });
+    if (!response.ok && response.status !== 204) {
+      throw new Error(`Dispatch failed: ${response.status} ${response.statusText}`);
+    }
+  }
+
+  // ============== Release Cleanup API ==============
+
+  async listReleases (owner: string, repo: string, perPage = 100, page = 1): Promise<Release[]> {
+    return this.request<Release[]>(
+      `/repos/${owner}/${repo}/releases?per_page=${perPage}&page=${page}`
+    );
   }
 }
 

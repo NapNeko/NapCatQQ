@@ -272,7 +272,7 @@ jobs:
   # 使用 always() 确保即使构建失败/取消也会执行
   # ---------------------------------------------------------------------------
   update-comment-result:
-    needs: [check-build, update-comment-building, build-framework, build-shell]
+    needs: [check-build, update-comment-building, build-framework, build-shell, publish-pr-release]
     if: always() && needs.check-build.outputs.should_build == 'true'
     runs-on: ubuntu-latest
     steps:
@@ -301,4 +301,113 @@ jobs:
           FRAMEWORK_ERROR: ${{ needs.build-framework.outputs.error }}
           SHELL_STATUS: ${{ needs.build-shell.outputs.status || 'cancelled' }}
           SHELL_ERROR: ${{ needs.build-shell.outputs.error }}
+          # PR Release 信息（用于在评论中显示安装命令）
+          INSTALL_URL: ${{ needs.publish-pr-release.outputs.install_url || '' }}
+          RELEASE_URL: ${{ needs.publish-pr-release.outputs.release_url || '' }}
         run: node --experimental-strip-types .github/scripts/pr-build-result.ts
+
+  # ---------------------------------------------------------------------------
+  # Job 6: 发布 PR 构建产物到 napcat-pr-release 仓库
+  # ---------------------------------------------------------------------------
+  # 将所有构建产物打包 + 从 NapCat-Installer 拉取并修改安装脚本，
+  # 一起发布为 GitHub Release（公开可下载，无需登录）。
+  # Release 会由 napcat-pr-release 仓库的定时任务在 24h 后自动清理。
+  # ---------------------------------------------------------------------------
+  publish-pr-release:
+    needs: [check-build, build-framework, build-shell]
+    if: always() && needs.check-build.outputs.should_build == 'true' && (needs.build-framework.outputs.status == 'success' || needs.build-shell.outputs.status == 'success')
+    runs-on: ubuntu-latest
+    outputs:
+      release_url: ${{ steps.publish.outputs.release_url }}
+      release_tag: ${{ steps.publish.outputs.release_tag }}
+      install_url: ${{ steps.publish.outputs.install_url }}
+    steps:
+      - name: Checkout scripts
+        uses: actions/checkout@v5
+        with:
+          sparse-checkout: .github/scripts
+          sparse-checkout-cone-mode: false
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Download Framework artifact
+        if: needs.build-framework.outputs.status == 'success'
+        uses: actions/download-artifact@v6
+        with:
+          name: NapCat.Framework
+          path: ./artifacts/NapCat.Framework
+
+      - name: Download Shell artifact
+        if: needs.build-shell.outputs.status == 'success'
+        uses: actions/download-artifact@v6
+        with:
+          name: NapCat.Shell
+          path: ./artifacts/NapCat.Shell
+
+      - name: Publish release
+        id: publish
+        continue-on-error: true
+        env:
+          RELEASE_PAT: ${{ secrets.PR_RELEASE_PAT }}
+          PR_NUMBER: ${{ needs.check-build.outputs.pr_number }}
+          PR_SHA: ${{ needs.check-build.outputs.pr_sha }}
+          NAPCAT_VERSION: ${{ needs.build-framework.outputs.version || needs.build-shell.outputs.version || '' }}
+          ARTIFACTS_DIR: ./artifacts
+        run: |
+          if [ -z "${RELEASE_PAT}" ]; then
+            echo "::warning::PR_RELEASE_PAT secret 未配置，跳过 PR Release 发布"
+            exit 0
+          fi
+          node --experimental-strip-types .github/scripts/pr-publish-release.ts
+
+      # 将修改后的安装脚本也上传为 CI artifact（自动过期）
+      - name: Upload install script as artifact
+        if: steps.publish.outcome == 'success'
+        uses: actions/upload-artifact@v6
+        with:
+          name: install-script
+          path: ./release-assets/install.sh
+          retention-days: 7
+          if-no-files-found: ignore
+
+  # ---------------------------------------------------------------------------
+  # Job 7: 触发 NapCat-Docker 仓库的 PR 测试镜像构建
+  # ---------------------------------------------------------------------------
+  # 仅当 Shell 构建成功、且 Release 已发布时触发。
+  # Docker 构建从公开 Release 下载产物，无需跨仓 artifact PAT。
+  # ---------------------------------------------------------------------------
+  trigger-docker:
+    needs: [check-build, build-shell, publish-pr-release]
+    if: needs.check-build.outputs.should_build == 'true' && needs.build-shell.outputs.status == 'success' && needs.publish-pr-release.outputs.release_tag != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout scripts
+        uses: actions/checkout@v5
+        with:
+          sparse-checkout: .github/scripts
+          sparse-checkout-cone-mode: false
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Dispatch docker build
+        continue-on-error: true
+        env:
+          DISPATCH_PAT: ${{ secrets.PR_RELEASE_PAT }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ needs.check-build.outputs.pr_number }}
+          PR_SHA: ${{ needs.check-build.outputs.pr_sha }}
+          PR_HEAD_REPO: ${{ needs.check-build.outputs.pr_head_repo }}
+          SOURCE_REPO: ${{ github.repository }}
+          RELEASE_REPO: NapNeko/napcat-pr-release
+        run: |
+          if [ -z "${DISPATCH_PAT}" ]; then
+            echo "::warning::PR_RELEASE_PAT secret 未配置，跳过 Docker 测试镜像构建"
+            exit 0
+          fi
+          node --experimental-strip-types .github/scripts/pr-docker-dispatch.ts

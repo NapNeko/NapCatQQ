@@ -11,11 +11,13 @@
  * - FRAMEWORK_ERROR: Framework 构建错误信息
  * - SHELL_STATUS: Shell 构建状态
  * - SHELL_ERROR: Shell 构建错误信息
+ * - INSTALL_URL: PR Release 安装脚本 URL (可选)
+ * - RELEASE_URL: PR Release 页面 URL (可选)
  */
 
 import { GitHubAPI, getEnv, getRepository } from './lib/github.ts';
 import { generateResultComment, COMMENT_MARKER } from './lib/comment.ts';
-import type { BuildTarget, BuildStatus } from './lib/comment.ts';
+import type { BuildTarget, BuildStatus, InstallInfo } from './lib/comment.ts';
 
 function parseStatus (value: string | undefined): BuildStatus {
   if (value === 'success' || value === 'failure' || value === 'cancelled') {
@@ -45,6 +47,17 @@ async function main (): Promise<void> {
   console.log(`Run: ${runId}`);
   console.log(`Framework: ${frameworkStatus}${frameworkError ? ` (${frameworkError})` : ''}`);
   console.log(`Shell: ${shellStatus}${shellError ? ` (${shellError})` : ''}\n`);
+
+  // PR Release 信息（由 publish-pr-release job 传入）
+  const installUrl = getEnv('INSTALL_URL');
+  const releaseUrl = getEnv('RELEASE_URL');
+  const installInfo: InstallInfo | undefined =
+    installUrl && releaseUrl ? { installUrl, releaseUrl } : undefined;
+
+  if (installInfo) {
+    console.log(`Install URL: ${installUrl}`);
+    console.log(`Release URL: ${releaseUrl}\n`);
+  }
 
   const github = new GitHubAPI(token);
   const repository = `${owner}/${repo}`;
@@ -79,7 +92,7 @@ async function main (): Promise<void> {
     },
   ];
 
-  const comment = generateResultComment(targets, prSha, runId, repository, version);
+  const comment = generateResultComment(targets, prSha, runId, repository, version, installInfo);
 
   await github.createOrUpdateComment(owner, repo, prNumber, comment, COMMENT_MARKER);
 }
