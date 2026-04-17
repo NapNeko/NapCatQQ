@@ -71,6 +71,11 @@ export class GitHubAPI {
       throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
     }
 
+    // 204 No Content（DELETE 等）不解析 body
+    if (response.status === 204) {
+      return undefined as T;
+    }
+
     return response.json() as Promise<T>;
   }
 
@@ -278,8 +283,7 @@ export function setMultilineOutput (name: string, value: string): void {
 
 // ============== 环境变量工具 ==============
 
-export function getEnv (name: string, required: true): string;
-export function getEnv (name: string, required?: false): string | undefined;
+// Note: 不使用函数重载——Node.js --experimental-strip-types 不支持 TS overload signatures
 export function getEnv (name: string, required = false): string | undefined {
   const value = process.env[name];
   if (required && !value) {

@@ -191,7 +191,7 @@ jobs:
         with:
           name: NapCat.Framework
           path: workspace/framework-dist
-          retention-days: 7 # 保留 7 天
+          retention-days: 5 # 保留 5 天（仓库上限）
 
   # ---------------------------------------------------------------------------
   # Job 4: 构建 Shell 包
@@ -263,7 +263,7 @@ jobs:
         with:
           name: NapCat.Shell
           path: workspace/shell-dist
-          retention-days: 7 # 保留 7 天
+          retention-days: 5 # 保留 5 天（仓库上限）
 
   # ---------------------------------------------------------------------------
   # Job 5: 更新评论为构建结果
@@ -370,7 +370,7 @@ jobs:
         with:
           name: install-script
           path: ./release-assets/install.sh
-          retention-days: 7
+          retention-days: 5
           if-no-files-found: ignore
 
   # ---------------------------------------------------------------------------
