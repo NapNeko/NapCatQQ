@@ -16,7 +16,7 @@
     }
   },
   "dependencies": {
-    "file-type": "^21.0.0"
+    "file-type": "^22.0.1"
   },
   "devDependencies": {
     "@types/node": "^22.0.1"

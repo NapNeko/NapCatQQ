@@ -20,7 +20,7 @@
         "cors": "^2.8.5",
         "express": "^5.0.0",
         "fast-xml-parser": "^4.3.6",
-        "file-type": "^21.0.0",
+        "file-type": "^22.0.1",
         "json5": "^2.2.3",
         "napcat-common": "workspace:*",
         "napcat-core": "workspace:*",
