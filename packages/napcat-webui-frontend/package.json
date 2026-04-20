@@ -49,7 +49,7 @@
     "@heroui/switch": "2.2.9",
     "@heroui/system": "2.4.7",
     "@heroui/table": "^2.2.9",
-    "@heroui/tabs": "2.2.8",
+    "@heroui/tabs": "2.2.29",
     "@heroui/theme": "2.4.6",
     "@heroui/tooltip": "2.2.8",
     "@monaco-editor/loader": "^1.4.0",
