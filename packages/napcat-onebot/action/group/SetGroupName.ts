@@ -26,7 +26,10 @@ export default class SetGroupName extends OneBotAction<PayloadType, ReturnType> 
   override returnExample = GroupActionsExamples.SetGroupName.response;
 
   async _handle (payload: PayloadType): Promise<null> {
-    const ret = await this.core.apis.GroupApi.setGroupName(payload.group_id.toString(), payload.group_name);
+    let ret = await this.core.apis.GroupApi.setGroupName(payload.group_id.toString(), payload.group_name);
+    if (ret.result.toString() === '1287') {
+      ret = await this.core.apis.GroupApi.setGroupName(payload.group_id.toString(), payload.group_name, true);
+    }
     if (ret.result !== 0) {
       throw new Error(`设置群名称失败 ErrCode: ${ret.result} ErrMsg: ${ret.errMsg}`);
     }

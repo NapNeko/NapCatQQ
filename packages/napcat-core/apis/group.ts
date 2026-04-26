@@ -25,7 +25,7 @@ export class NTQQGroupApi {
   groupMemberCache: Map<string, Map<string, GroupMember>> = new Map<string, Map<string, GroupMember>>();
   essenceLRU = new LimitedHashTable<number, string>(1000);
   // psKey 滑动缓存，TTL 60 秒，惰性删除（不主动清理，等下次访问检测到过期再刷新）
-  private _qunPskeyCache: { value: string; expireAt: number } | null = null;
+  private _qunPskeyCache: { value: string; expireAt: number; } | null = null;
 
   constructor (context: InstanceContext, core: NapCatCore) {
     this.context = context;
@@ -482,8 +482,8 @@ export class NTQQGroupApi {
     return this.context.session.getGroupService().modifyMemberRole(groupCode, memberUid, role);
   }
 
-  async setGroupName (groupCode: string, groupName: string) {
-    return this.context.session.getGroupService().modifyGroupName(groupCode, groupName, false);
+  async setGroupName (groupCode: string, groupName: string, isNormalMember: boolean = false) {
+    return this.context.session.getGroupService().modifyGroupName(groupCode, groupName, isNormalMember);
   }
 
   async publishGroupBulletin (groupCode: string, content: string, picInfo: {
