@@ -162,7 +162,8 @@ export class NTQQWebApi {
     confirm_required: number = 1,
     picId: string = '',
     imgWidth: number = 540,
-    imgHeight: number = 300
+    imgHeight: number = 300,
+    noticeId: string = ''
   ) {
     const cookieObject = await this.core.apis.UserApi.getCookies('qun.qq.com');
 
@@ -186,6 +187,7 @@ export class NTQQWebApi {
           type: type.toString(),
           settings,
           ...(picId === '' ? {} : externalParam),
+          ...(noticeId === '' ? {} : { fid: noticeId }),
         }).toString()}`,
         'POST',
         '',
