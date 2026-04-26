@@ -3,7 +3,7 @@ import { WebUiConfig, webUiPathWrapper } from '@/napcat-webui-backend/index';
 import { sendError, sendSuccess } from '@/napcat-webui-backend/src/utils/response';
 import { isEmpty } from '@/napcat-webui-backend/src/utils/check';
 import { existsSync, promises as fsProm } from 'node:fs';
-import { join, isAbsolute, normalize } from 'node:path';
+import { join, isAbsolute } from 'node:path';
 
 // 获取WebUI基础配置
 export const GetWebUIConfigHandler: RequestHandler = async (_, res) => {
@@ -158,8 +158,12 @@ export const UpdateWebUIConfigHandler: RequestHandler = async (req, res) => {
       if (typeof prefix !== 'string') {
         return sendError(res, 'prefix必须是字符串');
       }
+      // Remove leading/trailing slashes without using a regex on user input
+      const trimmedRaw = prefix.trim();
+      let trimmed = trimmedRaw;
+      while (trimmed.startsWith('/')) trimmed = trimmed.slice(1);
+      while (trimmed.endsWith('/')) trimmed = trimmed.slice(0, -1);
       // Validate prefix: only allow alphanumeric, hyphens, underscores (no slashes to avoid routing conflicts)
-      const trimmed = prefix.trim().replace(/^\/+|\/+$/g, '');
       if (trimmed && !/^[a-zA-Z0-9\-_]+$/.test(trimmed)) {
         return sendError(res, 'prefix只能包含字母、数字、连字符和下划线');
       }
@@ -287,13 +291,12 @@ export const UpdateSSLCertPathHandler: RequestHandler = async (req, res) => {
       if (!isAbsolute(trimmed)) {
         return `${fieldName}必须是绝对路径`;
       }
-      // Normalize and ensure no path traversal
-      const normalized = normalize(trimmed);
-      if (normalized !== trimmed && normalized !== trimmed.replace(/\/+$/, '')) {
-        return `${fieldName}包含无效路径`;
+      // Explicitly reject path traversal sequences
+      if (trimmed.includes('..')) {
+        return `${fieldName}包含无效路径序列`;
       }
-      if (!existsSync(normalized)) {
-        return `文件不存在: ${normalized}`;
+      if (!existsSync(trimmed)) {
+        return '指定的证书文件不存在';
       }
       return null;
     };

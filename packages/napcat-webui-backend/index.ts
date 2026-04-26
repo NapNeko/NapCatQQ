@@ -360,8 +360,8 @@ export async function InitWebUi (logger: ILogWrapper, pathWrapper: NapCatPathWra
   // 当配置了 URL 前缀时，拦截 /webui/ 根目录请求（防止绕过前缀访问登录页）
   if (urlPrefix) {
     app.use('/webui', (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      const p = req.path;
-      if (p === '/' || p === '' || p.toLowerCase() === '/index.html') {
+      const pLower = req.path.toLowerCase();
+      if (pLower === '/' || pLower === '' || pLower === '/index.html') {
         return res.status(404).send();
       }
       next();

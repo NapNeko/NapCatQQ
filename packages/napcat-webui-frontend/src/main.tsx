@@ -27,7 +27,7 @@ loadTheme();
 initFont();
 
 // 支持自定义 URL 前缀（Feature 1）：服务端会向 HTML 注入 window.__NAPCAT_PREFIX__
-const napCatPrefix = (window as any).__NAPCAT_PREFIX__ || '';
+const napCatPrefix = window.__NAPCAT_PREFIX__ || '';
 const routerBase = napCatPrefix ? `${napCatPrefix}/webui/` : '/webui/';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
