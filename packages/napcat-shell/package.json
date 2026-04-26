@@ -28,7 +28,7 @@
   },
   "devDependencies": {
     "json5": "^2.2.3",
-    "@types/node": "^22.0.1",
+    "@types/node": "^22.19.17",
     "napcat-vite": "workspace:*"
   },
   "engines": {

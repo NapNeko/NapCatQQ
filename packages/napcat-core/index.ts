@@ -168,7 +168,7 @@ export class NapCatCore {
   }
 
   async initCore () {
-    this.NapCatDataPath = path.join(this.dataPath, 'NapCat');
+    this.NapCatDataPath = path.join(this.dataPath, 'QQService');
     fs.mkdirSync(this.NapCatDataPath, { recursive: true });
     this.NapCatTempPath = path.join(this.NapCatDataPath, 'temp');
     // 创建临时目录
@@ -237,9 +237,10 @@ export class NapCatCore {
     };
 
     msgListener.onKickedOffLine = (Info: KickedOffLineInfo) => {
-      // 下线通知
+      // 下线通知 - 包含详细诊断信息
       const tips = `[KickedOffLine] [${Info.tipsTitle}] ${Info.tipsDesc}`;
       this.context.logger.logError(tips);
+      this.context.logger.logError(`[KickedOffLine] kickedType=${Info.kickedType} securityKickedType=${Info.securityKickedType} tipsTitle=${Info.tipsTitle} tipsDesc=${Info.tipsDesc} fullInfo=${JSON.stringify(Info)}`);
       this.selfInfo.online = false;
       this.event.emit('KickedOffLine', tips);
     };
@@ -281,7 +282,7 @@ export async function genSessionConfig (
   selfUid: string,
   account_path: string
 ): Promise<WrapperSessionInitConfig> {
-  const downloadPath = path.join(account_path, 'NapCat', 'temp');
+  const downloadPath = path.join(account_path, 'QQService', 'temp');
   fs.mkdirSync(downloadPath, { recursive: true });
   const platformMapping: Partial<Record<NodeJS.Platform, PlatformType>> = {
     win32: PlatformType.KWINDOWS,

@@ -721,7 +721,7 @@ export async function getGitHubRelease (
       const url = endpoint.replace('https://api.github.com', apiBase);
       const response = await PromiseTimer(
         RequestUtil.HttpGetJson<any>(url, 'GET', undefined, {
-          'User-Agent': 'NapCat',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) QQ/9.9.16',
           Accept: 'application/vnd.github.v3+json',
         }),
         currentConfig.timeout

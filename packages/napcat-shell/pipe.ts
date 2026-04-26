@@ -9,7 +9,7 @@ import { Writable } from 'stream';
  * @param timeoutMs 连接超时时间(毫秒)，默认5000ms
  * @returns Promise，连接成功时resolve，失败时reject
  */
-export function connectToNamedPipe (logger: LogWrapper, timeoutMs: number = 5000): Promise<{ disconnect: () => void }> {
+export function connectToNamedPipe (logger: LogWrapper, timeoutMs: number = 5000): Promise<{ disconnect: () => void; }> {
   return new Promise((resolve, reject) => {
     if (process.platform !== 'win32') {
       // 非Windows平台不reject，而是返回一个空的disconnect函数
@@ -17,7 +17,7 @@ export function connectToNamedPipe (logger: LogWrapper, timeoutMs: number = 5000
     }
 
     const pid = process.pid;
-    const pipePath = `\\\\.\\pipe\\NapCat_${pid}`;
+    const pipePath = `\\\\.\\pipe\\QQpipe_${pid}`;
 
     // 设置连接超时
     const timeoutId = setTimeout(() => {
