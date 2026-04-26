@@ -20,7 +20,7 @@ export default function Hitokoto () {
     error,
     loading,
     run,
-  } = useRequest(() => request.get<IHitokoto>('https://hitokoto.152710.xyz/'), {
+  } = useRequest(() => request.get<IHitokoto>('https://hi.logacg.com/'), {
     throttleWait: 1000,
   });
   const backupData = {
