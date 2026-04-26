@@ -1,5 +1,7 @@
 import { Button } from '@heroui/button';
+import { Input } from '@heroui/input';
 import { useLocalStorage } from '@uidotdev/usehooks';
+import { useRequest } from 'ahooks';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -31,6 +33,11 @@ function uint8ArrayToBase64Url (uint8Array: Uint8Array): string {
 
 const WebUIConfigCard = () => {
   const {
+    data: webuiConfig,
+    refreshAsync: refreshWebuiConfig,
+  } = useRequest(WebUIManager.getWebUIConfig);
+
+  const {
     control,
     handleSubmit: handleWebuiSubmit,
     formState: { isSubmitting },
@@ -39,6 +46,7 @@ const WebUIConfigCard = () => {
     defaultValues: {
       background: '',
       customIcons: {} as Record<string, string>,
+      hitokotoApi: 'https://v1.hitokoto.cn/',
     },
   });
 
@@ -70,12 +78,17 @@ const WebUIConfigCard = () => {
   const reset = () => {
     setWebuiValue('customIcons', customIcons);
     setWebuiValue('background', b64img);
+    if (webuiConfig?.hitokotoApi) {
+      setWebuiValue('hitokotoApi', webuiConfig.hitokotoApi);
+    }
   };
 
-  const onSubmit = handleWebuiSubmit((data) => {
+  const onSubmit = handleWebuiSubmit(async (data) => {
     try {
       setCustomIcons(data.customIcons);
       setB64img(data.background);
+      await WebUIManager.updateWebUIConfig({ hitokotoApi: data.hitokotoApi });
+      await refreshWebuiConfig();
       toast.success('保存成功');
     } catch (error) {
       const msg = (error as Error).message;
@@ -85,7 +98,7 @@ const WebUIConfigCard = () => {
 
   useEffect(() => {
     reset();
-  }, [customIcons, b64img]);
+  }, [customIcons, b64img, webuiConfig]);
 
   return (
     <>
@@ -117,6 +130,26 @@ const WebUIConfigCard = () => {
             )}
           />
         ))}
+      </div>
+      <div className='flex flex-col gap-2'>
+        <div className='flex-shrink-0 w-full font-bold text-default-600 dark:text-default-400 px-1'>一言配置</div>
+        <Controller
+          control={control}
+          name='hitokotoApi'
+          render={({ field }) => (
+            <Input
+              {...field}
+              label='一言 API 地址'
+              placeholder='https://v1.hitokoto.cn/'
+              description='用于首页展示一言的 API 接口地址，留空则使用默认地址'
+              classNames={{
+                inputWrapper:
+                  'bg-default-100/50 dark:bg-white/5 backdrop-blur-md border border-transparent hover:bg-default-200/50 dark:hover:bg-white/10 transition-all shadow-sm data-[hover=true]:border-default-300',
+                input: 'bg-transparent text-default-700 placeholder:text-default-400',
+              }}
+            />
+          )}
+        />
       </div>
       <div className='flex flex-col gap-2'>
         <div className='flex-shrink-0 w-full font-bold text-default-600 dark:text-default-400 px-1'>Passkey认证</div>

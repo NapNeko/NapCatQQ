@@ -33,6 +33,8 @@ const WebUiConfigSchema = Type.Object({
   ipBlacklist: Type.Array(Type.String(), { default: [] }),
   // 是否启用 X-Forwarded-For 获取真实IP
   enableXForwardedFor: Type.Boolean({ default: false }),
+  // 一言 API 地址
+  hitokotoApi: Type.String({ default: 'https://v1.hitokoto.cn/' }),
 });
 
 export type WebUiConfigType = Static<typeof WebUiConfigSchema>;

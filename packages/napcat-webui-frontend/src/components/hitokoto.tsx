@@ -10,18 +10,25 @@ import { IoMdQuote } from 'react-icons/io';
 import { IoCopy, IoRefresh } from 'react-icons/io5';
 
 import key from '@/const/key';
+import WebUIManager from '@/controllers/webui_manager';
 import { request } from '@/utils/request';
 
 import PageLoading from './page_loading';
 
+const DEFAULT_HITOKOTO_API = 'https://v1.hitokoto.cn/';
+
 export default function Hitokoto () {
+  const { data: webuiConfig } = useRequest(WebUIManager.getWebUIConfig);
+  const hitokotoApi = webuiConfig?.hitokotoApi || DEFAULT_HITOKOTO_API;
+
   const {
     data: dataOri,
     error,
     loading,
     run,
-  } = useRequest(() => request.get<IHitokoto>('https://hitokoto.152710.xyz/'), {
+  } = useRequest(() => request.get<IHitokoto>(hitokotoApi), {
     throttleWait: 1000,
+    refreshDeps: [hitokotoApi],
   });
   const backupData = {
     hitokoto: '凡是过往，皆为序章。',

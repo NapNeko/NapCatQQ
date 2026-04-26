@@ -18,6 +18,7 @@ export const GetWebUIConfigHandler: RequestHandler = async (_, res) => {
       ipWhitelist: config.ipWhitelist || [],
       ipBlacklist: config.ipBlacklist || [],
       enableXForwardedFor: config.enableXForwardedFor || false,
+      hitokotoApi: config.hitokotoApi || 'https://v1.hitokoto.cn/',
     });
   } catch (error) {
     const msg = (error as Error).message;
@@ -93,7 +94,7 @@ export const GetClientIPHandler: RequestHandler = async (req, res) => {
 // 更新WebUI基础配置
 export const UpdateWebUIConfigHandler: RequestHandler = async (req, res) => {
   try {
-    const { host, port, loginRate, disableWebUI, accessControlMode, ipWhitelist, ipBlacklist, enableXForwardedFor } = req.body;
+    const { host, port, loginRate, disableWebUI, accessControlMode, ipWhitelist, ipBlacklist, enableXForwardedFor, hitokotoApi } = req.body;
 
     const updateConfig: any = {};
 
@@ -151,6 +152,23 @@ export const UpdateWebUIConfigHandler: RequestHandler = async (req, res) => {
         return sendError(res, 'enableXForwardedFor必须是布尔值');
       }
       updateConfig.enableXForwardedFor = enableXForwardedFor;
+    }
+
+    if (hitokotoApi !== undefined) {
+      if (typeof hitokotoApi !== 'string') {
+        return sendError(res, 'hitokotoApi必须是字符串');
+      }
+      if (hitokotoApi !== '') {
+        try {
+          const url = new URL(hitokotoApi);
+          if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+            return sendError(res, 'hitokotoApi必须是有效的HTTP或HTTPS地址');
+          }
+        } catch {
+          return sendError(res, 'hitokotoApi必须是有效的URL地址');
+        }
+      }
+      updateConfig.hitokotoApi = hitokotoApi;
     }
 
     await WebUiConfig.UpdateWebUIConfig(updateConfig);
