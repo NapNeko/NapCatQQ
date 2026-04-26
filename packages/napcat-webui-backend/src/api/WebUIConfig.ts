@@ -3,7 +3,7 @@ import { WebUiConfig, webUiPathWrapper } from '@/napcat-webui-backend/index';
 import { sendError, sendSuccess } from '@/napcat-webui-backend/src/utils/response';
 import { isEmpty } from '@/napcat-webui-backend/src/utils/check';
 import { existsSync, promises as fsProm } from 'node:fs';
-import { join } from 'node:path';
+import { join, isAbsolute, normalize } from 'node:path';
 
 // 获取WebUI基础配置
 export const GetWebUIConfigHandler: RequestHandler = async (_, res) => {
@@ -158,10 +158,15 @@ export const UpdateWebUIConfigHandler: RequestHandler = async (req, res) => {
       if (typeof prefix !== 'string') {
         return sendError(res, 'prefix必须是字符串');
       }
-      // Validate prefix: only allow URL-safe characters
+      // Validate prefix: only allow alphanumeric, hyphens, underscores (no slashes to avoid routing conflicts)
       const trimmed = prefix.trim().replace(/^\/+|\/+$/g, '');
-      if (trimmed && !/^[a-zA-Z0-9\-_/]+$/.test(trimmed)) {
-        return sendError(res, 'prefix只能包含字母、数字、连字符、下划线和斜杠');
+      if (trimmed && !/^[a-zA-Z0-9\-_]+$/.test(trimmed)) {
+        return sendError(res, 'prefix只能包含字母、数字、连字符和下划线');
+      }
+      // Reject reserved path names that would conflict with existing routes
+      const reservedPaths = ['webui', 'api', 'files', 'plugin'];
+      if (reservedPaths.includes(trimmed.toLowerCase())) {
+        return sendError(res, `prefix不能使用保留路径名: ${reservedPaths.join(', ')}`);
       }
       updateConfig.prefix = trimmed;
     }
@@ -274,19 +279,34 @@ export const UpdateSSLCertPathHandler: RequestHandler = async (req, res) => {
     }
 
     const updateConfig: { sslCertPath?: string; sslKeyPath?: string; } = {};
+
+    const validateCertPath = (p: string, fieldName: string): string | null => {
+      const trimmed = p.trim();
+      if (!trimmed) return null; // Allow clearing the path
+      // Must be an absolute path
+      if (!isAbsolute(trimmed)) {
+        return `${fieldName}必须是绝对路径`;
+      }
+      // Normalize and ensure no path traversal
+      const normalized = normalize(trimmed);
+      if (normalized !== trimmed && normalized !== trimmed.replace(/\/+$/, '')) {
+        return `${fieldName}包含无效路径`;
+      }
+      if (!existsSync(normalized)) {
+        return `文件不存在: ${normalized}`;
+      }
+      return null;
+    };
+
     if (sslCertPath !== undefined) {
+      const error = validateCertPath(sslCertPath, 'sslCertPath');
+      if (error) return sendError(res, error);
       updateConfig.sslCertPath = sslCertPath.trim();
     }
     if (sslKeyPath !== undefined) {
+      const error = validateCertPath(sslKeyPath, 'sslKeyPath');
+      if (error) return sendError(res, error);
       updateConfig.sslKeyPath = sslKeyPath.trim();
-    }
-
-    // Validate paths exist if non-empty
-    if (updateConfig.sslCertPath && !existsSync(updateConfig.sslCertPath)) {
-      return sendError(res, `SSL证书文件不存在: ${updateConfig.sslCertPath}`);
-    }
-    if (updateConfig.sslKeyPath && !existsSync(updateConfig.sslKeyPath)) {
-      return sendError(res, `SSL私钥文件不存在: ${updateConfig.sslKeyPath}`);
     }
 
     await WebUiConfig.UpdateWebUIConfig(updateConfig);

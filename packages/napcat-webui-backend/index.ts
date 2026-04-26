@@ -104,7 +104,7 @@ async function checkCertificates (logger: ILogWrapper): Promise<{ key: string, c
         logger.log('[NapCat] [WebUi] 使用配置的SSL证书路径，将启用HTTPS模式');
         return { cert, key };
       }
-      logger.log('[NapCat] [WebUi] 配置的SSL证书路径不存在，尝试默认路径');
+      logger.log('[NapCat] [WebUi] 配置的SSL证书路径无效，尝试默认路径');
     }
 
     // Fall back to default paths
@@ -533,11 +533,15 @@ export async function InitWebUi (logger: ILogWrapper, pathWrapper: NapCatPathWra
 
   // 当设置了 URL 前缀时，挂载前缀下的 SPA 回退路由
   if (urlPrefix) {
-    const escapedPrefix = urlPrefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    app.all(new RegExp(`^${escapedPrefix}/webui(/.*)?$`), (_req, res) => {
+    // Match /{prefix}/webui (exact) - serve index.html
+    app.all(`${urlPrefix}/webui`, (_req, res) => {
       serveIndexHtml(res);
     });
-    // 重定向前缀根路径到 webui
+    // Match /{prefix}/webui/* (subroutes) - SPA fallback
+    app.all(`${urlPrefix}/webui/*`, (_req, res) => {
+      serveIndexHtml(res);
+    });
+    // Redirect /{prefix} and /{prefix}/ to /{prefix}/webui
     app.all(urlPrefix, (_req, res) => {
       res.status(301).header('Location', `${urlPrefix}/webui`).send();
     });
