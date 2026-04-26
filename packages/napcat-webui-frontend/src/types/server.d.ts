@@ -192,4 +192,5 @@ interface WebUIConfig {
   ipWhitelist: string[];
   ipBlacklist: string[];
   enableXForwardedFor: boolean;
+  prefix: string;
 }

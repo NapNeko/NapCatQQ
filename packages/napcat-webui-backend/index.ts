@@ -95,6 +95,19 @@ export async function InitPort (parsedConfig: WebUiConfigType): Promise<[string,
 
 async function checkCertificates (logger: ILogWrapper): Promise<{ key: string, cert: string; } | null> {
   try {
+    // Check configured file paths first (Feature 2: SSL cert file path support)
+    const config = await WebUiConfig?.GetWebUIConfig();
+    if (config?.sslCertPath && config?.sslKeyPath) {
+      if (existsSync(config.sslCertPath) && existsSync(config.sslKeyPath)) {
+        const cert = readFileSync(config.sslCertPath, 'utf8');
+        const key = readFileSync(config.sslKeyPath, 'utf8');
+        logger.log('[NapCat] [WebUi] 使用配置的SSL证书路径，将启用HTTPS模式');
+        return { cert, key };
+      }
+      logger.log('[NapCat] [WebUi] 配置的SSL证书路径不存在，尝试默认路径');
+    }
+
+    // Fall back to default paths
     const certPath = join(webUiPathWrapper.configPath, 'cert.pem');
     const keyPath = join(webUiPathWrapper.configPath, 'key.pem');
 
@@ -145,6 +158,13 @@ export async function InitWebUi (logger: ILogWrapper, pathWrapper: NapCatPathWra
 
   // 存储启动时的初始token用于鉴权
   setInitialWebUiToken(config.token);
+
+  // 计算 URL 前缀（Feature 1：自定义 URL 根路径）
+  const rawPrefix = config.prefix ? config.prefix.trim() : '';
+  const urlPrefix = rawPrefix ? ('/' + rawPrefix.replace(/^\/+|\/+$/g, '')) : '';
+  if (urlPrefix) {
+    logger.log(`[NapCat] [WebUi] 已配置 URL 前缀: ${urlPrefix}，WebUI 仅可通过 ${urlPrefix}/webui 访问`);
+  }
 
   const [host, port, token] = await InitPort(config);
   webUiRuntimePort = port;
@@ -233,14 +253,18 @@ export async function InitWebUi (logger: ILogWrapper, pathWrapper: NapCatPathWra
   app.use(cors);
 
   // 自定义字体文件路由 - 返回用户上传的字体文件
-  app.use('/webui/fonts/CustomFont.woff', async (_req, res) => {
+  const customFontHandler = async (_req: express.Request, res: express.Response) => {
     const fontPath = await WebUiConfig.GetWebUIFontPath();
     if (fontPath) {
       res.sendFile(fontPath);
     } else {
       res.status(404).send('Custom font not found');
     }
-  });
+  };
+  app.use('/webui/fonts/CustomFont.woff', customFontHandler);
+  if (urlPrefix) {
+    app.use(`${urlPrefix}/webui/fonts/CustomFont.woff`, customFontHandler);
+  }
 
   // 如果是自定义色彩，构建一个css文件
   app.use('/files/theme.css', async (_req, res) => {
@@ -307,35 +331,42 @@ export async function InitWebUi (logger: ILogWrapper, pathWrapper: NapCatPathWra
   });
 
   // 动态生成 sw.js
-  app.get('/webui/sw.js', async (_req, res) => {
+  const createSwHandler = (swScope: string) => async (_req: express.Request, res: express.Response) => {
     try {
-      // 读取模板文件
       let templatePath = resolve(__dirname, 'static', 'sw_template.js');
       if (!existsSync(templatePath)) {
         templatePath = resolve(__dirname, 'src', 'assets', 'sw_template.js');
       }
-
       let swContent = readFileSync(templatePath, 'utf-8');
-
-      // 替换版本号
-      // 使用 napCatVersion，如果为 alpha 则尝试加上时间戳或其他标识以避免缓存冲突，或者直接使用
-      // 用户要求控制 sw.js 版本，napCatVersion 是核心控制点
       swContent = swContent.replace('{{VERSION}}', napCatVersion);
-
       res.header('Content-Type', 'application/javascript');
-      res.header('Service-Worker-Allowed', '/webui/');
+      res.header('Service-Worker-Allowed', swScope);
       res.header('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.send(swContent);
     } catch (error) {
       console.error('[NapCat] [WebUi] Error generating sw.js', error);
       res.status(500).send('Error generating service worker');
     }
-  });
+  };
+  app.get('/webui/sw.js', createSwHandler('/webui/'));
+  if (urlPrefix) {
+    app.get(`${urlPrefix}/webui/sw.js`, createSwHandler(`${urlPrefix}/webui/`));
+  }
 
   // ------------中间件结束------------
 
   // ------------挂载路由------------
   // 挂载静态路由（前端），路径为 /webui
+  // 当配置了 URL 前缀时，拦截 /webui/ 根目录请求（防止绕过前缀访问登录页）
+  if (urlPrefix) {
+    app.use('/webui', (req: express.Request, res: express.Response, next: express.NextFunction) => {
+      const p = req.path;
+      if (p === '/' || p === '' || p.toLowerCase() === '/index.html') {
+        return res.status(404).send();
+      }
+      next();
+    });
+  }
   app.use('/webui', express.static(pathWrapper.staticPath, {
     maxAge: '1d',
   }));
@@ -483,13 +514,51 @@ export async function InitWebUi (logger: ILogWrapper, pathWrapper: NapCatPathWra
   // 所有剩下的请求都转到静态页面
   const indexFile = join(pathWrapper.staticPath, 'index.html');
 
-  app.all(/\/webui\/(.*)/, (_req, res) => {
+  // 辅助函数：向客户端发送 index.html，当设置了 URL 前缀时注入前缀变量
+  const serveIndexHtml = (res: express.Response) => {
+    if (urlPrefix) {
+      try {
+        const content = readFileSync(indexFile, 'utf-8');
+        const injection = `<script>window.__NAPCAT_PREFIX__=${JSON.stringify(urlPrefix)};</script>`;
+        const modified = content.replace('</head>', `${injection}\n</head>`);
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.send(modified);
+        return;
+      } catch {
+        // fall through to sendFile
+      }
+    }
     res.sendFile(indexFile);
+  };
+
+  // 当设置了 URL 前缀时，挂载前缀下的 SPA 回退路由
+  if (urlPrefix) {
+    const escapedPrefix = urlPrefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    app.all(new RegExp(`^${escapedPrefix}/webui(/.*)?$`), (_req, res) => {
+      serveIndexHtml(res);
+    });
+    // 重定向前缀根路径到 webui
+    app.all(urlPrefix, (_req, res) => {
+      res.status(301).header('Location', `${urlPrefix}/webui`).send();
+    });
+  }
+
+  // /webui/* SPA 回退（无前缀时使用；有前缀时返回 404 保护登录页）
+  app.all(/\/webui\/(.*)/, (_req, res) => {
+    if (urlPrefix) {
+      res.status(404).send();
+    } else {
+      serveIndexHtml(res);
+    }
   });
 
   // 初始服务（先放个首页）
   app.all('/', (_req, res) => {
-    res.status(301).header('Location', '/webui').send();
+    if (urlPrefix) {
+      res.status(404).send();
+    } else {
+      res.status(301).header('Location', '/webui').send();
+    }
   });
 
   // 错误处理中间件，捕获multer的错误
@@ -508,13 +577,14 @@ export async function InitWebUi (logger: ILogWrapper, pathWrapper: NapCatPathWra
   // ------------启动服务------------
   server.listen(port, host, async () => {
     const searchParams = { token };
+    const webuiPath = urlPrefix ? `${urlPrefix}/webui` : '/webui';
     logger.log(`[NapCat] [WebUi] WebUi Token: ${token}`);
     logger.log(
-      `[NapCat] [WebUi] WebUi User Panel Url: ${createUrl('127.0.0.1', port.toString(), '/webui', searchParams)}`
+      `[NapCat] [WebUi] WebUi User Panel Url: ${createUrl('127.0.0.1', port.toString(), webuiPath, searchParams)}`
     );
     if (host !== '') {
       logger.log(
-        `[NapCat] [WebUi] WebUi User Panel Url: ${createUrl(host, port.toString(), '/webui', searchParams)}`
+        `[NapCat] [WebUi] WebUi User Panel Url: ${createUrl(host, port.toString(), webuiPath, searchParams)}`
       );
     }
   });
