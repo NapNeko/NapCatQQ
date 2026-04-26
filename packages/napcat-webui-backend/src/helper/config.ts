@@ -33,6 +33,12 @@ const WebUiConfigSchema = Type.Object({
   ipBlacklist: Type.Array(Type.String(), { default: [] }),
   // 是否启用 X-Forwarded-For 获取真实IP
   enableXForwardedFor: Type.Boolean({ default: false }),
+  // 自定义 URL 前缀（安全入口），为空时使用默认路径
+  prefix: Type.String({ default: '' }),
+  // SSL 证书文件路径（绝对路径）
+  sslCertPath: Type.String({ default: '' }),
+  // SSL 私钥文件路径（绝对路径）
+  sslKeyPath: Type.String({ default: '' }),
 });
 
 export type WebUiConfigType = Static<typeof WebUiConfigSchema>;

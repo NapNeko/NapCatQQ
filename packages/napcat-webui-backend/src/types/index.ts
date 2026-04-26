@@ -24,6 +24,9 @@ export interface WebUiConfigType {
   ipWhitelist?: string[];
   ipBlacklist?: string[];
   enableXForwardedFor?: boolean;
+  prefix?: string;
+  sslCertPath?: string;
+  sslKeyPath?: string;
 }
 export interface WebUiCredentialInnerJson {
   CreatedTime: number;

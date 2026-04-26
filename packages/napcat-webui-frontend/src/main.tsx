@@ -26,9 +26,13 @@ if (theme && !theme.startsWith('"')) {
 loadTheme();
 initFont();
 
+// 支持自定义 URL 前缀（Feature 1）：服务端会向 HTML 注入 window.__NAPCAT_PREFIX__
+const napCatPrefix = window.__NAPCAT_PREFIX__ || '';
+const routerBase = napCatPrefix ? `${napCatPrefix}/webui/` : '/webui/';
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   // <React.StrictMode>
-  <BrowserRouter basename='/webui/'>
+  <BrowserRouter basename={routerBase}>
     <Provider>
       <App />
     </Provider>
@@ -39,9 +43,10 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 if (!import.meta.env.DEV) {
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      const baseUrl = import.meta.env.BASE_URL;
-      const swUrl = `${baseUrl}sw.js`;
-      navigator.serviceWorker.register(swUrl, { scope: baseUrl })
+      // 当设置了自定义前缀时，使用前缀路径下的 sw.js；否则使用默认路径
+      const swScope = napCatPrefix ? `${napCatPrefix}/webui/` : import.meta.env.BASE_URL;
+      const swUrl = napCatPrefix ? `${napCatPrefix}/webui/sw.js` : `${import.meta.env.BASE_URL}sw.js`;
+      navigator.serviceWorker.register(swUrl, { scope: swScope })
         .then((registration) => {
           console.log('SW registered: ', registration);
         })

@@ -36,6 +36,7 @@ const ServerConfigCard = () => {
     ipWhitelist: string[];
     ipBlacklist: string[];
     enableXForwardedFor: boolean;
+    prefix: string;
   }>({
     defaultValues: {
       host: '0.0.0.0',
@@ -46,6 +47,7 @@ const ServerConfigCard = () => {
       ipWhitelist: [],
       ipBlacklist: [],
       enableXForwardedFor: false,
+      prefix: '',
     },
   });
 
@@ -61,6 +63,7 @@ const ServerConfigCard = () => {
       setConfigValue('ipWhitelist', configData.ipWhitelist || []);
       setConfigValue('ipBlacklist', configData.ipBlacklist || []);
       setConfigValue('enableXForwardedFor', configData.enableXForwardedFor || false);
+      setConfigValue('prefix', configData.prefix || '');
 
       // 更新IP列表文本
       if (configData.accessControlMode === 'whitelist') {
@@ -215,6 +218,24 @@ const ServerConfigCard = () => {
 
         <div className='flex flex-col gap-3'>
           <div className='flex-shrink-0 w-full font-bold text-default-600 dark:text-default-400 px-1'>安全配置</div>
+          <Controller
+            control={control}
+            name='prefix'
+            render={({ field }) => (
+              <Input
+                {...field}
+                label='URL 前缀（安全入口）'
+                placeholder='例如：my-secret-entry'
+                description='设置后，WebUI 仅可通过 /{前缀}/webui 访问，直接访问 /webui 将返回 404。留空则使用默认路径。重启后生效。'
+                isDisabled={!!configError}
+                classNames={{
+                  inputWrapper:
+                    'bg-default-100/50 dark:bg-white/5 backdrop-blur-md border border-transparent hover:bg-default-200/50 dark:hover:bg-white/10 transition-all shadow-sm data-[hover=true]:border-default-300',
+                  input: 'bg-transparent text-default-700 placeholder:text-default-400',
+                }}
+              />
+            )}
+          />
           <Controller
             control={control}
             name='disableWebUI'

@@ -289,6 +289,8 @@ export default class WebUIManager {
       keyExists: boolean;
       certContent: string;
       keyContent: string;
+      sslCertPath: string;
+      sslKeyPath: string;
     }>>('/WebUIConfig/GetSSLStatus');
     return data.data;
   }
@@ -298,6 +300,15 @@ export default class WebUIManager {
     const { data } = await serverRequest.post<ServerResponse<{ message: string; }>>(
       '/WebUIConfig/UploadSSLCert',
       { cert, key }
+    );
+    return data.data;
+  }
+
+  // 保存SSL证书文件路径
+  public static async saveSSLCertPath (sslCertPath: string, sslKeyPath: string) {
+    const { data } = await serverRequest.post<ServerResponse<{ message: string; }>>(
+      '/WebUIConfig/UpdateSSLCertPath',
+      { sslCertPath, sslKeyPath }
     );
     return data.data;
   }

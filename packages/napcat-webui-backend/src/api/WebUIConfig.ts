@@ -3,7 +3,7 @@ import { WebUiConfig, webUiPathWrapper } from '@/napcat-webui-backend/index';
 import { sendError, sendSuccess } from '@/napcat-webui-backend/src/utils/response';
 import { isEmpty } from '@/napcat-webui-backend/src/utils/check';
 import { existsSync, promises as fsProm } from 'node:fs';
-import { join } from 'node:path';
+import { join, isAbsolute } from 'node:path';
 
 // 获取WebUI基础配置
 export const GetWebUIConfigHandler: RequestHandler = async (_, res) => {
@@ -18,6 +18,7 @@ export const GetWebUIConfigHandler: RequestHandler = async (_, res) => {
       ipWhitelist: config.ipWhitelist || [],
       ipBlacklist: config.ipBlacklist || [],
       enableXForwardedFor: config.enableXForwardedFor || false,
+      prefix: config.prefix || '',
     });
   } catch (error) {
     const msg = (error as Error).message;
@@ -93,7 +94,7 @@ export const GetClientIPHandler: RequestHandler = async (req, res) => {
 // 更新WebUI基础配置
 export const UpdateWebUIConfigHandler: RequestHandler = async (req, res) => {
   try {
-    const { host, port, loginRate, disableWebUI, accessControlMode, ipWhitelist, ipBlacklist, enableXForwardedFor } = req.body;
+    const { host, port, loginRate, disableWebUI, accessControlMode, ipWhitelist, ipBlacklist, enableXForwardedFor, prefix } = req.body;
 
     const updateConfig: any = {};
 
@@ -153,6 +154,27 @@ export const UpdateWebUIConfigHandler: RequestHandler = async (req, res) => {
       updateConfig.enableXForwardedFor = enableXForwardedFor;
     }
 
+    if (prefix !== undefined) {
+      if (typeof prefix !== 'string') {
+        return sendError(res, 'prefix必须是字符串');
+      }
+      // Remove leading/trailing slashes without using a regex on user input
+      const trimmedRaw = prefix.trim();
+      let trimmed = trimmedRaw;
+      while (trimmed.startsWith('/')) trimmed = trimmed.slice(1);
+      while (trimmed.endsWith('/')) trimmed = trimmed.slice(0, -1);
+      // Validate prefix: only allow alphanumeric, hyphens, underscores (no slashes to avoid routing conflicts)
+      if (trimmed && !/^[a-zA-Z0-9\-_]+$/.test(trimmed)) {
+        return sendError(res, 'prefix只能包含字母、数字、连字符和下划线');
+      }
+      // Reject reserved path names that would conflict with existing routes
+      const reservedPaths = ['webui', 'api', 'files', 'plugin'];
+      if (reservedPaths.includes(trimmed.toLowerCase())) {
+        return sendError(res, `prefix不能使用保留路径名: ${reservedPaths.join(', ')}`);
+      }
+      updateConfig.prefix = trimmed;
+    }
+
     await WebUiConfig.UpdateWebUIConfig(updateConfig);
     return sendSuccess(res, null);
   } catch (error) {
@@ -180,12 +202,16 @@ export const GetSSLStatusHandler: RequestHandler = async (_, res) => {
       keyContent = await fsProm.readFile(keyPath, 'utf-8');
     }
 
+    const config = await WebUiConfig.GetWebUIConfig();
+
     return sendSuccess(res, {
       enabled: certExists && keyExists,
       certExists,
       keyExists,
       certContent,
       keyContent,
+      sslCertPath: config.sslCertPath || '',
+      sslKeyPath: config.sslKeyPath || '',
     });
   } catch (error) {
     const msg = (error as Error).message;
@@ -241,5 +267,55 @@ export const DeleteSSLCertHandler: RequestHandler = async (_, res) => {
   } catch (error) {
     const msg = (error as Error).message;
     return sendError(res, `删除SSL证书失败: ${msg}`);
+  }
+};
+
+// 更新SSL证书文件路径配置
+export const UpdateSSLCertPathHandler: RequestHandler = async (req, res) => {
+  try {
+    const { sslCertPath, sslKeyPath } = req.body;
+
+    if (sslCertPath !== undefined && typeof sslCertPath !== 'string') {
+      return sendError(res, 'sslCertPath必须是字符串');
+    }
+    if (sslKeyPath !== undefined && typeof sslKeyPath !== 'string') {
+      return sendError(res, 'sslKeyPath必须是字符串');
+    }
+
+    const updateConfig: { sslCertPath?: string; sslKeyPath?: string; } = {};
+
+    const validateCertPath = (p: string, fieldName: string): string | null => {
+      const trimmed = p.trim();
+      if (!trimmed) return null; // Allow clearing the path
+      // Must be an absolute path
+      if (!isAbsolute(trimmed)) {
+        return `${fieldName}必须是绝对路径`;
+      }
+      // Explicitly reject path traversal sequences
+      if (trimmed.includes('..')) {
+        return `${fieldName}包含无效路径序列`;
+      }
+      if (!existsSync(trimmed)) {
+        return '指定的证书文件不存在';
+      }
+      return null;
+    };
+
+    if (sslCertPath !== undefined) {
+      const error = validateCertPath(sslCertPath, 'sslCertPath');
+      if (error) return sendError(res, error);
+      updateConfig.sslCertPath = sslCertPath.trim();
+    }
+    if (sslKeyPath !== undefined) {
+      const error = validateCertPath(sslKeyPath, 'sslKeyPath');
+      if (error) return sendError(res, error);
+      updateConfig.sslKeyPath = sslKeyPath.trim();
+    }
+
+    await WebUiConfig.UpdateWebUIConfig(updateConfig);
+    return sendSuccess(res, { message: 'SSL证书路径已保存，重启后生效' });
+  } catch (error) {
+    const msg = (error as Error).message;
+    return sendError(res, `更新SSL证书路径失败: ${msg}`);
   }
 };

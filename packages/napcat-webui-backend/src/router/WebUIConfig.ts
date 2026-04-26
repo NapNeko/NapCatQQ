@@ -8,6 +8,7 @@ import {
   GetSSLStatusHandler,
   UploadSSLCertHandler,
   DeleteSSLCertHandler,
+  UpdateSSLCertPathHandler,
 } from '@/napcat-webui-backend/src/api/WebUIConfig';
 
 const router: Router = Router();
@@ -35,5 +36,8 @@ router.post('/UploadSSLCert', UploadSSLCertHandler);
 
 // 删除SSL证书
 router.post('/DeleteSSLCert', DeleteSSLCertHandler);
+
+// 更新SSL证书文件路径
+router.post('/UpdateSSLCertPath', UpdateSSLCertPathHandler);
 
 export { router as WebUIConfigRouter };

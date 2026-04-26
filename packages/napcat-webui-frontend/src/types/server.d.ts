@@ -192,4 +192,10 @@ interface WebUIConfig {
   ipWhitelist: string[];
   ipBlacklist: string[];
   enableXForwardedFor: boolean;
+  prefix: string;
+}
+
+// Injected by NapCat backend when a URL prefix is configured
+interface Window {
+  __NAPCAT_PREFIX__?: string;
 }
