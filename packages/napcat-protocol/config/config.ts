@@ -22,6 +22,7 @@ const WebsocketClientConfigSchema = Type.Object({
   reconnectInterval: Type.Number({ default: 5000 }),
   heartInterval: Type.Number({ default: 30000 }),
   debug: Type.Boolean({ default: false }),
+  verifyCertificate: Type.Optional(Type.Boolean({ default: true })),
 });
 
 // HTTP 服务端配置

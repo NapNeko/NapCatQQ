@@ -59,6 +59,7 @@ const WebsocketClientConfigSchema = Type.Object({
   token: Type.String({ default: '' }),
   debug: Type.Boolean({ default: false }),
   heartInterval: Type.Number({ default: 30000 }),
+  verifyCertificate: Type.Optional(Type.Boolean({ default: true })),
 });
 
 const PluginConfigSchema = Type.Object({

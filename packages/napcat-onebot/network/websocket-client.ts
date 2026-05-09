@@ -73,7 +73,7 @@ export class OB11WebSocketClientAdapter extends IOB11NetworkAdapter<WebsocketCli
     if (!this.connection && this.isEnable) {
       let isClosedByError = false;
 
-      this.connection = new WebSocket(this.config.url, {
+      const wsOptions: any = {
         maxPayload: 50 * 1024 * 1024, // 50 MB
         handshakeTimeout: 2000,
         perMessageDeflate: false,
@@ -83,8 +83,14 @@ export class OB11WebSocketClientAdapter extends IOB11NetworkAdapter<WebsocketCli
           'x-client-role': 'Universal',  // 为koishi adpter适配
           'User-Agent': 'OneBot/11',
         },
+      };
 
-      });
+      // 如果配置了 verifyCertificate，设置 rejectUnauthorized
+      if (this.config.verifyCertificate !== undefined) {
+        wsOptions.rejectUnauthorized = this.config.verifyCertificate;
+      }
+
+      this.connection = new WebSocket(this.config.url, wsOptions);
       this.connection.on('pong', () => {
         // this.logger.logDebug('[OneBot] [WebSocket Client] 收到pong');
       });

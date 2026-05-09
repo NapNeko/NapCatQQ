@@ -42,6 +42,7 @@ interface WebsocketClientConfig extends AdapterConfig {
   token: string;
   debug: boolean;
   heartInterval: number;
+  verifyCertificate?: boolean;
 }
 
 interface HttpSseServerConfig extends HttpServerConfig {
