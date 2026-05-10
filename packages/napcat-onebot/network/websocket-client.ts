@@ -73,7 +73,7 @@ export class OB11WebSocketClientAdapter extends IOB11NetworkAdapter<WebsocketCli
     if (!this.connection && this.isEnable) {
       let isClosedByError = false;
 
-      const wsOptions: any = {
+      const wsOptions: WebSocket.ClientOptions = {
         maxPayload: 50 * 1024 * 1024, // 50 MB
         handshakeTimeout: 2000,
         perMessageDeflate: false,
