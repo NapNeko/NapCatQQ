@@ -2,11 +2,11 @@ import GenericForm, { random_token } from './generic_form';
 import type { Field } from './generic_form';
 
 export interface WebsocketClientFormProps {
-  data?: OneBotConfig['network']['websocketClients'][0]
-  onClose: () => void
+  data?: OneBotConfig['network']['websocketClients'][0];
+  onClose: () => void;
   onSubmit: (
     data: OneBotConfig['network']['websocketClients'][0]
-  ) => Promise<void>
+  ) => Promise<void>;
 }
 
 type WebsocketClientFormType = OneBotConfig['network']['websocketClients'];
@@ -26,6 +26,7 @@ const WebsocketClientForm: React.FC<WebsocketClientFormProps> = ({
     debug: false,
     heartInterval: 30000,
     reconnectInterval: 30000,
+    verifyCertificate: true,
   };
 
   const fields: Field<'websocketClients'>[] = [
@@ -98,6 +99,13 @@ const WebsocketClientForm: React.FC<WebsocketClientFormProps> = ({
       placeholder: '请输入重连间隔',
       isRequired: true,
       colSpan: 1,
+    },
+    {
+      name: 'verifyCertificate',
+      label: 'SSL证书验证',
+      type: 'switch',
+      description: '是否验证SSL证书（wss连接）。关闭后可连接自签名证书的服务器，但会降低安全性',
+      colSpan: 2,
     },
   ];
 

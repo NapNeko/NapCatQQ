@@ -97,6 +97,57 @@ describe('NapCat Configuration Loaders', () => {
     expect(loaded.musicSignUrl).toBe('');
   });
 
+  test('OneBotConfig websocketClients should apply verifyCertificate default', () => {
+    const partialConfig: Partial<OneBotConfig> = {
+      network: {
+        httpServers: [],
+        httpSseServers: [],
+        httpClients: [],
+        websocketServers: [],
+        websocketClients: [{
+          name: 'test-ws-client',
+          enable: true,
+          url: 'wss://example.com',
+          messagePostFormat: 'array',
+          reportSelfMessage: false,
+          reconnectInterval: 5000,
+          token: '',
+          debug: false,
+          heartInterval: 30000,
+        }],
+        plugins: [],
+      },
+    };
+    const loaded = loadOneBotConfig(partialConfig);
+    expect(loaded.network.websocketClients[0]?.verifyCertificate).toBe(true);
+  });
+
+  test('OneBotConfig websocketClients should preserve explicit verifyCertificate false', () => {
+    const partialConfig: Partial<OneBotConfig> = {
+      network: {
+        httpServers: [],
+        httpSseServers: [],
+        httpClients: [],
+        websocketServers: [],
+        websocketClients: [{
+          name: 'test-ws-client',
+          enable: true,
+          url: 'wss://example.com',
+          messagePostFormat: 'array',
+          reportSelfMessage: false,
+          reconnectInterval: 5000,
+          token: '',
+          debug: false,
+          heartInterval: 30000,
+          verifyCertificate: false,
+        }],
+        plugins: [],
+      },
+    };
+    const loaded = loadOneBotConfig(partialConfig);
+    expect(loaded.network.websocketClients[0]?.verifyCertificate).toBe(false);
+  });
+
   test('NapcatConfig should compile and apply defaults', () => {
     let compiled: ReturnType<typeof TypeCompiler.Compile> | undefined;
     expect(() => {
