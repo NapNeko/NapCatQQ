@@ -142,6 +142,8 @@ export default function WebLoginPage () {
   useEffect(() => {
     // 如果URL中有token，直接登录
     if (token) {
+      // 不需要检查passkey，立即清除loading状态，避免登录失败后输入框被永久禁用
+      setIsPasskeyLoading(false);
       onSubmit();
       return;
     }
