@@ -157,6 +157,7 @@ import { CancelOnlineFile } from './file/online/CancelOnlineFile';
 import { ReceiveOnlineFile } from './file/online/ReceiveOnlineFile';
 import { RefuseOnlineFile } from './file/online/RefuseOnlineFile';
 import { GetFilesetId } from './file/flash/GetFilesetIdByCode';
+import { FetchPttText } from '@/napcat-onebot/action/msg/FetchPttText';
 
 export function getAllHandlers (obContext: NapCatOneBot11Adapter, core: NapCatCore) {
   const actionHandlers = [
@@ -189,6 +190,7 @@ export function getAllHandlers (obContext: NapCatOneBot11Adapter, core: NapCatCo
     new GetGroupInfoEx(obContext, core),
     new FetchEmojiLike(obContext, core),
     new GetEmojiLikes(obContext, core),
+    new FetchPttText(obContext, core),
     new GetFile(obContext, core),
     new SetQQProfile(obContext, core),
     new ShareGroupEx(obContext, core),

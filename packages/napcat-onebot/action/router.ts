@@ -141,6 +141,7 @@ export const ActionName = {
   ForwardFriendSingleMsg: 'forward_friend_single_msg',
   ForwardGroupSingleMsg: 'forward_group_single_msg',
   TranslateEnWordToZn: 'translate_en2zh',
+  FetchPttText: 'fetch_ptt_text',
   SetMsgEmojiLike: 'set_msg_emoji_like',
   GoCQHTTP_SendForwardMsg: 'send_forward_msg',
   MarkPrivateMsgAsRead: 'mark_private_msg_as_read',

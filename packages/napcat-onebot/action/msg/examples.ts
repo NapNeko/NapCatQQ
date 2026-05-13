@@ -14,6 +14,12 @@ export const MsgActionsExamples = {
       message: 'hello',
     },
   },
+  FetchPttText: {
+    payload: { message_id: 123456 },
+    response: {
+      text: 'hello',
+    },
+  },
   MarkMsgAsRead: {
     payload: { group_id: '123456' },
     response: {},

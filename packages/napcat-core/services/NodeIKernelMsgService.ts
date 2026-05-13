@@ -341,7 +341,7 @@ export interface NodeIKernelMsgService {
 
   getFileThumbSavePath (arg1: string, arg2: number, arg3: boolean): unknown;
 
-  translatePtt2Text (msgId: string, peer: Peer, msgElement: MessageElement): unknown;
+  translatePtt2Text (msgId: string, peer: Peer, msgElement: MessageElement): Promise<GeneralCallResult>;
 
   setPttPlayedState (arg1: string, arg2: Peer, arg3: string): unknown;
 
