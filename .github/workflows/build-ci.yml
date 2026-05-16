@@ -17,14 +17,17 @@ jobs:
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
       - name: Use Node.js 20.x
         uses: actions/setup-node@v6
         with:
           node-version: 20.x
       - name: Install Dependencies
-        run: |
-          npm i -g pnpm
-          pnpm i
+        run: pnpm i
       - name: Type Check
         run: pnpm run typecheck
       - name: Run Tests
@@ -50,6 +53,11 @@ jobs:
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
       - name: Use Node.js 20.x
         uses: actions/setup-node@v6
         with:
@@ -68,7 +76,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NAPCAT_VERSION: ${{ env.NAPCAT_VERSION }}
         run: |
-          npm i -g pnpm
           pnpm i
           pnpm --filter napcat-webui-frontend run build || exit 1
           pnpm run ${{ matrix.target.build_cmd }}

@@ -157,6 +157,13 @@ jobs:
         with:
           node-version: 24
 
+      # 固定 pnpm v9 (避免 pnpm 10 对 ignored builds 默认非零退出)
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
       # 获取最新 release tag 并生成版本号
       - name: Generate Version
         id: version
@@ -228,6 +235,13 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 24
+
+      # 固定 pnpm v9 (避免 pnpm 10 对 ignored builds 默认非零退出)
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
 
       # 获取最新 release tag 并生成版本号
       - name: Generate Version

@@ -22,11 +22,7 @@ interface BuildStep {
 
 function getCommonSteps (): BuildStep[] {
   return [
-    {
-      name: 'Install pnpm',
-      command: 'npm i -g pnpm',
-      errorMessage: 'Failed to install pnpm',
-    },
+    // pnpm 已通过 GitHub Action (pnpm/action-setup) 预安装并固定 v9, 此处无需再次安装
     {
       name: 'Install dependencies',
       command: 'pnpm i',
