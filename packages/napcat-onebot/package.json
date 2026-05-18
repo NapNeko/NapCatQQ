@@ -29,7 +29,7 @@
         "napcat-webui-backend": "workspace:*",
         "napcat.protobuf": "^1.1.4",
         "on-finished": "^2.3.5",
-        "type-is": "^1.6.7",
+        "type-is": "^2.1.0",
         "ws": "^8.18.3"
     },
     "devDependencies": {
