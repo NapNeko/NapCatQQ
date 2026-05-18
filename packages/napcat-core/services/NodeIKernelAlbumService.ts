@@ -88,6 +88,7 @@ export interface NodeIKernelAlbumService {
       map_bytes_info: unknown[],
       map_user_account: unknown[];
     },
+    type: number,  // type : number  1 取消  2 点赞
     param: {
       // {"id":"421_1_0_1012959257|V61Yiali4PELg90bThrH4Bo2iI1M5Kab|V5bCgAxMDEyOTU5MjU3e*KqaLVYdic!^||^421_1_0_1012959257|V61Yiali4PELg90bThrH4Bo2iI1M5Kab|17560336594^||^1","status":1}
       id: string,

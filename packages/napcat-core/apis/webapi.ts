@@ -507,20 +507,36 @@ export class NTQQWebApi {
   async doAlbumMediaLikeByNTQQ (
     qunId: string,
     albumId: string,
-    lloc: string,
-    id: string) {
+    batchId: string,
+    lloc: string | undefined,
+    isLike: boolean
+  ) {
     const random_seq = Math.floor(Math.random() * 9000) + 1000;
     const uin = this.core.selfInfo.uin || '10001';
+
+    const type = isLike ? 2 : 1;
+    const status = isLike ? 0 : 1;
+
+    let id = '';
+    if (lloc) {
+      id = `421_1_0_${qunId}|${albumId}|${batchId}^||^421_1_0_${qunId}|${albumId}|${lloc}^||^0`;
+    } else {
+      id = `421_1_0_${qunId}|${albumId}|${batchId}`;
+    }
+
     return await this.context.session.getAlbumService().doQunLike(
-      random_seq, {
+      random_seq,
+      {
         map_info: [],
         map_bytes_info: [],
         map_user_account: [],
-      }, {
-        id,
-        status: 1,
       },
-      createAlbumFeedPublish(qunId, uin, albumId, lloc)
+      type,
+      {
+        id,
+        status,
+      },
+      createAlbumFeedPublish(qunId, uin, albumId, batchId)
     );
   }
 }
