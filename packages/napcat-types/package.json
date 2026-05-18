@@ -19,6 +19,6 @@
   "devDependencies": {
     "napcat-core": "workspace:*",
     "napcat-onebot": "workspace:*",
-    "tsc-alias": "^1.8.16"
+    "tsc-alias": "^1.8.17"
   }
 }
