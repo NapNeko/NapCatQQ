@@ -24,6 +24,7 @@ export const ActionName = {
 
   DelGroupAlbumMedia: 'del_group_album_media',
   SetGroupAlbumMediaLike: 'set_group_album_media_like',
+  CancelGroupAlbumMediaLike: 'cancel_group_album_media_like',
   DoGroupAlbumComment: 'do_group_album_comment',
   GetGroupAlbumMediaList: 'get_group_album_media_list',
   UploadImageToQunAlbum: 'upload_image_to_qun_album',

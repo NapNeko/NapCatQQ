@@ -163,14 +163,14 @@ export interface AlbumFeedLikePublish {
   };
   cell_media: {
     album_id: string;
-    batch_id: number;
-    media_items: Array<{
+    batch_id: string | number;
+    media_items?: {
       type: number;
       image: {
         lloc: string;
         sloc: string;
       };
-    }>;
+    }[];
   };
   cell_qun_info: {
     qun_id: string;
@@ -182,21 +182,19 @@ export interface AlbumFeedLikePublish {
  * @param qunId 群号
  * @param uin 用户QQ号
  * @param albumId 相册ID
- * @param lloc 信息
- * @param sloc 信息(可选，默认与lloc相同)
+ * @param batchId 批次ID
  * @returns 动态发布请求参数对象
  */
 export function createAlbumFeedPublish (
   qunId: string,
   uin: string,
   albumId: string,
-  lloc: string,
-  sloc?: string
-): AlbumFeedLikePublish {
+  batchId: string
+) {
   return {
     cell_common: {
       time: Date.now(),
-      feed_id: '',
+      feed_id: `422_0_${batchId}`, // 需要补全feed_id
     },
     cell_user_info: {
       user: {
@@ -205,14 +203,7 @@ export function createAlbumFeedPublish (
     },
     cell_media: {
       album_id: albumId,
-      batch_id: 0,
-      media_items: [{
-        type: 0,
-        image: {
-          lloc,
-          sloc: sloc || lloc,
-        },
-      }],
+      batch_id: batchId,
     },
     cell_qun_info: {
       qun_id: qunId,

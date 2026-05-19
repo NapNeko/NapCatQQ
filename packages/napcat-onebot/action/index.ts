@@ -134,7 +134,7 @@ import { GetQunAlbumList } from './extends/GetQunAlbumList';
 import { UploadImageToQunAlbum } from './extends/UploadImageToQunAlbum';
 import { DoGroupAlbumComment } from './extends/DoGroupAlbumComment';
 import { GetGroupAlbumMediaList } from './extends/GetGroupAlbumMediaList';
-import { SetGroupAlbumMediaLike } from './extends/SetGroupAlbumMediaLike';
+import { SetGroupAlbumMediaLike, CancelGroupAlbumMediaLike } from './extends/SetGroupAlbumMediaLike';
 import { DelGroupAlbumMedia } from './extends/DelGroupAlbumMedia';
 import { CleanStreamTempFile } from './stream/CleanStreamTempFile';
 import { DownloadFileStream } from './stream/DownloadFileStream';
@@ -169,6 +169,7 @@ export function getAllHandlers (obContext: NapCatOneBot11Adapter, core: NapCatCo
     new UploadFileStream(obContext, core),
     new DelGroupAlbumMedia(obContext, core),
     new SetGroupAlbumMediaLike(obContext, core),
+    new CancelGroupAlbumMediaLike(obContext, core),
     new DoGroupAlbumComment(obContext, core),
     new GetGroupAlbumMediaList(obContext, core),
     new GetQunAlbumList(obContext, core),
