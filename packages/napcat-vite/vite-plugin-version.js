@@ -47,8 +47,8 @@ function validateVersion (version) {
  * 版本号来源优先级:
  * 1. 环境变量 NAPCAT_VERSION (用于 CI 构建)
  * 2. 缓存的 GitHub tag
- * 3. 从 GitHub API 获取最新 tag
- * 4. 兆底版本号: 1.0.0-dev
+ * 3. 从 GitHub API 获取最新公开 tag（不携带 token）
+ * 4. 兜底版本号: 1.0.0-dev
  */
 export default function vitePluginNapcatVersion () {
   const pluginDir = path.resolve(__dirname, 'dist');
@@ -56,7 +56,6 @@ export default function vitePluginNapcatVersion () {
   const owner = 'NapNeko';
   const repo = 'NapCatQQ';
   const maxAgeMs = 24 * 60 * 60 * 1000; // cache 1 day
-  const githubToken = process.env.GITHUB_TOKEN;
   // CI 构建时可通过环境变量直接指定版本号
   const envVersion = process.env.NAPCAT_VERSION;
   const fallbackVersion = '1.0.0-dev';
@@ -92,7 +91,6 @@ export default function vitePluginNapcatVersion () {
           headers: {
             'User-Agent': 'vite-plugin-napcat-version',
             Accept: 'application/vnd.github.v3+json',
-            ...(githubToken ? { Authorization: `token ${githubToken}` } : {}),
           },
         },
         (res) => {

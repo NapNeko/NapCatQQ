@@ -254,6 +254,28 @@ export class GitHubAPI {
     }
   }
 
+  async createWorkflowDispatch (
+    owner: string,
+    repo: string,
+    workflowFile: string,
+    ref: string,
+    inputs: Record<string, string>
+  ): Promise<void> {
+    const response = await fetch(`${this.baseUrl}/repos/${owner}/${repo}/actions/workflows/${workflowFile}/dispatches`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+        Accept: 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ref, inputs }),
+    });
+    if (!response.ok && response.status !== 204) {
+      throw new Error(`Workflow dispatch failed: ${response.status} ${response.statusText}`);
+    }
+  }
+
   // ============== Release Cleanup API ==============
 
   async listReleases (owner: string, repo: string, perPage = 100, page = 1): Promise<Release[]> {
@@ -293,7 +315,7 @@ export function getEnv (name: string, required = false): string | undefined {
 }
 
 export function getRepository (): { owner: string, repo: string; } {
-  const repository = getEnv('GITHUB_REPOSITORY', true);
+  const repository = getEnv('GITHUB_REPOSITORY', true)!;
   const [owner, repo] = repository.split('/');
   return { owner, repo };
 }
