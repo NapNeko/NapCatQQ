@@ -3,7 +3,6 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "..",
-    "baseUrl": ".",
     "declaration": true,
     "emitDeclarationOnly": true,
     "skipLibCheck": true,
@@ -11,25 +10,31 @@
     "noEmitOnError": false,
     "paths": {
       "napcat-core": [
-        "../napcat-core/index.ts"
+        "../../packages/napcat-core/index.ts"
       ],
       "napcat-onebot": [
-        "../napcat-onebot/index.ts"
+        "../../packages/napcat-onebot/index.ts"
+      ],
+      "napcat-common/src/*": [
+        "../../packages/napcat-common/src/*"
+      ],
+      "napcat-image-size/src/*": [
+        "../../packages/napcat-image-size/src/*"
       ],
       "@/napcat-core/*": [
-        "../napcat-core/*"
+        "../../packages/napcat-core/*"
       ],
       "@/napcat-onebot/*": [
-        "../napcat-onebot/*"
+        "../../packages/napcat-onebot/*"
       ],
       "@/napcat-common/*": [
-        "../napcat-common/*"
+        "../../packages/napcat-common/*"
       ],
       "@/napcat-webui-backend/*": [
-        "../napcat-webui-backend/*"
+        "../../packages/napcat-webui-backend/*"
       ],
       "@/*": [
-        "../*"
+        "../../packages/*"
       ]
     }
   },

@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES2021",
     "module": "ESNext",
-    "moduleResolution": "Node",
+    "moduleResolution": "bundler",
     "lib": [
       "ES2021"
     ],
@@ -34,10 +34,15 @@
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
-    "baseUrl": ".",
     "paths": {
+      "napcat-common/src/*": [
+        "../../packages/napcat-common/src/*"
+      ],
+      "napcat-image-size/src/*": [
+        "../../packages/napcat-image-size/src/*"
+      ],
       "@/*": [
-        "../*"
+        "../../packages/*"
       ]
     },
     "skipLibCheck": true,
