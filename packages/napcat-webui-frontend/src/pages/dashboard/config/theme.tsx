@@ -436,15 +436,33 @@ const ThemeConfigCard = () => {
                               }
                             }
                             await FileManager.uploadWebUIFont(file);
-                            toast.success('上传成功，即将刷新页面');
+                            
+                            // 先自动把选择的字体模式设置为 custom，并保存配置，避免刷新后又变成了旧的/没保存的模式
+                            const updatedTheme = { ...theme, fontMode: 'custom' };
+                            await WebUIManager.setThemeConfig(updatedTheme);
+                            originalDataRef.current = updatedTheme;
+                            updateFontCache('custom');
+                            setHasUnsavedChanges(false);
+                            loadTheme();
+
+                            toast.success('上传并保存成功，即将刷新页面');
                             setTimeout(() => window.location.reload(), 1000);
                           } catch (error) {
-                            toast.error('上传失败: ' + (error as Error).message);
+                            toast.error('上传或保存失败: ' + (error as Error).message);
                           }
                         }}
                         onDelete={async () => {
                           try {
                             await FileManager.deleteWebUIFont();
+                            // 删除字体后，若当前选中的是自定义字体，则将其重置为系统默认（或其它）并保存，以防页面报错
+                            if (theme.fontMode === 'custom') {
+                              const updatedTheme = { ...theme, fontMode: 'system' };
+                              await WebUIManager.setThemeConfig(updatedTheme);
+                              originalDataRef.current = updatedTheme;
+                              updateFontCache('system');
+                              setHasUnsavedChanges(false);
+                              loadTheme();
+                            }
                             toast.success('删除成功，即将刷新页面');
                             setTimeout(() => window.location.reload(), 1000);
                           } catch (error) {

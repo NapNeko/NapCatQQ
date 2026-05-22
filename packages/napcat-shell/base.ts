@@ -492,7 +492,8 @@ async function handleLoginInner (context: { isLogined: boolean; }, logger: LogWr
     try {
       // 检查是否配置了自动登录账号，并尝试 WebUi 快速/密码回退登录。
       // 这可以避免在已经有自动登录配置的情况下过早输出二维码。
-      const hasAutoLogin = process.env['NAPCAT_QUICK_ACCOUNT'] || (WebUiDataRuntime.getQQQuickLoginList().length > 0); // 假如有历史登录列表
+      const quickLoginList = WebUiDataRuntime.getQQQuickLoginList() || [];
+      const hasAutoLogin = process.env['NAPCAT_QUICK_ACCOUNT'] || (quickLoginList.length > 0); // 假如有历史登录列表
       if (hasAutoLogin || process.env['NAPCAT_QUICK_PASSWORD'] || process.env['NAPCAT_QUICK_PASSWORD_MD5']) {
         hasAttemptedFallback = true;
       }

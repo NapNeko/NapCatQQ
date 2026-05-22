@@ -92,7 +92,7 @@ const BackupConfigCard: React.FC = () => {
             onPress={handleExportConfig}
             title='导出配置'
           >
-            <LuDownload size={20} />
+            <LuUpload size={20} />
           </Button>
           <label className='cursor-pointer'>
             <input
@@ -108,7 +108,7 @@ const BackupConfigCard: React.FC = () => {
               as='span'
               title='导入配置'
             >
-              <LuUpload size={20} />
+              <LuDownload size={20} />
             </Button>
           </label>
         </div>
