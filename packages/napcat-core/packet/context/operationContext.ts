@@ -373,8 +373,19 @@ export class PacketOperationContext {
           return element;
         })
       );
+      const isGroup = msg?.responseHead.grp !== undefined;
+      const peerUin = isGroup
+        ? String(msg?.responseHead.grp?.groupUin ?? 0)
+        : String(msg?.responseHead.fromUin ?? 0);
+      const peerUid = isGroup
+        ? String(msg?.responseHead.grp?.groupUin ?? 0)
+        : String(msg?.responseHead.fromUid ?? '');
+      const sendNickName = isGroup
+        ? (msg?.responseHead.grp?.memberName ?? '')
+        : (msg?.responseHead.forward?.friendName ?? '');
+
       return {
-        chatType: ChatType.KCHATTYPEGROUP,
+        chatType: isGroup ? ChatType.KCHATTYPEGROUP : ChatType.KCHATTYPEC2C,
         elements,
         guildId: '',
         isOnlineMsg: false,
@@ -385,18 +396,18 @@ export class PacketOperationContext {
         msgType: NTMsgType.KMSGTYPEMIX,
         parentMsgIdList: [],
         parentMsgPeer: {
-          chatType: ChatType.KCHATTYPEGROUP,
-          peerUid: String(msg?.responseHead.grp?.groupUin ?? 0),
+          chatType: isGroup ? ChatType.KCHATTYPEGROUP : ChatType.KCHATTYPEC2C,
+          peerUid,
         },
         peerName: '',
-        peerUid: '1094950020',
-        peerUin: '1094950020',
+        peerUid,
+        peerUin,
         recallTime: '0',
         records: [],
-        sendNickName: msg?.responseHead.grp?.memberName ?? '',
-        sendRemarkName: msg?.responseHead.grp?.memberName ?? '',
-        senderUid: '',
-        senderUin: '1094950020',
+        sendNickName,
+        sendRemarkName: sendNickName,
+        senderUid: msg?.responseHead.fromUid ?? '',
+        senderUin: String(msg?.responseHead.fromUin ?? 0),
         sourceType: MsgSourceType.K_DOWN_SOURCETYPE_UNKNOWN,
         subMsgType: 1,
       };
