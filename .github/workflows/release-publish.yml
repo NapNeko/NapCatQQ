@@ -419,7 +419,7 @@ jobs:
           APIFOX_TOKEN: ${{ secrets.APIFOX_TOKEN }}
         run: |
           npm i -g pnpm
-          pnpm i
+          pnpm i --ignore-scripts
           pnpm run build:openapi
 
           jq -n --rawfile input packages/napcat-schema/dist/openapi.json \

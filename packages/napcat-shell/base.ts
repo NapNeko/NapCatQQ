@@ -483,16 +483,25 @@ async function handleLoginInner (context: { isLogined: boolean; }, logger: LogWr
   } else {
     logger.log('没有 -q 指令指定快速登录，将使用二维码登录方式');
     if (historyLoginList.length > 0) {
-      logger.log(`可用于快速登录的 QQ：\n${historyLoginList
+      logger.log(`可用于快速登录 of QQ：\n${historyLoginList
         .map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`)
         .join('\n')
         }`);
     }
-    loginService.getQRCodePicture();
+    let hasAttemptedFallback = false;
     try {
+      // 检查是否配置了自动登录账号，并尝试 WebUi 快速/密码回退登录。
+      // 这可以避免在已经有自动登录配置的情况下过早输出二维码。
+      const hasAutoLogin = process.env['NAPCAT_QUICK_ACCOUNT'] || (WebUiDataRuntime.getQQQuickLoginList().length > 0); // 假如有历史登录列表
+      if (hasAutoLogin || process.env['NAPCAT_QUICK_PASSWORD'] || process.env['NAPCAT_QUICK_PASSWORD_MD5']) {
+        hasAttemptedFallback = true;
+      }
       await WebUiDataRuntime.runWebUiConfigQuickFunction();
     } catch (error) {
       logger.logError('WebUi 快速登录失败 执行失败', error);
+    }
+    if (!hasAttemptedFallback && !context.isLogined) {
+      loginService.getQRCodePicture();
     }
   }
 
