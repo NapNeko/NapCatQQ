@@ -40,6 +40,7 @@ interface UpdateConfig {
 const SKIP_UPDATE_FILES = [
   'NapCatWinBootMain.exe',
   'NapCatWinBootHook.dll',
+  'quickLoginExample.bat',
 ];
 
 // 更新时若文件已存在则保留（不覆盖）的用户配置文件（使用相对路径精确匹配）
