@@ -436,7 +436,7 @@ const ThemeConfigCard = () => {
                               }
                             }
                             await FileManager.uploadWebUIFont(file);
-                            
+
                             // 先自动把选择的字体模式设置为 custom，并保存配置，避免刷新后又变成了旧的/没保存的模式
                             const updatedTheme = { ...theme, fontMode: 'custom' };
                             await WebUIManager.setThemeConfig(updatedTheme);
