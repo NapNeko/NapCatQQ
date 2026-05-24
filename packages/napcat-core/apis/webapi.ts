@@ -539,4 +539,41 @@ export class NTQQWebApi {
       createAlbumFeedPublish(qunId, uin, albumId, batchId)
     );
   }
+
+  async getDaySignedList (groupCode: string) {
+    const pSkey = (await this.core.apis.UserApi.getPSkey(['qun.qq.com'])).domainPskeyMap.get('qun.qq.com')!;
+    const selfUin = this.core.selfInfo.uin;
+    const cookie = `p_uin=o${selfUin}; p_skey=${pSkey}; uin=o${selfUin}`;
+    const post = await RequestUtil.HttpGetJson<{
+      retCode: number,
+      costTime: number,
+      response: {
+        ret?: {
+          code: string,
+          msg: string,
+        },
+        page?: {
+          infos?: {
+            uid: string,
+            uidGroupNick: string,
+            signedTimeStamp: string,
+            signInRank: number,
+          }[],
+          offset: number,
+          total: number,
+        }[],
+      },
+      funcCode: number,
+    }>(`https://qun.qq.com/v2/signin/trpc/GetDaySignedList?g_tk=${this.getBknFromPSKey(pSkey)}`, 'POST', {
+      dayYmd: new Date().toISOString().slice(0, 10).replace(/-/g, ''),
+      offset: 0,
+      limit: 100,
+      uid: selfUin,
+      groupId: groupCode,
+    }, {
+      Cookie: cookie,
+      'Content-Type': 'application/json',
+    });
+    return post;
+  }
 }

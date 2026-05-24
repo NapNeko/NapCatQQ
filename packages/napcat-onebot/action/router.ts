@@ -208,4 +208,6 @@ export const ActionName = {
   ReceiveOnlineFile: 'receive_online_file',
   RefuseOnlineFile: 'refuse_online_file',
   CancelOnlineFile: 'cancel_online_file',
+
+  GetGroupSignedList: 'get_group_signed_list',
 } as const;
