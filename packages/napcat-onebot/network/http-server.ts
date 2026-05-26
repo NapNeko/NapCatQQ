@@ -250,7 +250,7 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
 
   async httpApiRequest (req: Request, res: Response, request_sse: boolean = false) {
     let payload = req.body;
-    if (req.method === 'get') {
+    if (req.method === 'GET') {
       payload = req.query;
     } else if (req.query) {
       payload = { ...req.body, ...req.query };
