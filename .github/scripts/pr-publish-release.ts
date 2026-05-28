@@ -19,7 +19,7 @@
 
 import { execSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync, mkdirSync, readdirSync } from 'node:fs';
-import { join, basename, resolve } from 'node:path';
+import { join, resolve } from 'node:path';
 import { GitHubAPI, getEnv, setOutput } from './lib/github.ts';
 import { toProxyUrl } from './lib/comment.ts';
 

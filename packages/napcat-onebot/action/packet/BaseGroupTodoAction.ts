@@ -16,7 +16,7 @@ export abstract class BaseGroupTodoAction extends GetPacketStatusDepends<GroupTo
   override returnSchema = Type.Null();
   override actionTags = ['核心接口'];
 
-  protected abstract handleGroupTodo(groupId: number, msgSeq: string): Promise<void>;
+  protected abstract handleGroupTodo (groupId: number, msgSeq: string): Promise<void>;
 
   async _handle (payload: GroupTodoPayload) {
     const groupId = +payload.group_id;

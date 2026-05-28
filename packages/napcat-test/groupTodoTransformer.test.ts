@@ -2,6 +2,9 @@ import { describe, expect, test, vi } from 'vitest';
 import { NapProtoMsg } from 'napcat-protobuf';
 import { OidbSvcTrpcTcpBase } from '@/napcat-core/packet/transformer/proto/oidb/OidbBase';
 import { OidbSvcTrpcTcp0XF90 } from '@/napcat-core/packet/transformer/proto/oidb/Oidb.0xf90';
+import SetGroupTodo from '@/napcat-core/packet/transformer/action/SetGroupTodo';
+import CompleteGroupTodo from '@/napcat-core/packet/transformer/action/CompleteGroupTodo';
+import CancelGroupTodo from '@/napcat-core/packet/transformer/action/CancelGroupTodo';
 
 vi.mock('@/napcat-core/packet/transformer/base', () => ({
   PacketTransformer: class PacketTransformer {
@@ -13,10 +16,6 @@ vi.mock('@/napcat-core/packet/transformer/base', () => ({
   },
   PacketBufBuilder: (str: Uint8Array) => Buffer.from(str),
 }));
-
-import SetGroupTodo from '@/napcat-core/packet/transformer/action/SetGroupTodo';
-import CompleteGroupTodo from '@/napcat-core/packet/transformer/action/CompleteGroupTodo';
-import CancelGroupTodo from '@/napcat-core/packet/transformer/action/CancelGroupTodo';
 
 const decodePacket = (data: Buffer) => {
   const base = new NapProtoMsg(OidbSvcTrpcTcpBase).decode(data);
