@@ -138,14 +138,14 @@ export class FFmpegExecAdapter implements IFFmpegAdapter {
   /**
    * 获取时长
    */
-  async getDuration(filePath: string): Promise<number> {
+  async getDuration (filePath: string): Promise<number> {
     const { stdout } = await execFileAsync(this.ffprobePath, [
-      "-v",
-      "error",
-      "-show_entries",
-      "format=duration",
-      "-of",
-      "default=noprint_wrappers=1:nokey=1",
+      '-v',
+      'error',
+      '-show_entries',
+      'format=duration',
+      '-of',
+      'default=noprint_wrappers=1:nokey=1',
       filePath,
     ]);
 
