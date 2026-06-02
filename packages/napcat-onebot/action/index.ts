@@ -63,6 +63,7 @@ import GetRecentContact from './user/GetRecentContact';
 import { GetProfileLike } from './extends/GetProfileLike';
 import SetGroupPortrait from './go-cqhttp/SetGroupPortrait';
 import { FetchCustomFace } from './extends/FetchCustomFace';
+import { AddCustomFace, DeleteCustomFace, FetchCustomFaceDetail, SetCustomFaceDesc } from './extends/CustomFace';
 import GoCQHTTPUploadPrivateFile from './go-cqhttp/UploadPrivateFile';
 import { FetchEmojiLike } from './extends/FetchEmojiLike';
 import { GetEmojiLikes } from './extends/GetEmojiLikes';
@@ -279,6 +280,10 @@ export function getAllHandlers (obContext: NapCatOneBot11Adapter, core: NapCatCo
     new GetProfileLike(obContext, core),
     new SetGroupPortrait(obContext, core),
     new FetchCustomFace(obContext, core),
+    new FetchCustomFaceDetail(obContext, core),
+    new AddCustomFace(obContext, core),
+    new DeleteCustomFace(obContext, core),
+    new SetCustomFaceDesc(obContext, core),
     new GoCQHTTPUploadPrivateFile(obContext, core),
     new GetGuildProfile(obContext, core),
     new GoCQHTTPGetModelShow(obContext, core),

@@ -67,6 +67,18 @@ export class NTQQMsgApi {
     return this.context.session.getMsgService().fetchFavEmojiList('', num, true, true);
   }
 
+  async addFavEmoji (req: Parameters<NodeIKernelMsgService['addFavEmoji']>[0]) {
+    return this.context.session.getMsgService().addFavEmoji(req);
+  }
+
+  async deleteFavEmoji (ids: string[]) {
+    return this.context.session.getMsgService().deleteFavEmoji(ids);
+  }
+
+  async modifyFavEmojiDesc (items: Parameters<NodeIKernelMsgService['modifyFavEmojiDesc']>[0]) {
+    return this.context.session.getMsgService().modifyFavEmojiDesc(items);
+  }
+
   async queryMsgsWithFilterExWithSeq (peer: Peer, msgSeq: string) {
     return await this.context.session.getMsgService().queryMsgsWithFilterEx('0', '0', msgSeq, {
       chatInfo: peer,
