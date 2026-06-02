@@ -369,7 +369,16 @@ export interface NodeIKernelMsgService {
     }>;
   }>;
 
-  addFavEmoji (arg: unknown): unknown;
+  addFavEmoji (arg: {
+    emojiId?: string,
+    packageId?: number,
+    emojiPath: string,
+    fileSize: string,
+    fileName: string,
+    md5: string,
+    isMarkFace?: boolean,
+    isOrigin?: boolean,
+  }): unknown;
 
   fetchMarketEmoticonList (arg1: number, arg2: number): unknown;
 
@@ -397,9 +406,14 @@ export interface NodeIKernelMsgService {
 
   downloadEmojiPic (arg1: number, arg2: Array<unknown>[], arg3: number, arg4: Map<unknown, unknown>): unknown;
 
-  deleteFavEmoji (arg: unknown): unknown;
+  deleteFavEmoji (arg: string[]): unknown;
 
-  modifyFavEmojiDesc (arg: unknown): unknown;
+  modifyFavEmojiDesc (arg: Array<{
+    emojiId: number,
+    resId: string,
+    md5: string,
+    desc: string,
+  }>): unknown;
 
   queryFavEmojiByDesc (arg: unknown): unknown;
 
