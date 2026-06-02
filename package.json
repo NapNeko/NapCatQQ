@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^16.0.3",
-    "@vitejs/plugin-react-swc": "^4.2.2",
+    "@vitejs/plugin-react-swc": "^4.3.1",
     "@vitest/ui": "^4.0.9",
     "eslint": "^9.39.1",
     "neostandard": "^0.12.2",
