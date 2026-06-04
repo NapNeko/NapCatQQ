@@ -16,7 +16,7 @@
         }
     },
     "dependencies": {
-        "@sinclair/typebox": "^0.34.38",
+        "@sinclair/typebox": "^0.34.41",
         "cors": "^2.8.5",
         "express": "^5.0.0",
         "fast-xml-parser": "^4.3.6",
@@ -35,7 +35,7 @@
     "devDependencies": {
         "@types/cors": "^2.8.17",
         "@types/express": "^5.0.0",
-        "@types/node": "^22.0.1",
+        "@types/node": "^22.12.0",
         "@types/on-finished": "^2.3.4",
         "@types/type-is": "^1.6.7"
     },

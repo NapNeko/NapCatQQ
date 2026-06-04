@@ -24,7 +24,7 @@
     "@vitest/ui": "^4.0.9",
     "eslint": "^9.39.1",
     "neostandard": "^0.12.2",
-    "typescript": "^5.3.0",
+    "typescript": "^5.7.3",
     "vite": "^6.4.1",
     "vite-plugin-cp": "^6.0.3",
     "vitest": "^4.0.9"

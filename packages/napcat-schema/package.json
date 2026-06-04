@@ -8,13 +8,13 @@
     "build:openapi": "vite build && node ./dist/schemas.mjs"
   },
   "dependencies": {
-    "@sinclair/typebox": "^0.34.38",
+    "@sinclair/typebox": "^0.34.41",
     "napcat-onebot": "workspace:*",
     "napcat-common": "workspace:*",
     "napcat-vite": "workspace:*"
   },
   "devDependencies": {
     "tsx": "^4.7.1",
-    "vite": "^6.0.0"
+    "vite": "^6.4.1"
   }
 }

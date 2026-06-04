@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import store from 'napcat-common/src/store';
 import type { WebUiCredentialJson, WebUiCredentialInnerJson } from '@/napcat-webui-backend/src/types';
 export class AuthHelper {
-  private static readonly secretKey = process.env['NAPCAT_WEBUI_JWT_SECRET_KEY'] || Math.random().toString(36).slice(2);
+  private static readonly secretKey = process.env['NAPCAT_WEBUI_JWT_SECRET_KEY'] || crypto.randomBytes(32).toString('hex');
   private static readonly MAX_CREDENTIAL_VALID_SECONDS = 3600;
 
   public static getSecretKey (): string {

@@ -69,10 +69,10 @@ jobs:
           sparse-checkout-cone-mode: false
           persist-credentials: false
 
-      - name: Setup Node.js 24
+      - name: Setup Node.js 20
         uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version: 20
 
       - name: Check trigger condition
         id: check
@@ -96,10 +96,10 @@ jobs:
           sparse-checkout-cone-mode: false
           persist-credentials: false
 
-      - name: Setup Node.js 24
+      - name: Setup Node.js 20
         uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version: 20
 
       - name: Update building comment
         env:
@@ -123,10 +123,10 @@ jobs:
           sparse-checkout-cone-mode: false
           persist-credentials: false
 
-      - name: Setup Node.js 24
+      - name: Setup Node.js 20
         uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version: 20
 
       - name: Dispatch untrusted build
         env:
@@ -169,10 +169,10 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Setup Node.js 24
+      - name: Setup Node.js 20
         uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version: 20
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -238,10 +238,10 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Setup Node.js 24
+      - name: Setup Node.js 20
         uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version: 20
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -303,10 +303,10 @@ jobs:
           sparse-checkout-cone-mode: false
           persist-credentials: false
 
-      - name: Setup Node.js 24
+      - name: Setup Node.js 20
         uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version: 20
 
       - name: Download Framework artifact
         if: needs.build-framework.outputs.status == 'success'
@@ -364,10 +364,10 @@ jobs:
           sparse-checkout-cone-mode: false
           persist-credentials: false
 
-      - name: Setup Node.js 24
+      - name: Setup Node.js 20
         uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version: 20
 
       - name: Update result comment
         env:
@@ -401,10 +401,10 @@ jobs:
           sparse-checkout-cone-mode: false
           persist-credentials: false
 
-      - name: Setup Node.js 24
+      - name: Setup Node.js 20
         uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version: 20
 
       - name: Dispatch docker build
         continue-on-error: true

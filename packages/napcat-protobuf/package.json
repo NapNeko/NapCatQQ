@@ -9,9 +9,9 @@
     "prepack": "tsc"
   },
   "dependencies": {
-    "@protobuf-ts/runtime": "^2.9.4"
+    "@protobuf-ts/runtime": "^2.11.1"
   },
   "devDependencies": {
-    "typescript": "^5.6"
+    "typescript": "^5.7.3"
   }
 }
