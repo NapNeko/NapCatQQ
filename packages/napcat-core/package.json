@@ -18,7 +18,7 @@
   "dependencies": {
     "@protobuf-ts/runtime": "^2.11.1",
     "@sinclair/typebox": "^0.34.38",
-    "compressing": "^1.10.1",
+    "compressing": "^2.1.1",
     "file-type": "^21.0.0",
     "inversify": "^7.10.4",
     "json5": "^2.2.3",
