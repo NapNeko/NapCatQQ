@@ -54,7 +54,7 @@ const ShellBaseConfig = (source_map: boolean = false) =>
     build: {
       sourcemap: source_map,
       target: 'esnext',
-      minify: false,
+      minify: source_map ? false : 'esbuild',
       lib: {
         entry: {
           napcat: path.resolve(__dirname, 'napcat.ts'),

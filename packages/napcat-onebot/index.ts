@@ -157,10 +157,6 @@ export class NapCatOneBot11Adapter {
 
     // 创建NetWork服务
 
-    // 注册Plugin 如果需要基于NapCat进行快速开发
-    // this.networkManager.registerAdapter(
-    //     new OB11PluginAdapter('myPlugin', this.core, this,this.actions)
-    // );
     // 检查插件目录是否存在，不存在则不加载插件管理器
     if (existsSync(this.context.pathWrapper.pluginPath)) {
       this.context.logger.log('[Plugins] 插件目录存在，开始加载插件');

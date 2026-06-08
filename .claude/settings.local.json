@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tasklist)",
+      "Bash(sort -rk5)",
+      "Bash(powershell \"Get-Process | Sort-Object CPU -Descending | Select-Object -First 15 Name,CPU,Id,WorkingSet | Format-Table -AutoSize\")",
+      "Bash(powershell *)",
+      "Bash(where ssh *)",
+      "Bash(where plink *)",
+      "Bash(where sshpass *)",
+      "Bash(echo \"exit=$?\")",
+      "Bash(python -c \"import paramiko; print\\('paramiko OK'\\)\")",
+      "Bash(pnpm --filter napcat-common run typecheck)",
+      "Bash(pnpm --filter napcat-core run typecheck)",
+      "Bash(pnpm --filter napcat-onebot run typecheck)",
+      "Bash(git *)"
+    ]
+  }
+}
