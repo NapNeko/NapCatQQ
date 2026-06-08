@@ -30,7 +30,7 @@
         "napcat.protobuf": "^1.1.4",
         "on-finished": "^2.3.5",
         "type-is": "^1.6.7",
-        "ws": "^8.18.3"
+        "ws": "^8.21.0"
     },
     "devDependencies": {
         "@types/cors": "^2.8.17",

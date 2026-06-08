@@ -22,7 +22,7 @@
     "json5": "^2.2.3",
     "napcat-common": "workspace:*",
     "napcat-core": "workspace:*",
-    "ws": "^8.18.3"
+    "ws": "^8.21.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

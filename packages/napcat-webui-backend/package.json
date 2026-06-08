@@ -27,7 +27,7 @@
     "napcat-common": "workspace:*",
     "napcat-dpapi": "workspace:*",
     "napcat-pty": "workspace:*",
-    "ws": "^8.18.3"
+    "ws": "^8.21.0"
   },
   "devDependencies": {
     "@types/compression": "^1.8.1",
