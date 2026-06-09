@@ -58,7 +58,7 @@ _Modern protocol-side framework implemented based on NTQQ._
 
 > QQ群因为特殊原因需要入群密钥，请在webui关于页面获取，仅最新的100个版本以内有效。
 
-下面的QQ Group 无需密钥，随时清理不活跃人员和Bot，仅500人容量。
+社区相关日后会进一步加强审核，并严格限制一定时间的入群人数，请具备一定编程基础和问题解决能力再申请入群。
 
 [困困猫猫的高中](https://qm.qq.com/q/14aUVclRUA)
 
