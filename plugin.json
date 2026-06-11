@@ -1,0 +1,8 @@
+{
+  "name": "napcat-plugin-qq-guardian",
+  "version": "1.0.0",
+  "description": "NapCat QQ group guardian plugin — comprehensive group management",
+  "main": "dist/index.mjs",
+  "author": "ShiYuPIay",
+  "license": "AGPL-3.0-or-later"
+}
