@@ -195,6 +195,11 @@ export async function NCoreInitFramework (
   if (oneBotAdapter) {
     WebUiDataRuntime.setOneBotContext(oneBotAdapter);
   }
+
+  // 监听下线通知并同步到 WebUI（兜底保障，防止 WebUI 状态不同步）
+  loaderObject.core.event.on('KickedOffLine', () => {
+    WebUiDataRuntime.setQQLoginStatus(false);
+  });
 }
 
 function registerWebUiLoginCallbacks (

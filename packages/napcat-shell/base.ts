@@ -794,6 +794,7 @@ export class NapCatShell {
 
     // 监听下线通知并同步到 WebUI
     this.core.event.on('KickedOffLine', (tips: string) => {
+      WebUiDataRuntime.setQQLoginStatus(false);
       WebUiDataRuntime.setQQLoginError(tips);
     });
     // 使用 NapCatAdapterManager 统一管理协议适配器
