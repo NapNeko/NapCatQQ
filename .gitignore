@@ -1,23 +1,10 @@
-# Develop
 node_modules/
-pnpm-lock.yaml
-out/
 dist/
-/src/core.lib/common/
-devconfig/*
-
-# Editor
-!.vscode/extensions.json
-.idea/*
-
-# macOS
-.DS_Store
-
-# Build
-*.db
-checkVersion.sh
-bun.lockb
-tests/run/
-guild1.db-wal
-guild1.db-shm
-packages/napcat-develop/config/.env
+data/qqadmin.db
+data/qqadmin.db-wal
+data/qqadmin.db-shm
+logs/
+backups/
+config-backups/
+*.tsbuildinfo
+.env
