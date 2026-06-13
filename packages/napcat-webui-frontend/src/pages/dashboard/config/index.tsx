@@ -103,6 +103,7 @@ export default function ConfigPage () {
           </ConfigPageItem>
         </Tab>
         //把修改密码移动到WebUI栏目中
+        {
         /*
         <Tab title='修改密码' key='token'>
           <ConfigPageItem size='sm'>
@@ -110,6 +111,7 @@ export default function ConfigPage () {
           </ConfigPageItem>
         </Tab>
         */
+        }
 
         <Tab title='主题配置' key='theme'>
           <ConfigPageItem size='lg'>
