@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+pnpm-lock.yaml
+
+# Build outputs
+dist/
+build/
+*.log
+
+# IDE
+.idea/
+.vscode/
+.trae/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
