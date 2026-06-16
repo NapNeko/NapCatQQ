@@ -1,8 +1,10 @@
 import { Button } from '@heroui/button';
+import { Input } from '@heroui/input';
 import { useLocalStorage } from '@uidotdev/usehooks';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 import key from '@/const/key';
 
@@ -11,10 +13,6 @@ import ImageInput from '@/components/input/image_input';
 
 import { siteConfig } from '@/config/site';
 import WebUIManager from '@/controllers/webui_manager';
-
-// 新增导入
-import { Input } from '@heroui/input';
-import { useNavigate } from 'react-router-dom';
 
 // Base64URL to Uint8Array converter
 function base64UrlToUint8Array (base64Url: string): Uint8Array {
@@ -54,14 +52,13 @@ const WebUIConfigCard = () => {
   const [registrationOptions, setRegistrationOptions] = useState<any>(null);
   const [isLoadingOptions, setIsLoadingOptions] = useState(false);
 
-  // 修改密码独立表单状态
+  // 修改密码独立表单
   const navigate = useNavigate();
   const [, setToken] = useLocalStorage(key.token, '');
   const {
     control: pwdControl,
     handleSubmit: handlePwdSubmit,
     formState: { isSubmitting: isPwdSubmitting, errors: pwdErrors },
-    reset: resetPwdForm,
     watch,
   } = useForm<{
     oldToken: string;
@@ -73,6 +70,8 @@ const WebUIConfigCard = () => {
     },
   });
   const oldTokenValue = watch('oldToken');
+
+  // 修复类型错误：显式包装为无参函数，满足 onPress 的类型要求
   const onPasswordSubmit = handlePwdSubmit(async (data) => {
     try {
       await WebUIManager.changePassword(data.oldToken, data.newToken);
@@ -126,6 +125,86 @@ const WebUIConfigCard = () => {
   return (
     <>
       <title>WebUI配置 - NapCat WebUI</title>
+
+      {/* 修改密码区块 - 移到顶部 */}
+      <div className='flex flex-col gap-4'>
+        <div className='flex-shrink-0 w-full font-bold text-default-600 dark:text-default-400 px-1'>修改密码</div>
+        <Controller
+          control={pwdControl}
+          name='oldToken'
+          rules={{
+            required: '旧密码不能为空',
+            validate: (value) => {
+              if (!value || value.trim().length === 0) {
+                return '旧密码不能为空';
+              }
+              return true;
+            },
+          }}
+          render={({ field }) => (
+            <Input
+              {...field}
+              label='旧密码'
+              placeholder='请输入旧密码'
+              type='password'
+              isRequired
+              isInvalid={!!pwdErrors.oldToken}
+              errorMessage={pwdErrors.oldToken?.message}
+            />
+          )}
+        />
+        <Controller
+          control={pwdControl}
+          name='newToken'
+          rules={{
+            required: '新密码不能为空',
+            minLength: {
+              value: 6,
+              message: '新密码至少需要6个字符',
+            },
+            validate: (value) => {
+              if (!value || value.trim().length === 0) {
+                return '新密码不能为空';
+              }
+              if (value.trim().length !== value.length) {
+                return '新密码不能包含前后空格';
+              }
+              if (value === oldTokenValue) {
+                return '新密码不能与旧密码相同';
+              }
+              if (!/[a-zA-Z]/.test(value)) {
+                return '新密码必须包含字母';
+              }
+              if (!/[0-9]/.test(value)) {
+                return '新密码必须包含数字';
+              }
+              return true;
+            },
+          }}
+          render={({ field }) => (
+            <Input
+              {...field}
+              label='新密码'
+              placeholder='至少6位，包含字母和数字'
+              type='password'
+              isRequired
+              isInvalid={!!pwdErrors.newToken}
+              errorMessage={pwdErrors.newToken?.message}
+            />
+          )}
+        />
+        {/* 自定义确认按钮，无取消按钮；onPress 调用 onPasswordSubmit（已通过 handlePwdSubmit 包装，类型兼容） */}
+        <div className='flex justify-end'>
+          <Button
+            color='primary'
+            onPress={() => { onPasswordSubmit(); }}
+            isLoading={isPwdSubmitting}
+          >
+            确认修改密码
+          </Button>
+        </div>
+      </div>
+
       <div className='flex flex-col gap-2'>
         <div className='flex-shrink-0 w-full font-bold text-default-600 dark:text-default-400 px-1'>背景图</div>
         <Controller
@@ -286,79 +365,6 @@ const WebUIConfigCard = () => {
               )}
             </>
           )}
-      </div>
-      
-      <div className='flex flex-col gap-4 mt-2'>
-        <div className='flex-shrink-0 w-full font-bold text-default-600 dark:text-default-400 px-1'>修改密码</div>
-        <Controller
-          control={pwdControl}
-          name='oldToken'
-          rules={{
-            required: '旧密码不能为空',
-            validate: (value) => {
-              if (!value || value.trim().length === 0) {
-                return '旧密码不能为空';
-              }
-              return true;
-            },
-          }}
-          render={({ field }) => (
-            <Input
-              {...field}
-              label='旧密码'
-              placeholder='请输入旧密码'
-              type='password'
-              isRequired
-              isInvalid={!!pwdErrors.oldToken}
-              errorMessage={pwdErrors.oldToken?.message}
-            />
-          )}
-        />
-        <Controller
-          control={pwdControl}
-          name='newToken'
-          rules={{
-            required: '新密码不能为空',
-            minLength: {
-              value: 6,
-              message: '新密码至少需要6个字符',
-            },
-            validate: (value) => {
-              if (!value || value.trim().length === 0) {
-                return '新密码不能为空';
-              }
-              if (value.trim().length !== value.length) {
-                return '新密码不能包含前后空格';
-              }
-              if (value === oldTokenValue) {
-                return '新密码不能与旧密码相同';
-              }
-              if (!/[a-zA-Z]/.test(value)) {
-                return '新密码必须包含字母';
-              }
-              if (!/[0-9]/.test(value)) {
-                return '新密码必须包含数字';
-              }
-              return true;
-            },
-          }}
-          render={({ field }) => (
-            <Input
-              {...field}
-              label='新密码'
-              placeholder='至少6位，包含字母和数字'
-              type='password'
-              isRequired
-              isInvalid={!!pwdErrors.newToken}
-              errorMessage={pwdErrors.newToken?.message}
-            />
-          )}
-        />
-        <SaveButtons
-          onSubmit={onPasswordSubmit}
-          reset={() => resetPwdForm()}
-          isSubmitting={isPwdSubmitting}
-        />
       </div>
 
       <SaveButtons
