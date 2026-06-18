@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="system">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>QQ Guardian</title>
+<style>
+:root{--bg:#f5f7fa;--surface:#fff;--border:#e2e8f0;--text:#1a202c;--muted:#718096;--primary:#3b82f6;--primary-dark:#2563eb;--danger:#ef4444;--success:#22c55e;--warning:#f59e0b;--radius:8px;--shadow:0 1px 3px rgba(0,0,0,.08)}
+[data-theme="dark"]{--bg:#0f172a;--surface:#1e293b;--border:#334155;--text:#f1f5f9;--muted:#94a3b8}
+@media(prefers-color-scheme:dark){[data-theme="system"]{--bg:#0f172a;--surface:#1e293b;--border:#334155;--text:#f1f5f9;--muted:#94a3b8}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);line-height:1.5;display:flex;min-height:100vh}
+#sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0;z-index:10}
+#main{margin-left:220px;flex:1;display:flex;flex-direction:column}
+#topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between}
+#content{padding:24px;flex:1}
+.sb-logo{padding:20px 16px;font-size:18px;font-weight:700;color:var(--primary);border-bottom:1px solid var(--border)}
+.sb-nav{flex:1;overflow-y:auto;padding:8px 0}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 16px;color:var(--muted);border-left:3px solid transparent;cursor:pointer;transition:.15s;font-size:14px}
+.sb-item:hover{color:var(--text);background:rgba(59,130,246,.06)}
+.sb-item.active{color:var(--primary);border-left-color:var(--primary);background:rgba(59,130,246,.08)}
+.sb-footer{padding:12px 16px;border-top:1px solid var(--border);font-size:12px;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px}
+.card-title{font-size:15px;font-weight:600;margin-bottom:14px}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;margin-bottom:24px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center}
+.stat-val{font-size:28px;font-weight:700;color:var(--primary)}
+.stat-label{font-size:12px;color:var(--muted);margin-top:4px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{background:var(--bg);font-weight:600;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.04em;padding:8px 12px;border-bottom:1px solid var(--border);text-align:left}
+td{padding:10px 12px;border-bottom:1px solid var(--border)}
+.table-wrap{overflow-x:auto}
+.form-group{margin-bottom:14px}
+label{display:block;font-size:13px;font-weight:500;margin-bottom:5px}
+input,select,textarea{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-size:14px;outline:none}
+input:focus,select:focus{border-color:var(--primary)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:6px;border:1px solid transparent;font-size:14px;font-weight:500;cursor:pointer;transition:.15s}
+.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-dark)}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-outline{background:transparent;color:var(--text);border-color:var(--border)}
+.btn-sm{padding:5px 10px;font-size:12px}
+.badge{display:inline-block;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:600}
+.badge-green{background:#dcfce7;color:#15803d}.badge-red{background:#fee2e2;color:#dc2626}
+.badge-yellow{background:#fef9c3;color:#854d0e}.badge-blue{background:#dbeafe;color:#1d4ed8}
+.badge-gray{background:var(--bg);color:var(--muted)}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:10px;padding:24px;width:480px;max-width:95vw;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:18px;font-weight:700;margin-bottom:16px}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+#toasts{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:8px;z-index:200}
+.toast{padding:10px 18px;border-radius:8px;font-size:14px;font-weight:500;color:#fff;animation:slideIn .25s ease}
+.toast-success{background:#22c55e}.toast-error{background:#ef4444}.toast-info{background:#3b82f6}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:none;opacity:1}}
+.page{display:none}.page.active{display:block}
+.page-title{font-size:20px;font-weight:700;margin-bottom:20px}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.empty{text-align:center;color:var(--muted);padding:40px;font-size:14px}
+hr{border:none;border-top:1px solid var(--border);margin:20px 0}
+.health-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.health-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+.health-name{font-size:13px;font-weight:600;margin-bottom:4px}
+.health-detail{font-size:12px;color:var(--muted)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
+.dot-green{background:var(--success)}.dot-red{background:var(--danger)}.dot-yellow{background:var(--warning)}
+</style>
+</head>
+<body>
+
+<nav id="sidebar">
+  <div class="sb-logo">🛡️ QQ Guardian</div>
+  <div class="sb-nav" id="sb-nav"></div>
+  <div class="sb-footer" id="version-badge">v1.0.0</div>
+</nav>
+
+<div id="main">
+  <div id="topbar">
+    <span id="page-title" style="font-size:15px;font-weight:600">Dashboard</span>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-outline btn-sm" id="theme-btn">🌓</button>
+      <button class="btn btn-outline btn-sm" id="lang-btn">中文</button>
+    </div>
+  </div>
+  <div id="content">
+    <div class="page active" id="page-dashboard">
+      <div class="stats-grid" id="stats-grid"></div>
+      <div class="card"><div class="card-title">Approval Queue</div><div id="dash-pending"></div></div>
+    </div>
+    <div class="page" id="page-approval">
+      <div class="section-header"><span class="page-title">Pending Requests</span>
+        <button class="btn btn-outline btn-sm" onclick="loadApprovals()">↻ Refresh</button></div>
+      <div class="card"><div class="table-wrap"><table>
+        <thead><tr><th>User</th><th>Group</th><th>Comment</th><th>Status</th><th>Time</th><th>Actions</th></tr></thead>
+        <tbody id="approval-tbody"></tbody>
+      </table></div></div>
+    </div>
+    <div class="page" id="page-punishments">
+      <div class="section-header"><span class="page-title">Punishments</span>
+        <button class="btn btn-primary btn-sm" onclick="openPunishModal()">+ Punish</button></div>
+      <div class="card"><div class="table-wrap"><table>
+        <thead><tr><th>User</th><th>Group</th><th>Type</th><th>Reason</th><th>Time</th><th>Actions</th></tr></thead>
+        <tbody id="punishments-tbody"></tbody>
+      </table></div></div>
+    </div>
+    <div class="page" id="page-blacklist">
+      <div class="section-header"><span class="page-title">Blacklist</span>
+        <button class="btn btn-danger btn-sm" onclick="openBlacklistModal()">+ Add</button></div>
+      <div class="card"><div class="table-wrap"><table>
+        <thead><tr><th>User</th><th>Group</th><th>Reason</th><th>Added</th><th>Actions</th></tr></thead>
+        <tbody id="blacklist-tbody"></tbody>
+      </table></div></div>
+    </div>
+    <div class="page" id="page-risk">
+      <div class="section-header"><span class="page-title">Risk Rules</span>
+        <button class="btn btn-primary btn-sm" onclick="openRuleModal()">+ Rule</button></div>
+      <div class="card"><div class="table-wrap"><table>
+        <thead><tr><th>Name</th><th>Type</th><th>Pattern</th><th>Weight</th><th>Active</th><th>Ops</th></tr></thead>
+        <tbody id="risk-tbody"></tbody>
+      </table></div></div>
+    </div>
+    <div class="page" id="page-audit">
+      <div class="section-header"><span class="page-title">Audit Logs</span>
+        <button class="btn btn-outline btn-sm" onclick="loadAudit()">↻</button></div>
+      <div class="card"><div class="table-wrap"><table>
+        <thead><tr><th>Action</th><th>Actor</th><th>Target</th><th>Time</th></tr></thead>
+        <tbody id="audit-tbody"></tbody>
+      </table></div></div>
+    </div>
+    <div class="page" id="page-monitor">
+      <div class="page-title">Health Monitor</div>
+      <div class="health-grid" id="health-grid"></div>
+    </div>
+    <div class="page" id="page-update">
+      <div class="page-title">Updates</div>
+      <div class="card" id="update-info">Checking…</div>
+    </div>
+    <div class="page" id="page-statistics">
+      <div class="page-title">Statistics</div>
+      <div class="stats-grid" id="stats-grid2"></div>
+    </div>
+    <div class="page" id="page-settings">
+      <div class="page-title">Settings</div>
+      <div class="card">
+        <div class="form-group"><label>Bot Self ID</label><input type="number" id="cfg-selfid"/></div>
+        <div class="form-group"><label>Log Level</label>
+          <select id="cfg-loglevel"><option>trace</option><option>debug</option><option>info</option><option>warn</option><option>error</option></select></div>
+        <hr>
+        <div class="form-group"><label>Risk Threshold (0-100)</label><input type="number" id="cfg-threshold" min="0" max="100"/></div>
+        <div class="form-group"><label>Risk Action</label>
+          <select id="cfg-action"><option value="mute">Mute</option><option value="kick">Kick</option><option value="notify_admin">Notify Admin</option><option value="log_only">Log Only</option></select></div>
+        <button class="btn btn-primary" onclick="saveConfig()">Save Settings</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+<div class="overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-title" id="modal-title"></div>
+    <div id="modal-body"></div>
+    <div class="modal-footer" id="modal-footer"></div>
+  </div>
+</div>
+
+<script>
+// ─── NapCat authenticated API base ───────────────────────────────────────────
+// Routes registered via ctx.router.get/post resolve to this prefix
+const API = '/api/Plugin/ext/napcat-plugin-qq-guardian';
+
+// ─── State ───────────────────────────────────────────────────────────────────
+let _lang  = localStorage.getItem('lang')  || 'en';
+let _theme = localStorage.getItem('theme') || 'system';
+let _currentPage = 'dashboard';
+
+// ─── i18n ────────────────────────────────────────────────────────────────────
+const T = {
+  en: { dashboard:'Dashboard', approval:'Approval', punishments:'Punishments', blacklist:'Blacklist',
+        risk:'Risk', audit:'Audit', monitor:'Monitor', update:'Update', statistics:'Statistics', settings:'Settings',
+        approve:'Approve', reject:'Reject', revoke:'Revoke', remove:'Remove', confirm:'Confirm', cancel:'Cancel' },
+  zh: { dashboard:'仪表盘', approval:'入群审批', punishments:'处罚记录', blacklist:'黑名单',
+        risk:'风控规则', audit:'审计日志', monitor:'健康监控', update:'更新', statistics:'统计', settings:'设置',
+        approve:'通过', reject:'拒绝', revoke:'撤销', remove:'移除', confirm:'确认', cancel:'取消' },
+};
+const t = k => T[_lang][k] || k;
+
+const PAGES = [
+  {id:'dashboard',icon:'📊'},{id:'approval',icon:'✅'},{id:'punishments',icon:'🔨'},
+  {id:'blacklist',icon:'⛔'},{id:'risk',icon:'⚠️'},{id:'audit',icon:'📋'},
+  {id:'monitor',icon:'💓'},{id:'update',icon:'🔄'},{id:'statistics',icon:'📈'},{id:'settings',icon:'⚙️'},
+];
+
+// ─── Theme / lang ────────────────────────────────────────────────────────────
+document.getElementById('theme-btn').onclick = () => {
+  _theme = {light:'dark',dark:'system',system:'light'}[_theme] || 'system';
+  document.documentElement.dataset.theme = _theme;
+  localStorage.setItem('theme', _theme);
+};
+document.getElementById('lang-btn').onclick = () => {
+  _lang = _lang === 'en' ? 'zh' : 'en';
+  localStorage.setItem('lang', _lang);
+  document.getElementById('lang-btn').textContent = _lang === 'en' ? '中文' : 'EN';
+  buildNav(); navigateTo(_currentPage);
+};
+document.documentElement.dataset.theme = _theme;
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+const $ = s => document.querySelector(s);
+function toast(msg, type='info') {
+  const el = document.createElement('div');
+  el.className = `toast toast-${type}`; el.textContent = msg;
+  $('#toasts').appendChild(el); setTimeout(() => el.remove(), 3500);
+}
+function fmtTime(ts) { return ts ? new Date(ts).toLocaleString() : '—'; }
+function statusBadge(s) {
+  const m = {approved:'green',rejected:'red',pending:'yellow',captcha:'blue',expired:'gray'};
+  return `<span class="badge badge-${m[s]||'gray'}">${s}</span>`;
+}
+async function api(path, opts={}) {
+  // NapCat's auth is handled via session cookie — no Authorization header needed
+  const res = await fetch(API + path, {
+    headers:{'Content-Type':'application/json'}, ...opts,
+    body: opts.body ? JSON.stringify(opts.body) : undefined,
+  });
+  const json = await res.json().catch(()=>({}));
+  if (!res.ok || !json.ok) throw new Error(json.error || `HTTP ${res.status}`);
+  return json.data;
+}
+function openModal(title, bodyHTML, buttons) {
+  $('#modal-title').textContent = title; $('#modal-body').innerHTML = bodyHTML;
+  $('#modal-footer').innerHTML = '';
+  for (const btn of buttons) {
+    const el = document.createElement('button');
+    el.className = 'btn ' + (btn.cls||'btn-outline'); el.textContent = btn.label;
+    el.onclick = btn.onClick; $('#modal-footer').appendChild(el);
+  }
+  $('#modal-overlay').classList.add('open');
+}
+function closeModal() { $('#modal-overlay').classList.remove('open'); }
+$('#modal-overlay').onclick = e => { if(e.target===$('#modal-overlay')) closeModal(); };
+
+// ─── Navigation ───────────────────────────────────────────────────────────────
+function buildNav() {
+  const nav = $('#sb-nav'); nav.innerHTML = '';
+  for (const p of PAGES) {
+    const el = document.createElement('div');
+    el.className = 'sb-item' + (p.id===_currentPage?' active':'');
+    el.dataset.page = p.id;
+    el.innerHTML = `<span>${p.icon}</span><span>${t(p.id)}</span>`;
+    el.onclick = () => navigateTo(p.id); nav.appendChild(el);
+  }
+}
+function navigateTo(id) {
+  _currentPage = id;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const pg = document.getElementById('page-'+id);
+  if (pg) pg.classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(el=>el.classList.toggle('active',el.dataset.page===id));
+  $('#page-title').textContent = t(id);
+  loadPage(id);
+}
+
+// ─── Page loaders ─────────────────────────────────────────────────────────────
+async function loadPage(id) {
+  try {
+    if(id==='dashboard')  await loadDashboard();
+    if(id==='approval')   await loadApprovals();
+    if(id==='punishments')await loadPunishments();
+    if(id==='blacklist')  await loadBlacklist();
+    if(id==='risk')       await loadRisk();
+    if(id==='audit')      await loadAudit();
+    if(id==='monitor')    await loadMonitor();
+    if(id==='update')     await loadUpdate();
+    if(id==='statistics') await loadStatistics();
+    if(id==='settings')   await loadSettings();
+  } catch(e) { toast(e.message,'error'); }
+}
+
+async function loadDashboard() {
+  const s = await api('/stats');
+  const t_ = s.totals;
+  $('#stats-grid').innerHTML = [
+    {v:t_.approvals_total,l:'Total Approvals'},{v:t_.approvals_passed,l:'Approved'},
+    {v:t_.approvals_rejected,l:'Rejected'},{v:t_.punishments_total,l:'Punishments'},
+    {v:t_.risk_detections,l:'Risk Detections'},{v:t_.captchas_passed,l:'Captchas OK'},
+  ].map(x=>`<div class="stat-card"><div class="stat-val">${x.v}</div><div class="stat-label">${x.l}</div></div>`).join('');
+  const pending = s.approvalCounts?.pending ?? 0, captcha = s.approvalCounts?.captcha ?? 0;
+  $('#dash-pending').innerHTML = `<span class="badge badge-yellow">Pending: ${pending}</span>&nbsp;<span class="badge badge-blue">Captcha: ${captcha}</span>`;
+}
+
+async function loadApprovals() {
+  const data = await api('/approvals?limit=100');
+  const tb = $('#approval-tbody');
+  if (!data.length) { tb.innerHTML = '<tr><td colspan="6" class="empty">No pending requests</td></tr>'; return; }
+  tb.innerHTML = data.map(r=>`<tr>
+    <td>${r.user_id}</td><td>${r.group_id}</td>
+    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.comment||'—'}</td>
+    <td>${statusBadge(r.status)}</td><td>${fmtTime(r.created_at)}</td>
+    <td>${r.status==='pending'||r.status==='captcha'?`
+      <button class="btn btn-outline btn-sm" onclick="approveReq(${r.id})">${t('approve')}</button>
+      <button class="btn btn-danger btn-sm" onclick="rejectReq(${r.id})">${t('reject')}</button>`:'-'}</td>
+  </tr>`).join('');
+}
+window.approveReq = async id => {
+  if(!confirm('Approve?')) return;
+  try { await api(`/approvals/${id}/approve`,{method:'POST',body:{operatorId:0}}); toast('Approved','success'); loadApprovals(); } catch(e){toast(e.message,'error');}
+};
+window.rejectReq = id => openModal('Reject',
+  `<div class="form-group"><label>Reason</label><input id="rr" type="text" value="Does not meet requirements"/></div>`,
+  [{label:t('cancel'),onClick:closeModal},{label:t('reject'),cls:'btn-danger',onClick:async()=>{
+    try{await api(`/approvals/${id}/reject`,{method:'POST',body:{operatorId:0,reason:$('#rr').value}});closeModal();toast('Rejected','success');loadApprovals();}catch(e){toast(e.message,'error');}
+  }}]);
+
+async function loadPunishments() {
+  const data = await api('/punishments?limit=100');
+  const tb = $('#punishments-tbody');
+  if(!data.length){tb.innerHTML='<tr><td colspan="6" class="empty">No records</td></tr>';return;}
+  tb.innerHTML=data.map(r=>`<tr>
+    <td>${r.user_id}</td><td>${r.group_id}</td>
+    <td><span class="badge badge-${r.type==='mute'?'yellow':'red'}">${r.type}</span></td>
+    <td>${r.reason||'—'}</td><td>${fmtTime(r.created_at)}</td>
+    <td>${!r.revoked_at?`<button class="btn btn-outline btn-sm" onclick="revokePunishment(${r.id})">${t('revoke')}</button>`:'<span class="badge badge-gray">revoked</span>'}</td>
+  </tr>`).join('');
+}
+window.openPunishModal = () => openModal('Punish User',`
+  <div class="form-group"><label>Group ID</label><input type="number" id="p-gid"/></div>
+  <div class="form-group"><label>User ID</label><input type="number" id="p-uid"/></div>
+  <div class="form-group"><label>Type</label><select id="p-type"><option value="mute">Mute</option><option value="kick">Kick</option></select></div>
+  <div class="form-group"><label>Duration (seconds, mute only)</label><input type="number" id="p-dur" value="600"/></div>
+  <div class="form-group"><label>Reason</label><input type="text" id="p-reason"/></div>`,
+  [{label:t('cancel'),onClick:closeModal},{label:'Punish',cls:'btn-danger',onClick:async()=>{
+    const type=$('#p-type').value;
+    try{
+      if(type==='mute') await api('/punishments/mute',{method:'POST',body:{groupId:$('#p-gid').value,userId:$('#p-uid').value,durationSeconds:$('#p-dur').value,reason:$('#p-reason').value,operatorId:0}});
+      else await api('/punishments/kick',{method:'POST',body:{groupId:$('#p-gid').value,userId:$('#p-uid').value,reason:$('#p-reason').value,operatorId:0}});
+      closeModal();toast('Done','success');loadPunishments();
+    }catch(e){toast(e.message,'error');}
+  }}]);
+window.revokePunishment = async id=>{
+  if(!confirm('Revoke?'))return;
+  try{await api(`/punishments/${id}/revoke`,{method:'POST',body:{operatorId:0}});toast('Revoked','success');loadPunishments();}catch(e){toast(e.message,'error');}
+};
+
+async function loadBlacklist() {
+  const data = await api('/blacklist?limit=100');
+  const tb = $('#blacklist-tbody');
+  if(!data.length){tb.innerHTML='<tr><td colspan="5" class="empty">Blacklist is empty</td></tr>';return;}
+  tb.innerHTML=data.map(r=>`<tr>
+    <td>${r.user_id}</td><td>${r.group_id||'<span class="badge badge-red">Global</span>'}</td>
+    <td>${r.reason||'—'}</td><td>${fmtTime(r.created_at)}</td>
+    <td><button class="btn btn-danger btn-sm" onclick="removeBlacklist(${r.user_id},${r.group_id||'null'})">${t('remove')}</button></td>
+  </tr>`).join('');
+}
+window.openBlacklistModal = () => openModal('Add to Blacklist',`
+  <div class="form-group"><label>User ID</label><input type="number" id="bl-uid"/></div>
+  <div class="form-group"><label>Group ID (blank = global)</label><input type="number" id="bl-gid"/></div>
+  <div class="form-group"><label>Reason</label><input type="text" id="bl-reason"/></div>`,
+  [{label:t('cancel'),onClick:closeModal},{label:'Add',cls:'btn-danger',onClick:async()=>{
+    try{await api('/blacklist',{method:'POST',body:{userId:$('#bl-uid').value,groupId:$('#bl-gid').value||null,reason:$('#bl-reason').value,createdBy:0}});closeModal();toast('Added','success');loadBlacklist();}catch(e){toast(e.message,'error');}
+  }}]);
+window.removeBlacklist = async(uid,gid)=>{
+  if(!confirm('Remove?'))return;
+  try{await api(`/blacklist/${uid}${gid&&gid!='null'?'?groupId='+gid:''}`,{method:'DELETE'});toast('Removed','success');loadBlacklist();}catch(e){toast(e.message,'error');}
+};
+
+async function loadRisk() {
+  const data = await api('/risk/rules');
+  const tb = $('#risk-tbody');
+  if(!data.length){tb.innerHTML='<tr><td colspan="6" class="empty">No custom rules</td></tr>';return;}
+  tb.innerHTML=data.map(r=>`<tr>
+    <td>${r.name}</td><td>${r.type}</td>
+    <td style="font-family:monospace;font-size:12px">${r.pattern}</td>
+    <td>${r.weight}</td>
+    <td><span class="badge badge-${r.enabled?'green':'gray'}">${r.enabled?'on':'off'}</span></td>
+    <td><button class="btn btn-outline btn-sm" onclick="toggleRule(${r.id},${r.enabled})">${r.enabled?'Disable':'Enable'}</button></td>
+  </tr>`).join('');
+}
+window.openRuleModal = () => openModal('Add Risk Rule',`
+  <div class="form-group"><label>Name</label><input type="text" id="rr-name"/></div>
+  <div class="form-group"><label>Type</label><input type="text" id="rr-type" placeholder="regex"/></div>
+  <div class="form-group"><label>Pattern</label><input type="text" id="rr-pat"/></div>
+  <div class="form-group"><label>Weight (1.0 = normal)</label><input type="number" id="rr-wt" value="1" step="0.1"/></div>`,
+  [{label:t('cancel'),onClick:closeModal},{label:'Add',cls:'btn-primary',onClick:async()=>{
+    try{await api('/risk/rules',{method:'POST',body:{name:$('#rr-name').value,type:$('#rr-type').value,pattern:$('#rr-pat').value,weight:$('#rr-wt').value}});closeModal();toast('Rule added','success');loadRisk();}catch(e){toast(e.message,'error');}
+  }}]);
+window.toggleRule = async(id,enabled)=>{
+  try{await api(`/risk/rules/${id}/toggle`,{method:'POST',body:{enabled:!enabled}});loadRisk();}catch(e){toast(e.message,'error');}
+};
+
+async function loadAudit() {
+  const data = await api('/audit?limit=100');
+  const tb = $('#audit-tbody');
+  if(!data.length){tb.innerHTML='<tr><td colspan="4" class="empty">No logs</td></tr>';return;}
+  tb.innerHTML=data.map(r=>`<tr>
+    <td><code style="font-size:12px">${r.action}</code></td>
+    <td>${r.actor_id||'system'}</td>
+    <td>${r.target_type?`${r.target_type}:${r.target_id}`:'—'}</td>
+    <td>${fmtTime(r.created_at)}</td>
+  </tr>`).join('');
+}
+
+async function loadMonitor() {
+  const data = await api('/metrics');
+  const grid = $('#health-grid');
+  grid.innerHTML = Object.entries(data.components||{}).map(([name,c])=>`
+    <div class="health-item">
+      <div class="health-name"><span class="dot dot-${c.status==='ok'?'green':c.status==='warn'?'yellow':'red'}"></span>${name}</div>
+      <div class="health-detail">${c.message||JSON.stringify(c.detail||{})}</div>
+    </div>`).join('') || '<div class="empty">No data</div>';
+}
+
+async function loadUpdate() {
+  const data = await api('/update/check');
+  const div = $('#update-info');
+  if(!data.latest){div.innerHTML=`<p>✅ Latest: <strong>v${data.current}</strong></p>`;}
+  else div.innerHTML=`<p>Current: <strong>v${data.current}</strong> → Available: <strong>v${data.latest.version}</strong></p>
+    <button class="btn btn-primary" style="margin-top:12px" onclick="doUpdate('${data.latest.version}','${data.latest.downloadUrl}','${data.latest.publishedAt}')">Install v${data.latest.version}</button>`;
+}
+window.doUpdate = async(v,u,p)=>{
+  if(!confirm(`Install v${v}?`))return;
+  try{await api('/update/apply',{method:'POST',body:{version:v,downloadUrl:u,publishedAt:p,releaseNotes:''}});toast('Update applied, please restart','success');}catch(e){toast(e.message,'error');}
+};
+
+async function loadStatistics() {
+  const s = await api('/stats');
+  const t_ = s.totals;
+  $('#stats-grid2').innerHTML=[
+    {v:t_.approvals_total,l:'Total Approvals'},{v:t_.approvals_passed,l:'Approved'},
+    {v:t_.approvals_rejected,l:'Rejected'},{v:t_.punishments_total,l:'Punishments'},
+    {v:t_.risk_detections,l:'Risk Detections'},{v:t_.captchas_passed,l:'Captchas OK'},
+  ].map(x=>`<div class="stat-card"><div class="stat-val">${x.v}</div><div class="stat-label">${x.l}</div></div>`).join('');
+}
+
+async function loadSettings() {
+  const cfg = await api('/config');
+  $('#cfg-selfid').value = cfg.core?.selfId||'';
+  $('#cfg-loglevel').value = cfg.core?.logLevel||'info';
+  $('#cfg-threshold').value = cfg.risk?.threshold??70;
+  $('#cfg-action').value = cfg.risk?.action||'mute';
+}
+async function saveConfig() {
+  try{
+    await api('/config',{method:'POST',body:{
+      core:{selfId:Number($('#cfg-selfid').value)||0,logLevel:$('#cfg-loglevel').value},
+      risk:{threshold:Number($('#cfg-threshold').value),action:$('#cfg-action').value},
+    }});
+    toast('Settings saved','success');
+  }catch(e){toast(e.message,'error');}
+}
+window.saveConfig = saveConfig;
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+buildNav();
+navigateTo('dashboard');
+
+// Show version
+api('/update/check').then(d=>{if(d?.current)$('#version-badge').textContent='v'+d.current;}).catch(()=>{});
+
+// Auto-refresh active page every 30s
+setInterval(()=>loadPage(_currentPage), 30000);
+</script>
+</body>
+</html>
