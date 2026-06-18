@@ -33,6 +33,10 @@ const WebUiConfigSchema = Type.Object({
   ipBlacklist: Type.Array(Type.String(), { default: [] }),
   // 是否启用 X-Forwarded-For 获取真实IP
   enableXForwardedFor: Type.Boolean({ default: false }),
+  // 是否启用双因素认证（2FA）
+  enable2FA: Type.Boolean({ default: false }),
+  // TOTP 密钥
+  totpSecret: Type.String({ default: '' }),
 });
 
 export type WebUiConfigType = Static<typeof WebUiConfigSchema>;

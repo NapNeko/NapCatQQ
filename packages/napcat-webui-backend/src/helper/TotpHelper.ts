@@ -1,102 +1,194 @@
 import crypto from 'crypto';
 
+/**
+ * TOTP (Time-based One-Time Password) Helper
+ * 用于生成和验证基于时间的一次性密码
+ */
 export class TotpHelper {
-  private static readonly DEFAULT_DIGITS = 6;
-  private static readonly DEFAULT_PERIOD = 30;
-  private static readonly HASH_ALGORITHM = 'sha1';
-  private static readonly BASE32_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-
-  public static generateSecret (length: number = 16): string {
-    const bytes = crypto.randomBytes(length);
-    let result = '';
-    let buffer = 0;
-    let bitsLeft = 0;
-
-    for (let i = 0; i < bytes.length; i++) {
-      buffer = (buffer << 8) | bytes[i];
-      bitsLeft += 8;
-
-      while (bitsLeft >= 5) {
-        bitsLeft -= 5;
-        result += TotpHelper.BASE32_CHARS[(buffer >> bitsLeft) & 0x1F];
-      }
-    }
-
-    if (bitsLeft > 0) {
-      result += TotpHelper.BASE32_CHARS[(buffer << (5 - bitsLeft)) & 0x1F];
-    }
-
-    return result;
+  /**
+   * 生成随机密钥（Base32格式）
+   * @param length 密钥长度（字节），默认16字节
+   * @returns Base32编码的密钥
+   */
+  static generateSecret(length: number = 16): string {
+    const buffer = crypto.randomBytes(length);
+    return this.toBase32(buffer);
   }
 
-  public static generateTotp (secret: string, timestamp: number = Date.now()): string {
-    const period = TotpHelper.DEFAULT_PERIOD;
-    const digits = TotpHelper.DEFAULT_DIGITS;
-    const algorithm = TotpHelper.HASH_ALGORITHM;
-
-    const counter = Math.floor(timestamp / 1000 / period);
-    const counterBuffer = Buffer.alloc(8);
-    counterBuffer.writeUInt32BE(Math.floor(counter / 0x100000000), 0);
-    counterBuffer.writeUInt32BE(counter & 0xFFFFFFFF, 4);
-
-    const decodedSecret = TotpHelper.base32Decode(secret);
-    const hmac = crypto.createHmac(algorithm, decodedSecret);
-    hmac.update(counterBuffer);
-    const hash = hmac.digest();
-
-    const offset = hash[hash.length - 1] & 0x0F;
-    const binary = (hash[offset] & 0x7F) << 24 |
-                   (hash[offset + 1] & 0xFF) << 16 |
-                   (hash[offset + 2] & 0xFF) << 8 |
-                   (hash[offset + 3] & 0xFF);
-
-    const otp = binary % Math.pow(10, digits);
-    return otp.toString().padStart(digits, '0');
+  /**
+   * 生成当前时间的一次性密码
+   * @param secret Base32编码的密钥
+   * @param timeStep 时间步长（秒），默认30秒
+   * @returns 6位数字验证码
+   */
+  static generateTotp(secret: string, timeStep: number = 30): string {
+    const time = Math.floor(Date.now() / 1000 / timeStep);
+    return this.generateHotp(secret, time);
   }
 
-  public static verifyTotp (secret: string, token: string, window: number = 1): boolean {
-    const currentTime = Date.now();
-    const period = TotpHelper.DEFAULT_PERIOD;
+  /**
+   * 验证一次性密码
+   * @param secret Base32编码的密钥
+   * @param code 用户输入的验证码
+   * @param timeStep 时间步长（秒），默认30秒
+   * @param window 允许的时间窗口（前后各多少个时间步长），默认1
+   * @returns 是否验证通过
+   */
+  static verifyTotp(
+    secret: string,
+    code: string,
+    timeStep: number = 30,
+    window: number = 1
+  ): boolean {
+    const time = Math.floor(Date.now() / 1000 / timeStep);
 
+    // 检查前后 window 个时间步长
     for (let i = -window; i <= window; i++) {
-      const timestamp = currentTime + (i * period * 1000);
-      const generatedToken = TotpHelper.generateTotp(secret, timestamp);
-      if (generatedToken === token) {
+      const candidateCode = this.generateHotp(secret, time + i);
+      if (candidateCode === code) {
         return true;
       }
     }
     return false;
   }
 
-  public static generateQrCodeUrl (secret: string, label: string = 'NapCat WebUI', issuer: string = 'NapCat'): string {
-    const encodedLabel = encodeURIComponent(label);
-    const encodedIssuer = encodeURIComponent(issuer);
-    const encodedSecret = encodeURIComponent(secret);
-    return `otpauth://totp/${encodedLabel}?secret=${encodedSecret}&issuer=${encodedIssuer}&algorithm=SHA1&digits=6&period=30`;
+  /**
+   * 生成 HOTP (HMAC-based One-Time Password)
+   * @param secret Base32编码的密钥
+   * @param counter 计数器
+   * @returns 6位数字验证码
+   */
+  private static generateHotp(secret: string, counter: number): string {
+    // 将 Base32 密钥转换为字节
+    const key = this.base32ToBytes(secret);
+
+    // 将计数器转换为 8 字节大端序
+    const counterBytes = Buffer.alloc(8);
+    let tempCounter = counter;
+    for (let i = 7; i >= 0; i--) {
+      counterBytes[i] = tempCounter & 0xff;
+      tempCounter = Math.floor(tempCounter / 256);
+    }
+
+    // 计算 HMAC-SHA1
+    const hmac = crypto.createHmac('sha1', key);
+    hmac.update(counterBytes);
+    const hash = hmac.digest();
+
+    // 动态截断
+    const offset = hash[hash.length - 1] & 0x0f;
+    const binary =
+      ((hash[offset] & 0x7f) << 24) |
+      ((hash[offset + 1] & 0xff) << 16) |
+      ((hash[offset + 2] & 0xff) << 8) |
+      (hash[offset + 3] & 0xff);
+
+    // 生成 6 位数字
+    const otp = binary % 1000000;
+    return otp.toString().padStart(6, '0');
   }
 
-  private static base32Decode (encoded: string): Buffer {
-    const base32Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-    let bits = 0;
-    let value = 0;
-    const output: number[] = [];
+  /**
+   * 生成 QR Code URL
+   * @param secret Base32编码的密钥
+   * @param account 账户名称
+   * @param issuer 发行方名称
+   * @returns otpauth:// URL
+   */
+  static generateQrCodeUrl(
+    secret: string,
+    account: string,
+    issuer: string
+  ): string {
+    const encodedIssuer = encodeURIComponent(issuer);
+    const encodedAccount = encodeURIComponent(`${issuer}:${account}`);
+    return `otpauth://totp/${encodedAccount}?secret=${secret}&issuer=${encodedIssuer}&algorithm=SHA1&digits=6&period=30`;
+  }
 
-    encoded = encoded.toUpperCase().replace(/[^A-Z2-7]/g, '');
+  /**
+   * 将字节数组转换为 Base32 编码
+   * @param buffer 字节数组
+   * @returns Base32编码字符串
+   */
+  private static toBase32(buffer: Buffer): string {
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+    let result = '';
+    let bufferIndex = 0;
+    let bitsLeft = 8;
 
-    for (let i = 0; i < encoded.length; i++) {
-      const index = base32Chars.indexOf(encoded[i]);
-      if (index === -1) {
-        throw new Error('Invalid base32 character');
-      }
-      value = (value << 5) | index;
-      bits += 5;
-
-      if (bits >= 8) {
-        bits -= 8;
-        output.push((value >>> bits) & 0xFF);
+    while (bitsLeft > 0 || bufferIndex < buffer.length) {
+      if (bitsLeft < 5) {
+        if (bufferIndex < buffer.length) {
+          const byte = buffer[bufferIndex];
+          bitsLeft += 8;
+          bufferIndex++;
+          // 将新字节的低位部分与之前剩余的位组合
+          const combined = (byte >> (8 - bitsLeft)) | (bitsLeft > 8 ? 0 : 0);
+          result += alphabet[combined & 0x1f];
+          bitsLeft -= 5;
+        } else {
+          break;
+        }
+      } else {
+        const byte = buffer[bufferIndex];
+        const index = (byte >> (bitsLeft - 5)) & 0x1f;
+        result += alphabet[index];
+        bitsLeft -= 5;
       }
     }
 
-    return Buffer.from(output);
+    // 简化版本：使用更可靠的 Base32 实现
+    const base32Alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+    let output = '';
+    let buffer2 = buffer;
+
+    for (let i = 0; i < buffer2.length; i += 5) {
+      const b0 = buffer2[i] || 0;
+      const b1 = buffer2[i + 1] || 0;
+      const b2 = buffer2[i + 2] || 0;
+      const b3 = buffer2[i + 3] || 0;
+      const b4 = buffer2[i + 4] || 0;
+
+      output += base32Alphabet[(b0 >> 3) & 0x1f];
+      output += base32Alphabet[((b0 << 2) | (b1 >> 6)) & 0x1f];
+      output += base32Alphabet[(b1 >> 1) & 0x1f];
+      output += base32Alphabet[((b1 << 4) | (b2 >> 4)) & 0x1f];
+      output += base32Alphabet[((b2 << 1) | (b3 >> 7)) & 0x1f];
+      output += base32Alphabet[(b3 >> 2) & 0x1f];
+      output += base32Alphabet[((b3 << 3) | (b4 >> 5)) & 0x1f];
+      output += base32Alphabet[b4 & 0x1f];
+    }
+
+    // 移除填充的等号
+    return output.replace(/=+$/, '');
+  }
+
+  /**
+   * 将 Base32 字符串转换为字节数组
+   * @param base32 Base32编码字符串
+   * @returns 字节数组
+   */
+  private static base32ToBytes(base32: string): Buffer {
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+    const base32Clean = base32.toUpperCase().replace(/=+$/, '');
+
+    const bytes: number[] = [];
+    let buffer = 0;
+    let bitsLeft = 0;
+
+    for (const char of base32Clean) {
+      const value = alphabet.indexOf(char);
+      if (value === -1) continue;
+
+      buffer = (buffer << 5) | value;
+      bitsLeft += 5;
+
+      if (bitsLeft >= 8) {
+        bytes.push((buffer >> (bitsLeft - 8)) & 0xff);
+        bitsLeft -= 8;
+      }
+    }
+
+    return Buffer.from(bytes);
   }
 }
