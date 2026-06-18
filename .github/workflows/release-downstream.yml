@@ -1,0 +1,153 @@
+name: Release Downstream
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Release tag name (e.g., v4.10.7)'
+        required: true
+        type: string
+
+env:
+  QQ_URL_X86_64: 'https://dldir1v6.qq.com/qqfile/qq/QQNT/94704804/linuxqq_3.2.23-44343_x86_64.AppImage'
+  QQ_URL_ARM64: 'https://dldir1v6.qq.com/qqfile/qq/QQNT/94704804/linuxqq_3.2.23-44343_arm64.AppImage'
+
+jobs:
+  get-version:
+    runs-on: ubuntu-latest
+    outputs:
+      latest_tag: ${{ steps.get_version.outputs.latest_tag }}
+      version: ${{ steps.get_version.outputs.version }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+      - name: Get Latest NapCat Version
+        id: get_version
+        run: |
+          if [ -n "${{ inputs.tag_name }}" ]; then
+            latest_tag="${{ inputs.tag_name }}"
+          else
+            latest_tag=$(git describe --tags $(git rev-list --tags --max-count=1))
+          fi
+          version=${latest_tag#v}
+          echo "Debug: Latest NapCat Version is ${latest_tag}, version is ${version}"
+          echo "latest_tag=${latest_tag}" >> $GITHUB_OUTPUT
+          echo "version=${version}" >> $GITHUB_OUTPUT
+
+  publish-schema:
+    needs: get-version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build napcat-schema
+        run: |
+          cd packages/napcat-schema
+          pnpm run build:openapi
+
+      - name: Checkout NapCatDocs
+        uses: actions/checkout@v5
+        with:
+          repository: NapNeko/NapCatDocs
+          token: ${{ secrets.NAPCAT_BUILD }}
+          path: napcat-docs
+
+      - name: Copy OpenAPI Schema
+        run: |
+          VERSION="${{ needs.get-version.outputs.version }}"
+          mkdir -p napcat-docs/src/api/${VERSION}
+          cp packages/napcat-schema/dist/openapi.json napcat-docs/src/api/${VERSION}/openapi.json
+          echo "OpenAPI schema copied to napcat-docs/src/api/${VERSION}/openapi.json"
+
+      - name: Commit and Push
+        run: |
+          VERSION="${{ needs.get-version.outputs.version }}"
+          cd napcat-docs
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add src/api/${VERSION}/openapi.json
+          git commit -m "chore: update OpenAPI schema for version ${VERSION}" || echo "No changes to commit"
+          git push
+
+  shell-docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger NapCat-Docker docker-publish workflow
+        env:
+          GH_TOKEN: ${{ secrets.NAPCAT_BUILD }}
+        run: |
+          curl -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            https://api.github.com/repos/NapNeko/NapCat-Docker/actions/workflows/docker-publish.yml/dispatches \
+            -d '{"ref":"main"}'
+
+  framework-docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger NapCat-Framework-Docker docker-publish workflow
+        env:
+          GH_TOKEN: ${{ secrets.NAPCAT_BUILD }}
+        run: |
+          curl -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            https://api.github.com/repos/NapNeko/NapCat.Docker.Framework/actions/workflows/docker-image.yml/dispatches \
+            -d '{"ref":"main"}'
+
+  appimage:
+    needs: get-version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger NapCat AppImage build workflow
+        env:
+          GH_TOKEN: ${{ secrets.NAPCAT_BUILD }}
+          NAPCAT_VERSION: ${{ needs.get-version.outputs.latest_tag }}
+        run: |
+          echo "Debug: Triggering NapCat AppImage with napcat_version=${NAPCAT_VERSION}"
+          curl -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            https://api.github.com/repos/NapNeko/NapCatAppImageBuild/actions/workflows/release.yml/dispatches \
+            -d "{\"ref\":\"main\",\"inputs\":{\"napcat_version\":\"${NAPCAT_VERSION}\",\"qq_version_x86_64\":\"${{ env.QQ_URL_X86_64 }}\",\"qq_version_arm64\":\"${{ env.QQ_URL_ARM64 }}\"}}"
+
+  node-shell:
+    needs: get-version
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.NAPCAT_BUILD }}
+      NAPCAT_VERSION: ${{ needs.get-version.outputs.latest_tag }}
+    steps:
+      - name: Trigger NapCat NodeLoader release workflow
+        run: |
+          echo "Debug: Triggering NapCat NodeLoader release with napcat_version=${NAPCAT_VERSION}"
+          curl -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            https://api.github.com/repos/NapNeko/NapCatLinuxNodeLoader/actions/workflows/release.yml/dispatches \
+            -d "{\"ref\":\"main\",\"inputs\":{\"napcat_version\":\"${NAPCAT_VERSION}\",\"qq_url_amd64\":\"${{ env.QQ_URL_X86_64 }}\",\"qq_url_arm64\":\"${{ env.QQ_URL_ARM64 }}\"}}"
+
+      - name: Trigger NapCat NodeLoader docker workflow
+        run: |
+          echo "Debug: Triggering NapCat NodeLoader docker with napcat_version=${NAPCAT_VERSION}"
+          curl -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            https://api.github.com/repos/NapNeko/NapCatLinuxNodeLoader/actions/workflows/docker-publish.yml/dispatches \
+            -d "{\"ref\":\"main\",\"inputs\":{\"napcat_version\":\"${NAPCAT_VERSION}\",\"qq_url_amd64\":\"${{ env.QQ_URL_X86_64 }}\",\"qq_url_arm64\":\"${{ env.QQ_URL_ARM64 }}\"}}"

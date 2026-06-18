@@ -1,0 +1,92 @@
+{
+  "compilerOptions": {
+    "target": "ES2021",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": [
+      "ES2021"
+    ],
+    "esModuleInterop": true,
+    "outDir": "dist",
+    "noEmit": false,
+    "sourceMap": true,
+    "strict": true,
+    "noImplicitAny": false,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "alwaysStrict": true,
+    "noImplicitThis": true,
+    "noImplicitReturns": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": false,
+    "forceConsistentCasingInFileNames": true,
+    "useUnknownInCatchVariables": true,
+    "noImplicitOverride": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "useDefineForClassFields": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "paths": {
+      "napcat-core": [
+        "./packages/napcat-core/index.ts"
+      ],
+      "napcat-core/*": [
+        "./packages/napcat-core/*"
+      ],
+      "napcat-onebot": [
+        "./packages/napcat-onebot/index.ts"
+      ],
+      "napcat-onebot/*": [
+        "./packages/napcat-onebot/*"
+      ],
+      "napcat-common": [
+        "./packages/napcat-common/src/index.ts"
+      ],
+      "napcat-common/src/*": [
+        "./packages/napcat-common/src/*"
+      ],
+      "napcat-image-size": [
+        "./packages/napcat-image-size/src/index.ts"
+      ],
+      "napcat-image-size/src/*": [
+        "./packages/napcat-image-size/src/*"
+      ],
+      "napcat-database": [
+        "./packages/napcat-database/src/index.ts"
+      ],
+      "napcat-database/src/*": [
+        "./packages/napcat-database/src/*"
+      ],
+      "napcat-protocol": [
+        "./packages/napcat-protocol/index.ts"
+      ],
+      "napcat-protocol/*": [
+        "./packages/napcat-protocol/*"
+      ],
+      "napcat-qrcode": [
+        "./packages/napcat-qrcode/index.ts"
+      ],
+      "napcat-qrcode/*": [
+        "./packages/napcat-qrcode/*"
+      ],
+      "napcat-webui-backend": [
+        "./packages/napcat-webui-backend/index.ts"
+      ],
+      "napcat-webui-backend/*": [
+        "./packages/napcat-webui-backend/*"
+      ],
+      "napcat-pty": [
+        "./packages/napcat-pty/node-pty.d.ts"
+      ],
+      "@/*": [
+        "./packages/*"
+      ]
+    },
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true
+  }
+}

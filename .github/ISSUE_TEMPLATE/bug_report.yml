@@ -1,0 +1,85 @@
+name: Bug 反馈
+description: 报告可能的 NapCat 异常行为
+title: "[BUG] "
+labels: bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        欢迎来到 NapCat 的 Issue Tracker！请填写以下表格来提交 Bug。
+        在提交新的 Bug 反馈前，请确保您：
+        * 已经搜索了现有的 issues，并且没有找到可以解决您问题的方法
+        * 不与现有的某一 issue 重复
+        * **不接受因发送不当内容而导致的问题报告**
+          - 包括但不限于：多媒体发送失败、转发消息失败、消息被拦截等因 18+ 内容、违规内容或触发风控的问题
+          - 提交 issue 前，请确认您发送的多媒体内容、链接、文本等均为正常合规内容，不会触发平台风控机制
+          - 因违规内容导致的问题，一律不予受理
+  - type: input
+    id: system-version
+    attributes:
+      label: 系统版本
+      description: 运行 QQNT 的系统版本
+      placeholder: Windows 11 24H2
+    validations:
+      required: true
+  - type: input
+    id: qqnt-version
+    attributes:
+      label: QQNT 版本
+      description: 可在 QQNT 的「关于」的设置页中找到
+      placeholder: 9.9.16-29927
+    validations:
+      required: true
+  - type: input
+    id: napcat-version
+    attributes:
+      label: NapCat 版本
+      description: 可在 WebUI 的「系统信息」页中找到
+      placeholder: 1.0.0
+    validations:
+      required: true
+  - type: input
+    id: onebot-client-version
+    attributes:
+      label: OneBot 客户端
+      description: 连接至 NapCat 的客户端版本信息
+      placeholder: Karin 1.0.0
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 发生了什么?
+      description: 填写你认为的 NapCat 的异常行为
+    validations:
+      required: true
+  - type: textarea
+    id: how-reproduce
+    attributes:
+      label: 如何复现
+      description: 填写应当如何操作才能触发这个异常行为
+      placeholder: |
+        1. xxx
+        2. xxx
+        3. xxx
+    validations:
+      required: true
+  - type: textarea
+    id: what-expected
+    attributes:
+      label: 期望的结果?
+      description: 填写你认为 NapCat 应当执行的正常行为
+    validations:
+      required: true
+  - type: textarea
+    id: napcat-log
+    attributes:
+      label: NapCat 运行日志
+      description: 粘贴相关日志内容到此处
+      render: shell
+  - type: textarea
+    id: onebot-client-log
+    attributes:
+      label: OneBot 客户端运行日志
+      description: 粘贴 OneBot 客户端的相关日志内容到此处
+      render: shell

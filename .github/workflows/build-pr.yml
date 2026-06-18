@@ -1,0 +1,424 @@
+# =============================================================================
+# PR 构建工作流
+# =============================================================================
+# 安全模型：
+#   1. pull_request_target / issue_comment 入口只读取元数据、检查权限、更新评论并触发构建。
+#   2. 真正执行 PR 代码的构建流程只在 workflow_dispatch 中运行。
+#   3. 构建流程不具备写仓库/写评论/读 secrets 权限，显式清空 GITHUB_TOKEN，不持久化 checkout 凭据。
+#   4. 版本号在 Action 中提前生成，通过 NAPCAT_VERSION 传给 Vite 插件，插件无需 GitHub token。
+#   5. 发布 Release、触发 Docker 等可信操作只消费构建 artifact，不执行 PR artifact 中的代码。
+# =============================================================================
+
+name: Build PR
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+  issue_comment:
+    types: [created]
+
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: PR 编号
+        required: true
+        type: string
+      pr_sha:
+        description: PR HEAD SHA
+        required: true
+        type: string
+      pr_head_repo:
+        description: PR 源仓库
+        required: true
+        type: string
+      pr_head_ref:
+        description: PR 源分支
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-build-${{ github.event_name == 'workflow_dispatch' && inputs.pr_number || github.event_name == 'pull_request_target' && github.event.pull_request.number || github.event_name == 'issue_comment' && github.event.issue.pull_request && contains(github.event.comment.body, '/build') && github.event.issue.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # 特权入口：只检查条件、写入“构建中”评论、触发无权限构建
+  # ---------------------------------------------------------------------------
+  check-build:
+    if: github.event_name != 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: write
+    outputs:
+      should_build: ${{ steps.check.outputs.should_build }}
+      pr_number: ${{ steps.check.outputs.pr_number }}
+      pr_sha: ${{ steps.check.outputs.pr_sha }}
+      pr_head_repo: ${{ steps.check.outputs.pr_head_repo }}
+      pr_head_ref: ${{ steps.check.outputs.pr_head_ref }}
+    steps:
+      - name: Checkout scripts
+        uses: actions/checkout@v5
+        with:
+          sparse-checkout: .github/scripts
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Check trigger condition
+        id: check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node --experimental-strip-types .github/scripts/pr-build-check.ts
+
+  update-comment-building:
+    needs: check-build
+    if: needs.check-build.outputs.should_build == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Checkout scripts
+        uses: actions/checkout@v5
+        with:
+          sparse-checkout: .github/scripts
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Update building comment
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ needs.check-build.outputs.pr_number }}
+          PR_SHA: ${{ needs.check-build.outputs.pr_sha }}
+        run: node --experimental-strip-types .github/scripts/pr-build-building.ts
+
+  dispatch-build:
+    needs: [check-build, update-comment-building]
+    if: needs.check-build.outputs.should_build == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
+    steps:
+      - name: Checkout scripts
+        uses: actions/checkout@v5
+        with:
+          sparse-checkout: .github/scripts
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Dispatch untrusted build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ needs.check-build.outputs.pr_number }}
+          PR_SHA: ${{ needs.check-build.outputs.pr_sha }}
+          PR_HEAD_REPO: ${{ needs.check-build.outputs.pr_head_repo }}
+          PR_HEAD_REF: ${{ needs.check-build.outputs.pr_head_ref }}
+          WORKFLOW_FILE: build-pr.yml
+          DISPATCH_REF: ${{ github.event.repository.default_branch }}
+        run: node --experimental-strip-types .github/scripts/pr-build-dispatch.ts
+
+  # ---------------------------------------------------------------------------
+  # 无权限构建：只由 workflow_dispatch 执行 PR 代码
+  # ---------------------------------------------------------------------------
+  build-framework:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      status: ${{ steps.build.outcome }}
+      error: ${{ steps.build.outputs.error }}
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Checkout scripts from base
+        uses: actions/checkout@v5
+        with:
+          sparse-checkout: .github/scripts
+          sparse-checkout-cone-mode: false
+          path: _scripts
+          persist-credentials: false
+
+      - name: Checkout PR code
+        uses: actions/checkout@v5
+        with:
+          repository: ${{ inputs.pr_head_repo }}
+          ref: ${{ inputs.pr_sha }}
+          path: workspace
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: Generate Version
+        id: version
+        working-directory: workspace
+        run: |
+          LATEST_TAG=$(git describe --tags --abbrev=0 --match "v[0-9]*.[0-9]*.[0-9]*" 2>/dev/null || echo "v0.0.0")
+          BASE_VERSION="${LATEST_TAG#v}"
+          SHORT_SHA="${{ inputs.pr_sha }}"
+          SHORT_SHA="${SHORT_SHA::7}"
+          VERSION="${BASE_VERSION}-pr.${{ inputs.pr_number }}.${{ github.run_number }}+${SHORT_SHA}"
+          echo "NAPCAT_VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Latest tag: ${LATEST_TAG}"
+          echo "Build version: ${VERSION}"
+
+      - name: Build
+        id: build
+        working-directory: workspace
+        env:
+          GITHUB_TOKEN: ''
+          NAPCAT_VERSION: ${{ env.NAPCAT_VERSION }}
+        run: node --experimental-strip-types ../_scripts/.github/scripts/pr-build-run.ts framework
+        continue-on-error: true
+
+      - name: Upload Artifact
+        if: steps.build.outcome == 'success'
+        uses: actions/upload-artifact@v6
+        with:
+          name: NapCat.Framework
+          path: workspace/framework-dist
+          retention-days: 5
+
+  build-shell:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      status: ${{ steps.build.outcome }}
+      error: ${{ steps.build.outputs.error }}
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Checkout scripts from base
+        uses: actions/checkout@v5
+        with:
+          sparse-checkout: .github/scripts
+          sparse-checkout-cone-mode: false
+          path: _scripts
+          persist-credentials: false
+
+      - name: Checkout PR code
+        uses: actions/checkout@v5
+        with:
+          repository: ${{ inputs.pr_head_repo }}
+          ref: ${{ inputs.pr_sha }}
+          path: workspace
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: Generate Version
+        id: version
+        working-directory: workspace
+        run: |
+          LATEST_TAG=$(git describe --tags --abbrev=0 --match "v[0-9]*.[0-9]*.[0-9]*" 2>/dev/null || echo "v0.0.0")
+          BASE_VERSION="${LATEST_TAG#v}"
+          SHORT_SHA="${{ inputs.pr_sha }}"
+          SHORT_SHA="${SHORT_SHA::7}"
+          VERSION="${BASE_VERSION}-pr.${{ inputs.pr_number }}.${{ github.run_number }}+${SHORT_SHA}"
+          echo "NAPCAT_VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Latest tag: ${LATEST_TAG}"
+          echo "Build version: ${VERSION}"
+
+      - name: Build
+        id: build
+        working-directory: workspace
+        env:
+          GITHUB_TOKEN: ''
+          NAPCAT_VERSION: ${{ env.NAPCAT_VERSION }}
+        run: node --experimental-strip-types ../_scripts/.github/scripts/pr-build-run.ts shell
+        continue-on-error: true
+
+      - name: Upload Artifact
+        if: steps.build.outcome == 'success'
+        uses: actions/upload-artifact@v6
+        with:
+          name: NapCat.Shell
+          path: workspace/shell-dist
+          retention-days: 5
+
+  # ---------------------------------------------------------------------------
+  # 可信后处理：只下载/打包/发布 artifact，不执行 artifact 中的代码
+  # ---------------------------------------------------------------------------
+  publish-pr-release:
+    needs: [build-framework, build-shell]
+    if: always() && github.event_name == 'workflow_dispatch' && (needs.build-framework.outputs.status == 'success' || needs.build-shell.outputs.status == 'success')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      release_url: ${{ steps.publish.outputs.release_url }}
+      release_tag: ${{ steps.publish.outputs.release_tag }}
+      install_url: ${{ steps.publish.outputs.install_url }}
+      publish_status: ${{ steps.publish.outcome }}
+    steps:
+      - name: Checkout scripts
+        uses: actions/checkout@v5
+        with:
+          sparse-checkout: .github/scripts
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Download Framework artifact
+        if: needs.build-framework.outputs.status == 'success'
+        uses: actions/download-artifact@v6
+        with:
+          name: NapCat.Framework
+          path: ./artifacts/NapCat.Framework
+
+      - name: Download Shell artifact
+        if: needs.build-shell.outputs.status == 'success'
+        uses: actions/download-artifact@v6
+        with:
+          name: NapCat.Shell
+          path: ./artifacts/NapCat.Shell
+
+      - name: Publish release
+        id: publish
+        continue-on-error: true
+        env:
+          RELEASE_PAT: ${{ secrets.PR_RELEASE_PAT }}
+          PR_NUMBER: ${{ inputs.pr_number }}
+          PR_SHA: ${{ inputs.pr_sha }}
+          NAPCAT_VERSION: ${{ needs.build-framework.outputs.version || needs.build-shell.outputs.version || '' }}
+          ARTIFACTS_DIR: ./artifacts
+        run: |
+          if [ -z "${RELEASE_PAT}" ]; then
+            echo "::warning::PR_RELEASE_PAT secret 未配置，跳过 PR Release 发布"
+            exit 0
+          fi
+          node --experimental-strip-types .github/scripts/pr-publish-release.ts
+
+      - name: Upload install script as artifact
+        if: steps.publish.outcome == 'success'
+        uses: actions/upload-artifact@v6
+        with:
+          name: install-script
+          path: ./release-assets/install.sh
+          retention-days: 5
+          if-no-files-found: ignore
+
+  update-comment-result:
+    needs: [build-framework, build-shell, publish-pr-release]
+    if: always() && github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Checkout scripts
+        uses: actions/checkout@v5
+        with:
+          sparse-checkout: .github/scripts
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Update result comment
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ inputs.pr_number }}
+          PR_SHA: ${{ inputs.pr_sha }}
+          RUN_ID: ${{ github.run_id }}
+          NAPCAT_VERSION: ${{ needs.build-framework.outputs.version || needs.build-shell.outputs.version || '' }}
+          FRAMEWORK_STATUS: ${{ needs.build-framework.outputs.status || 'cancelled' }}
+          FRAMEWORK_ERROR: ${{ needs.build-framework.outputs.error }}
+          SHELL_STATUS: ${{ needs.build-shell.outputs.status || 'cancelled' }}
+          SHELL_ERROR: ${{ needs.build-shell.outputs.error }}
+          INSTALL_URL: ${{ needs.publish-pr-release.outputs.install_url || '' }}
+          RELEASE_URL: ${{ needs.publish-pr-release.outputs.release_url || '' }}
+          PUBLISH_STATUS: ${{ needs.publish-pr-release.outputs.publish_status || '' }}
+        run: node --experimental-strip-types .github/scripts/pr-build-result.ts
+
+  trigger-docker:
+    needs: [build-shell, publish-pr-release]
+    if: github.event_name == 'workflow_dispatch' && needs.build-shell.outputs.status == 'success' && needs.publish-pr-release.outputs.release_tag != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Checkout scripts
+        uses: actions/checkout@v5
+        with:
+          sparse-checkout: .github/scripts
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Dispatch docker build
+        continue-on-error: true
+        env:
+          DISPATCH_PAT: ${{ secrets.PR_RELEASE_PAT }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ inputs.pr_number }}
+          PR_SHA: ${{ inputs.pr_sha }}
+          PR_HEAD_REPO: ${{ inputs.pr_head_repo }}
+          SOURCE_REPO: ${{ github.repository }}
+          RELEASE_REPO: NapNeko/napcat-pr-release
+        run: |
+          if [ -z "${DISPATCH_PAT}" ]; then
+            echo "::warning::PR_RELEASE_PAT secret 未配置，跳过 Docker 测试镜像构建"
+            exit 0
+          fi
+          node --experimental-strip-types .github/scripts/pr-docker-dispatch.ts
