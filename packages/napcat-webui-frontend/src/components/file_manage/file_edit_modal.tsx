@@ -1,0 +1,104 @@
+import { Button } from '@heroui/button';
+import { Code } from '@heroui/code';
+import {
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+} from '@heroui/modal';
+
+import CodeEditor from '@/components/code_editor';
+
+interface FileEditModalProps {
+  isOpen: boolean;
+  file: { path: string; content: string; } | null;
+  onClose: () => void;
+  onSave: () => void;
+  onContentChange: (newContent?: string) => void;
+}
+
+export default function FileEditModal ({
+  isOpen,
+  file,
+  onClose,
+  onSave,
+  onContentChange,
+}: FileEditModalProps) {
+  // 根据文件后缀返回对应语言
+  const getLanguage = (filePath: string) => {
+    if (filePath.endsWith('.js')) return 'javascript';
+    if (filePath.endsWith('.ts')) return 'typescript';
+    if (filePath.endsWith('.tsx')) return 'tsx';
+    if (filePath.endsWith('.jsx')) return 'jsx';
+    if (filePath.endsWith('.vue')) return 'vue';
+    if (filePath.endsWith('.svelte')) return 'svelte';
+    if (filePath.endsWith('.json')) return 'json';
+    if (filePath.endsWith('.html')) return 'html';
+    if (filePath.endsWith('.css')) return 'css';
+    if (filePath.endsWith('.scss')) return 'scss';
+    if (filePath.endsWith('.less')) return 'less';
+    if (filePath.endsWith('.md')) return 'markdown';
+    if (filePath.endsWith('.yaml') || filePath.endsWith('.yml')) return 'yaml';
+    if (filePath.endsWith('.xml')) return 'xml';
+    if (filePath.endsWith('.sql')) return 'sql';
+    if (filePath.endsWith('.sh')) return 'shell';
+    if (filePath.endsWith('.bat')) return 'bat';
+    if (filePath.endsWith('.php')) return 'php';
+    if (filePath.endsWith('.java')) return 'java';
+    if (filePath.endsWith('.c')) return 'c';
+    if (filePath.endsWith('.cpp')) return 'cpp';
+    if (filePath.endsWith('.h')) return 'h';
+    if (filePath.endsWith('.hpp')) return 'hpp';
+    if (filePath.endsWith('.go')) return 'go';
+    if (filePath.endsWith('.py')) return 'python';
+    if (filePath.endsWith('.rb')) return 'ruby';
+    if (filePath.endsWith('.cs')) return 'csharp';
+    if (filePath.endsWith('.swift')) return 'swift';
+    if (filePath.endsWith('.vb')) return 'vb';
+    if (filePath.endsWith('.lua')) return 'lua';
+    if (filePath.endsWith('.pl')) return 'perl';
+    if (filePath.endsWith('.r')) return 'r';
+    return 'plaintext';
+  };
+
+  return (
+    <Modal radius='sm' size='full' isOpen={isOpen} onClose={onClose} scrollBehavior='inside'>
+      <ModalContent className='flex flex-col h-full max-h-[100dvh]'>
+        <ModalHeader className='flex items-center gap-2 border-b border-default-200/50 flex-shrink-0'>
+          <span>编辑文件</span>
+          <Code radius='sm' className='text-xs'>{file?.path}</Code>
+          <div className='ml-auto text-xs text-default-400 font-normal px-2'>
+            按 <span className='px-1 py-0.5 rounded border border-default-300 bg-default-100'>Ctrl/Cmd + S</span> 保存
+          </div>
+        </ModalHeader>
+        <ModalBody className='p-4 bg-content2/50 flex-1 min-h-0 overflow-hidden'>
+          <div
+            className='h-full w-full overflow-auto' onKeyDown={(e) => {
+              if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                onSave();
+              }
+            }}
+          >
+            <CodeEditor
+              height='100%'
+              value={file?.content || ''}
+              onChange={onContentChange}
+              options={{ wordWrap: 'on' }}
+              language={file?.path ? getLanguage(file.path) : 'plaintext'}
+            />
+          </div>
+        </ModalBody>
+        <ModalFooter className='border-t border-default-200/50 flex-shrink-0'>
+          <Button radius='sm' color='primary' variant='flat' onPress={onClose}>
+            取消
+          </Button>
+          <Button radius='sm' color='primary' onPress={onSave}>
+            保存
+          </Button>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
+  );
+}

@@ -1,0 +1,51 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "..",
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "skipLibCheck": true,
+    "stripInternal": true,
+    "noEmitOnError": false,
+    "paths": {
+      "napcat-core": [
+        "../../packages/napcat-core/index.ts"
+      ],
+      "napcat-onebot": [
+        "../../packages/napcat-onebot/index.ts"
+      ],
+      "napcat-common/src/*": [
+        "../../packages/napcat-common/src/*"
+      ],
+      "napcat-image-size/src/*": [
+        "../../packages/napcat-image-size/src/*"
+      ],
+      "@/napcat-core/*": [
+        "../../packages/napcat-core/*"
+      ],
+      "@/napcat-onebot/*": [
+        "../../packages/napcat-onebot/*"
+      ],
+      "@/napcat-common/*": [
+        "../../packages/napcat-common/*"
+      ],
+      "@/napcat-webui-backend/*": [
+        "../../packages/napcat-webui-backend/*"
+      ],
+      "@/*": [
+        "../../packages/*"
+      ]
+    }
+  },
+  "include": [
+    "./index.ts",
+    "../napcat-core/**/*.ts",
+    "../napcat-onebot/**/*.ts",
+    "../napcat-common/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

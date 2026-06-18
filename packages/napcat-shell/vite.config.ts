@@ -1,0 +1,82 @@
+import cp from 'vite-plugin-cp';
+import { defineConfig, PluginOption, UserConfig } from 'vite';
+import path, { resolve } from 'path';
+import nodeResolve from '@rollup/plugin-node-resolve';
+import { builtinModules } from 'module';
+import napcatVersion from 'napcat-vite/vite-plugin-version.js';
+import { autoIncludeTSPlugin } from 'napcat-vite/vite-auto-include.js';
+import react from '@vitejs/plugin-react-swc';
+
+// 依赖排除
+const external = [
+  'ws',
+  'express',
+  'electron',
+];
+
+const nodeModules = [...builtinModules, builtinModules.map((m) => `node:${m}`), 'node:sqlite'].flat();
+const ShellBaseConfigPlugin: PluginOption[] = [
+  react({ tsDecorators: true }),
+  autoIncludeTSPlugin({
+    entries: [
+      { entry: 'napcat.ts', dir: path.resolve(__dirname, '../napcat-core/protocol') },
+      { entry: 'napcat.ts', dir: path.resolve(__dirname, '../napcat-onebot/action/test') },
+    ],
+  }),
+  cp({
+    targets: [
+      { src: '../napcat-native/', dest: 'dist/native', flatten: false },
+      { src: '../napcat-webui-frontend/dist/', dest: 'dist/static/', flatten: false },
+      { src: '../napcat-webui-backend/src/assets/sw_template.js', dest: 'dist/static/' },
+      { src: '../napcat-core/external/napcat.json', dest: 'dist/config/' },
+      { src: '../../package.json', dest: 'dist' },
+      { src: '../napcat-shell-loader', dest: 'dist' },
+    ],
+  }),
+  nodeResolve(),
+  napcatVersion(),
+];
+const ShellBaseConfig = (source_map: boolean = false) =>
+  defineConfig({
+    resolve: {
+      conditions: ['node', 'default'],
+      alias: {
+        '@/napcat-core': resolve(__dirname, '../napcat-core'),
+        '@/napcat-common': resolve(__dirname, '../napcat-common'),
+        '@/napcat-onebot': resolve(__dirname, '../napcat-onebot'),
+        '@/napcat-pty': resolve(__dirname, '../napcat-pty'),
+        '@/napcat-dpapi': resolve(__dirname, '../napcat-dpapi'),
+        '@/napcat-webui-backend': resolve(__dirname, '../napcat-webui-backend'),
+        '@/napcat-image-size': resolve(__dirname, '../napcat-image-size'),
+        '@/napcat-protocol': resolve(__dirname, '../napcat-protocol'),
+      },
+    },
+    build: {
+      sourcemap: source_map,
+      target: 'esnext',
+      minify: source_map ? false : 'esbuild',
+      lib: {
+        entry: {
+          napcat: path.resolve(__dirname, 'napcat.ts'),
+          'worker/conoutSocketWorker': path.resolve(__dirname, '../napcat-pty/worker/conoutSocketWorker.ts'),
+        },
+        formats: ['es'],
+        fileName: (_, entryName) => `${entryName}.mjs`,
+      },
+      rollupOptions: {
+        external: [...nodeModules, ...external],
+      },
+    },
+  });
+export default defineConfig(({ mode }): UserConfig => {
+  if (mode === 'development') {
+    return {
+      ...ShellBaseConfig(true),
+      plugins: [...ShellBaseConfigPlugin],
+    };
+  }
+  return {
+    ...ShellBaseConfig(),
+    plugins: [...ShellBaseConfigPlugin],
+  };
+});

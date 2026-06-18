@@ -382,7 +382,7 @@ export const Verify2FACodeHandler: RequestHandler = async (req, res) => {
     }
 
     const signCredential = Buffer.from(JSON.stringify(AuthHelper.signCredential(initialToken))).toString('base64');
-    store.delete(loginChallengeKey);
+    store.remove(loginChallengeKey);
 
     return sendSuccess(res, {
       Credential: signCredential,

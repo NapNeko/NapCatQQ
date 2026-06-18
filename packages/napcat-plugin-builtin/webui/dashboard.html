@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>内置插件仪表盘</title>
+  <style>
+    :root {
+      --bg-primary: rgba(255, 255, 255, 0.4);
+      --bg-secondary: rgba(255, 255, 255, 0.6);
+      --bg-card: rgba(255, 255, 255, 0.5);
+      --bg-item: rgba(0, 0, 0, 0.03);
+      --text-primary: #1a1a1a;
+      --text-secondary: #666;
+      --text-muted: #999;
+      --border-color: rgba(0, 0, 0, 0.06);
+      --accent-color: #52525b;
+      --accent-light: rgba(82, 82, 91, 0.1);
+      --success-color: #17c964;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-primary: rgba(0, 0, 0, 0.2);
+        --bg-secondary: rgba(0, 0, 0, 0.3);
+        --bg-card: rgba(255, 255, 255, 0.05);
+        --bg-item: rgba(255, 255, 255, 0.05);
+        --text-primary: #f5f5f5;
+        --text-secondary: #a1a1a1;
+        --text-muted: #666;
+        --border-color: rgba(255, 255, 255, 0.1);
+        --accent-light: rgba(82, 82, 91, 0.25);
+      }
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: transparent;
+      min-height: 100vh;
+      padding: 16px;
+      color: var(--text-primary);
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--bg-card);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 16px;
+      border: 1px solid var(--border-color);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .card-header .icon {
+      font-size: 20px;
+    }
+
+    .card-header h2 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+    }
+
+    .status-item {
+      background: var(--bg-item);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      border: 1px solid var(--border-color);
+      transition: all 0.2s ease;
+    }
+
+    .status-item:hover {
+      background: var(--accent-light);
+      border-color: var(--accent-color);
+    }
+
+    .status-item .label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .status-item .value {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--accent-color);
+      word-break: break-all;
+    }
+
+    .status-item .value.success {
+      color: var(--success-color);
+    }
+
+    .config-list {
+      list-style: none;
+    }
+
+    .config-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      border-radius: 8px;
+      margin-bottom: 6px;
+      background: var(--bg-item);
+      border: 1px solid var(--border-color);
+    }
+
+    .config-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    .config-list .key {
+      font-weight: 500;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .config-list .value {
+      color: var(--accent-color);
+      font-family: 'Monaco', 'Consolas', monospace;
+      font-size: 12px;
+      background: var(--accent-light);
+      padding: 4px 10px;
+      border-radius: 6px;
+      max-width: 60%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: var(--accent-color);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.9;
+      transform: scale(1.02);
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 30px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .loading::after {
+      content: '';
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--accent-color);
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .error {
+      background: rgba(243, 18, 96, 0.1);
+      color: #f31260;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      border: 1px solid rgba(243, 18, 96, 0.2);
+    }
+
+    .footer {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 11px;
+      margin-top: 16px;
+      padding: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="card-header">
+        <h2>NapCat 内置插件仪表盘</h2>
+      </div>
+
+      <div id="content">
+        <div class="loading">加载中</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>当前配置</h2>
+      </div>
+      <div id="config-content">
+        <div class="loading">加载中</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>静态资源测试</h2>
+      </div>
+      <div id="static-content">
+        <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 12px;">
+          测试插件静态资源服务是否正常工作（不需要鉴权）
+        </p>
+        <div class="actions" style="margin-top: 0;">
+          <button class="btn btn-primary" onclick="testStaticResource()">
+            获取 test.txt（文件系统）
+          </button>
+          <button class="btn btn-primary" onclick="testMemoryResource()">
+            获取 info.json（内存生成）
+          </button>
+        </div>
+        <div id="static-result" style="margin-top: 12px;"></div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>NapCat Builtin Plugin - WebUI 扩展页面演示</p>
+    </div>
+  </div>
+
+  <script>
+    // 从 localStorage 获取 token（与父页面同源，可直接访问）
+    // 兼容旧版：如果 URL 有 webui_token 参数则优先使用
+    const urlParams = new URLSearchParams(window.location.search);
+    const webuiToken = localStorage.getItem('token') || '';
+
+    // 插件 API 基础路径（需要鉴权）
+    const apiBase = '/api/Plugin/ext/napcat-plugin-builtin';
+    // 插件静态资源基础路径（不需要鉴权）
+    const staticBase = '/plugin/napcat-plugin-builtin/files';
+    // 插件内存资源基础路径（不需要鉴权）
+    const memBase = '/plugin/napcat-plugin-builtin/mem';
+
+    // 封装 fetch，自动携带认证
+    async function authFetch (url, options = {}) {
+      const headers = options.headers || {};
+      if (webuiToken) {
+        headers['Authorization'] = `Bearer ${webuiToken}`;
+      }
+      return fetch(url, { ...options, headers });
+    }
+
+    async function fetchStatus () {
+      try {
+        const response = await authFetch(`${apiBase}/status`);
+        const result = await response.json();
+
+        if (result.code === 0) {
+          renderStatus(result.data);
+        } else {
+          showError('获取状态失败: ' + result.message);
+        }
+      } catch (error) {
+        showError('请求失败: ' + error.message);
+      }
+    }
+
+    async function fetchConfig () {
+      try {
+        const response = await authFetch(`${apiBase}/config`);
+        const result = await response.json();
+
+        if (result.code === 0) {
+          renderConfig(result.data);
+        } else {
+          showError('获取配置失败: ' + result.message);
+        }
+      } catch (error) {
+        showError('请求失败: ' + error.message);
+      }
+    }
+
+    function renderStatus (data) {
+      const content = document.getElementById('content');
+      content.innerHTML = `
+        <div class="status-grid">
+          <div class="status-item">
+            <div class="label">插件名称</div>
+            <div class="value">${data.pluginName}</div>
+          </div>
+          <div class="status-item">
+            <div class="label">运行时间</div>
+            <div class="value success">${data.uptimeFormatted}</div>
+          </div>
+          <div class="status-item">
+            <div class="label">运行平台</div>
+            <div class="value">${data.platform}</div>
+          </div>
+          <div class="status-item">
+            <div class="label">系统架构</div>
+            <div class="value">${data.arch}</div>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" onclick="refresh()">
+            刷新状态
+          </button>
+        </div>
+      `;
+    }
+
+    function renderConfig (config) {
+      const content = document.getElementById('config-content');
+      const items = Object.entries(config)
+        .map(([key, value]) => `
+          <li>
+            <span class="key">${key}</span>
+            <span class="value">${JSON.stringify(value)}</span>
+          </li>
+        `)
+        .join('');
+
+      content.innerHTML = `
+        <ul class="config-list">
+          ${items || '<li><span class="key">暂无配置</span></li>'}
+        </ul>
+      `;
+    }
+
+    function showError (message) {
+      const content = document.getElementById('content');
+      content.innerHTML = `<div class="error">${message}</div>`;
+    }
+
+    function refresh () {
+      document.getElementById('content').innerHTML = '<div class="loading">加载中</div>';
+      fetchStatus();
+      fetchConfig();
+    }
+
+    // 初始化
+    refresh();
+
+    // 每 30 秒自动刷新
+    setInterval(refresh, 30000);
+
+    // 测试静态资源
+    async function testStaticResource () {
+      const resultDiv = document.getElementById('static-result');
+      resultDiv.innerHTML = '<div class="loading">加载中</div>';
+
+      try {
+        // 静态资源不需要鉴权，直接请求
+        const response = await fetch(`${staticBase}/static/test.txt`);
+        if (response.ok) {
+          const text = await response.text();
+          resultDiv.innerHTML = `
+            <div style="background: var(--bg-item); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px;">
+              <div style="font-size: 11px; color: var(--success-color); margin-bottom: 8px;">文件系统静态资源访问成功</div>
+              <pre style="font-family: Monaco, Consolas, monospace; font-size: 12px; color: var(--text-primary); white-space: pre-wrap; margin: 0;">${text}</pre>
+            </div>
+          `;
+        } else {
+          resultDiv.innerHTML = `<div class="error">请求失败: ${response.status} ${response.statusText}</div>`;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="error">请求失败: ${error.message}</div>`;
+      }
+    }
+
+    // 测试内存资源
+    async function testMemoryResource () {
+      const resultDiv = document.getElementById('static-result');
+      resultDiv.innerHTML = '<div class="loading">加载中</div>';
+
+      try {
+        // 内存资源不需要鉴权，直接请求
+        const response = await fetch(`${memBase}/dynamic/info.json`);
+        if (response.ok) {
+          const json = await response.json();
+          resultDiv.innerHTML = `
+            <div style="background: var(--bg-item); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px;">
+              <div style="font-size: 11px; color: var(--success-color); margin-bottom: 8px;">内存生成资源访问成功</div>
+              <pre style="font-family: Monaco, Consolas, monospace; font-size: 12px; color: var(--text-primary); white-space: pre-wrap; margin: 0;">${JSON.stringify(json, null, 2)}</pre>
+            </div>
+          `;
+        } else {
+          resultDiv.innerHTML = `<div class="error">请求失败: ${response.status} ${response.statusText}</div>`;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="error">请求失败: ${error.message}</div>`;
+      }
+    }
+  </script>
+</body>
+
+</html>

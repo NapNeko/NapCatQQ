@@ -1,0 +1,583 @@
+/**
+ * @file WebUI服务入口文件
+ */
+
+import express from 'express';
+import type { WebUiConfigType } from './src/types';
+import { createServer } from 'http';
+import { createHash, randomUUID } from 'node:crypto';
+import { createServer as createHttpsServer } from 'https';
+import { NapCatPathWrapper } from 'napcat-common/src/path';
+import { WebUiConfigWrapper } from '@/napcat-webui-backend/src/helper/config';
+import { ALLRouter } from '@/napcat-webui-backend/src/router';
+import { cors } from '@/napcat-webui-backend/src/middleware/cors';
+import { createUrl, getRandomToken } from '@/napcat-webui-backend/src/utils/url';
+import { sendError } from '@/napcat-webui-backend/src/utils/response';
+import { join, dirname, resolve } from 'node:path';
+import { terminalManager } from '@/napcat-webui-backend/src/terminal/terminal_manager';
+import multer from 'multer';
+import * as net from 'node:net';
+import { WebUiDataRuntime } from './src/helper/Data';
+import { existsSync, readFileSync } from 'node:fs'; // 引入multer用于错误捕获
+import { ILogWrapper } from 'napcat-common/src/log-interface';
+import { ISubscription } from 'napcat-common/src/subscription-interface';
+import { IStatusHelperSubscription } from '@/napcat-common/src/status-interface';
+import { handleDebugWebSocket } from '@/napcat-webui-backend/src/api/Debug';
+import compression from 'compression';
+import { napCatVersion } from 'napcat-common/src/version';
+import { fileURLToPath } from 'node:url';
+import { NapCatOneBot11Adapter } from '@/napcat-onebot/index';
+import { OB11PluginMangerAdapter } from '@/napcat-onebot/network/plugin-manger';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+// 实例化Express
+const app = express();
+/**
+ * 初始化并启动WebUI服务。
+ * 该函数配置了Express服务器以支持JSON解析和静态文件服务，并监听6099端口。
+ * 无需参数。
+ * @returns {Promise<void>} 无返回值。
+ */
+export let WebUiConfig: WebUiConfigWrapper;
+export let webUiPathWrapper: NapCatPathWrapper;
+export let logSubscription: ISubscription;
+export let statusHelperSubscription: IStatusHelperSubscription;
+export let webUiLogger: ILogWrapper | null = null;
+const MAX_PORT_TRY = 100;
+
+export let webUiRuntimePort = 6099;
+// 全局变量：存储需要在QQ登录成功后发送的新token
+export let pendingTokenToSend: string | null = null;
+
+/**
+ * 存储WebUI启动时的初始token，用于鉴权
+ * - 无论是否在运行时修改密码，都应该使用此token进行鉴权
+ * - 运行时手动修改的密码将会在下次napcat重启后生效
+ * - 如果需要在运行时修改密码并立即生效，则需要在前端调用路由进行修改
+ */
+let initialWebUiToken: string = '';
+
+export function setInitialWebUiToken (token: string) {
+  initialWebUiToken = token;
+}
+
+export function getInitialWebUiToken (): string {
+  return initialWebUiToken;
+}
+
+export function setPendingTokenToSend (token: string | null) {
+  pendingTokenToSend = token;
+}
+
+export async function InitPort (parsedConfig: WebUiConfigType): Promise<[string, number, string]> {
+  try {
+    await tryUseHost(parsedConfig.host);
+    const preferredPort = parseInt(process.env['NAPCAT_WEBUI_PREFERRED_PORT'] || '', 10);
+
+    let port: number;
+    if (preferredPort > 0) {
+      try {
+        port = await tryUsePort(preferredPort, parsedConfig.host, 0, true);
+      } catch {
+        port = await tryUsePort(parsedConfig.port, parsedConfig.host);
+      }
+    } else {
+      port = await tryUsePort(parsedConfig.port, parsedConfig.host);
+    }
+
+    return [parsedConfig.host, port, parsedConfig.token];
+  } catch (error) {
+    console.log('host或port不可用', error);
+    return ['', 0, randomUUID()];
+  }
+}
+
+async function checkCertificates (logger: ILogWrapper): Promise<{ key: string, cert: string; } | null> {
+  try {
+    const certPath = join(webUiPathWrapper.configPath, 'cert.pem');
+    const keyPath = join(webUiPathWrapper.configPath, 'key.pem');
+
+    if (existsSync(certPath) && existsSync(keyPath)) {
+      const cert = readFileSync(certPath, 'utf8');
+      const key = readFileSync(keyPath, 'utf8');
+      logger.log('[NapCat] [WebUi] 找到SSL证书，将启用HTTPS模式');
+      return { cert, key };
+    }
+    return null;
+  } catch (error) {
+    logger.log('[NapCat] [WebUi] 检查SSL证书时出错: ' + error);
+    return null;
+  }
+}
+export async function InitWebUi (logger: ILogWrapper, pathWrapper: NapCatPathWrapper, Subscription: ISubscription, statusSubscription: IStatusHelperSubscription) {
+  webUiPathWrapper = pathWrapper;
+  logSubscription = Subscription;
+  statusHelperSubscription = statusSubscription;
+  webUiLogger = logger;
+  WebUiConfig = new WebUiConfigWrapper();
+  let config = await WebUiConfig.GetWebUIConfig();
+
+  // 检查是否禁用WebUI（若禁用则不进行密码检测）
+  if (config.disableWebUI) {
+    logger.log('[NapCat] [WebUi] WebUI is disabled by configuration.');
+    return;
+  }
+
+  // 优先使用环境变量覆盖 Token
+  if (process.env['NAPCAT_WEBUI_SECRET_KEY'] && config.token !== process.env['NAPCAT_WEBUI_SECRET_KEY']) {
+    await WebUiConfig.UpdateWebUIConfig({ token: process.env['NAPCAT_WEBUI_SECRET_KEY'] });
+    logger.log(`[NapCat] [WebUi] 检测到环境变量配置，已更新 WebUI Token 为 ${process.env['NAPCAT_WEBUI_SECRET_KEY']}`);
+    config = await WebUiConfig.GetWebUIConfig();
+  } else if (config.token === 'napcat' || !config.token) {
+    // 只有没设置环境变量，且是默认密码时，才生成随机密码
+    const randomToken = getRandomToken(8);
+    await WebUiConfig.UpdateWebUIConfig({ token: randomToken });
+    logger.log('[NapCat] [WebUi] 检测到默认密码，已自动更新为安全密码');
+
+    // 存储token到全局变量，等待QQ登录成功后发送
+    setPendingTokenToSend(randomToken);
+    logger.log('[NapCat] [WebUi] 新密码将在QQ登录成功后发送给用户');
+
+    // 重新获取更新后的配置
+    config = await WebUiConfig.GetWebUIConfig();
+  }
+
+  // 存储启动时的初始token用于鉴权
+  setInitialWebUiToken(config.token);
+
+  const [host, port, token] = await InitPort(config);
+  webUiRuntimePort = port;
+  if (port === 0) {
+    logger.log('[NapCat] [WebUi] Current WebUi is not run.');
+    return;
+  }
+  WebUiDataRuntime.setWebUiConfigQuickFunction(
+    async () => {
+      const autoLoginAccount = process.env['NAPCAT_QUICK_ACCOUNT'] || WebUiConfig.getAutoLoginAccount();
+      const resolveQuickPasswordMd5 = (): string | undefined => {
+        const quickPasswordMd5FromEnv = process.env['NAPCAT_QUICK_PASSWORD_MD5']?.trim();
+        if (quickPasswordMd5FromEnv) {
+          if (/^[a-fA-F0-9]{32}$/.test(quickPasswordMd5FromEnv)) {
+            return quickPasswordMd5FromEnv.toLowerCase();
+          }
+          console.log('[NapCat] [WebUi] NAPCAT_QUICK_PASSWORD_MD5 格式无效（需为 32 位 MD5）');
+        }
+
+        const quickPassword = process.env['NAPCAT_QUICK_PASSWORD'];
+        if (typeof quickPassword === 'string' && quickPassword.length > 0) {
+          console.log('[NapCat] [WebUi] 检测到 NAPCAT_QUICK_PASSWORD，已在内存中计算 MD5 用于回退登录');
+          return createHash('md5').update(quickPassword, 'utf8').digest('hex');
+        }
+        return undefined;
+      };
+      if (!autoLoginAccount) {
+        return;
+      }
+      const quickPasswordMd5 = resolveQuickPasswordMd5();
+
+      try {
+        const { result, message } = await WebUiDataRuntime.requestQuickLogin(autoLoginAccount);
+        if (result) {
+          console.log(`[NapCat] [WebUi] 自动快速登录成功: ${autoLoginAccount}`);
+          return;
+        }
+        console.log(`[NapCat] [WebUi] 自动快速登录失败: ${message || '未知错误'}`);
+      } catch (error) {
+        console.log('[NapCat] [WebUi] 自动快速登录异常:' + error);
+      }
+
+      if (!quickPasswordMd5) {
+        console.log(`[NapCat] [WebUi] QQ ${autoLoginAccount} 未配置回退密码环境变量，建议优先使用 ACCOUNT + NAPCAT_QUICK_PASSWORD（NAPCAT_QUICK_PASSWORD_MD5 作为备用），保持二维码登录兜底`);
+        return;
+      }
+
+      try {
+        const { result, message, needCaptcha, needNewDevice } = await WebUiDataRuntime.requestPasswordLogin(autoLoginAccount, quickPasswordMd5);
+        if (result) {
+          console.log(`[NapCat] [WebUi] 自动密码回退登录成功: ${autoLoginAccount}`);
+          return;
+        }
+        if (needCaptcha) {
+          console.log(`[NapCat] [WebUi] 自动密码回退登录需要验证码，请在登录页面继续完成: ${autoLoginAccount}`);
+          return;
+        }
+        if (needNewDevice) {
+          console.log(`[NapCat] [WebUi] 自动密码回退登录需要新设备验证，请在登录页面继续完成: ${autoLoginAccount}`);
+          return;
+        }
+        console.log(`[NapCat] [WebUi] 自动密码回退登录失败: ${message || '未知错误'}`);
+      } catch (error) {
+        console.log('[NapCat] [WebUi] 自动密码回退登录异常:' + error);
+      }
+    });
+  // ------------注册中间件------------
+  // 使用express的json中间件
+  app.use(express.json());
+  // 启用gzip压缩（对所有响应启用，阈值1KB）
+  app.use(compression({
+    level: 6, // 压缩级别 1-9，6 是性能和压缩率的平衡点
+    threshold: 1024, // 只压缩大于 1KB 的响应
+    filter: (req, res) => {
+      // 不压缩 SSE 和 WebSocket 升级请求
+      if (req.headers['accept'] === 'text/event-stream') {
+        return false;
+      }
+      // 使用默认过滤器
+      return compression.filter(req, res);
+    },
+  }));
+
+  // CORS中间件
+  // TODO:
+  app.use(cors);
+
+  // 自定义字体文件路由 - 返回用户上传的字体文件
+  app.use('/webui/fonts/CustomFont.woff', async (_req, res) => {
+    const fontPath = await WebUiConfig.GetWebUIFontPath();
+    if (fontPath) {
+      res.sendFile(fontPath);
+    } else {
+      res.status(404).send('Custom font not found');
+    }
+  });
+
+  // 如果是自定义色彩，构建一个css文件
+  app.use('/files/theme.css', async (_req, res) => {
+    const theme = await WebUiConfig.GetTheme();
+    const fontMode = theme.fontMode || 'system';
+
+    let css = '';
+
+    // 生成字体 @font-face
+    if (fontMode === 'aacute') {
+      css += `
+@font-face {
+  font-family: 'Aa偷吃可爱长大的';
+  src: url('/webui/fonts/AaCute.woff') format('woff');
+  font-display: swap;
+}
+`;
+    } else if (fontMode === 'custom') {
+      css += `
+@font-face {
+  font-family: 'CustomFont';
+  src: url('/webui/fonts/CustomFont.woff') format('woff');
+  font-display: swap;
+}
+`;
+    }
+
+    // 生成颜色主题和字体变量
+    css += ':root, .light, [data-theme="light"] {';
+    for (const key in theme.light) {
+      css += `${key}: ${theme.light[key]};`;
+    }
+    // 添加字体变量
+    if (fontMode === 'aacute') {
+      css += "--font-family-base: 'Aa偷吃可爱长大的', var(--font-family-fallbacks) !important;";
+      css += "--font-family-mono: 'Aa偷吃可爱长大的', var(--font-family-fallbacks) !important;";
+    } else if (fontMode === 'custom') {
+      css += "--font-family-base: 'CustomFont', var(--font-family-fallbacks) !important;";
+      css += "--font-family-mono: 'CustomFont', var(--font-family-fallbacks) !important;";
+    } else {
+      css += '--font-family-base: var(--font-family-fallbacks) !important;';
+      css += '--font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;';
+    }
+    css += '}';
+
+    css += '.dark, [data-theme="dark"] {';
+    for (const key in theme.dark) {
+      css += `${key}: ${theme.dark[key]};`;
+    }
+    // 添加字体变量
+    if (fontMode === 'aacute') {
+      css += "--font-family-base: 'Aa偷吃可爱长大的', var(--font-family-fallbacks) !important;";
+      css += "--font-family-mono: 'Aa偷吃可爱长大的', var(--font-family-fallbacks) !important;";
+    } else if (fontMode === 'custom') {
+      css += "--font-family-base: 'CustomFont', var(--font-family-fallbacks) !important;";
+      css += "--font-family-mono: 'CustomFont', var(--font-family-fallbacks) !important;";
+    } else {
+      css += '--font-family-base: var(--font-family-fallbacks) !important;';
+      css += '--font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;';
+    }
+    css += '}';
+
+    res.send(css);
+  });
+
+  // 动态生成 sw.js
+  app.get('/webui/sw.js', async (_req, res) => {
+    try {
+      // 读取模板文件
+      let templatePath = resolve(__dirname, 'static', 'sw_template.js');
+      if (!existsSync(templatePath)) {
+        templatePath = resolve(__dirname, 'src', 'assets', 'sw_template.js');
+      }
+
+      let swContent = readFileSync(templatePath, 'utf-8');
+
+      // 替换版本号
+      // 使用 napCatVersion，如果为 alpha 则尝试加上时间戳或其他标识以避免缓存冲突，或者直接使用
+      // 用户要求控制 sw.js 版本，napCatVersion 是核心控制点
+      swContent = swContent.replace('{{VERSION}}', napCatVersion);
+
+      res.header('Content-Type', 'application/javascript');
+      res.header('Service-Worker-Allowed', '/webui/');
+      res.header('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.send(swContent);
+    } catch (error) {
+      console.error('[NapCat] [WebUi] Error generating sw.js', error);
+      res.status(500).send('Error generating service worker');
+    }
+  });
+
+  // ------------中间件结束------------
+
+  // ------------挂载路由------------
+  // 挂载静态路由（前端），路径为 /webui
+  app.use('/webui', express.static(pathWrapper.staticPath, {
+    maxAge: '1d',
+  }));
+
+  // 插件内存静态资源路由（不需要鉴权）
+  // 路径格式: /plugin/:pluginId/mem/:urlPath/*
+  app.use('/plugin/:pluginId/mem', async (req, res) => {
+    const { pluginId } = req.params;
+    if (!pluginId) return res.status(400).json({ code: -1, message: 'Plugin ID is required' });
+
+    const ob11 = WebUiDataRuntime.getOneBotContext() as NapCatOneBot11Adapter | null;
+    if (!ob11) return res.status(503).json({ code: -1, message: 'OneBot context not available' });
+
+    const pluginManager = ob11.networkManager.findSomeAdapter('plugin_manager') as OB11PluginMangerAdapter | undefined;
+    if (!pluginManager) return res.status(503).json({ code: -1, message: 'Plugin manager not available' });
+
+    const routerRegistry = pluginManager.getPluginRouter(pluginId);
+    const memoryRoutes = routerRegistry?.getMemoryStaticRoutes() || [];
+
+    for (const { urlPath, files } of memoryRoutes) {
+      const prefix = urlPath.startsWith('/') ? urlPath : '/' + urlPath;
+      if (req.path.startsWith(prefix)) {
+        const filePath = '/' + (req.path.substring(prefix.length).replace(/^\//, '') || '');
+        const memFile = files.find(f => ('/' + f.path.replace(/^\//, '')) === filePath);
+        if (memFile) {
+          try {
+            const content = typeof memFile.content === 'function' ? await memFile.content() : memFile.content;
+            res.setHeader('Content-Type', memFile.contentType || 'application/octet-stream');
+            return res.send(content);
+          } catch (err) {
+            console.error(`[Plugin: ${pluginId}] Error serving memory file:`, err);
+            return res.status(500).json({ code: -1, message: 'Error serving memory file' });
+          }
+        }
+      }
+    }
+    return res.status(404).json({ code: -1, message: 'Memory file not found' });
+  });
+
+  // 插件无认证 API 路由（不需要鉴权）
+  // 路径格式: /plugin/:pluginId/api/*
+  app.use('/plugin/:pluginId/api', (req, res, next) => {
+    const { pluginId } = req.params;
+    if (!pluginId) return res.status(400).json({ code: -1, message: 'Plugin ID is required' });
+
+    const ob11 = WebUiDataRuntime.getOneBotContext() as NapCatOneBot11Adapter | null;
+    if (!ob11) return res.status(503).json({ code: -1, message: 'OneBot context not available' });
+
+    const pluginManager = ob11.networkManager.findSomeAdapter('plugin_manager') as OB11PluginMangerAdapter | undefined;
+    if (!pluginManager) return res.status(503).json({ code: -1, message: 'Plugin manager not available' });
+
+    const routerRegistry = pluginManager.getPluginRouter(pluginId);
+    if (!routerRegistry || !routerRegistry.hasApiNoAuthRoutes()) {
+      return res.status(404).json({ code: -1, message: `Plugin '${pluginId}' has no registered no-auth API routes` });
+    }
+
+    // 构建并执行插件无认证 API 路由
+    const pluginRouter = routerRegistry.buildApiNoAuthRouter();
+    return pluginRouter(req, res, next);
+  });
+
+  // 插件页面路由（不需要鉴权）
+  // 路径格式: /plugin/:pluginId/page/:pagePath
+  app.get('/plugin/:pluginId/page/:pagePath', (req, res) => {
+    const { pluginId, pagePath } = req.params;
+    if (!pluginId) return res.status(400).json({ code: -1, message: 'Plugin ID is required' });
+
+    const ob11 = WebUiDataRuntime.getOneBotContext() as NapCatOneBot11Adapter | null;
+    if (!ob11) return res.status(503).json({ code: -1, message: 'OneBot context not available' });
+
+    const pluginManager = ob11.networkManager.findSomeAdapter('plugin_manager') as OB11PluginMangerAdapter | undefined;
+    if (!pluginManager) return res.status(503).json({ code: -1, message: 'Plugin manager not available' });
+
+    const routerRegistry = pluginManager.getPluginRouter(pluginId);
+    if (!routerRegistry || !routerRegistry.hasPages()) {
+      return res.status(404).json({ code: -1, message: `Plugin '${pluginId}' has no registered pages` });
+    }
+
+    const pages = routerRegistry.getPages();
+    const page = pages.find(p => p.path === '/' + pagePath || p.path === pagePath);
+    if (!page) {
+      return res.status(404).json({ code: -1, message: `Page '${pagePath}' not found in plugin '${pluginId}'` });
+    }
+
+    const pluginPath = routerRegistry.getPluginPath();
+    if (!pluginPath) {
+      return res.status(500).json({ code: -1, message: 'Plugin path not available' });
+    }
+
+    const htmlFilePath = join(pluginPath, page.htmlFile);
+    if (!existsSync(htmlFilePath)) {
+      return res.status(404).json({ code: -1, message: `HTML file not found: ${page.htmlFile}` });
+    }
+
+    return res.sendFile(htmlFilePath);
+  });
+
+  // 插件文件系统静态资源路由（不需要鉴权）
+  // 路径格式: /plugin/:pluginId/files/*
+  app.use('/plugin/:pluginId/files', (req, res, next) => {
+    const { pluginId } = req.params;
+    if (!pluginId) return res.status(400).json({ code: -1, message: 'Plugin ID is required' });
+
+    const ob11 = WebUiDataRuntime.getOneBotContext() as NapCatOneBot11Adapter | null;
+    if (!ob11) return res.status(503).json({ code: -1, message: 'OneBot context not available' });
+
+    const pluginManager = ob11.networkManager.findSomeAdapter('plugin_manager') as OB11PluginMangerAdapter | undefined;
+    if (!pluginManager) return res.status(503).json({ code: -1, message: 'Plugin manager not available' });
+
+    const routerRegistry = pluginManager.getPluginRouter(pluginId);
+    const staticRoutes = routerRegistry?.getStaticRoutes() || [];
+
+    for (const { urlPath, localPath } of staticRoutes) {
+      const prefix = urlPath.startsWith('/') ? urlPath : '/' + urlPath;
+      if (req.path.startsWith(prefix) || req.path === prefix.slice(0, -1)) {
+        const staticMiddleware = express.static(localPath, { maxAge: '1d' });
+        const originalUrl = req.url;
+        req.url = '/' + (req.path.substring(prefix.length).replace(/^\//, '') || '');
+        return staticMiddleware(req, res, (err) => {
+          req.url = originalUrl;
+          err ? next(err) : next();
+        });
+      }
+    }
+    res.status(404).json({ code: -1, message: 'Static resource not found' });
+  });
+
+  // 初始化WebSocket服务器
+  const sslCerts = await checkCertificates(logger);
+  const isHttps = !!sslCerts;
+  const server = isHttps && sslCerts ? createHttpsServer(sslCerts, app) : createServer(app);
+  server.on('upgrade', (request, socket, head) => {
+    const url = new URL(request.url || '', `http://${request.headers.host}`);
+
+    // 检查是否是调试 WebSocket 连接
+    if (url.pathname.startsWith('/api/Debug/ws')) {
+      handleDebugWebSocket(request, socket, head);
+    } else {
+      // 默认为终端 WebSocket
+      terminalManager.initialize(request, socket, head, logger);
+    }
+  });
+  // 挂载API接口
+  app.use('/api', ALLRouter);
+  // 所有剩下的请求都转到静态页面
+  const indexFile = join(pathWrapper.staticPath, 'index.html');
+
+  app.all(/\/webui\/(.*)/, (_req, res) => {
+    res.sendFile(indexFile);
+  });
+
+  // 初始服务（先放个首页）
+  app.all('/', (_req, res) => {
+    res.status(301).header('Location', '/webui').send();
+  });
+
+  // 错误处理中间件，捕获multer的错误
+  app.use((err: Error, _: express.Request, res: express.Response, next: express.NextFunction) => {
+    if (err instanceof multer.MulterError) {
+      return sendError(res, err.message, true);
+    }
+    next(err);
+  });
+
+  // 全局错误处理中间件（非multer错误）
+  app.use((_: Error, __: express.Request, res: express.Response, ___: express.NextFunction) => {
+    sendError(res, 'An unknown error occurred.', true);
+  });
+
+  // ------------启动服务------------
+  server.listen(port, host, async () => {
+    const searchParams = { token };
+    logger.log(`[NapCat] [WebUi] WebUi Token: ${token}`);
+    logger.log(
+      `[NapCat] [WebUi] WebUi User Panel Url: ${createUrl('127.0.0.1', port.toString(), '/webui', searchParams)}`
+    );
+    if (host !== '') {
+      logger.log(
+        `[NapCat] [WebUi] WebUi User Panel Url: ${createUrl(host, port.toString(), '/webui', searchParams)}`
+      );
+    }
+  });
+
+  // ------------Over！------------
+}
+
+async function tryUseHost (host: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    try {
+      const server = net.createServer();
+      server.on('listening', () => {
+        server.close();
+        resolve(host);
+      });
+
+      server.on('error', (err: any) => {
+        if (err.code === 'EADDRNOTAVAIL') {
+          reject(new Error('主机地址验证失败，可能为非本机地址'));
+        } else {
+          reject(new Error(`遇到错误: ${err.code}`));
+        }
+      });
+
+      // 尝试监听 让系统随机分配一个端口
+      server.listen(0, host);
+    } catch (error) {
+      // 这里捕获到的错误应该是启动服务器时的同步错误
+      reject(new Error(`服务器启动时发生错误: ${error}`));
+    }
+  });
+}
+
+async function tryUsePort (port: number, host: string, tryCount: number = 0, singleTry: boolean = false): Promise<number> {
+  return new Promise((resolve, reject) => {
+    try {
+      const server = net.createServer();
+      server.on('listening', () => {
+        server.close();
+        resolve(port);
+      });
+
+      server.on('error', (err: any) => {
+        if (err.code === 'EADDRINUSE') {
+          if (singleTry) {
+            // 只尝试一次，端口被占用则直接失败
+            reject(new Error(`端口 ${port} 已被占用`));
+          } else if (tryCount < MAX_PORT_TRY) {
+            // 递归尝试下一个端口
+            resolve(tryUsePort(port + 1, host, tryCount + 1, false));
+          } else {
+            reject(new Error(`端口尝试失败，达到最大尝试次数: ${MAX_PORT_TRY}`));
+          }
+        } else {
+          reject(new Error(`遇到错误: ${err.code}`));
+        }
+      });
+
+      // 尝试监听端口
+      server.listen(port, host);
+    } catch (error) {
+      // 这里捕获到的错误应该是启动服务器时的同步错误
+      reject(new Error(`服务器启动时发生错误: ${error}`));
+    }
+  });
+}

@@ -1,0 +1,26 @@
+{
+    "name": "napcat-pty",
+    "version": "0.0.1",
+    "private": true,
+    "type": "module",
+    "main": "index.ts",
+    "types": "node-pty.d.ts",
+    "exports": {
+        ".": {
+            "import": "./index.ts"
+        },
+        "./src/*": {
+            "import": "./*"
+        }
+    },
+    "dependencies": {
+        "@homebridge/node-pty-prebuilt-multiarch":"^0.12.0"
+
+    },
+    "devDependencies": {
+        "@types/node": "^22.0.1"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    }
+}

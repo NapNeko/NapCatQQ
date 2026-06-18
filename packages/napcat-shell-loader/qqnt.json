@@ -1,0 +1,25 @@
+{
+  "name": "qq-chat",
+  "verHash": "2c9d3f6c",
+  "version": "9.9.22-40990",
+  "linuxVersion": "3.2.20-40990",
+  "linuxVerHash": "ec800879",
+  "private": true,
+  "description": "QQ",
+  "productName": "QQ",
+  "author": {
+    "name": "Tencent",
+    "email": "QQ-Team@tencent.com"
+  },
+  "homepage": "https://im.qq.com",
+  "sideEffects": true,
+  "bin": {
+    "qd": "externals/devtools/cli/index.js"
+  },
+  "main": "./loadNapCat.js",
+  "buildVersion": "40990",
+  "isPureShell": true,
+  "isByteCodeShell": true,
+  "platform": "win32",
+  "eleArch": "x64"
+}

@@ -1,0 +1,21 @@
+{
+  "name": "napcat-test",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest",
+    "test:ui": "vitest --ui"
+  },
+  "devDependencies": {
+    "vitest": "^4.0.9"
+  },
+  "dependencies": {
+    "@sinclair/typebox": "^0.34.41",
+    "napcat-core": "workspace:*",
+    "napcat-image-size": "workspace:*",
+    "napcat-onebot": "workspace:*",
+    "napcat-rpc": "workspace:*",
+    "napcat-protobuf": "workspace:*"
+  }
+}

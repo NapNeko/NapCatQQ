@@ -1,0 +1,362 @@
+import {
+  NTQQFileApi,
+  NTQQFriendApi,
+  NTQQGroupApi,
+  NTQQMsgApi,
+  NTQQSystemApi,
+  NTQQUserApi,
+  NTQQWebApi,
+  NTQQFlashApi,
+  NTQQOnlineApi,
+  NTQQDatabaseApi,
+} from '@/napcat-core/apis';
+import { NTQQCollectionApi } from '@/napcat-core/apis/collection';
+import {
+  NodeIQQNTWrapperSession,
+  NodeQQNTWrapperUtil,
+  PlatformType,
+  VendorType,
+  WrapperNodeApi,
+  WrapperSessionInitConfig,
+} from '@/napcat-core/wrapper';
+import { LogLevel, LogWrapper } from '@/napcat-core/helper/log';
+import { QQBasicInfoWrapper } from '@/napcat-core/helper/qq-basic-info';
+import { NapCatPathWrapper } from 'napcat-common/src/path';
+import path from 'node:path';
+import fs from 'node:fs';
+import { hostname, systemName, systemVersion } from 'napcat-common/src/system';
+import { NTEventWrapper } from '@/napcat-core/helper/event';
+import { createSessionProxy } from '@/napcat-core/helper/session-proxy';
+import { KickedOffLineInfo, RawMessage, SelfInfo, SelfStatusInfo } from '@/napcat-core/types';
+import { NapCatConfigLoader, NapcatConfigSchema } from '@/napcat-core/helper/config';
+import os from 'node:os';
+import { NodeIKernelMsgListener, NodeIKernelProfileListener } from '@/napcat-core/listeners';
+import { proxiedListenerOf } from '@/napcat-core/helper/proxy-handler';
+import { NTQQPacketApi } from './apis/packet';
+import { NativePacketHandler } from './packet/handler/client';
+import { Napi2NativeLoader } from './packet/handler/napi2nativeLoader';
+import { container, ReceiverServiceRegistry } from './packet/handler/serviceRegister';
+import { appEvent } from './packet/handler/eventList';
+import { TypedEventEmitter } from './packet/handler/typeEvent';
+import { hookGlobalDateNow } from './helper/server-time';
+export * from './wrapper';
+export * from './types/index';
+export * from './services/index';
+export * from './listeners/index';
+export * from './apis/index';
+export * from './helper/log';
+export * from './helper/qq-basic-info';
+export * from './helper/event';
+export * from './helper/config';
+export * from './helper/config-base';
+export * from './helper/proxy-handler';
+export * from './helper/session-proxy';
+export * from './helper/server-time';
+
+export enum NapCatCoreWorkingEnv {
+  Unknown = 0,
+  Shell = 1,
+  Framework = 2,
+}
+
+export function loadQQWrapper (execPath: string | undefined, QQVersion: string): WrapperNodeApi {
+  if (process.env['NAPCAT_WRAPPER_PATH']) {
+    const wrapperPath = process.env['NAPCAT_WRAPPER_PATH'];
+    const nativemodule: { exports: WrapperNodeApi; } = { exports: {} as WrapperNodeApi };
+    process.dlopen(nativemodule, wrapperPath);
+    return nativemodule.exports;
+  }
+  if (!execPath) {
+    throw new Error('无法加载Wrapper，execPath未定义');
+  }
+  let appPath;
+  if (os.platform() === 'darwin') {
+    appPath = path.resolve(path.dirname(execPath), '../Resources/app');
+  } else if (os.platform() === 'linux') {
+    appPath = path.resolve(path.dirname(execPath), './resources/app');
+  } else {
+    appPath = path.resolve(path.dirname(execPath), `./versions/${QQVersion}/`);
+  }
+  let wrapperNodePath = path.resolve(appPath, 'wrapper.node');
+  if (!fs.existsSync(wrapperNodePath)) {
+    wrapperNodePath = path.join(appPath, './resources/app/wrapper.node');
+  }
+  // 老版本兼容 未来去掉
+  if (!fs.existsSync(wrapperNodePath)) {
+    wrapperNodePath = path.join(path.dirname(execPath), `./resources/app/versions/${QQVersion}/wrapper.node`);
+  }
+  const nativemodule: { exports: WrapperNodeApi; } = { exports: {} as WrapperNodeApi };
+  process.dlopen(nativemodule, wrapperNodePath);
+  process.env['NAPCAT_WRAPPER_PATH'] = wrapperNodePath;
+  return nativemodule.exports;
+}
+export function getMajorPath (execPath: string, QQVersion: string): string {
+  // major.node
+  let appPath;
+  if (os.platform() === 'darwin') {
+    appPath = path.resolve(path.dirname(execPath), '../Resources/app');
+  } else if (os.platform() === 'linux') {
+    appPath = path.resolve(path.dirname(execPath), './resources/app');
+  } else {
+    appPath = path.resolve(path.dirname(execPath), `./versions/${QQVersion}/`);
+  }
+  let majorPath = path.resolve(appPath, 'major.node');
+  if (!fs.existsSync(majorPath)) {
+    majorPath = path.join(appPath, './resources/app/major.node');
+  }
+  // 老版本兼容 未来去掉
+  if (!fs.existsSync(majorPath)) {
+    majorPath = path.join(path.dirname(execPath), `./resources/app/versions/${QQVersion}/major.node`);
+  }
+  return majorPath;
+}
+export class NapCatCore {
+  readonly context: InstanceContext;
+  readonly eventWrapper: NTEventWrapper;
+  event = appEvent;
+  NapCatDataPath: string = '';
+  NapCatTempPath: string = '';
+  apis: StableNTApiWrapper;
+  // runtime info, not readonly
+  selfInfo: SelfInfo;
+  util: NodeQQNTWrapperUtil;
+  configLoader: NapCatConfigLoader;
+  /** 数据库 passphrase，由 OidbSvcTrpcTcp.0xcde_2 包获取 */
+  dbPassphrase: string | undefined;
+
+  // 通过构造器递过去的 runtime info 应该尽量少
+  constructor (context: InstanceContext, selfInfo: SelfInfo) {
+    this.selfInfo = selfInfo;
+    // 先用原始 session 创建 eventWrapper
+    this.eventWrapper = new NTEventWrapper(context.session);
+    // 通过环境变量 NAPCAT_SESSION_PROXY 开启 session 代理
+    if (process.env['NAPCAT_SESSION_PROXY'] === '1') {
+      const proxiedSession = createSessionProxy(context.session, this.eventWrapper);
+      this.context = {
+        ...context,
+        session: proxiedSession,
+      };
+    } else {
+      this.context = context;
+    }
+    this.util = this.context.wrapper.NodeQQNTWrapperUtil;
+    this.configLoader = new NapCatConfigLoader(this, this.context.pathWrapper.configPath, NapcatConfigSchema);
+    this.apis = {
+      FileApi: new NTQQFileApi(this.context, this),
+      SystemApi: new NTQQSystemApi(this.context, this),
+      CollectionApi: new NTQQCollectionApi(this.context, this),
+      PacketApi: new NTQQPacketApi(this.context, this),
+      WebApi: new NTQQWebApi(this.context, this),
+      FriendApi: new NTQQFriendApi(this.context, this),
+      MsgApi: new NTQQMsgApi(this.context, this),
+      UserApi: new NTQQUserApi(this.context, this),
+      GroupApi: new NTQQGroupApi(this.context, this),
+      FlashApi: new NTQQFlashApi(this.context, this),
+      OnlineApi: new NTQQOnlineApi(this.context, this),
+      DatabaseApi: new NTQQDatabaseApi(this.context, this),
+    };
+    container.bind(NapCatCore).toConstantValue(this);
+    container.bind(TypedEventEmitter).toConstantValue(this.event);
+    ReceiverServiceRegistry.forEach((ServiceClass, serviceName) => {
+      container.bind(ServiceClass).toSelf();
+      // console.log(`Registering service handler for: ${serviceName}`);
+      this.context.packetHandler.onCmd(serviceName, ({ seq, hex_data }) => {
+        const serviceInstance = container.get(ServiceClass);
+        return serviceInstance.handler(seq, hex_data);
+      });
+    });
+  }
+
+  async initCore () {
+    this.NapCatDataPath = path.join(this.dataPath, 'NapCat');
+    fs.mkdirSync(this.NapCatDataPath, { recursive: true });
+    this.NapCatTempPath = path.join(this.NapCatDataPath, 'temp');
+    // 创建临时目录
+    if (!fs.existsSync(this.NapCatTempPath)) {
+      fs.mkdirSync(this.NapCatTempPath, { recursive: true });
+    }
+    // 通过 getServerTime 全局 hook Date.now() 矫正本地时间偏差
+    // 可通过环境变量 NAPCAT_DISABLE_TIME_SYNC=1 或配置 autoTimeSync: false 禁用
+    if (process.env['NAPCAT_DISABLE_TIME_SYNC'] === '1' || !this.configLoader.configData.autoTimeSync) {
+      this.context.logger.log('[ServerTime] 自动对时已禁用');
+    } else {
+      const doTimeSync = () => {
+        try {
+          const offsetMs = hookGlobalDateNow(() => this.context.session.getMSFService().getServerTime());
+          if (Math.abs(offsetMs) > 5000) {
+            this.context.logger.logWarn(`[ServerTime] 本地时间与服务器时间偏差 ${(offsetMs / 1000).toFixed(1)}s，已自动矫正`);
+          } else {
+            this.context.logger.log(`[ServerTime] 时间同步完成，偏差 ${offsetMs}ms`);
+          }
+        } catch (e) {
+          this.context.logger.logError('[ServerTime] 时间矫正失败', e);
+        }
+      };
+      doTimeSync();
+      // 每小时定期重同步，防止长时间运行后本地时钟漂移触发风控
+      const syncTimer = setInterval(doTimeSync, 3600000);
+      syncTimer.unref();
+    }
+    // 遍历this.apis[i].initApi 如果存在该函数进行async 调用
+    for (const apiKey in this.apis) {
+      const api = this.apis[apiKey as keyof StableNTApiWrapper];
+      if ('initApi' in api && typeof api.initApi === 'function') {
+        await api.initApi();
+      }
+    }
+    this.initNapCatCoreListeners().then().catch((e) => this.context.logger.logError(e));
+
+    this.context.logger.setFileLogEnabled(
+      this.configLoader.configData.fileLog
+    );
+    this.context.logger.setConsoleLogEnabled(
+      this.configLoader.configData.consoleLog
+    );
+    this.context.logger.setFileAndConsoleLogLevel(
+      this.configLoader.configData.fileLogLevel as LogLevel,
+      this.configLoader.configData.consoleLogLevel as LogLevel
+    );
+  }
+
+  get dataPath (): string {
+    let result = this.context.wrapper.NodeQQNTWrapperUtil.getNTUserDataInfoConfig();
+    if (!result) {
+      result = path.resolve(os.homedir(), './.config/QQ');
+      fs.mkdirSync(result, { recursive: true });
+    }
+    return result;
+  }
+
+  // Renamed from 'InitDataListener'
+  async initNapCatCoreListeners () {
+    const msgListener = new NodeIKernelMsgListener();
+
+    // 在线文件/文件夹消息
+    msgListener.onRecvOnlineFileMsg = (msgs: RawMessage[]) => {
+      msgs.forEach(msg => this.context.logger.logMessage(msg, this.selfInfo));
+    };
+
+    msgListener.onKickedOffLine = (Info: KickedOffLineInfo) => {
+      // 下线通知
+      const tips = `[KickedOffLine] [${Info.tipsTitle}] ${Info.tipsDesc}`;
+      this.context.logger.logError(tips);
+      this.selfInfo.online = false;
+      this.event.emit('KickedOffLine', tips);
+    };
+    msgListener.onRecvMsg = (msgs) => {
+      msgs.forEach(msg => this.context.logger.logMessage(msg, this.selfInfo));
+    };
+    msgListener.onAddSendMsg = (msg) => {
+      this.context.logger.logMessage(msg, this.selfInfo);
+    };
+    this.context.session.getMsgService().addKernelMsgListener(
+      proxiedListenerOf(msgListener, this.context.logger)
+    );
+
+    const profileListener = new NodeIKernelProfileListener();
+    profileListener.onProfileDetailInfoChanged = (profile) => {
+      if (profile.uid === this.selfInfo.uid) {
+        Object.assign(this.selfInfo, profile);
+      }
+    };
+    profileListener.onSelfStatusChanged = (Info: SelfStatusInfo) => {
+      if (Info.status === 20) {
+        this.selfInfo.online = false;
+        this.context.logger.log('账号状态变更为离线');
+      } else {
+        this.selfInfo.online = true;
+      }
+    };
+    this.context.session.getProfileService().addKernelProfileListener(
+      proxiedListenerOf(profileListener, this.context.logger)
+    );
+  }
+}
+
+export async function genSessionConfig (
+  guid: string,
+  QQVersionAppid: string,
+  QQVersion: string,
+  selfUin: string,
+  selfUid: string,
+  account_path: string
+): Promise<WrapperSessionInitConfig> {
+  const downloadPath = path.join(account_path, 'NapCat', 'temp');
+  fs.mkdirSync(downloadPath, { recursive: true });
+  const platformMapping: Partial<Record<NodeJS.Platform, PlatformType>> = {
+    win32: PlatformType.KWINDOWS,
+    darwin: PlatformType.KMAC,
+    linux: PlatformType.KLINUX,
+  };
+  const systemPlatform = platformMapping[os.platform()] ?? PlatformType.KWINDOWS;
+  return {
+    selfUin,
+    selfUid,
+    desktopPathConfig: {
+      account_path, // 可以通过NodeQQNTWrapperUtil().getNTUserDataInfoConfig()获取
+    },
+    clientVer: QQVersion,
+    a2: '',
+    d2: '',
+    d2Key: '',
+    machineId: '',
+    platform: systemPlatform,  // 3是Windows?
+    platVer: systemVersion,  // 系统版本号, 应该可以固定
+    appid: QQVersionAppid,
+    rdeliveryConfig: {
+      appKey: '',
+      systemId: 0,
+      appId: '',
+      logicEnvironment: '',
+      platform: systemPlatform,
+      language: '',
+      sdkVersion: '',
+      userId: '',
+      appVersion: '',
+      osVersion: '',
+      bundleId: '',
+      serverUrl: '',
+      fixedAfterHitKeys: [''],
+    },
+    defaultFileDownloadPath: downloadPath,
+    deviceInfo: {
+      guid,
+      buildVer: QQVersion,
+      localId: 2052,
+      devName: hostname,
+      devType: systemName,
+      vendorName: '',
+      osVer: systemVersion,
+      vendorOsName: systemName,
+      setMute: false,
+      vendorType: VendorType.KNOSETONIOS,
+    },
+    deviceConfig: '{"appearance":{"isSplitViewMode":true},"msg":{}}',
+  };
+}
+
+export interface InstanceContext {
+  readonly workingEnv: NapCatCoreWorkingEnv;
+  readonly wrapper: WrapperNodeApi;
+  readonly session: NodeIQQNTWrapperSession;
+  readonly logger: LogWrapper;
+  readonly basicInfoWrapper: QQBasicInfoWrapper;
+  readonly pathWrapper: NapCatPathWrapper;
+  readonly packetHandler: NativePacketHandler;
+  readonly napi2nativeLoader: Napi2NativeLoader;
+}
+
+export interface StableNTApiWrapper {
+  FileApi: NTQQFileApi,
+  SystemApi: NTQQSystemApi,
+  PacketApi: NTQQPacketApi,
+  CollectionApi: NTQQCollectionApi,
+  WebApi: NTQQWebApi,
+  FriendApi: NTQQFriendApi,
+  MsgApi: NTQQMsgApi,
+  UserApi: NTQQUserApi,
+  GroupApi: NTQQGroupApi;
+  FlashApi: NTQQFlashApi,
+  OnlineApi: NTQQOnlineApi,
+  DatabaseApi: NTQQDatabaseApi,
+}

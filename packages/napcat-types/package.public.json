@@ -1,0 +1,19 @@
+{
+  "name": "napcat-types",
+  "version": "0.0.17",
+  "private": false,
+  "type": "module",
+  "types": "./napcat-types/index.d.ts",
+  "files": [
+    "./**/*"
+  ],
+  "dependencies": {
+    "@types/node": "^22.10.7",
+    "@sinclair/typebox": "^0.34.38"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public",
+    "tag": "latest"
+  }
+}

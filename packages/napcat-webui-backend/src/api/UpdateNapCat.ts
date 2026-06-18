@@ -1,0 +1,422 @@
+import { RequestHandler } from 'express';
+import { sendSuccess, sendError } from '@/napcat-webui-backend/src/utils/response';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as https from 'https';
+import compressing from 'compressing';
+import { webUiPathWrapper, webUiLogger } from '../../index';
+import { NapCatPathWrapper } from '@/napcat-common/src/path';
+import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
+import { NapCatCoreWorkingEnv } from '@/napcat-webui-backend/src/types';
+import {
+  getGitHubRelease,
+  findAvailableDownloadUrl,
+} from '@/napcat-common/src/mirror';
+import { ILogWrapper } from '@/napcat-common/src/log-interface';
+
+// 更新请求体接口
+interface UpdateRequestBody {
+  /** 要更新到的版本 tag，如 "v4.9.9"，不传则更新到最新版本 */
+  targetVersion?: string;
+  /** 是否强制更新（即使是降级也更新） */
+  force?: boolean;
+  /** 指定使用的镜像 */
+  mirror?: string;
+}
+
+// 更新配置文件接口
+interface UpdateConfig {
+  version: string;
+  updateTime: string;
+  files: Array<{
+    sourcePath: string;
+    targetPath: string;
+    backupPath?: string;
+  }>;
+  changelog?: string;
+}
+
+// 需要跳过更新的文件
+const SKIP_UPDATE_FILES = [
+  'NapCatWinBootMain.exe',
+  'NapCatWinBootHook.dll',
+  'quickLoginExample.bat',
+];
+
+// 更新时若文件已存在则保留（不覆盖）的用户配置文件（使用相对路径精确匹配）
+// 这些文件保存了用户的自定义设置，更新时应予以保留；
+// 新增的配置项将在运行时通过 TypeBox schema 默认值自动填充，用户不会错过新配置选项。
+const PRESERVE_USER_CONFIG_RELATIVE_PATHS = new Set([
+  path.normalize('config/napcat.json'),
+]);
+
+/**
+ * 递归扫描目录中的所有文件
+ */
+function scanFilesRecursively (dirPath: string, basePath: string = dirPath): Array<{
+  sourcePath: string;
+  relativePath: string;
+}> {
+  const files: Array<{
+    sourcePath: string;
+    relativePath: string;
+  }> = [];
+
+  const items = fs.readdirSync(dirPath);
+
+  for (const item of items) {
+    const fullPath = path.join(dirPath, item);
+    const relativePath = path.relative(basePath, fullPath);
+    const stat = fs.lstatSync(fullPath);
+
+    if (stat.isSymbolicLink()) {
+      // 跳过符号链接，避免潜在的路径穿越风险
+      continue;
+    } else if (stat.isDirectory()) {
+      // 递归扫描子目录
+      files.push(...scanFilesRecursively(fullPath, basePath));
+    } else if (stat.isFile()) {
+      files.push({
+        sourcePath: fullPath,
+        relativePath,
+      });
+    }
+  }
+
+  return files;
+}
+
+// 注：镜像配置已迁移到 @/napcat-common/src/mirror 模块统一管理
+
+/**
+ * 下载文件（带进度和重试）
+ */
+async function downloadFile (url: string, dest: string): Promise<void> {
+  webUiLogger?.log('[NapCat Update] Starting download from:', url);
+  const file = fs.createWriteStream(dest);
+
+  return new Promise((resolve, reject) => {
+    const request = https.get(url, {
+      headers: { 'User-Agent': 'NapCat-WebUI' },
+    }, (res) => {
+      webUiLogger?.log('[NapCat Update] Response status:', res.statusCode);
+      webUiLogger?.log('[NapCat Update] Content-Type:', res.headers['content-type']);
+
+      if (res.statusCode === 302 || res.statusCode === 301) {
+        webUiLogger?.log('[NapCat Update] Following redirect to:', res.headers.location);
+        file.close();
+        fs.unlinkSync(dest);
+        downloadFile(res.headers.location!, dest).then(resolve).catch(reject);
+        return;
+      }
+
+      if (res.statusCode !== 200) {
+        file.close();
+        fs.unlinkSync(dest);
+        reject(new Error(`HTTP ${res.statusCode}: ${res.statusMessage}`));
+        return;
+      }
+
+      res.pipe(file);
+      file.on('finish', () => {
+        file.close();
+        webUiLogger?.log('[NapCat Update] Download completed');
+        resolve();
+      });
+    });
+
+    request.on('error', (err) => {
+      webUiLogger?.logError('[NapCat Update] Download error:', err);
+      file.close();
+      fs.unlink(dest, () => { });
+      reject(err);
+    });
+  });
+}
+
+export const UpdateNapCatHandler: RequestHandler = async (req, res) => {
+  try {
+    // 从请求体获取目标版本（可选）
+    const { targetVersion, force, mirror } = req.body as UpdateRequestBody;
+
+    // 确定要下载的文件名
+    const ReleaseName = WebUiDataRuntime.getWorkingEnv() === NapCatCoreWorkingEnv.Framework ? 'NapCat.Framework.zip' : 'NapCat.Shell.zip';
+
+    // 确定目标版本 tag
+    // 如果指定了版本，使用指定版本；否则使用 'latest'
+    const targetTag = targetVersion || 'latest';
+    webUiLogger?.log(`[NapCat Update] Target version: ${targetTag}`);
+
+    // 检查是否是 action 临时版本
+    const isActionVersion = targetTag.startsWith('action-');
+    let downloadUrl: string;
+    let actualVersion: string;
+
+    if (isActionVersion) {
+      // 处理 action 临时版本
+      const runId = parseInt(targetTag.replace('action-', ''));
+      if (isNaN(runId)) {
+        throw new Error(`Invalid action version format: ${targetTag}`);
+      }
+
+      webUiLogger?.log(`[NapCat Update] Downloading action artifact from run: ${runId}`);
+
+      // 根据当前工作环境确定 artifact 名称
+      const artifactName = ReleaseName.replace('.zip', ''); // NapCat.Framework 或 NapCat.Shell
+
+      // Action artifacts 通过 nightly.link 下载
+      // 格式：https://nightly.link/{owner}/{repo}/actions/runs/{run_id}/{artifact_name}.zip
+      const baseUrl = `https://nightly.link/NapNeko/NapCatQQ/actions/runs/${runId}/${artifactName}.zip`;
+      actualVersion = targetTag;
+
+      webUiLogger?.log(`[NapCat Update] Action artifact URL: ${baseUrl}`);
+
+      // 使用 mirror 模块查找可用的 nightly.link 镜像
+      try {
+        downloadUrl = await findAvailableDownloadUrl(baseUrl, {
+          validateContent: true,
+          minFileSize: 1024 * 1024,
+          timeout: 10000,
+          customMirror: mirror,
+        });
+        webUiLogger?.log(`[NapCat Update] Using download URL: ${downloadUrl}`);
+      } catch (_error) {
+        // 如果镜像都不可用，直接使用原始 URL
+        webUiLogger?.logWarn('[NapCat Update] All nightly.link mirrors failed, using original URL');
+        downloadUrl = baseUrl;
+      }
+    } else {
+      // 处理标准 release 版本
+      // 使用 mirror 模块获取 release 信息（不依赖 API）
+      // 通过 assetNames 参数直接构建下载 URL，避免调用 GitHub API
+      const release = await getGitHubRelease('NapNeko', 'NapCatQQ', targetTag, {
+        assetNames: [ReleaseName, 'NapCat.Framework.zip', 'NapCat.Shell.zip'],
+        fetchChangelog: false, // 不需要 changelog，避免 API 调用
+        mirror,
+      });
+
+      const shellZipAsset = release.assets.find(asset => asset.name === ReleaseName);
+      if (!shellZipAsset) {
+        throw new Error(`未找到${ReleaseName}文件`);
+      }
+
+      actualVersion = release.tag_name;
+
+      // 使用 mirror 模块查找可用的下载 URL
+      // 启用内容验证，确保返回的是有效文件而非错误页面
+      downloadUrl = await findAvailableDownloadUrl(shellZipAsset.browser_download_url, {
+        validateContent: true,           // 验证 Content-Type 和状态码
+        minFileSize: 1024 * 1024,        // 最小 1MB，确保不是错误页面
+        timeout: 10000,                  // 10秒超时
+        customMirror: mirror,
+      });
+    }
+
+    // 检查是否需要强制更新（降级警告）
+    const currentVersion = WebUiDataRuntime.GetNapCatVersion();
+    webUiLogger?.log(`[NapCat Update] Current version: ${currentVersion}, Target version: ${actualVersion}`);
+
+    if (!force && currentVersion && !isActionVersion) {
+      // 简单的版本比较（可选的降级保护）
+      const parseVersion = (v: string): [number, number, number] => {
+        const match = v.match(/^v?(\d+)\.(\d+)\.(\d+)/);
+        if (!match) return [0, 0, 0];
+        return [parseInt(match[1] || '0'), parseInt(match[2] || '0'), parseInt(match[3] || '0')];
+      };
+      const [currMajor, currMinor, currPatch] = parseVersion(currentVersion);
+      const [targetMajor, targetMinor, targetPatch] = parseVersion(actualVersion);
+
+      const isDowngrade =
+        targetMajor < currMajor ||
+        (targetMajor === currMajor && targetMinor < currMinor) ||
+        (targetMajor === currMajor && targetMinor === currMinor && targetPatch < currPatch);
+
+      if (isDowngrade) {
+        webUiLogger?.log(`[NapCat Update] Downgrade from ${currentVersion} to ${actualVersion}, force=${force}`);
+        // 不阻止降级，只是记录日志
+      }
+    }
+
+    webUiLogger?.log(`[NapCat Update] Updating to version: ${actualVersion}`);
+
+    // 创建临时目录
+    const tempDir = path.join(webUiPathWrapper.binaryPath, './temp');
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir, { recursive: true });
+    }
+
+    webUiLogger?.log(`[NapCat Update] Using download URL: ${downloadUrl}`);
+
+    // 下载zip
+    const zipPath = path.join(tempDir, 'napcat-latest.zip');
+    webUiLogger?.log('[NapCat Update] Saving to:', zipPath);
+    await downloadFile(downloadUrl, zipPath);
+
+    // 检查文件大小
+    const stats = fs.statSync(zipPath);
+    webUiLogger?.log('[NapCat Update] Downloaded file size:', stats.size, 'bytes');
+
+    // 解压到临时目录
+    const extractPath = path.join(tempDir, 'napcat-extract');
+    webUiLogger?.log('[NapCat Update] Extracting to:', extractPath);
+    await compressing.zip.uncompress(zipPath, extractPath);
+
+    // 获取解压后的实际内容目录（NapCat.Shell.zip直接包含文件，无额外根目录）
+    const sourcePath = extractPath;
+
+    // 执行更新操作
+    try {
+      // 扫描需要更新的文件
+      const allFiles = scanFilesRecursively(sourcePath);
+      const failedFiles: Array<{
+        sourcePath: string;
+        targetPath: string;
+      }> = [];
+
+      // 先尝试直接替换文件
+      const resolvedBinaryPath = path.resolve(webUiPathWrapper.binaryPath);
+      for (const fileInfo of allFiles) {
+        // 防止路径穿越攻击：确保目标路径严格位于 binaryPath 子目录内
+        const targetFilePath = path.resolve(webUiPathWrapper.binaryPath, fileInfo.relativePath);
+        if (!targetFilePath.startsWith(resolvedBinaryPath + path.sep)) {
+          webUiLogger?.logWarn(`[NapCat Update] Skipping suspicious path: ${fileInfo.relativePath}`);
+          continue;
+        }
+
+        const normalizedRelativePath = path.normalize(fileInfo.relativePath);
+
+        // 跳过指定的文件
+        if (SKIP_UPDATE_FILES.includes(path.basename(fileInfo.relativePath))) {
+          webUiLogger?.log(`[NapCat Update] Skipping update for ${fileInfo.relativePath}`);
+          continue;
+        }
+
+        // 保留已存在的用户配置文件，避免覆盖用户设置
+        if (PRESERVE_USER_CONFIG_RELATIVE_PATHS.has(normalizedRelativePath) && fs.existsSync(targetFilePath)) {
+          webUiLogger?.log(`[NapCat Update] Preserving existing user config: ${fileInfo.relativePath}`);
+          continue;
+        }
+
+        try {
+          // 确保目标目录存在
+          const targetDir = path.dirname(targetFilePath);
+          if (!fs.existsSync(targetDir)) {
+            fs.mkdirSync(targetDir, { recursive: true });
+          }
+
+          // 尝试直接替换文件
+          if (fs.existsSync(targetFilePath)) {
+            fs.unlinkSync(targetFilePath); // 删除旧文件
+          }
+          fs.copyFileSync(fileInfo.sourcePath, targetFilePath);
+        } catch (error) {
+          // 如果替换失败，添加到失败列表
+          webUiLogger?.logError(`[NapCat Update] Failed to update ${targetFilePath}, will retry on next startup:`, error);
+          failedFiles.push({
+            sourcePath: fileInfo.sourcePath,
+            targetPath: targetFilePath,
+          });
+        }
+      }
+
+      // 如果有替换失败的文件，创建更新配置文件
+      if (failedFiles.length > 0) {
+        const updateConfig: UpdateConfig = {
+          version: actualVersion,
+          updateTime: new Date().toISOString(),
+          files: failedFiles,
+          changelog: '',
+        };
+
+        // 保存更新配置文件
+        const configPath = path.join(webUiPathWrapper.configPath, 'napcat-update.json');
+        fs.writeFileSync(configPath, JSON.stringify(updateConfig, null, 2));
+        webUiLogger?.log(`[NapCat Update] Update config saved for ${failedFiles.length} failed files: ${configPath}`);
+      }
+
+      // 发送成功响应
+      const message = failedFiles.length > 0
+        ? `更新完成，重启应用以应用剩余${failedFiles.length}个文件的更新`
+        : '更新完成';
+      sendSuccess(res, {
+        status: 'completed',
+        message,
+        newVersion: actualVersion,
+        failedFilesCount: failedFiles.length,
+      });
+    } catch (error) {
+      webUiLogger?.logError('[NapCat Update] 更新失败:', error);
+      sendError(res, '更新失败: ' + (error instanceof Error ? error.message : '未知错误'));
+    }
+  } catch (error: any) {
+    webUiLogger?.logError('[NapCat Update] 更新失败:', error);
+    sendError(res, '更新失败: ' + error.message);
+  }
+};
+
+// 注：getLatestRelease 已移除，现在使用 mirror 模块的 getGitHubRelease
+
+/**
+ * 应用待处理的更新（在应用启动时调用）
+ */
+export async function applyPendingUpdates (webUiPathWrapper: NapCatPathWrapper, logger: ILogWrapper): Promise<void> {
+  const configPath = path.join(webUiPathWrapper.configPath, 'napcat-update.json');
+
+  if (!fs.existsSync(configPath)) {
+    // logger.log('[NapCat Update] No pending updates found');
+    return;
+  }
+
+  try {
+    logger.log('[NapCat Update] Applying pending updates...');
+    const updateConfig: UpdateConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+
+    const remainingFiles: Array<{
+      sourcePath: string;
+      targetPath: string;
+    }> = [];
+
+    for (const file of updateConfig.files) {
+      try {
+        // 检查源文件是否存在
+        if (!fs.existsSync(file.sourcePath)) {
+          logger.logWarn(`[NapCat Update] Source file not found: ${file.sourcePath}`);
+          continue;
+        }
+
+        // 确保目标目录存在
+        const targetDir = path.dirname(file.targetPath);
+        if (!fs.existsSync(targetDir)) {
+          fs.mkdirSync(targetDir, { recursive: true });
+        }
+
+        // 尝试替换文件
+        if (fs.existsSync(file.targetPath)) {
+          fs.unlinkSync(file.targetPath); // 删除旧文件
+        }
+        fs.copyFileSync(file.sourcePath, file.targetPath);
+        logger.log(`[NapCat Update] Updated ${path.basename(file.targetPath)} on startup`);
+      } catch (error) {
+        logger.logError(`[NapCat Update] Failed to update ${file.targetPath} on startup:`, error);
+        // 如果仍然失败，保留在列表中
+        remainingFiles.push(file);
+      }
+    }
+
+    // 如果还有失败的文件，更新配置文件
+    if (remainingFiles.length > 0) {
+      const updatedConfig: UpdateConfig = {
+        ...updateConfig,
+        files: remainingFiles,
+      };
+      fs.writeFileSync(configPath, JSON.stringify(updatedConfig, null, 2));
+      logger.log(`[NapCat Update] ${remainingFiles.length} files still pending update`);
+    } else {
+      // 所有文件都成功更新，删除配置文件
+      fs.unlinkSync(configPath);
+      logger.log('[NapCat Update] All pending updates applied successfully');
+    }
+  } catch (error) {
+    logger.logError('[NapCat Update] Failed to apply pending updates:', error);
+  }
+}

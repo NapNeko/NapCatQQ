@@ -1,0 +1,24 @@
+{
+  "name": "napcat-types",
+  "version": "0.0.1",
+  "private": false,
+  "type": "module",
+  "types": "./dist/napcat-types/index.d.ts",
+  "files": [
+    "dist/**/*"
+  ],
+  "scripts": {
+    "build": "tsc --project tsconfig.json && tsc-alias --project tsconfig.json --outDir dist && node ./scripts/post-build.mjs && node ./scripts/copy-dist.mjs",
+    "test": "pnpm -s exec tsc --project tsconfig.json --noEmit",
+    "publish": "cd dist && npm publish"
+  },
+  "dependencies": {
+    "@types/node": "^22.10.7",
+    "@sinclair/typebox": "^0.34.38"
+  },
+  "devDependencies": {
+    "napcat-core": "workspace:*",
+    "napcat-onebot": "workspace:*",
+    "tsc-alias": "^1.8.16"
+  }
+}

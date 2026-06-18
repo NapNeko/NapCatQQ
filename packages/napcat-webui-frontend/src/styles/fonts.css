@@ -1,0 +1,10 @@
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('/webui/fonts/JetBrainsMono.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('/webui/fonts/JetBrainsMono-Italic.ttf') format('truetype');
+  font-style: italic;
+}

@@ -1,0 +1,36 @@
+{
+  "name": "napcat-framework",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "index.ts",
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "tsc --noEmit --skipLibCheck -p tsconfig.json"
+  },
+  "exports": {
+    ".": {
+      "import": "./index.ts"
+    },
+    "./*": {
+      "import": "./*"
+    }
+  },
+  "dependencies": {
+    "napcat-core": "workspace:*",
+    "napcat-common": "workspace:*",
+    "napcat-database": "workspace:*",
+    "napcat-protobuf": "workspace:*",
+    "napcat-adapter": "workspace:*",
+    "napcat-webui-backend": "workspace:*",
+    "napcat-vite": "workspace:*",
+    "napcat-qrcode": "workspace:*",
+    "json5": "^2.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
