@@ -17,50 +17,13 @@ export default class WebUIManager {
     return data.data;
   }
 
-  public static async loginWithToken (token: string, totpCode?: string) {
+  public static async loginWithToken (token: string) {
     const sha256 = CryptoJS.SHA256(token + '.napcat').toString();
-    const { data } = await serverRequest.post<ServerResponse<{ Credential: string; require2FA: boolean; message?: string; }>>(
+    const { data } = await serverRequest.post<ServerResponse<AuthResponse>>(
       '/auth/login',
-      { hash: sha256, totpCode }
+      { hash: sha256 }
     );
-    return data.data;
-  }
-
-  public static async get2FAStatus () {
-    const { data } = await serverRequest.get<ServerResponse<{ enable2FA: boolean; hasSecret: boolean; }>>(
-      '/auth/2fa/status'
-    );
-    return data.data;
-  }
-
-  public static async generate2FASecret () {
-    const { data } = await serverRequest.post<ServerResponse<{ secret: string; qrCodeUrl: string; }>>(
-      '/auth/2fa/generate-secret'
-    );
-    return data.data;
-  }
-
-  public static async enable2FA (secret: string, totpCode: string) {
-    const { data } = await serverRequest.post<ServerResponse<{ message: string; }>>(
-      '/auth/2fa/enable',
-      { secret, totpCode }
-    );
-    return data.data;
-  }
-
-  public static async disable2FA () {
-    const { data } = await serverRequest.post<ServerResponse<{ message: string; }>>(
-      '/auth/2fa/disable'
-    );
-    return data.data;
-  }
-
-  public static async verify2FACode (totpCode: string) {
-    const { data } = await serverRequest.post<ServerResponse<{ Credential: string; require2FA: boolean; }>>(
-      '/auth/2fa/verify',
-      { totpCode }
-    );
-    return data.data;
+    return data.data.Credential;
   }
 
   public static async changePassword (oldToken: string, newToken: string) {

@@ -38,25 +38,21 @@ serverRequest.interceptors.request.use((config) => {
   const token = localStorage.getItem(key.token);
 
   if (token) {
-    try {
-      const parsedToken = JSON.parse(token);
-      config.headers['Authorization'] = `Bearer ${parsedToken}`;
-    } catch {
-      config.headers['Authorization'] = `Bearer ${token}`;
-    }
+    config.headers['Authorization'] = `Bearer ${JSON.parse(token)}`;
   }
 
   return config;
 });
 
 serverRequest.interceptors.response.use((response) => {
+  // 如果是流式传输的文件
   if (response.headers['content-type'] === 'application/octet-stream') {
     return response;
   }
   if (response.data.code !== 0) {
     if (response.data.message === 'Unauthorized') {
       const token = localStorage.getItem(key.token);
-      if (token) {
+      if (token && JSON.parse(token)) {
         localStorage.removeItem(key.token);
         window.location.reload();
       }

@@ -5,7 +5,7 @@ import { Input } from '@heroui/input';
 import { useLocalStorage } from '@uidotdev/usehooks';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { IoKeyOutline, IoLockClosed, IoCheckmarkCircleOutline } from 'react-icons/io5';
+import { IoKeyOutline } from 'react-icons/io5';
 import { useNavigate } from 'react-router-dom';
 
 import logo from '@/assets/images/logo.png';
@@ -20,19 +20,16 @@ import WebUIManager from '@/controllers/webui_manager';
 import PureLayout from '@/layouts/pure';
 import { motion } from 'motion/react';
 
-type LoginStep = 'token' | '2fa';
-
 export default function WebLoginPage () {
   const urlSearchParams = new URLSearchParams(window.location.search);
   const token = urlSearchParams.get('token');
   const navigate = useNavigate();
   const [tokenValue, setTokenValue] = useState<string>(token || '');
-  const [totpCode, setTotpCode] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isPasskeyLoading, setIsPasskeyLoading] = useState<boolean>(true);
-  const [loginStep, setLoginStep] = useState<LoginStep>('token');
+  const [isPasskeyLoading, setIsPasskeyLoading] = useState<boolean>(true); // 初始为true，表示正在检查passkey
   const [, setLocalToken] = useLocalStorage<string>(key.token, '');
 
+  // Helper function to decode base64url
   function base64UrlToUint8Array (base64Url: string): Uint8Array {
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     const binaryString = atob(base64);
@@ -43,18 +40,23 @@ export default function WebLoginPage () {
     return bytes;
   }
 
+  // Helper function to encode Uint8Array to base64url
   function uint8ArrayToBase64Url (uint8Array: Uint8Array): string {
     const base64 = btoa(String.fromCharCode(...uint8Array));
     return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
   }
 
+  // 自动检查并尝试passkey登录
   const tryPasskeyLogin = async () => {
     if (!navigator.credentials || !navigator.credentials.get) {
+      // toast.error('当前浏览器/环境不支持 Passkey 登录。');
       return;
     }
     try {
+      // 检查是否有passkey
       const options = await WebUIManager.generatePasskeyAuthenticationOptions();
 
+      // 如果有passkey，自动进行认证
       const credential = await navigator.credentials.get({
         publicKey: {
           challenge: base64UrlToUint8Array(options.challenge) as BufferSource,
@@ -71,6 +73,7 @@ export default function WebLoginPage () {
         throw new Error('Passkey authentication cancelled');
       }
 
+      // 准备响应进行验证 - 转换为base64url字符串格式
       const authResponse = credential.response as AuthenticatorAssertionResponse;
       const response = {
         id: credential.id,
@@ -84,28 +87,25 @@ export default function WebLoginPage () {
         type: credential.type,
       };
 
+      // 验证认证
       const data = await WebUIManager.verifyPasskeyAuthentication(response);
 
-      if (data) {
-        if (data.require2FA) {
-          setLoginStep('2fa');
-          return true;
-        }
-        if (data.Credential) {
-          setLocalToken(data.Credential);
-          navigate('/qq_login', { replace: true });
-          return true;
-        }
+      if (data && data.Credential) {
+        setLocalToken(data.Credential);
+        navigate('/qq_login', { replace: true });
+        return true; // 登录成功
       }
     } catch (error) {
+      // passkey登录失败，继续显示token登录界面
       console.log('Passkey login failed or not available:', error);
     }
-    return false;
+    return false; // 登录失败
   };
 
-  const onTokenSubmit = async () => {
+  const onSubmit = async () => {
     if (!tokenValue) {
       toast.error('请输入token');
+
       return;
     }
     setIsLoading(true);
@@ -113,11 +113,7 @@ export default function WebLoginPage () {
       const data = await WebUIManager.loginWithToken(tokenValue);
 
       if (data) {
-        if (data.require2FA) {
-          setLoginStep('2fa');
-          return;
-        }
-        setLocalToken(data.Credential);
+        setLocalToken(data);
         navigate('/qq_login', { replace: true });
       }
     } catch (error) {
@@ -127,59 +123,32 @@ export default function WebLoginPage () {
     }
   };
 
-  const on2FASubmit = async () => {
-    if (!totpCode) {
-      toast.error('请输入验证码');
-      return;
-    }
-    if (totpCode.length !== 6) {
-      toast.error('验证码必须是6位数字');
-      return;
-    }
-    setIsLoading(true);
-    try {
-      const data = await WebUIManager.loginWithToken(tokenValue, totpCode);
-
-      if (data && data.Credential) {
-        setLocalToken(data.Credential);
-        navigate('/qq_login', { replace: true });
-      }
-    } catch (error) {
-      toast.error((error as Error).message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const goBackToToken = () => {
-    setLoginStep('token');
-    setTotpCode('');
-  };
-
+  // 处理全局键盘事件
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Enter' && !isLoading && !isPasskeyLoading) {
-      if (loginStep === 'token') {
-        onTokenSubmit();
-      } else {
-        on2FASubmit();
-      }
+      onSubmit();
     }
   };
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
+
+    // 清理函数
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [tokenValue, totpCode, isLoading, isPasskeyLoading, loginStep]);
+  }, [tokenValue, isLoading, isPasskeyLoading]); // 依赖项包含用于登录的状态
 
   useEffect(() => {
+    // 如果URL中有token，直接登录
     if (token) {
+      // 不需要检查passkey，立即清除loading状态，避免登录失败后输入框被永久禁用
       setIsPasskeyLoading(false);
-      onTokenSubmit();
+      onSubmit();
       return;
     }
 
+    // 否则尝试passkey自动登录
     tryPasskeyLogin().finally(() => {
       setIsPasskeyLoading(false);
     });
@@ -214,128 +183,70 @@ export default function WebLoginPage () {
             </CardHeader>
 
             <CardBody className='flex gap-5 py-5 px-5 md:px-10'>
-              {isPasskeyLoading && loginStep === 'token' && (
+              {isPasskeyLoading && (
                 <div className='text-center text-small text-default-600 dark:text-default-400 px-2'>
                   🔐 正在检查Passkey...
                 </div>
               )}
-
-              {loginStep === 'token' ? (
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    onTokenSubmit();
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  onSubmit();
+                }}
+              >
+                {/* 隐藏的用户名字段，帮助浏览器识别登录表单 */}
+                <input
+                  type='text'
+                  name='username'
+                  value='napcat-webui'
+                  autoComplete='username'
+                  className='absolute -left-[9999px] opacity-0 pointer-events-none'
+                  readOnly
+                  tabIndex={-1}
+                  aria-label='Username'
+                />
+                <Input
+                  isClearable
+                  type='password'
+                  name='password'
+                  autoComplete='current-password'
+                  classNames={{
+                    label: 'text-black/50 dark:text-white/90',
+                    input: [
+                      'bg-transparent',
+                      'text-black/90 dark:text-white/90',
+                      'placeholder:text-default-700/50 dark:placeholder:text-white/60',
+                    ],
+                    innerWrapper: 'bg-transparent',
+                    inputWrapper: [
+                      'shadow-xl',
+                      'bg-default-100/70',
+                      'dark:bg-default/60',
+                      'backdrop-blur-xl',
+                      'backdrop-saturate-200',
+                      'hover:bg-default-0/70',
+                      'dark:hover:bg-default/70',
+                      'group-data-[focus=true]:bg-default-100/50',
+                      'dark:group-data-[focus=true]:bg-default/60',
+                      '!cursor-text',
+                    ],
                   }}
-                >
-                  <input
-                    type='text'
-                    name='username'
-                    value='napcat-webui'
-                    autoComplete='username'
-                    className='absolute -left-[9999px] opacity-0 pointer-events-none'
-                    readOnly
-                    tabIndex={-1}
-                    aria-label='Username'
-                  />
-                  <Input
-                    isClearable
-                    type='password'
-                    name='password'
-                    autoComplete='current-password'
-                    classNames={{
-                      label: 'text-black/50 dark:text-white/90',
-                      input: [
-                        'bg-transparent',
-                        'text-black/90 dark:text-white/90',
-                        'placeholder:text-default-700/50 dark:placeholder:text-white/60',
-                      ],
-                      innerWrapper: 'bg-transparent',
-                      inputWrapper: [
-                        'shadow-xl',
-                        'bg-default-100/70',
-                        'dark:bg-default/60',
-                        'backdrop-blur-xl',
-                        'backdrop-saturate-200',
-                        'hover:bg-default-0/70',
-                        'dark:hover:bg-default/70',
-                        'group-data-[focus=true]:bg-default-100/50',
-                        'dark:group-data-[focus=true]:bg-default/60',
-                        '!cursor-text',
-                      ],
-                    }}
-                    isDisabled={isLoading || isPasskeyLoading}
-                    label='Token'
-                    placeholder='请输入token'
-                    radius='lg'
-                    size='lg'
-                    startContent={
-                      <IoKeyOutline className='text-black/50 mb-0.5 dark:text-white/90 text-slate-400 pointer-events-none flex-shrink-0' />
-                    }
-                    value={tokenValue}
-                    onChange={(e) => setTokenValue(e.target.value)}
-                    onClear={() => setTokenValue('')}
-                  />
-                </form>
-              ) : (
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    on2FASubmit();
-                  }}
-                >
-                  <div className='flex items-center gap-2 mb-4 cursor-pointer' onClick={goBackToToken}>
-                    <IoLockClosed className='text-sm text-default-500' />
-                    <span className='text-sm text-default-500 hover:text-default-700'>返回密码输入</span>
-                  </div>
-                  <Input
-                    type='text'
-                    inputMode='numeric'
-                    pattern='[0-9]*'
-                    maxLength={6}
-                    classNames={{
-                      label: 'text-black/50 dark:text-white/90',
-                      input: [
-                        'bg-transparent text-center text-2xl tracking-widest',
-                        'text-black/90 dark:text-white/90',
-                        'placeholder:text-default-700/50 dark:placeholder:text-white/60',
-                      ],
-                      innerWrapper: 'bg-transparent',
-                      inputWrapper: [
-                        'shadow-xl',
-                        'bg-default-100/70',
-                        'dark:bg-default/60',
-                        'backdrop-blur-xl',
-                        'backdrop-saturate-200',
-                        'hover:bg-default-0/70',
-                        'dark:hover:bg-default/70',
-                        'group-data-[focus=true]:bg-default-100/50',
-                        'dark:group-data-[focus=true]:bg-default/60',
-                        '!cursor-text',
-                      ],
-                    }}
-                    isDisabled={isLoading}
-                    label='验证码'
-                    placeholder='000000'
-                    radius='lg'
-                    size='lg'
-                    startContent={
-                      <IoCheckmarkCircleOutline className='text-black/50 mb-0.5 dark:text-white/90 text-slate-400 pointer-events-none flex-shrink-0' />
-                    }
-                    value={totpCode}
-                    onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, ''))}
-                  />
-                  <div className='text-center text-small text-default-600 dark:text-default-400 px-2 mt-4'>
-                    💡 请打开 Authenticator 应用获取验证码
-                  </div>
-                </form>
-              )}
-
-              {loginStep === 'token' && (
-                <div className='text-center text-small text-default-600 dark:text-default-400 px-2'>
-                  💡 提示：请从 NapCat 启动日志中查看登录密钥
-                </div>
-              )}
-
+                  isDisabled={isLoading || isPasskeyLoading}
+                  label='Token'
+                  placeholder='请输入token'
+                  radius='lg'
+                  size='lg'
+                  startContent={
+                    <IoKeyOutline className='text-black/50 mb-0.5 dark:text-white/90 text-slate-400 pointer-events-none flex-shrink-0' />
+                  }
+                  value={tokenValue}
+                  onChange={(e) => setTokenValue(e.target.value)}
+                  onClear={() => setTokenValue('')}
+                />
+              </form>
+              <div className='text-center text-small text-default-600 dark:text-default-400 px-2'>
+                💡 提示：请从 NapCat 启动日志中查看登录密钥
+              </div>
               <Button
                 className='mx-10 mt-10 text-lg py-7'
                 color='primary'
@@ -343,7 +254,7 @@ export default function WebLoginPage () {
                 radius='full'
                 size='lg'
                 variant='shadow'
-                onPress={loginStep === 'token' ? onTokenSubmit : on2FASubmit}
+                onPress={onSubmit}
               >
                 {!isLoading && (
                   <Image
@@ -355,7 +266,7 @@ export default function WebLoginPage () {
                     src={logo}
                   />
                 )}
-                {loginStep === 'token' ? '登录' : '验证'}
+                登录
               </Button>
             </CardBody>
           </HoverEffectCard>

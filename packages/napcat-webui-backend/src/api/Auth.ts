@@ -1,61 +1,45 @@
 import { RequestHandler } from 'express';
 import { AuthHelper } from '@/napcat-webui-backend/src/helper/SignToken';
 import { PasskeyHelper } from '@/napcat-webui-backend/src/helper/PasskeyHelper';
-import { TotpHelper } from '@/napcat-webui-backend/src/helper/TotpHelper';
 import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
 import { sendSuccess, sendError } from '@/napcat-webui-backend/src/utils/response';
 import { isEmpty } from '@/napcat-webui-backend/src/utils/check';
 import { WebUiConfig, getInitialWebUiToken, setInitialWebUiToken } from '@/napcat-webui-backend/index';
-import store from 'napcat-common/src/store';
 
-// 登录 - 支持2FA验证
+// 登录
 export const LoginHandler: RequestHandler = async (req, res) => {
+  // 获取WebUI配置
   const WebUiConfigData = await WebUiConfig.GetWebUIConfig();
-  const { hash, totpCode } = req.body;
+  // 获取请求体中的hash
+  const { hash } = req.body;
+  // 获取客户端IP
   const clientIP = req.ip || req.socket.remoteAddress || '';
 
+  // 如果token为空，返回错误信息
   if (isEmpty(hash)) {
     return sendError(res, 'token is empty');
   }
-
+  // 检查登录频率
   if (!WebUiDataRuntime.checkLoginRate(clientIP, WebUiConfigData.loginRate)) {
     return sendError(res, 'login rate limit');
   }
-
+  // 使用启动时缓存的token进行验证，而不是动态读取配置文件
   const initialToken = getInitialWebUiToken();
   if (!initialToken) {
     return sendError(res, 'Server token not initialized');
   }
-
+  // 验证初始token hash是否等于提交的token hash
   if (!AuthHelper.comparePasswordHash(initialToken, hash)) {
     return sendError(res, 'token is invalid');
   }
 
-  if (WebUiConfigData.enable2FA && WebUiConfigData.totpSecret) {
-    const loginChallengeKey = `2fa_challenge:${clientIP}`;
-    const storedHash = store.get<string>(loginChallengeKey);
-
-    if (!totpCode) {
-      store.set(loginChallengeKey, hash, 300);
-      return sendSuccess(res, {
-        require2FA: true,
-        message: '请输入Authenticator验证码',
-      });
-    }
-
-    if (!storedHash || storedHash !== hash) {
-      return sendError(res, '请先输入密码');
-    }
-
-    if (!TotpHelper.verifyTotp(WebUiConfigData.totpSecret, totpCode)) {
-      return sendError(res, '验证码无效或已过期');
-    }
-  }
-
-  const signCredential = Buffer.from(JSON.stringify(AuthHelper.signCredential(hash))).toString('base64');
+  // 签发凭证
+  const signCredential = Buffer.from(JSON.stringify(AuthHelper.signCredential(hash))).toString(
+    'base64'
+  );
+  // 返回成功信息
   return sendSuccess(res, {
     Credential: signCredential,
-    require2FA: false,
   });
 };
 
@@ -261,134 +245,19 @@ export const VerifyPasskeyAuthenticationHandler: RequestHandler = async (req, re
     const verification = await PasskeyHelper.verifyAuthentication(userId, response, origin, rpId);
 
     if (verification.verified) {
+      // 使用与普通登录相同的凭证签发
       const initialToken = getInitialWebUiToken();
       if (!initialToken) {
         return sendError(res, 'Server token not initialized');
       }
-
-      const WebUiConfigData = await WebUiConfig.GetWebUIConfig();
-      if (WebUiConfigData.enable2FA && WebUiConfigData.totpSecret) {
-        const clientIP = req.ip || req.socket.remoteAddress || '';
-        store.set(`2fa_challenge:${clientIP}`, AuthHelper.generatePasswordHash(initialToken), 300);
-        return sendSuccess(res, {
-          require2FA: true,
-          message: '请输入Authenticator验证码',
-        });
-      }
-
       const signCredential = Buffer.from(JSON.stringify(AuthHelper.signCredential(AuthHelper.generatePasswordHash(initialToken)))).toString('base64');
       return sendSuccess(res, {
         Credential: signCredential,
-        require2FA: false,
       });
     } else {
       return sendError(res, 'Authentication failed');
     }
   } catch (error) {
     return sendError(res, `Authentication verification failed: ${(error as Error).message}`);
-  }
-};
-
-export const Get2FAStatusHandler: RequestHandler = async (_req, res) => {
-  try {
-    const WebUiConfigData = await WebUiConfig.GetWebUIConfig();
-    return sendSuccess(res, {
-      enable2FA: WebUiConfigData.enable2FA || false,
-      hasSecret: !!WebUiConfigData.totpSecret,
-    });
-  } catch (error) {
-    return sendError(res, `获取2FA状态失败: ${(error as Error).message}`);
-  }
-};
-
-export const Generate2FASecretHandler: RequestHandler = async (_req, res) => {
-  try {
-    const secret = TotpHelper.generateSecret();
-    const qrCodeUrl = TotpHelper.generateQrCodeUrl(secret, 'NapCat WebUI', 'NapCat');
-    
-    return sendSuccess(res, {
-      secret,
-      qrCodeUrl,
-    });
-  } catch (error) {
-    return sendError(res, `生成2FA密钥失败: ${(error as Error).message}`);
-  }
-};
-
-export const Enable2FAHandler: RequestHandler = async (req, res) => {
-  try {
-    const { secret, totpCode } = req.body;
-
-    if (!secret || !totpCode) {
-      return sendError(res, 'secret和totpCode不能为空');
-    }
-
-    if (!TotpHelper.verifyTotp(secret, totpCode)) {
-      return sendError(res, '验证码无效');
-    }
-
-    await WebUiConfig.UpdateWebUIConfig({
-      enable2FA: true,
-      totpSecret: secret,
-    });
-
-    return sendSuccess(res, { message: '2FA已启用' });
-  } catch (error) {
-    return sendError(res, `启用2FA失败: ${(error as Error).message}`);
-  }
-};
-
-export const Disable2FAHandler: RequestHandler = async (_req, res) => {
-  try {
-    await WebUiConfig.UpdateWebUIConfig({
-      enable2FA: false,
-      totpSecret: '',
-    });
-
-    return sendSuccess(res, { message: '2FA已禁用' });
-  } catch (error) {
-    return sendError(res, `禁用2FA失败: ${(error as Error).message}`);
-  }
-};
-
-export const Verify2FACodeHandler: RequestHandler = async (req, res) => {
-  try {
-    const { totpCode } = req.body;
-    const clientIP = req.ip || req.socket.remoteAddress || '';
-
-    if (!totpCode) {
-      return sendError(res, 'totpCode不能为空');
-    }
-
-    const WebUiConfigData = await WebUiConfig.GetWebUIConfig();
-    if (!WebUiConfigData.enable2FA || !WebUiConfigData.totpSecret) {
-      return sendError(res, '2FA未启用');
-    }
-
-    const loginChallengeKey = `2fa_challenge:${clientIP}`;
-    const storedHash = store.get<string>(loginChallengeKey);
-
-    if (!storedHash) {
-      return sendError(res, '请先输入密码');
-    }
-
-    if (!TotpHelper.verifyTotp(WebUiConfigData.totpSecret, totpCode)) {
-      return sendError(res, '验证码无效或已过期');
-    }
-
-    const initialToken = getInitialWebUiToken();
-    if (!initialToken) {
-      return sendError(res, 'Server token not initialized');
-    }
-
-    const signCredential = Buffer.from(JSON.stringify(AuthHelper.signCredential(initialToken))).toString('base64');
-    store.remove(loginChallengeKey);
-
-    return sendSuccess(res, {
-      Credential: signCredential,
-      require2FA: false,
-    });
-  } catch (error) {
-    return sendError(res, `验证2FA失败: ${(error as Error).message}`);
   }
 };

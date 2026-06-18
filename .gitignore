@@ -1,21 +1,23 @@
-# Dependencies
+# Develop
 node_modules/
 pnpm-lock.yaml
-
-# Build outputs
+out/
 dist/
-build/
-*.log
+/src/core.lib/common/
+devconfig/*
 
-# IDE
-.idea/
-.vscode/
-.trae/
+# Editor
+!.vscode/extensions.json
+.idea/*
 
-# OS
+# macOS
 .DS_Store
-Thumbs.db
 
-# Environment
-.env
-.env.local
+# Build
+*.db
+checkVersion.sh
+bun.lockb
+tests/run/
+guild1.db-wal
+guild1.db-shm
+packages/napcat-develop/config/.env

@@ -1,9 +1,10 @@
 import { Button } from '@heroui/button';
+import { Input } from '@heroui/input';
 import { useLocalStorage } from '@uidotdev/usehooks';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import { IoQrCode } from 'react-icons/io5';
+import { useNavigate } from 'react-router-dom';
 
 import key from '@/const/key';
 
@@ -50,77 +51,39 @@ const WebUIConfigCard = () => {
   );
   const [registrationOptions, setRegistrationOptions] = useState<any>(null);
   const [isLoadingOptions, setIsLoadingOptions] = useState(false);
-  const [twoFAStatus, setTwoFAStatus] = useState<{ enable2FA: boolean; hasSecret: boolean }>({ enable2FA: false, hasSecret: false });
-  const [twoFASecret, setTwoFASecret] = useState<string>('');
-  const [twoFAQrCodeUrl, setTwoFAQrCodeUrl] = useState<string>('');
-  const [twoFATotpCode, setTwoFATotpCode] = useState<string>('');
-  const [isGeneratingSecret, setIsGeneratingSecret] = useState(false);
-  const [isEnabling2FA, setIsEnabling2FA] = useState(false);
-  const [isDisabling2FA, setIsDisabling2FA] = useState(false);
 
-  const loadTwoFAStatus = async () => {
+  // 修改密码独立表单
+  const navigate = useNavigate();
+  const [, setToken] = useLocalStorage(key.token, '');
+  const {
+    control: pwdControl,
+    handleSubmit: handlePwdSubmit,
+    formState: { isSubmitting: isPwdSubmitting, errors: pwdErrors },
+    watch,
+  } = useForm<{
+    oldToken: string;
+    newToken: string;
+  }>({
+    defaultValues: {
+      oldToken: '',
+      newToken: '',
+    },
+  });
+  const oldTokenValue = watch('oldToken');
+
+  // 修复类型错误：显式包装为无参函数，满足 onPress 的类型要求
+  const onPasswordSubmit = handlePwdSubmit(async (data) => {
     try {
-      const status = await WebUIManager.get2FAStatus();
-      setTwoFAStatus(status);
+      await WebUIManager.changePassword(data.oldToken, data.newToken);
+      toast.success('修改成功');
+      setToken('');
+      localStorage.removeItem(key.token);
+      navigate('/web_login');
     } catch (error) {
-      console.error('获取2FA状态失败:', error);
+      const msg = (error as Error).message;
+      toast.error(`修改失败: ${msg}`);
     }
-  };
-
-  const generateTwoFASecret = async () => {
-    setIsGeneratingSecret(true);
-    try {
-      const data = await WebUIManager.generate2FASecret();
-      setTwoFASecret(data.secret);
-      setTwoFAQrCodeUrl(data.qrCodeUrl);
-      toast.success('密钥已生成，请使用Authenticator应用扫码');
-    } catch (error) {
-      toast.error(`生成密钥失败: ${(error as Error).message}`);
-    } finally {
-      setIsGeneratingSecret(false);
-    }
-  };
-
-  const enableTwoFA = async () => {
-    if (!twoFASecret || !twoFATotpCode) {
-      toast.error('请先生成密钥并输入验证码');
-      return;
-    }
-    if (twoFATotpCode.length !== 6) {
-      toast.error('验证码必须是6位数字');
-      return;
-    }
-    setIsEnabling2FA(true);
-    try {
-      await WebUIManager.enable2FA(twoFASecret, twoFATotpCode);
-      await loadTwoFAStatus();
-      setTwoFASecret('');
-      setTwoFAQrCodeUrl('');
-      setTwoFATotpCode('');
-      toast.success('双因素认证已启用');
-    } catch (error) {
-      toast.error(`启用失败: ${(error as Error).message}`);
-    } finally {
-      setIsEnabling2FA(false);
-    }
-  };
-
-  const disableTwoFA = async () => {
-    setIsDisabling2FA(true);
-    try {
-      await WebUIManager.disable2FA();
-      await loadTwoFAStatus();
-      toast.success('双因素认证已禁用');
-    } catch (error) {
-      toast.error(`禁用失败: ${(error as Error).message}`);
-    } finally {
-      setIsDisabling2FA(false);
-    }
-  };
-
-  useEffect(() => {
-    loadTwoFAStatus();
-  }, []);
+  });
 
   // 预先获取注册选项（可以在任何时候调用）
   const preloadRegistrationOptions = async () => {
@@ -162,6 +125,86 @@ const WebUIConfigCard = () => {
   return (
     <>
       <title>WebUI配置 - NapCat WebUI</title>
+
+      {/* 修改密码区块 - 移到顶部 */}
+      <div className='flex flex-col gap-4'>
+        <div className='flex-shrink-0 w-full font-bold text-default-600 dark:text-default-400 px-1'>修改密码</div>
+        <Controller
+          control={pwdControl}
+          name='oldToken'
+          rules={{
+            required: '旧密码不能为空',
+            validate: (value) => {
+              if (!value || value.trim().length === 0) {
+                return '旧密码不能为空';
+              }
+              return true;
+            },
+          }}
+          render={({ field }) => (
+            <Input
+              {...field}
+              label='旧密码'
+              placeholder='请输入旧密码'
+              type='password'
+              isRequired
+              isInvalid={!!pwdErrors.oldToken}
+              errorMessage={pwdErrors.oldToken?.message}
+            />
+          )}
+        />
+        <Controller
+          control={pwdControl}
+          name='newToken'
+          rules={{
+            required: '新密码不能为空',
+            minLength: {
+              value: 6,
+              message: '新密码至少需要6个字符',
+            },
+            validate: (value) => {
+              if (!value || value.trim().length === 0) {
+                return '新密码不能为空';
+              }
+              if (value.trim().length !== value.length) {
+                return '新密码不能包含前后空格';
+              }
+              if (value === oldTokenValue) {
+                return '新密码不能与旧密码相同';
+              }
+              if (!/[a-zA-Z]/.test(value)) {
+                return '新密码必须包含字母';
+              }
+              if (!/[0-9]/.test(value)) {
+                return '新密码必须包含数字';
+              }
+              return true;
+            },
+          }}
+          render={({ field }) => (
+            <Input
+              {...field}
+              label='新密码'
+              placeholder='至少6位，包含字母和数字'
+              type='password'
+              isRequired
+              isInvalid={!!pwdErrors.newToken}
+              errorMessage={pwdErrors.newToken?.message}
+            />
+          )}
+        />
+        {/* 自定义确认按钮，无取消按钮；onPress 调用 onPasswordSubmit（已通过 handlePwdSubmit 包装，类型兼容） */}
+        <div className='flex justify-end'>
+          <Button
+            color='primary'
+            onPress={() => { onPasswordSubmit(); }}
+            isLoading={isPwdSubmitting}
+          >
+            确认修改密码
+          </Button>
+        </div>
+      </div>
+
       <div className='flex flex-col gap-2'>
         <div className='flex-shrink-0 w-full font-bold text-default-600 dark:text-default-400 px-1'>背景图</div>
         <Controller
@@ -323,93 +366,7 @@ const WebUIConfigCard = () => {
             </>
           )}
       </div>
-      <div className='flex flex-col gap-2'>
-        <div className='flex-shrink-0 w-full font-bold text-default-600 dark:text-default-400 px-1 flex items-center gap-2'>
-          <span>双因素认证 (2FA)</span>
-          <span className={`text-sm px-2 py-0.5 rounded-full ${twoFAStatus.enable2FA ? 'bg-green-100 text-green-700' : 'bg-default-200 text-default-600'}`}>
-            {twoFAStatus.enable2FA ? '已启用' : '已禁用'}
-          </span>
-        </div>
 
-        {twoFAStatus.enable2FA ? (
-          <div className='bg-green-50 border border-green-200 rounded-lg p-4'>
-            <div className='text-sm text-green-700 mb-3'>✅ 双因素认证已启用</div>
-            <Button
-              color='danger'
-              variant='flat'
-              onPress={disableTwoFA}
-              isLoading={isDisabling2FA}
-              className='w-fit'
-            >
-              禁用双因素认证
-            </Button>
-          </div>
-        ) : (
-          <>
-            <div className='text-sm text-default-400 mb-2'>
-              启用双因素认证后，登录时需要额外输入Authenticator应用生成的验证码
-            </div>
-            <div className='bg-default-50 border border-default-200 rounded-lg p-4'>
-              <Button
-                color='secondary'
-                variant='flat'
-                onPress={generateTwoFASecret}
-                isLoading={isGeneratingSecret}
-                className='w-fit mb-4'
-              >
-                <IoQrCode className='mr-2' />
-                生成密钥
-              </Button>
-              
-              {twoFASecret && (
-                <>
-                  <div className='mb-4'>
-                    <div className='text-sm text-default-600 mb-2'>扫描二维码或手动输入密钥</div>
-                    <div className='flex items-center gap-4'>
-                      <div className='bg-white border border-default-300 rounded-lg p-3'>
-                        <img
-                          src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(twoFAQrCodeUrl)}`}
-                          alt='QR Code'
-                          className='w-32 h-32'
-                        />
-                      </div>
-                      <div>
-                        <div className='text-xs text-default-500 mb-1'>密钥</div>
-                        <div className='font-mono text-sm bg-default-100 px-3 py-2 rounded break-all'>
-                          {twoFASecret}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className='mb-4'>
-                    <div className='text-sm text-default-600 mb-2'>输入Authenticator验证码</div>
-                    <input
-                      type='text'
-                      inputMode='numeric'
-                      pattern='[0-9]*'
-                      maxLength={6}
-                      value={twoFATotpCode}
-                      onChange={(e) => setTwoFATotpCode(e.target.value.replace(/\D/g, ''))}
-                      placeholder='000000'
-                      className='w-32 px-3 py-2 border border-default-300 rounded-lg text-center text-lg tracking-widest'
-                    />
-                  </div>
-                  <Button
-                    color='primary'
-                    variant='flat'
-                    onPress={enableTwoFA}
-                    isLoading={isEnabling2FA}
-                    disabled={!twoFATotpCode || twoFATotpCode.length !== 6}
-                    className='w-fit'
-                  >
-                    启用双因素认证
-                  </Button>
-                </>
-              )}
-            </div>
-          </>
-        )}
-      </div>
       <SaveButtons
         onSubmit={onSubmit}
         reset={reset}

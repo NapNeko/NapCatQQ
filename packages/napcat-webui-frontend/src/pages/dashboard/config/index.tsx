@@ -6,7 +6,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import key from '@/const/key';
 
-import ChangePasswordCard from './change_password';
+//把修改密码移动到WebUI栏目中
+//import ChangePasswordCard from './change_password';
 import LoginConfigCard from './login';
 import OneBotConfigCard from './onebot';
 import ServerConfigCard from './server';
@@ -101,11 +102,16 @@ export default function ConfigPage () {
             <LoginConfigCard />
           </ConfigPageItem>
         </Tab>
+        //把修改密码移动到WebUI栏目中
+        {
+        /*
         <Tab title='修改密码' key='token'>
           <ConfigPageItem size='sm'>
             <ChangePasswordCard />
           </ConfigPageItem>
         </Tab>
+        */
+        }
 
         <Tab title='主题配置' key='theme'>
           <ConfigPageItem size='lg'>
