@@ -5,7 +5,9 @@ interface ServerResponse<T> {
 }
 
 interface AuthResponse {
-  Credential: string;
+  Credential?: string;
+  require2FA?: boolean;
+  message?: string;
 }
 
 interface LoginListItem {
