@@ -76,12 +76,21 @@ export class TotpHelper {
     const hash = hmac.digest();
 
     // 动态截断
-    const offset = hash[hash.length - 1] & 0x0f;
+    const hashLength = hash.length;
+    const lastByte = hash[hashLength - 1];
+    if (lastByte === undefined) {
+      return '000000';
+    }
+    const offset = lastByte & 0x0f;
+    const byte0 = hash[offset] ?? 0;
+    const byte1 = hash[offset + 1] ?? 0;
+    const byte2 = hash[offset + 2] ?? 0;
+    const byte3 = hash[offset + 3] ?? 0;
     const binary =
-      ((hash[offset] & 0x7f) << 24) |
-      ((hash[offset + 1] & 0xff) << 16) |
-      ((hash[offset + 2] & 0xff) << 8) |
-      (hash[offset + 3] & 0xff);
+      ((byte0 & 0x7f) << 24) |
+      ((byte1 & 0xff) << 16) |
+      ((byte2 & 0xff) << 8) |
+      (byte3 & 0xff);
 
     // 生成 6 位数字
     const otp = binary % 1000000;
@@ -111,43 +120,15 @@ export class TotpHelper {
    * @returns Base32编码字符串
    */
   private static toBase32(buffer: Buffer): string {
-    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-    let result = '';
-    let bufferIndex = 0;
-    let bitsLeft = 8;
-
-    while (bitsLeft > 0 || bufferIndex < buffer.length) {
-      if (bitsLeft < 5) {
-        if (bufferIndex < buffer.length) {
-          const byte = buffer[bufferIndex];
-          bitsLeft += 8;
-          bufferIndex++;
-          // 将新字节的低位部分与之前剩余的位组合
-          const combined = (byte >> (8 - bitsLeft)) | (bitsLeft > 8 ? 0 : 0);
-          result += alphabet[combined & 0x1f];
-          bitsLeft -= 5;
-        } else {
-          break;
-        }
-      } else {
-        const byte = buffer[bufferIndex];
-        const index = (byte >> (bitsLeft - 5)) & 0x1f;
-        result += alphabet[index];
-        bitsLeft -= 5;
-      }
-    }
-
-    // 简化版本：使用更可靠的 Base32 实现
     const base32Alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
     let output = '';
-    let buffer2 = buffer;
 
-    for (let i = 0; i < buffer2.length; i += 5) {
-      const b0 = buffer2[i] || 0;
-      const b1 = buffer2[i + 1] || 0;
-      const b2 = buffer2[i + 2] || 0;
-      const b3 = buffer2[i + 3] || 0;
-      const b4 = buffer2[i + 4] || 0;
+    for (let i = 0; i < buffer.length; i += 5) {
+      const b0 = buffer[i] ?? 0;
+      const b1 = buffer[i + 1] ?? 0;
+      const b2 = buffer[i + 2] ?? 0;
+      const b3 = buffer[i + 3] ?? 0;
+      const b4 = buffer[i + 4] ?? 0;
 
       output += base32Alphabet[(b0 >> 3) & 0x1f];
       output += base32Alphabet[((b0 << 2) | (b1 >> 6)) & 0x1f];
