@@ -127,7 +127,9 @@ export default function WebLoginPage () {
         }
 
         // 不需要2FA，直接登录
-        setLocalToken(data.Credential || data);
+        if (data.Credential) {
+          setLocalToken(data.Credential);
+        }
         navigate('/qq_login', { replace: true });
       }
     } catch (error) {
@@ -147,8 +149,8 @@ export default function WebLoginPage () {
     try {
       const data = await WebUIManager.loginWithTokenAndTotp(pendingToken, totpCode);
 
-      if (data) {
-        setLocalToken(data.Credential || data);
+      if (data && data.Credential) {
+        setLocalToken(data.Credential);
         navigate('/qq_login', { replace: true });
       }
     } catch (error) {
