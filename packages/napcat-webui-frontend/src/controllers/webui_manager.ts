@@ -26,15 +26,6 @@ export default class WebUIManager {
     return data.data;
   }
 
-  public static async loginWithTokenAndTotp (token: string, totpCode: string) {
-    const sha256 = CryptoJS.SHA256(token + '.napcat').toString();
-    const { data } = await serverRequest.post<ServerResponse<AuthResponse>>(
-      '/auth/login',
-      { hash: sha256, totpCode }
-    );
-    return data.data;
-  }
-
   public static async get2FAStatus () {
     const { data } = await serverRequest.get<ServerResponse<{ enable2FA: boolean; hasSecret: boolean; }>>(
       '/auth/2fa/status'
@@ -57,16 +48,9 @@ export default class WebUIManager {
     return data.data;
   }
 
-  public static async disable2FA () {
+  public static async disable2FA (totpCode: string) {
     const { data } = await serverRequest.post<ServerResponse<{ message: string; }>>(
-      '/auth/2fa/disable'
-    );
-    return data.data;
-  }
-
-  public static async verify2FACode (totpCode: string) {
-    const { data } = await serverRequest.post<ServerResponse<{ Credential: string; require2FA: boolean; }>>(
-      '/auth/2fa/verify',
+      '/auth/2fa/disable',
       { totpCode }
     );
     return data.data;

@@ -142,12 +142,12 @@ export default function WebLoginPage () {
   // 2FA验证提交
   const onSubmit2FA = async () => {
     if (!totpCode || totpCode.length !== 6) {
-      toast.error('请输入6位验证码');
+      toast.error('Please enter 6-digit code');
       return;
     }
     setIsLoading(true);
     try {
-      const data = await WebUIManager.loginWithTokenAndTotp(pendingToken, totpCode);
+      const data = await WebUIManager.loginWithToken(pendingToken, totpCode);
 
       if (data && data.Credential) {
         setLocalToken(data.Credential);

@@ -37,26 +37,17 @@ export const LoginHandler: RequestHandler = async (req, res) => {
 
   // 检查是否启用了2FA
   if (WebUiConfigData.enable2FA && WebUiConfigData.totpSecret) {
-    const loginChallengeKey = `2fa_challenge:${clientIP}`;
-    const storedHash = store.get<string>(loginChallengeKey);
-
-    // 如果没有提供验证码，需要先存储哈希并要求验证码
+    // 如果没有提供验证码，返回要求验证码
     if (!totpCode) {
-      store.set(loginChallengeKey, hash, 300); // 5分钟有效期
       return sendSuccess(res, {
         require2FA: true,
-        message: '请输入Authenticator验证码',
+        message: 'Please enter your authenticator code',
       });
-    }
-
-    // 验证存储的哈希是否存在且匹配
-    if (!storedHash || storedHash !== hash) {
-      return sendError(res, '请先输入密码');
     }
 
     // 验证TOTP验证码
     if (!TotpHelper.verifyTotp(WebUiConfigData.totpSecret, totpCode)) {
-      return sendError(res, '验证码无效或已过期');
+      return sendError(res, 'Invalid or expired code');
     }
 
     // 2FA验证成功，签发凭证
@@ -317,7 +308,7 @@ export const Generate2FASecretHandler: RequestHandler = async (_req, res) => {
       qrCodeUrl,
     });
   } catch (error) {
-    return sendError(res, `生成2FA密钥失败: ${(error as Error).message}`);
+    return sendError(res, `Failed to generate 2FA secret: ${(error as Error).message}`);
   }
 };
 
@@ -327,11 +318,11 @@ export const Enable2FAHandler: RequestHandler = async (req, res) => {
     const { secret, totpCode } = req.body;
 
     if (!secret || !totpCode) {
-      return sendError(res, 'secret和totpCode不能为空');
+      return sendError(res, 'secret and totpCode are required');
     }
 
     if (!TotpHelper.verifyTotp(secret, totpCode)) {
-      return sendError(res, '验证码无效');
+      return sendError(res, 'Invalid code');
     }
 
     await WebUiConfig.UpdateWebUIConfig({
@@ -339,22 +330,38 @@ export const Enable2FAHandler: RequestHandler = async (req, res) => {
       totpSecret: secret,
     });
 
-    return sendSuccess(res, { message: '2FA已启用' });
+    return sendSuccess(res, { message: '2FA enabled' });
   } catch (error) {
-    return sendError(res, `启用2FA失败: ${(error as Error).message}`);
+    return sendError(res, `Failed to enable 2FA: ${(error as Error).message}`);
   }
 };
 
-// 禁用2FA
-export const Disable2FAHandler: RequestHandler = async (_req, res) => {
+// 禁用2FA - 需要验证当前TOTP代码
+export const Disable2FAHandler: RequestHandler = async (req, res) => {
   try {
+    const { totpCode } = req.body;
+
+    if (!totpCode) {
+      return sendError(res, 'totpCode is required to disable 2FA');
+    }
+
+    const WebUiConfigData = await WebUiConfig.GetWebUIConfig();
+    if (!WebUiConfigData.totpSecret) {
+      return sendError(res, '2FA is not enabled');
+    }
+
+    // 验证当前TOTP代码
+    if (!TotpHelper.verifyTotp(WebUiConfigData.totpSecret, totpCode)) {
+      return sendError(res, 'Invalid code');
+    }
+
     await WebUiConfig.UpdateWebUIConfig({
       enable2FA: false,
       totpSecret: '',
     });
 
-    return sendSuccess(res, { message: '2FA已禁用' });
+    return sendSuccess(res, { message: '2FA disabled' });
   } catch (error) {
-    return sendError(res, `禁用2FA失败: ${(error as Error).message}`);
+    return sendError(res, `Failed to disable 2FA: ${(error as Error).message}`);
   }
 };

@@ -16,17 +16,6 @@ export class TotpHelper {
   }
 
   /**
-   * 生成当前时间的一次性密码
-   * @param secret Base32编码的密钥
-   * @param timeStep 时间步长（秒），默认30秒
-   * @returns 6位数字验证码
-   */
-  static generateTotp(secret: string, timeStep: number = 30): string {
-    const time = Math.floor(Date.now() / 1000 / timeStep);
-    return this.generateHotp(secret, time);
-  }
-
-  /**
    * 验证一次性密码
    * @param secret Base32编码的密钥
    * @param code 用户输入的验证码

@@ -6,6 +6,7 @@ import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { IoQrCode } from 'react-icons/io5';
+import { QRCodeSVG } from 'qrcode.react';
 
 import key from '@/const/key';
 
@@ -58,6 +59,7 @@ const WebUIConfigCard = () => {
   const [twoFASecret, setTwoFASecret] = useState<string>('');
   const [twoFAQrCodeUrl, setTwoFAQrCodeUrl] = useState<string>('');
   const [twoFATotpCode, setTwoFATotpCode] = useState<string>('');
+  const [disableTotpCode, setDisableTotpCode] = useState<string>('');
   const [isGeneratingSecret, setIsGeneratingSecret] = useState(false);
   const [isEnabling2FA, setIsEnabling2FA] = useState(false);
   const [isDisabling2FA, setIsDisabling2FA] = useState(false);
@@ -110,13 +112,18 @@ const WebUIConfigCard = () => {
   };
 
   const disableTwoFA = async () => {
+    if (!disableTotpCode || disableTotpCode.length !== 6) {
+      toast.error('Please enter 6-digit code to disable 2FA');
+      return;
+    }
     setIsDisabling2FA(true);
     try {
-      await WebUIManager.disable2FA();
+      await WebUIManager.disable2FA(disableTotpCode);
       await loadTwoFAStatus();
-      toast.success('双因素认证已禁用');
+      setDisableTotpCode('');
+      toast.success('2FA has been disabled');
     } catch (error) {
-      toast.error(`禁用失败: ${(error as Error).message}`);
+      toast.error(`Failed to disable 2FA: ${(error as Error).message}`);
     } finally {
       setIsDisabling2FA(false);
     }
@@ -452,15 +459,29 @@ const WebUIConfigCard = () => {
 
         {twoFAStatus.enable2FA ? (
           <div className='bg-green-50 border border-green-200 rounded-lg p-4'>
-            <div className='text-sm text-green-700 mb-3'>✅ 双因素认证已启用</div>
+            <div className='text-sm text-green-700 mb-3'>✅ 2FA is enabled</div>
+            <div className='mb-3'>
+              <div className='text-sm text-default-600 mb-2'>Enter code to disable</div>
+              <input
+                type='text'
+                inputMode='numeric'
+                pattern='[0-9]*'
+                maxLength={6}
+                value={disableTotpCode}
+                onChange={(e) => setDisableTotpCode(e.target.value.replace(/\D/g, ''))}
+                placeholder='000000'
+                className='w-32 px-3 py-2 border border-default-300 rounded-lg text-center text-lg tracking-widest'
+              />
+            </div>
             <Button
               color='danger'
               variant='flat'
               onPress={disableTwoFA}
               isLoading={isDisabling2FA}
+              disabled={!disableTotpCode || disableTotpCode.length !== 6}
               className='w-fit'
             >
-              禁用双因素认证
+              Disable 2FA
             </Button>
           </div>
         ) : (
@@ -483,18 +504,19 @@ const WebUIConfigCard = () => {
               {twoFASecret && (
                 <>
                   <div className='mb-4'>
-                    <div className='text-sm text-default-600 mb-2'>扫描二维码或手动输入密钥</div>
+                    <div className='text-sm text-default-600 mb-2'>请使用 Authenticator 应用扫描下方二维码</div>
                     <div className='flex items-center gap-4'>
                       <div className='bg-white border border-default-300 rounded-lg p-3'>
-                        <img
-                          src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(twoFAQrCodeUrl)}`}
-                          alt='QR Code'
-                          className='w-32 h-32'
+                        <QRCodeSVG
+                          value={twoFAQrCodeUrl}
+                          size={128}
+                          level='M'
+                          includeMargin={false}
                         />
                       </div>
                       <div>
-                        <div className='text-xs text-default-500 mb-1'>密钥</div>
-                        <div className='font-mono text-sm bg-default-100 px-3 py-2 rounded break-all'>
+                        <div className='text-xs text-default-500 mb-1'>密钥（手动输入用）</div>
+                        <div className='font-mono text-sm bg-default-100 px-3 py-2 rounded break-all max-w-[200px]'>
                           {twoFASecret}
                         </div>
                       </div>
