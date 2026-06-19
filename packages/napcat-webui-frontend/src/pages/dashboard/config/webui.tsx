@@ -113,7 +113,7 @@ const WebUIConfigCard = () => {
 
   const disableTwoFA = async () => {
     if (!disableTotpCode || disableTotpCode.length !== 6) {
-      toast.error('Please enter 6-digit code to disable 2FA');
+      toast.error('请输入6位验证码');
       return;
     }
     setIsDisabling2FA(true);
@@ -121,9 +121,9 @@ const WebUIConfigCard = () => {
       await WebUIManager.disable2FA(disableTotpCode);
       await loadTwoFAStatus();
       setDisableTotpCode('');
-      toast.success('2FA has been disabled');
+      toast.success('双因素认证已禁用');
     } catch (error) {
-      toast.error(`Failed to disable 2FA: ${(error as Error).message}`);
+      toast.error(`禁用失败: ${(error as Error).message}`);
     } finally {
       setIsDisabling2FA(false);
     }
@@ -459,9 +459,9 @@ const WebUIConfigCard = () => {
 
         {twoFAStatus.enable2FA ? (
           <div className='bg-green-50 border border-green-200 rounded-lg p-4'>
-            <div className='text-sm text-green-700 mb-3'>✅ 2FA is enabled</div>
+            <div className='text-sm text-green-700 mb-3'>✅ 双因素认证已启用</div>
             <div className='mb-3'>
-              <div className='text-sm text-default-600 mb-2'>Enter code to disable</div>
+              <div className='text-sm text-default-600 mb-2'>输入验证码以禁用</div>
               <input
                 type='text'
                 inputMode='numeric'
@@ -481,7 +481,7 @@ const WebUIConfigCard = () => {
               disabled={!disableTotpCode || disableTotpCode.length !== 6}
               className='w-fit'
             >
-              Disable 2FA
+              禁用双因素认证
             </Button>
           </div>
         ) : (
