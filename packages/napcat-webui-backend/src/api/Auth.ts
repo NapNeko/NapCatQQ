@@ -1,17 +1,18 @@
 import { RequestHandler } from 'express';
 import { AuthHelper } from '@/napcat-webui-backend/src/helper/SignToken';
 import { PasskeyHelper } from '@/napcat-webui-backend/src/helper/PasskeyHelper';
+import { TotpHelper } from '@/napcat-webui-backend/src/helper/TotpHelper';
 import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
 import { sendSuccess, sendError } from '@/napcat-webui-backend/src/utils/response';
 import { isEmpty } from '@/napcat-webui-backend/src/utils/check';
 import { WebUiConfig, getInitialWebUiToken, setInitialWebUiToken } from '@/napcat-webui-backend/index';
 
-// 登录
+// 登录 - 支持2FA验证
 export const LoginHandler: RequestHandler = async (req, res) => {
   // 获取WebUI配置
   const WebUiConfigData = await WebUiConfig.GetWebUIConfig();
-  // 获取请求体中的hash
-  const { hash } = req.body;
+  // 获取请求体中的hash和totpCode
+  const { hash, totpCode } = req.body;
   // 获取客户端IP
   const clientIP = req.ip || req.socket.remoteAddress || '';
 
@@ -33,11 +34,31 @@ export const LoginHandler: RequestHandler = async (req, res) => {
     return sendError(res, 'token is invalid');
   }
 
-  // 签发凭证
-  const signCredential = Buffer.from(JSON.stringify(AuthHelper.signCredential(hash))).toString(
-    'base64'
-  );
-  // 返回成功信息
+  // 检查是否启用了2FA
+  if (WebUiConfigData.enable2FA && WebUiConfigData.totpSecret) {
+    // 如果没有提供验证码，返回要求验证码
+    if (!totpCode) {
+      return sendSuccess(res, {
+        require2FA: true,
+        message: 'Please enter your authenticator code',
+      });
+    }
+
+    // 验证TOTP验证码
+    if (!TotpHelper.verifyTotp(WebUiConfigData.totpSecret, totpCode)) {
+      return sendError(res, 'Invalid or expired code');
+    }
+
+    // 2FA验证成功，签发凭证
+    const signCredential = Buffer.from(JSON.stringify(AuthHelper.signCredential(hash))).toString('base64');
+    return sendSuccess(res, {
+      Credential: signCredential,
+      require2FA: false,
+    });
+  }
+
+  // 未启用2FA，直接签发凭证
+  const signCredential = Buffer.from(JSON.stringify(AuthHelper.signCredential(hash))).toString('base64');
   return sendSuccess(res, {
     Credential: signCredential,
   });
@@ -259,5 +280,87 @@ export const VerifyPasskeyAuthenticationHandler: RequestHandler = async (req, re
     }
   } catch (error) {
     return sendError(res, `Authentication verification failed: ${(error as Error).message}`);
+  }
+};
+
+// 获取2FA状态
+export const Get2FAStatusHandler: RequestHandler = async (_req, res) => {
+  try {
+    const WebUiConfigData = await WebUiConfig.GetWebUIConfig();
+    return sendSuccess(res, {
+      enable2FA: WebUiConfigData.enable2FA || false,
+      hasSecret: !!WebUiConfigData.totpSecret,
+    });
+  } catch (error) {
+    return sendError(res, `获取2FA状态失败: ${(error as Error).message}`);
+  }
+};
+
+// 生成2FA密钥
+export const Generate2FASecretHandler: RequestHandler = async (_req, res) => {
+  try {
+    const secret = TotpHelper.generateSecret();
+    const qrCodeUrl = TotpHelper.generateQrCodeUrl(secret, 'NapCat WebUI', 'NapCat');
+
+    return sendSuccess(res, {
+      secret,
+      qrCodeUrl,
+    });
+  } catch (error) {
+    return sendError(res, `Failed to generate 2FA secret: ${(error as Error).message}`);
+  }
+};
+
+// 启用2FA
+export const Enable2FAHandler: RequestHandler = async (req, res) => {
+  try {
+    const { secret, totpCode } = req.body;
+
+    if (!secret || !totpCode) {
+      return sendError(res, 'secret and totpCode are required');
+    }
+
+    if (!TotpHelper.verifyTotp(secret, totpCode)) {
+      return sendError(res, 'Invalid code');
+    }
+
+    await WebUiConfig.UpdateWebUIConfig({
+      enable2FA: true,
+      totpSecret: secret,
+    });
+
+    return sendSuccess(res, { message: '2FA enabled' });
+  } catch (error) {
+    return sendError(res, `Failed to enable 2FA: ${(error as Error).message}`);
+  }
+};
+
+// 禁用2FA - 需要验证当前TOTP代码
+export const Disable2FAHandler: RequestHandler = async (req, res) => {
+  try {
+    const { totpCode } = req.body;
+
+    if (!totpCode) {
+      return sendError(res, 'totpCode is required to disable 2FA');
+    }
+
+    const WebUiConfigData = await WebUiConfig.GetWebUIConfig();
+    if (!WebUiConfigData.totpSecret) {
+      return sendError(res, '2FA is not enabled');
+    }
+
+    // 验证当前TOTP代码
+    if (!TotpHelper.verifyTotp(WebUiConfigData.totpSecret, totpCode)) {
+      return sendError(res, 'Invalid code');
+    }
+
+    await WebUiConfig.UpdateWebUIConfig({
+      enable2FA: false,
+      totpSecret: '',
+    });
+
+    return sendSuccess(res, { message: '2FA disabled' });
+  } catch (error) {
+    return sendError(res, `Failed to disable 2FA: ${(error as Error).message}`);
   }
 };

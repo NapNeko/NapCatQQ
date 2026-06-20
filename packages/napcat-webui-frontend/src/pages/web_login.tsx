@@ -5,7 +5,7 @@ import { Input } from '@heroui/input';
 import { useLocalStorage } from '@uidotdev/usehooks';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { IoKeyOutline } from 'react-icons/io5';
+import { IoKeyOutline, IoArrowBack } from 'react-icons/io5';
 import { useNavigate } from 'react-router-dom';
 
 import logo from '@/assets/images/logo.png';
@@ -28,6 +28,11 @@ export default function WebLoginPage () {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isPasskeyLoading, setIsPasskeyLoading] = useState<boolean>(true); // 初始为true，表示正在检查passkey
   const [, setLocalToken] = useLocalStorage<string>(key.token, '');
+
+  // 2FA相关状态
+  const [require2FA, setRequire2FA] = useState<boolean>(false);
+  const [totpCode, setTotpCode] = useState<string>('');
+  const [pendingToken, setPendingToken] = useState<string>('');
 
   // Helper function to decode base64url
   function base64UrlToUint8Array (base64Url: string): Uint8Array {
@@ -102,10 +107,10 @@ export default function WebLoginPage () {
     return false; // 登录失败
   };
 
-  const onSubmit = async () => {
+  // 第一次登录（输入token）
+  const onSubmitToken = async () => {
     if (!tokenValue) {
       toast.error('请输入token');
-
       return;
     }
     setIsLoading(true);
@@ -113,7 +118,18 @@ export default function WebLoginPage () {
       const data = await WebUIManager.loginWithToken(tokenValue);
 
       if (data) {
-        setLocalToken(data);
+        if (data.require2FA) {
+          // 需要2FA验证
+          setRequire2FA(true);
+          setPendingToken(tokenValue);
+          setIsLoading(false);
+          return;
+        }
+
+        // 不需要2FA，直接登录
+        if (data.Credential) {
+          setLocalToken(data.Credential);
+        }
         navigate('/qq_login', { replace: true });
       }
     } catch (error) {
@@ -123,10 +139,42 @@ export default function WebLoginPage () {
     }
   };
 
+  // 2FA验证提交
+  const onSubmit2FA = async () => {
+    if (!totpCode || totpCode.length !== 6) {
+      toast.error('Please enter 6-digit code');
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const data = await WebUIManager.loginWithToken(pendingToken, totpCode);
+
+      if (data && data.Credential) {
+        setLocalToken(data.Credential);
+        navigate('/qq_login', { replace: true });
+      }
+    } catch (error) {
+      toast.error((error as Error).message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 返回token输入步骤
+  const goBackToToken = () => {
+    setRequire2FA(false);
+    setTotpCode('');
+    setPendingToken('');
+  };
+
   // 处理全局键盘事件
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Enter' && !isLoading && !isPasskeyLoading) {
-      onSubmit();
+      if (require2FA) {
+        onSubmit2FA();
+      } else {
+        onSubmitToken();
+      }
     }
   };
 
@@ -137,14 +185,14 @@ export default function WebLoginPage () {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [tokenValue, isLoading, isPasskeyLoading]); // 依赖项包含用于登录的状态
+  }, [tokenValue, totpCode, isLoading, isPasskeyLoading, require2FA]); // 依赖项包含用于登录的状态
 
   useEffect(() => {
     // 如果URL中有token，直接登录
     if (token) {
       // 不需要检查passkey，立即清除loading状态，避免登录失败后输入框被永久禁用
       setIsPasskeyLoading(false);
-      onSubmit();
+      onSubmitToken();
       return;
     }
 
@@ -188,86 +236,161 @@ export default function WebLoginPage () {
                   🔐 正在检查Passkey...
                 </div>
               )}
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  onSubmit();
-                }}
-              >
-                {/* 隐藏的用户名字段，帮助浏览器识别登录表单 */}
-                <input
-                  type='text'
-                  name='username'
-                  value='napcat-webui'
-                  autoComplete='username'
-                  className='absolute -left-[9999px] opacity-0 pointer-events-none'
-                  readOnly
-                  tabIndex={-1}
-                  aria-label='Username'
-                />
-                <Input
-                  isClearable
-                  type='password'
-                  name='password'
-                  autoComplete='current-password'
-                  classNames={{
-                    label: 'text-black/50 dark:text-white/90',
-                    input: [
-                      'bg-transparent',
-                      'text-black/90 dark:text-white/90',
-                      'placeholder:text-default-700/50 dark:placeholder:text-white/60',
-                    ],
-                    innerWrapper: 'bg-transparent',
-                    inputWrapper: [
-                      'shadow-xl',
-                      'bg-default-100/70',
-                      'dark:bg-default/60',
-                      'backdrop-blur-xl',
-                      'backdrop-saturate-200',
-                      'hover:bg-default-0/70',
-                      'dark:hover:bg-default/70',
-                      'group-data-[focus=true]:bg-default-100/50',
-                      'dark:group-data-[focus=true]:bg-default/60',
-                      '!cursor-text',
-                    ],
-                  }}
-                  isDisabled={isLoading || isPasskeyLoading}
-                  label='Token'
-                  placeholder='请输入token'
-                  radius='lg'
-                  size='lg'
-                  startContent={
-                    <IoKeyOutline className='text-black/50 mb-0.5 dark:text-white/90 text-slate-400 pointer-events-none flex-shrink-0' />
-                  }
-                  value={tokenValue}
-                  onChange={(e) => setTokenValue(e.target.value)}
-                  onClear={() => setTokenValue('')}
-                />
-              </form>
-              <div className='text-center text-small text-default-600 dark:text-default-400 px-2'>
-                💡 提示：请从 NapCat 启动日志中查看登录密钥
-              </div>
-              <Button
-                className='mx-10 mt-10 text-lg py-7'
-                color='primary'
-                isLoading={isLoading}
-                radius='full'
-                size='lg'
-                variant='shadow'
-                onPress={onSubmit}
-              >
-                {!isLoading && (
-                  <Image
-                    alt='logo'
-                    classNames={{
-                      wrapper: '-ml-8',
+
+              {/* 2FA验证步骤 */}
+              {require2FA ? (
+                <>
+                  <Button
+                    isIconOnly
+                    variant='light'
+                    className='self-start -ml-2'
+                    onPress={goBackToToken}
+                  >
+                    <IoArrowBack size={20} />
+                  </Button>
+                  <div className='text-center text-default-600 dark:text-default-400'>
+                    请输入Authenticator中的验证码
+                  </div>
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      onSubmit2FA();
                     }}
-                    height='2em'
-                    src={logo}
-                  />
-                )}
-                登录
-              </Button>
+                  >
+                    <Input
+                      type='text'
+                      inputMode='numeric'
+                      pattern='[0-9]*'
+                      maxLength={6}
+                      classNames={{
+                        label: 'text-black/50 dark:text-white/90',
+                        input: [
+                          'bg-transparent',
+                          'text-black/90 dark:text-white/90',
+                          'placeholder:text-default-700/50 dark:placeholder:text-white/60',
+                        ],
+                        innerWrapper: 'bg-transparent',
+                        inputWrapper: [
+                          'shadow-xl',
+                          'bg-default-100/70',
+                          'dark:bg-default/60',
+                          'backdrop-blur-xl',
+                          'backdrop-saturate-200',
+                          'hover:bg-default-0/70',
+                          'dark:hover:bg-default/70',
+                          'group-data-[focus=true]:bg-default-100/50',
+                          'dark:group-data-[focus=true]:bg-default/60',
+                          '!cursor-text',
+                        ],
+                      }}
+                      isDisabled={isLoading}
+                      label='验证码'
+                      placeholder='请输入6位验证码'
+                      radius='lg'
+                      size='lg'
+                      startContent={
+                        <IoKeyOutline className='text-black/50 mb-0.5 dark:text-white/90 text-slate-400 pointer-events-none flex-shrink-0' />
+                      }
+                      value={totpCode}
+                      onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, ''))}
+                    />
+                  </form>
+                  <Button
+                    className='mx-10 mt-10 text-lg py-7'
+                    color='primary'
+                    isLoading={isLoading}
+                    radius='full'
+                    size='lg'
+                    variant='shadow'
+                    onPress={onSubmit2FA}
+                  >
+                    验证
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      onSubmitToken();
+                    }}
+                  >
+                    {/* 隐藏的用户名字段，帮助浏览器识别登录表单 */}
+                    <input
+                      type='text'
+                      name='username'
+                      value='napcat-webui'
+                      autoComplete='username'
+                      className='absolute -left-[9999px] opacity-0 pointer-events-none'
+                      readOnly
+                      tabIndex={-1}
+                      aria-label='Username'
+                    />
+                    <Input
+                      isClearable
+                      type='password'
+                      name='password'
+                      autoComplete='current-password'
+                      classNames={{
+                        label: 'text-black/50 dark:text-white/90',
+                        input: [
+                          'bg-transparent',
+                          'text-black/90 dark:text-white/90',
+                          'placeholder:text-default-700/50 dark:placeholder:text-white/60',
+                        ],
+                        innerWrapper: 'bg-transparent',
+                        inputWrapper: [
+                          'shadow-xl',
+                          'bg-default-100/70',
+                          'dark:bg-default/60',
+                          'backdrop-blur-xl',
+                          'backdrop-saturate-200',
+                          'hover:bg-default-0/70',
+                          'dark:hover:bg-default/70',
+                          'group-data-[focus=true]:bg-default-100/50',
+                          'dark:group-data-[focus=true]:bg-default/60',
+                          '!cursor-text',
+                        ],
+                      }}
+                      isDisabled={isLoading || isPasskeyLoading}
+                      label='Token'
+                      placeholder='请输入token'
+                      radius='lg'
+                      size='lg'
+                      startContent={
+                        <IoKeyOutline className='text-black/50 mb-0.5 dark:text-white/90 text-slate-400 pointer-events-none flex-shrink-0' />
+                      }
+                      value={tokenValue}
+                      onChange={(e) => setTokenValue(e.target.value)}
+                      onClear={() => setTokenValue('')}
+                    />
+                  </form>
+                  <div className='text-center text-small text-default-600 dark:text-default-400 px-2'>
+                    💡 提示：请从 NapCat 启动日志中查看登录密钥
+                  </div>
+                  <Button
+                    className='mx-10 mt-10 text-lg py-7'
+                    color='primary'
+                    isLoading={isLoading}
+                    radius='full'
+                    size='lg'
+                    variant='shadow'
+                    onPress={onSubmitToken}
+                  >
+                    {!isLoading && (
+                      <Image
+                        alt='logo'
+                        classNames={{
+                          wrapper: '-ml-8',
+                        }}
+                        height='2em'
+                        src={logo}
+                      />
+                    )}
+                    登录
+                  </Button>
+                </>
+              )}
             </CardBody>
           </HoverEffectCard>
         </motion.div>

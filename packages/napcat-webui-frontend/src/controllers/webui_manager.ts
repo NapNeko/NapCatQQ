@@ -17,13 +17,43 @@ export default class WebUIManager {
     return data.data;
   }
 
-  public static async loginWithToken (token: string) {
+  public static async loginWithToken (token: string, totpCode?: string) {
     const sha256 = CryptoJS.SHA256(token + '.napcat').toString();
     const { data } = await serverRequest.post<ServerResponse<AuthResponse>>(
       '/auth/login',
-      { hash: sha256 }
+      { hash: sha256, totpCode }
     );
-    return data.data.Credential;
+    return data.data;
+  }
+
+  public static async get2FAStatus () {
+    const { data } = await serverRequest.get<ServerResponse<{ enable2FA: boolean; hasSecret: boolean; }>>(
+      '/auth/2fa/status'
+    );
+    return data.data;
+  }
+
+  public static async generate2FASecret () {
+    const { data } = await serverRequest.post<ServerResponse<{ secret: string; qrCodeUrl: string; }>>(
+      '/auth/2fa/generate-secret'
+    );
+    return data.data;
+  }
+
+  public static async enable2FA (secret: string, totpCode: string) {
+    const { data } = await serverRequest.post<ServerResponse<{ message: string; }>>(
+      '/auth/2fa/enable',
+      { secret, totpCode }
+    );
+    return data.data;
+  }
+
+  public static async disable2FA (totpCode: string) {
+    const { data } = await serverRequest.post<ServerResponse<{ message: string; }>>(
+      '/auth/2fa/disable',
+      { totpCode }
+    );
+    return data.data;
   }
 
   public static async changePassword (oldToken: string, newToken: string) {
