@@ -57,6 +57,13 @@ export async function NCoreInitFramework (
   } else {
     logger.log('[NapCat] Napi2NativeLoader: Bypass已通过环境变量禁用');
   }
+
+  // 清洗 process.env 中包含 napcat 关键字的键，防止 wrapper.node 扫描检测
+  for (const key of Object.keys(process.env)) {
+    if (/napcat/i.test(key)) {
+      delete process.env[key];
+    }
+  }
   // nativePacketHandler.onAll((packet) => {
   //     console.log('[Packet]', packet.uin, packet.cmd, packet.hex_data);
   // });

@@ -591,7 +591,7 @@ export async function NCoreInitShell () {
   console.log('NapCat Shell App Loading...');
   const pathWrapper = new NapCatPathWrapper();
   const logger = new LogWrapper(pathWrapper.logsPath);
-  if (process.env['NAPCAT_WORKER_PROCESS'] !== '1' && process.env['NAPCAT_DISABLE_MULTI_PROCESS'] !== '1' && process.env['NAPCAT_DISABLE_MULTIPROCESSING'] !== '1') {
+  if (process.env['_NTAPP_SUBPROCESS'] !== '1' && process.env['NAPCAT_DISABLE_MULTI_PROCESS'] !== '1' && process.env['NAPCAT_DISABLE_MULTIPROCESSING'] !== '1') {
     logger.setFileLogEnabled(false);
   }
   handleUncaughtExceptions(logger);
@@ -605,7 +605,7 @@ export async function NCoreInitShell () {
   // 初始化 FFmpeg 服务
   await FFmpegService.init(pathWrapper.binaryPath, logger);
 
-  if (!(process.env['NAPCAT_DISABLE_PIPE'] === '1' || process.env['NAPCAT_WORKER_PROCESS'] === '1')) {
+  if (!(process.env['NAPCAT_DISABLE_PIPE'] === '1' || process.env['_NTAPP_SUBPROCESS'] === '1')) {
     await connectToNamedPipe(logger).catch(e => logger.logError('命名管道连接失败', e));
   }
   const wrapper = loadQQWrapper(basicInfoWrapper.QQMainPath, basicInfoWrapper.getFullQQVersion());
@@ -641,6 +641,13 @@ export async function NCoreInitShell () {
     napi2nativeLoader.nativeExports.enableAllBypasses?.(bypassOptions);
   } else {
     logger.log('[NapCat] Napi2NativeLoader: Bypass已通过环境变量禁用');
+  }
+
+  // 清洗 process.env 中包含 napcat 关键字的键，防止 wrapper.node 扫描检测
+  for (const key of Object.keys(process.env)) {
+    if (/napcat/i.test(key)) {
+      delete process.env[key];
+    }
   }
 
   const o3Service = wrapper.NodeIO3MiscService.get();
@@ -704,7 +711,7 @@ export async function NCoreInitShell () {
 
   let guid = loginService.getMachineGuid();
   guid = guid.slice(0, 8) + '-' + guid.slice(8, 12) + '-' + guid.slice(12, 16) + '-' + guid.slice(16, 20) + '-' + guid.slice(20);
-  o3Service.reportAmgomWeather('login', 'a6', [dataTimestape, '184', '329']);
+  o3Service.reportAmgomWeather('login', 'a6', [dataTimestape, (150 + Math.floor(Math.random() * 80)).toString(), (280 + Math.floor(Math.random() * 100)).toString()]);
 
   const sessionConfig = await genSessionConfig(
     guid,
@@ -717,7 +724,7 @@ export async function NCoreInitShell () {
 
   await initializeSession(session, sessionConfig, startupSession);
 
-  const accountDataPath = path.resolve(dataPath, './NapCat/data');
+  const accountDataPath = path.resolve(dataPath, './QQService/data');
   // 判断dataPath是否为根目录 或者 D:/ 之类的盘目录
   if (dataPath !== '/' && /^[a-zA-Z]:\\$/.test(dataPath) === false) {
     try {

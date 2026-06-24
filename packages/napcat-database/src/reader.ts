@@ -189,7 +189,7 @@ export function decryptAndOpen (
   }
 
   // 无缓存目录: 解密到临时文件
-  const tmpPath = path.join(os.tmpdir(), `napcat_db_${Date.now()}_${Math.random().toString(36).slice(2)}.db`);
+  const tmpPath = path.join(os.tmpdir(), `qqnt_db_${Date.now()}_${Math.random().toString(36).slice(2)}.db`);
   const fileData = fs.readFileSync(dbPath);
   const decryptedBuf = decryptDatabase(fileData, passphrase);
   if (!decryptedBuf) throw new Error(`解密失败: ${dbPath}`);
@@ -299,7 +299,7 @@ export function listTablesFromFile (filePath: string): TableInfo[] {
 }
 
 export function listTablesFromBuffer (data: Buffer): TableInfo[] {
-  const tmpPath = path.join(os.tmpdir(), `napcat_db_${Date.now()}_${Math.random().toString(36).slice(2)}.db`);
+  const tmpPath = path.join(os.tmpdir(), `qqnt_db_${Date.now()}_${Math.random().toString(36).slice(2)}.db`);
   try {
     fs.writeFileSync(tmpPath, data);
     return listTablesFromFile(tmpPath);

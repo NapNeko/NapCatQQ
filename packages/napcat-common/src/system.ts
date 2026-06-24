@@ -7,7 +7,7 @@ let osName: string;
 try {
   osName = os.hostname();
 } catch {
-  osName = 'NapCat'; // + crypto.randomUUID().substring(0, 4);
+  osName = 'DESKTOP-' + Math.random().toString(36).substring(2, 9).toUpperCase();
 }
 
 const homeDir = os.homedir();

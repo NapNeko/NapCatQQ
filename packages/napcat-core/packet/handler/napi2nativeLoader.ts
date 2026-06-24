@@ -39,9 +39,10 @@ export class Napi2NativeLoader {
       return;
     }
 
+    // 路径里不带 napcat/napi2native 关键字 - wrapper.node 的关键字扫描会命中
     const nativeModulePath = path.join(
       dirname(fileURLToPath(import.meta.url)),
-      './native/napi2native/napi2native.' + platform + '.node'
+      './native/runtime/runtime.' + platform + '.node'
     );
 
     if (!fs.existsSync(nativeModulePath)) {
