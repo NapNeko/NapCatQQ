@@ -73,7 +73,12 @@ export function encodeCQCode (data: OB11MessageData) {
       continue;
     }
     try {
-      const text = value?.toString();
+      let text: string | undefined;
+      if (typeof value === 'object' && value?.toString === Object.prototype.toString) {
+        text = JSON.stringify(value);
+      } else {
+        text = value?.toString();
+      }
       if (text) {
         result += `,${name}=${CQCodeEscape(text)}`;
       }
