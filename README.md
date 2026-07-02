@@ -68,6 +68,8 @@ _Modern protocol-side framework implemented based on NTQQ._
 
 - [AstrBot](https://github.com/AstrBotDevs/AstrBot) 是完美适配本项目的LLM Bot框架 在此推荐一下
 
+- [happysnaker/qq-ai-bot](https://github.com/happysnaker/qq-ai-bot) 基于 NapCat / OneBot 11 与 ACP 的自托管 QQ ↔ AI 机器人骨架 在此推荐一下
+
 - [MaiBot](https://github.com/MaiM-with-u/MaiBot) 一只赛博群友 麦麦 Bot框架 在此推荐一下
 
 - [qq-chat-exporter](https://github.com/shuakami/qq-chat-exporter/) 基于NapCat的消息导出工具 在此推荐一下
