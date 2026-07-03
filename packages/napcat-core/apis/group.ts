@@ -430,6 +430,24 @@ export class NTQQGroupApi {
     return this.context.session.getRichMediaService().batchGetGroupFileCount(groupCodes);
   }
 
+  // getGroupFileList also carries the group's used/total space in its call
+  // result's `groupSpaceResult`; a single-item fetch is enough to read it.
+  async getGroupFileSpace (groupCode: string) {
+    const [result] = await this.core.eventWrapper.callNormalEventV2(
+      'NodeIKernelRichMediaService/getGroupFileList',
+      'NodeIKernelMsgListener/onGroupFileInfoUpdate',
+      [
+        groupCode,
+        { sortType: 1, fileCount: 1, startIndex: 0, sortOrder: 1, showOnlinedocFolder: 0 },
+      ],
+      () => true,
+      () => true,
+      1,
+      5000
+    );
+    return result?.groupSpaceResult;
+  }
+
   async getArkJsonGroupShare (groupCode: string) {
     const ret = await this.core.eventWrapper.callNoListenerEvent(
       'NodeIKernelGroupService/getGroupRecommendContactArkJson',

@@ -29,15 +29,22 @@ export class GetGroupFileSystemInfo extends OneBotAction<PayloadType, ReturnType
   override returnExample = GoCQHTTPActionsExamples.GetGroupFileSystemInfo.response;
 
   async _handle (payload: PayloadType) {
-    const groupFileCount = (await this.core.apis.GroupApi.getGroupFileCount([payload.group_id.toString()])).groupFileCounts[0];
-    if (!groupFileCount) {
+    const groupCode = payload.group_id.toString();
+    const [countResult, space] = await Promise.all([
+      this.core.apis.GroupApi.getGroupFileCount([groupCode]),
+      this.core.apis.GroupApi.getGroupFileSpace(groupCode),
+    ]);
+    const groupFileCount = countResult.groupFileCounts[0];
+    if (groupFileCount === undefined) {
       throw new Error('Group not found');
     }
     return {
       file_count: groupFileCount,
       limit_count: 10000,
-      used_space: 0,
-      total_space: 10 * 1024 * 1024 * 1024,
+      // Real values from the kernel's groupSpaceResult; fall back to the old
+      // placeholders if the field is unexpectedly absent.
+      used_space: space?.usedSpace ?? 0,
+      total_space: space?.totalSpace ?? 10 * 1024 * 1024 * 1024,
     };
   }
 }
