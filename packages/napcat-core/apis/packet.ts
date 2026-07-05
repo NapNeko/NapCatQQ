@@ -36,7 +36,7 @@ export class NTQQPacketApi {
       })
       .catch((err) => {
         this.logger.logError(err);
-        this.errStack.push(err);
+        this.pushError(err);
         return false;
       })) && this.pkt?.available;
   }
@@ -46,7 +46,15 @@ export class NTQQPacketApi {
   }
 
   get clientLogStack () {
-    return this.pkt?.clientLogStack + '\n' + this.errStack.join('\n');
+    return [this.pkt?.clientLogStack, ...this.errStack].filter(Boolean).join('\n');
+  }
+
+  private pushError (error: unknown) {
+    if (error instanceof Error) {
+      this.errStack.push(error.stack || error.message);
+      return;
+    }
+    this.errStack.push(String(error));
   }
 
   async InitSendPacket (qqVer: string) {
@@ -67,10 +75,17 @@ export class NTQQPacketApi {
     }
     this.pkt = new PacketClientSession(this.core);
     await this.pkt.init(process.pid, table.recv, table.send);
+    if (!this.pkt.available) {
+      const err = '[Core] [Packet] NativePacketClient 初始化失败，PacketBackend 发包能力不可用！';
+      this.logger.logError(err);
+      this.errStack.push(err);
+      return false;
+    }
     try {
       await this.pkt.operation.FetchRkey(3000);
     } catch (error) {
       this.logger.logError('测试Packet状态异常', error);
+      this.pushError(error);
       return false;
     }
     return true;

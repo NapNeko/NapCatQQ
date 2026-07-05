@@ -4,6 +4,8 @@ import { Type } from '@sinclair/typebox';
 
 export abstract class GetPacketStatusDepends<PT, RT> extends OneBotAction<PT, RT> {
   protected override async check (payload: PT): Promise<BaseCheckResult> {
+    const schemaResult = await super.check(payload);
+    if (!schemaResult.valid) return schemaResult;
     if (!this.core.apis.PacketApi.packetStatus) {
       return {
         valid: false,
@@ -11,7 +13,22 @@ export abstract class GetPacketStatusDepends<PT, RT> extends OneBotAction<PT, RT
           '错误堆栈信息：' + this.core.apis.PacketApi.clientLogStack,
       };
     }
-    return await super.check(payload);
+    return { valid: true };
+  }
+}
+
+export abstract class PacketSendAvailableDepends<PT, RT> extends OneBotAction<PT, RT> {
+  protected override async check (payload: PT): Promise<BaseCheckResult> {
+    const schemaResult = await super.check(payload);
+    if (!schemaResult.valid) return schemaResult;
+    if (!this.core.apis.PacketApi.available) {
+      return {
+        valid: false,
+        message: 'packetBackend发包能力不可用，请参照文档 https://napneko.github.io/config/advanced 和启动日志检查packetBackend状态或进行配置！' +
+          '错误堆栈信息：' + this.core.apis.PacketApi.clientLogStack,
+      };
+    }
+    return { valid: true };
   }
 }
 

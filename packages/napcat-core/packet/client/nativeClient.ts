@@ -39,12 +39,17 @@ export class NativePacketClient {
 
   async init (_pid: number, recv: string, send: string): Promise<void> {
     const isNewQQ = this.napcore.basicInfo.requireMinNTQQBuild('40824');
-    if (isNewQQ) {
-      const success = this.napi2nativeLoader.initHook(send, recv);
-      if (success) {
-        this.available = true;
-      }
+    if (!isNewQQ) {
+      this.logStack.pushLogWarn('[PacketClient] 当前 QQ 版本低于 NativePacketClient 要求，跳过 Hook 初始化');
+      return;
     }
+    const success = this.napi2nativeLoader.initHook(send, recv);
+    if (success) {
+      this.available = true;
+      this.logStack.pushLogInfo(`[PacketClient] NativePacketClient Hook 初始化成功 platform=${process.platform}.${process.arch}`);
+      return;
+    }
+    this.logStack.pushLogError(`[PacketClient] NativePacketClient Hook 初始化失败 platform=${process.platform}.${process.arch} send=${send} recv=${recv}`);
   }
 
   async sendPacket (

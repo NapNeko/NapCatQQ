@@ -1,5 +1,5 @@
 import { ActionName } from '@/napcat-onebot/action/router';
-import { GetPacketStatusDepends } from '@/napcat-onebot/action/packet/GetPacketStatus';
+import { PacketSendAvailableDepends } from '@/napcat-onebot/action/packet/GetPacketStatus';
 import { Static, Type } from '@sinclair/typebox';
 
 import { PacketActionsExamples } from '../example/PacketActionsExamples';
@@ -11,7 +11,7 @@ export const SendPokePayloadSchema = Type.Object({
 });
 
 export type SendPokePayload = Static<typeof SendPokePayloadSchema>;
-export class SendPokeBase extends GetPacketStatusDepends<SendPokePayload, void> {
+export class SendPokeBase extends PacketSendAvailableDepends<SendPokePayload, void> {
   override payloadSchema = SendPokePayloadSchema;
   override returnSchema = Type.Null();
   override actionSummary = '发送戳一戳';
