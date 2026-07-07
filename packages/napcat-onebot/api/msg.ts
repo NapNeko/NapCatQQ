@@ -278,7 +278,7 @@ export class OneBotMsgApi {
       };
     },
 
-    replyElement: async (element, msg, _, quick_reply) => {
+    replyElement: async (element, msg, _, { quick_reply }) => {
       const peer = {
         chatType: msg.chatType,
         peerUid: msg.peerUid,
