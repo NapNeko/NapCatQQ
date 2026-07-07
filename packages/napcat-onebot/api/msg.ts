@@ -310,9 +310,9 @@ export class OneBotMsgApi {
               peer, msgSeq, msgTime, [senderUid]
             )).msgList;
 
-            const replyMsg = msgRandom
-              ? replyMsgList.find(msg => msg.msgRandom === msgRandom)
-              : replyMsgList.find(msg => msg.msgSeq === msgSeq);
+            const replyMsg = replyMsgList.find(msg =>
+              (msgRandom && msg.msgRandom === msgRandom) || msg.msgSeq === msgSeq
+            );
 
             if (replyMsg) return replyMsg;
             if (quick_reply) {
@@ -327,9 +327,9 @@ export class OneBotMsgApi {
             peer, msgSeq, 1, true, true
           )).msgList;
 
-          const replyMsg = msgRandom
-            ? replyMsgList.find(msg => msg.msgRandom === msgRandom)
-            : replyMsgList.find(msg => msg.msgSeq === msgSeq);
+          const replyMsg = replyMsgList.find(msg =>
+            (msgRandom && msg.msgRandom === msgRandom) || msg.msgSeq === msgSeq
+          );
 
           if (replyMsg) return replyMsg;
 
@@ -341,9 +341,9 @@ export class OneBotMsgApi {
               peer, msgSeq, [senderUid]
             )).msgList;
 
-            const replyMsg = msgRandom
-              ? replyMsgList.find(msg => msg.msgRandom === msgRandom)
-              : replyMsgList.find(msg => msg.msgSeq === msgSeq);
+            const replyMsg = replyMsgList.find(msg =>
+              (msgRandom && msg.msgRandom === msgRandom) || msg.msgSeq === msgSeq
+            );
 
             if (replyMsg) return replyMsg;
 
