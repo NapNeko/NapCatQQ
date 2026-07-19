@@ -84,19 +84,19 @@ export async function createContext (core: NapCatCore, payload: OB11PostContext 
     }
     const isBuddy = await core.apis.FriendApi.isBuddy(Uid);
     if (!isBuddy) {
+      if (payload.group_id) {
+        return {
+          chatType: ChatType.KCHATTYPETEMPC2CFROMGROUP,
+          peerUid: Uid,
+          guildId: payload.group_id.toString(),
+        };
+      }
       const ret = await core.apis.MsgApi.getTempChatInfo(ChatType.KCHATTYPETEMPC2CFROMGROUP, Uid);
       if (ret.tmpChatInfo?.groupCode) {
         return {
           chatType: ChatType.KCHATTYPETEMPC2CFROMGROUP,
           peerUid: Uid,
           guildId: '',
-        };
-      }
-      if (payload.group_id) {
-        return {
-          chatType: ChatType.KCHATTYPETEMPC2CFROMGROUP,
-          peerUid: Uid,
-          guildId: payload.group_id.toString(),
         };
       }
       return {
