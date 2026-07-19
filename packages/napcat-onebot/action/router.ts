@@ -214,4 +214,7 @@ export const ActionName = {
   CancelOnlineFile: 'cancel_online_file',
 
   GetGroupSignedList: 'get_group_signed_list',
+
+  // QQ 空间扩展
+  SendQzoneMsg: 'send_qzone_msg',
 } as const;

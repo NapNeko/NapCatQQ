@@ -42,4 +42,8 @@ export const ExtendsActionsExamples = {
     payload: { group_id: '123456', user_id: '123456789', special_title: '头衔' },
     response: null,
   },
+  SendQzoneMsg: {
+    payload: { content: '今天天气不错', images: [], ugc_right: 1, target_uins: [] },
+    response: { tid: '1234567890abcdef1234567890' },
+  },
 };
