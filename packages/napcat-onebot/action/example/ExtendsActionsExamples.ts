@@ -46,4 +46,8 @@ export const ExtendsActionsExamples = {
     payload: { content: '今天天气不错', images: [], ugc_right: 1, target_uins: [] },
     response: { tid: '1234567890abcdef1234567890' },
   },
+  DeleteQzoneMsg: {
+    payload: { tid: '1234567890abcdef1234567890' },
+    response: null,
+  },
 };

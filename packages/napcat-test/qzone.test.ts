@@ -1,7 +1,9 @@
 import { describe, expect, test } from 'vitest';
 import {
+  buildQzoneDeleteBody,
   buildQzonePublishBody,
   buildQzoneUploadImageBody,
+  parseQzoneDeleteResponse,
   parseQzonePublishResponse,
   parseQzoneUploadImageResponseText,
   toQzoneRichval,
@@ -90,5 +92,29 @@ describe('Qzone data helpers', () => {
 
   test('parseQzonePublishResponse throws when tid missing', () => {
     expect(() => parseQzonePublishResponse({ subcode: 0 })).toThrow();
+  });
+
+  test('buildQzoneDeleteBody encodes required fields', () => {
+    const body = buildQzoneDeleteBody({ hostuin: '123456', tid: 'tid123' });
+    const params = new URLSearchParams(body);
+    expect(params.get('hostuin')).toBe('123456');
+    expect(params.get('tid')).toBe('tid123');
+    expect(params.get('t1_source')).toBe('1');
+    expect(params.get('code_version')).toBe('1');
+    expect(params.get('format')).toBe('json');
+    expect(params.get('qzreferrer')).toContain('123456');
+  });
+
+  test('parseQzoneDeleteResponse succeeds when subcode is 0', () => {
+    const result = parseQzoneDeleteResponse({ subcode: 0 });
+    expect(result.success).toBe(true);
+  });
+
+  test('parseQzoneDeleteResponse throws when subcode indicates failure', () => {
+    expect(() => parseQzoneDeleteResponse({ subcode: -200, message: '权限不足' })).toThrow('权限不足');
+  });
+
+  test('parseQzoneDeleteResponse throws with default message when subcode indicates failure without message', () => {
+    expect(() => parseQzoneDeleteResponse({ subcode: -200 })).toThrow('subcode=-200');
   });
 });

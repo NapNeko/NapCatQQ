@@ -14,11 +14,14 @@ import { basename } from 'node:path';
 import { qunAlbumControl } from '../data/webapi';
 import { createAlbumCommentRequest, createAlbumFeedPublish, createAlbumMediaFeed } from '../data/album';
 import {
+  buildQzoneDeleteBody,
   buildQzonePublishBody,
   buildQzoneUploadImageBody,
+  parseQzoneDeleteResponse,
   parseQzonePublishResponse,
   parseQzoneUploadImageResponseText,
   toQzoneRichval,
+  QzoneDeleteResponse,
   QzonePublishResponse,
 } from '../data/qzone';
 export interface SetNoticeRetSuccess {
@@ -487,10 +490,10 @@ export class NTQQWebApi {
     const client_key = Date.now() * 1000;
     return await this.context.session.getAlbumService().doQunComment(
       random_seq, {
-        map_info: [],
-        map_bytes_info: [],
-        map_user_account: [],
-      },
+      map_info: [],
+      map_bytes_info: [],
+      map_user_account: [],
+    },
       qunId,
       2,
       createAlbumMediaFeed(uin, albumId, lloc),
@@ -603,6 +606,21 @@ export class NTQQWebApi {
       'Content-Type': 'application/x-www-form-urlencoded',
     }, true, false);
     return parseQzonePublishResponse(result);
+  }
+
+  /**
+   * 删除QQ空间说说
+   * @param tid 说说Tid, 来自 publishQzoneMsg 的返回值
+   */
+  async deleteQzoneMsg (tid: string) {
+    const { uin, g_tk, cookie } = await this.getQzoneAuth();
+    const body = buildQzoneDeleteBody({ hostuin: uin, tid });
+    const api = `https://user.qzone.qq.com/proxy/domain/taotao.qzone.qq.com/cgi-bin/emotion_cgi_delete_v6?g_tk=${g_tk}`;
+    const result = await RequestUtil.HttpGetJson<QzoneDeleteResponse>(api, 'POST', body, {
+      Cookie: cookie,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    }, true, false);
+    return parseQzoneDeleteResponse(result);
   }
 
   async getDaySignedList (groupCode: string) {

@@ -217,4 +217,5 @@ export const ActionName = {
 
   // QQ 空间扩展
   SendQzoneMsg: 'send_qzone_msg',
+  DeleteQzoneMsg: 'delete_qzone_msg',
 } as const;

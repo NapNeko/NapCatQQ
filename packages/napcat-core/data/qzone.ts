@@ -157,3 +157,43 @@ export function parseQzonePublishResponse (json: QzonePublishResponse): { tid: s
   }
   return { tid };
 }
+
+export interface QzoneDeleteParams {
+  hostuin: string;
+  tid: string;
+}
+
+/**
+ * 构造删除说说的表单请求体 (application/x-www-form-urlencoded)
+ * 对齐 https://user.qzone.qq.com/proxy/domain/taotao.qzone.qq.com/cgi-bin/emotion_cgi_delete_v6
+ */
+export function buildQzoneDeleteBody (params: QzoneDeleteParams): string {
+  const { hostuin, tid } = params;
+  const fields: Record<string, string> = {
+    hostuin,
+    tid,
+    t1_source: '1',
+    code_version: '1',
+    format: 'json',
+    qzreferrer: `https://user.qzone.qq.com/${hostuin}`,
+  };
+  return new URLSearchParams(fields).toString();
+}
+
+export interface QzoneDeleteResponse {
+  subcode?: number;
+  code?: number;
+  message?: string;
+  msg?: string;
+}
+
+/**
+ * 解析删除说说接口返回的 JSON
+ */
+export function parseQzoneDeleteResponse (json: QzoneDeleteResponse): { success: true; } {
+  const subcode = json.subcode ?? json.code;
+  if (subcode !== undefined && subcode !== 0) {
+    throw new Error(json.message || json.msg || `QQ空间删说说失败, subcode=${subcode}`);
+  }
+  return { success: true };
+}

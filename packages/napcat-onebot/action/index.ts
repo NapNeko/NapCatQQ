@@ -161,6 +161,7 @@ import { GetFilesetId } from './file/flash/GetFilesetIdByCode';
 import { FetchPttText } from '@/napcat-onebot/action/msg/FetchPttText';
 import { GetGroupSignedList } from './extends/GetGroupSignedList';
 import { SendQzoneMsg } from './extends/SendQzoneMsg';
+import { DeleteQzoneMsg } from './extends/DeleteQzoneMsg';
 
 export function getAllHandlers (obContext: NapCatOneBot11Adapter, core: NapCatCore) {
   const actionHandlers = [
@@ -218,6 +219,7 @@ export function getAllHandlers (obContext: NapCatOneBot11Adapter, core: NapCatCo
     new TransGroupFile(obContext, core),
     new GetGroupSignedList(obContext, core),
     new SendQzoneMsg(obContext, core),
+    new DeleteQzoneMsg(obContext, core),
     // onebot11
     new SendLike(obContext, core),
     new GetMsg(obContext, core),
