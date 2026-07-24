@@ -87,11 +87,13 @@ export async function NCoreInitFramework (
 
   // 提前启动 WebUI，使其在登录前可用，支持通过 WebUI 操控登录过程
   WebUiDataRuntime.setWorkingEnv(NapCatCoreWorkingEnv.Framework);
-  InitWebUi(logger, pathWrapper, logSubscription, statusHelperSubscription).then().catch(e => logger.logError(e));
+  await InitWebUi(logger, pathWrapper, logSubscription, statusHelperSubscription)
+    .catch(e => logger.logError(e));
 
   // 直到登录成功后，执行下一步
   const selfInfo = await new Promise<SelfInfo>((resolve) => {
     const loginContext = { isLogined: false };
+    let autoLoginTriggered = false;
 
     const loginListener = new NodeIKernelLoginListener();
 
@@ -105,6 +107,11 @@ export async function NCoreInitFramework (
       loginContext.isLogined = true;
       WebUiDataRuntime.setQQLoginStatus(true);
       WebUiDataRuntime.setQQLoginError('');
+      try {
+        await WebUiConfig.UpdateLastLoginAccount(loginResult.uin);
+      } catch (error) {
+        logger.logWarn('[NapCat] [Framework] 保存最近登录账号失败:', error);
+      }
       await new Promise<void>(resolve => {
         registerInitCallback(() => resolve());
       });
@@ -140,12 +147,19 @@ export async function NCoreInitFramework (
       logger.log('[NapCat] [Framework] 登录服务已连接');
       // 注册 WebUI 登录操作回调
       registerWebUiLoginCallbacks(loginService, loginContext, logger);
-      // 获取历史登录列表供 WebUI 使用
-      loginService.getLoginList().then((res) => {
-        const list = res.LocalLoginInfoList.filter((item) => item.isQuickLogin);
-        WebUiDataRuntime.setQQQuickLoginList(list.map((item) => item.uin.toString()));
-        WebUiDataRuntime.setQQNewLoginList(list);
-      }).catch(e => logger.logError('[NapCat] [Framework] 获取登录列表失败:', e));
+      if (autoLoginTriggered) return;
+      autoLoginTriggered = true;
+      (async () => {
+        try {
+          const res = await loginService.getLoginList();
+          const list = res.LocalLoginInfoList.filter((item) => item.isQuickLogin);
+          WebUiDataRuntime.setQQQuickLoginList(list.map((item) => item.uin.toString()));
+          WebUiDataRuntime.setQQNewLoginList(list);
+        } catch (error) {
+          logger.logError('[NapCat] [Framework] 获取登录列表失败:', error);
+        }
+        await WebUiDataRuntime.runWebUiConfigQuickFunction();
+      })().catch(error => logger.logError('[NapCat] [Framework] 自动登录执行失败:', error));
     };
 
     loginListener.onQRCodeSessionUserScaned = () => {
