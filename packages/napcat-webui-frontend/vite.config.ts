@@ -44,8 +44,11 @@ export default defineConfig(({ mode }) => {
               // if (id.includes('@heroui/')) {
               //   return 'heroui';
               // }
-              if (id.includes('react-dom')) {
-                return 'react-dom';
+              // React 19: react / react-dom / scheduler 必须合并到同一 vendor chunk，
+              // 否则 react 的 forwardRef 等 API 会被错导向 react-dom 块而变成 undefined，
+              // 导致 codemirror-core 等 chunk 初始化即崩溃（Cannot read properties of undefined (reading 'forwardRef')）。
+              if (/[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/.test(id)) {
+                return 'react-vendor';
               }
               if (id.includes('react-router-dom')) {
                 return 'react-router-dom';
