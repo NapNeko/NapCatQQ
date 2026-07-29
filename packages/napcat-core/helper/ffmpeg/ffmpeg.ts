@@ -1,4 +1,5 @@
 import { statSync, existsSync, writeFileSync } from 'fs';
+import { copyFile, stat } from 'node:fs/promises';
 import path from 'path';
 import type { VideoInfo } from './video';
 import { fileTypeFromFile } from 'file-type';
@@ -6,6 +7,13 @@ import { platform } from 'node:os';
 import { LogWrapper } from '@/napcat-core/helper/log';
 import { FFmpegAdapterFactory } from './ffmpeg-adapter-factory';
 import type { IFFmpegAdapter } from './ffmpeg-adapter-interface';
+import {
+  FFmpegExecAdapter,
+  NormalizedVideoThumbnail,
+  VIDEO_THUMBNAIL_MAX_BYTES,
+  VIDEO_THUMBNAIL_MAX_SIDE,
+} from './ffmpeg-exec-adapter';
+import { imageSizeFallBack } from 'napcat-image-size/src/index';
 
 const getFFmpegPath = (tool: string, binaryPath?: string): string => {
   if (process.platform === 'win32' && binaryPath) {
@@ -21,6 +29,9 @@ export let FFMPEG_CMD = 'ffmpeg';
 export let FFPROBE_CMD = 'ffprobe';
 export class FFmpegService {
   private static adapter: IFFmpegAdapter | null = null;
+  private static thumbnailAdapter: FFmpegExecAdapter | null = null;
+  private static binaryPath: string | undefined;
+  private static logger: LogWrapper | null = null;
   private static initialized = false;
 
   /**
@@ -29,6 +40,8 @@ export class FFmpegService {
      * @param logger 日志记录器
      */
   public static async init (binaryPath: string, logger: LogWrapper): Promise<void> {
+    this.binaryPath = binaryPath;
+    this.logger = logger;
     if (this.initialized) {
       return;
     }
@@ -44,6 +57,9 @@ export class FFmpegService {
       FFPROBE_CMD,
       binaryPath
     );
+    if (this.adapter instanceof FFmpegExecAdapter) {
+      this.thumbnailAdapter = this.adapter;
+    }
 
     this.initialized = true;
   }
@@ -83,6 +99,8 @@ export class FFmpegService {
 
       // 更新适配器路径
       await FFmpegAdapterFactory.updateFFmpegPath(logger, FFMPEG_CMD, FFPROBE_CMD);
+      this.thumbnailAdapter?.setFFmpegPath(FFMPEG_CMD);
+      this.thumbnailAdapter?.setFFprobePath(FFPROBE_CMD);
     }
   }
 
@@ -92,6 +110,47 @@ export class FFmpegService {
   public static async extractThumbnail (videoPath: string, thumbnailPath: string): Promise<void> {
     const adapter = await this.getAdapter();
     await adapter.extractThumbnail(videoPath, thumbnailPath);
+  }
+
+  private static async getThumbnailAdapter (): Promise<FFmpegExecAdapter> {
+    if (this.thumbnailAdapter) {
+      return this.thumbnailAdapter;
+    }
+    const adapter = new FFmpegExecAdapter(
+      FFMPEG_CMD,
+      FFPROBE_CMD,
+      this.binaryPath,
+      this.logger ?? undefined
+    );
+    if (!await adapter.isAvailable()) {
+      throw new Error('FFmpeg command line tool is unavailable');
+    }
+    this.thumbnailAdapter = adapter;
+    return adapter;
+  }
+
+  public static async normalizeVideoThumbnail (
+    inputPath: string,
+    outputPath: string
+  ): Promise<NormalizedVideoThumbnail> {
+    const [inputType, inputDimensions, inputStat] = await Promise.all([
+      fileTypeFromFile(inputPath),
+      imageSizeFallBack(inputPath),
+      stat(inputPath),
+    ]);
+    if (
+      ['jpg', 'jpeg'].includes(inputType?.ext ?? '') &&
+      Math.max(inputDimensions.width, inputDimensions.height) <= VIDEO_THUMBNAIL_MAX_SIDE &&
+      inputStat.size <= VIDEO_THUMBNAIL_MAX_BYTES
+    ) {
+      await copyFile(inputPath, outputPath);
+      return {
+        width: inputDimensions.width,
+        height: inputDimensions.height,
+        size: inputStat.size,
+      };
+    }
+    return (await this.getThumbnailAdapter()).normalizeVideoThumbnail(inputPath, outputPath);
   }
 
   /**

@@ -19,6 +19,7 @@ import { ImageOcrResult } from '@/napcat-core/packet/entities/ocrResult';
 import { gunzipSync } from 'zlib';
 import { PacketMsgConverter } from '@/napcat-core/packet/message/converter';
 import { UploadForwardMsgParams } from '@/napcat-core/packet/transformer/message/UploadForwardMsgV2';
+import { assertUploadResults } from '@/napcat-core/packet/context/uploadResult';
 
 export class PacketOperationContext {
   private readonly context: PacketContext;
@@ -105,15 +106,7 @@ export class PacketOperationContext {
         .filter(Boolean)
     );
     const res = await Promise.allSettled(reqList);
-    const failedCount = res.filter((r) => r.status === 'rejected').length;
-    if (failedCount > 0) {
-      this.context.logger.warn(`上传资源${res.length}个，失败${failedCount}个`);
-      res.forEach((result, index) => {
-        if (result.status === 'rejected') {
-          this.context.logger.error(`上传第${index + 1}个资源失败：${result.reason.stack}`);
-        }
-      });
-    }
+    assertUploadResults(res, this.context.logger);
   }
 
   async UploadImage (img: PacketMsgPicElement) {
@@ -240,9 +233,10 @@ export class PacketOperationContext {
   }
 
   async UploadForwardMsgV2 (msg: UploadForwardMsgParams[], groupUin: number = 0) {
-    // await this.SendPreprocess(msg, groupUin);
     // 遍历上传资源（跳过已有原始数据的项）
-    await Promise.allSettled(msg.filter(item => item.actionMsg).map(async (item) => { return await this.SendPreprocess(item.actionMsg!, groupUin); }));
+    await Promise.all(msg.filter(item => item.actionMsg).map(async (item) => {
+      await this.SendPreprocess(item.actionMsg!, groupUin);
+    }));
     const req = trans.UploadForwardMsgV2.build(this.context.napcore.basicInfo.uid, msg, groupUin);
     const resp = await this.context.client.sendOidbPacket(req, true);
     const res = trans.UploadForwardMsg.parse(resp);
@@ -366,6 +360,23 @@ export class PacketOperationContext {
               element.picElement = {
                 ...element.picElement,
                 originImageUrl: await this.GetImageUrl(this.context.napcore.basicInfo.uid, index!),
+              };
+            }
+            return element;
+          }
+          if (element.videoElement && rawElem?.commonElem?.pbElem) {
+            const extra = new NapProtoMsg(MsgInfo).decode(rawElem.commonElem.pbElem);
+            const index = extra?.msgInfoBody[0]?.index;
+            if (!index) return element;
+            if (msg?.responseHead.grp !== undefined) {
+              element.videoElement = {
+                ...element.videoElement,
+                filePath: await this.GetGroupVideoUrl(msg.responseHead.grp.groupUin ?? 0, index),
+              };
+            } else {
+              element.videoElement = {
+                ...element.videoElement,
+                filePath: await this.GetVideoUrl(this.context.napcore.basicInfo.uid, index),
               };
             }
             return element;

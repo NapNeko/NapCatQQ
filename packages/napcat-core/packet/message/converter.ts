@@ -4,6 +4,8 @@ import {
   MessageElement,
   Peer,
   RawMessage,
+} from '@/napcat-core/types/msg';
+import {
   SendArkElement,
   SendFaceElement,
   SendFileElement,
@@ -15,7 +17,7 @@ import {
   SendReplyElement,
   SendTextElement,
   SendVideoElement,
-} from '@/napcat-core/index';
+} from '@/napcat-core/types/element';
 import {
   IPacketMsgElement,
   PacketMsgAtElement,
@@ -158,7 +160,8 @@ export class PacketMsgConverter {
 
   packetMsgToRaw (msg: NapProtoDecodeStructType<typeof Elem>[]): [MessageElement, NapProtoDecodeStructType<typeof Elem> | null][] {
     const converters = [PacketMsgTextElement.parseElement,
-      PacketMsgAtElement.parseElement, PacketMsgReplyElement.parseElement, PacketMsgPicElement.parseElement];
+      PacketMsgAtElement.parseElement, PacketMsgReplyElement.parseElement,
+      PacketMsgVideoElement.parseElement, PacketMsgPicElement.parseElement];
     return msg.map((element) => {
       for (const converter of converters) {
         const result = converter(element);
