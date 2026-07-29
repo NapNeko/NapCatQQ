@@ -14,7 +14,6 @@ import {
   PushMsgBody,
   QBigFaceExtra,
   QSmallFaceExtra,
-  VideoFile,
 } from '@/napcat-core/packet/transformer/proto';
 import {
   ElementType,
@@ -469,7 +468,6 @@ export class PacketMsgVideoElement extends IPacketMsgElement<SendVideoElement> {
   thumbHeight?: number;
   businessType: 11 | 21 = 21;
   msgInfo: NapProtoEncodeStructType<typeof MsgInfo> | null = null;
-  compatVideoFile: NapProtoDecodeStructType<typeof VideoFile> | null = null;
 
   constructor (element: SendVideoElement) {
     super(element);
@@ -489,25 +487,18 @@ export class PacketMsgVideoElement extends IPacketMsgElement<SendVideoElement> {
   }
 
   override get valid (): boolean {
-    return !!this.msgInfo && !!this.compatVideoFile;
+    return !!this.msgInfo;
   }
 
   override buildElement (): NapProtoEncodeStructType<typeof Elem>[] {
     if (!this.msgInfo) return [];
-    const result: NapProtoEncodeStructType<typeof Elem>[] = [];
-    if (this.compatVideoFile) {
-      result.push({
-        videoFile: this.compatVideoFile,
-      });
-    }
-    result.push({
+    return [{
       commonElem: {
         serviceType: 48,
         pbElem: new NapProtoMsg(MsgInfo).encode(this.msgInfo),
         businessType: this.businessType,
       },
-    });
-    return result;
+    }];
   }
 
   static override parseElement = (elem: NapProtoDecodeStructType<typeof Elem>): ParseElementFnR => {

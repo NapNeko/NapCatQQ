@@ -8,7 +8,7 @@ import {
 } from '@/napcat-core/packet/message/element';
 import { PacketMsgConverter } from '@/napcat-core/packet/message/converter';
 import { assertUploadResults } from '@/napcat-core/packet/context/uploadResult';
-import { Elem, MsgInfo, VideoFile } from '@/napcat-core/packet/transformer/proto';
+import { Elem, MsgInfo } from '@/napcat-core/packet/transformer/proto';
 import { NTV2RichMediaReq } from '@/napcat-core/packet/transformer/proto/oidb/common/Ntv2.RichMediaReq';
 import UploadGroupVideo from '@/napcat-core/packet/transformer/highway/UploadGroupVideo';
 import OidbBase from '@/napcat-core/packet/transformer/oidb/oidbBase';
@@ -60,25 +60,6 @@ function createVideoMsgInfo (): NapProtoEncodeStructType<typeof MsgInfo> {
   };
 }
 
-function createCompatVideoFile () {
-  const codec = new NapProtoMsg(VideoFile);
-  return codec.decode(codec.encode({
-    fileUuid: 'video-uuid',
-    fileMd5: Buffer.from('00112233445566778899aabbccddeeff', 'hex'),
-    fileName: 'clip.mp4',
-    fileFormat: NTVideoType.VIDEO_FORMAT_MP4,
-    fileTime: 12,
-    fileSize: 1024,
-    thumbWidth: 640,
-    thumbHeight: 360,
-    thumbFileMd5: Buffer.from('ffeeddccbbaa99887766554433221100', 'hex'),
-    thumbFileSize: 2048,
-    busiType: 0,
-    fromChatType: 1,
-    toChatType: 1,
-  }));
-}
-
 function createSendVideoElement (): SendVideoElement {
   return {
     elementType: ElementType.VIDEO,
@@ -119,18 +100,17 @@ function createCommonVideoElem (businessType: 11 | 21): NapProtoDecodeStructType
 }
 
 describe('packet video forwarding', () => {
-  it('emits compat VideoFile before the common rich-media element', () => {
+  it('emits only the common rich-media element so mobile rendering is not blocked', () => {
     const video = new PacketMsgVideoElement(createSendVideoElement());
     video.msgInfo = createVideoMsgInfo();
-    video.compatVideoFile = createCompatVideoFile();
     video.businessType = 11;
 
     const elems = video.buildElement();
 
-    expect(elems).toHaveLength(2);
-    expect(elems[0]?.videoFile?.fileUuid).toBe('video-uuid');
-    expect(elems[1]?.commonElem?.serviceType).toBe(48);
-    expect(elems[1]?.commonElem?.businessType).toBe(11);
+    expect(elems).toHaveLength(1);
+    expect(elems[0]?.videoFile).toBeUndefined();
+    expect(elems[0]?.commonElem?.serviceType).toBe(48);
+    expect(elems[0]?.commonElem?.businessType).toBe(11);
     expect(video.valid).toBe(true);
   });
 
@@ -139,10 +119,7 @@ describe('packet video forwarding', () => {
       const commonElem = createCommonVideoElem(businessType);
       expect(PacketMsgPicElement.parseElement(commonElem)).toBeUndefined();
 
-      const parsed = new PacketMsgConverter().packetMsgToRaw([
-        decodeElem({ videoFile: createCompatVideoFile() }),
-        commonElem,
-      ]);
+      const parsed = new PacketMsgConverter().packetMsgToRaw([commonElem]);
 
       expect(parsed).toHaveLength(1);
       expect(parsed[0]?.[0].elementType).toBe(ElementType.VIDEO);

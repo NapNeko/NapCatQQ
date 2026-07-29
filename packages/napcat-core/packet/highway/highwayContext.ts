@@ -327,13 +327,6 @@ export class PacketHighwayContext {
     if (!videoIndex || !thumbIndex) {
       throw new Error('[Highway] uploadGroupVideo response is missing video or thumbnail MsgInfo');
     }
-    if (!preRespData.upload.compatQMsg?.length) {
-      throw new Error('[Highway] uploadGroupVideo response is missing compatQMsg');
-    }
-    const compatVideoFile = new NapProtoMsg(proto.VideoFile).decode(preRespData.upload.compatQMsg);
-    if (!compatVideoFile.fileUuid || !compatVideoFile.fileMd5.length || !compatVideoFile.thumbFileMd5.length) {
-      throw new Error('[Highway] uploadGroupVideo compatQMsg is incomplete');
-    }
     const ukey = preRespData.upload.uKey;
     if (ukey && ukey !== '') {
       this.logger.debug(`[Highway] uploadGroupVideoReq get upload video ukey: ${ukey}, need upload!`);
@@ -388,7 +381,6 @@ export class PacketHighwayContext {
       this.logger.debug(`[Highway] uploadGroupVideoReq get upload invalid thumb ukey ${subFile?.uKey ?? ''}, don't need upload!`);
     }
     video.msgInfo = preRespData.upload.msgInfo;
-    video.compatVideoFile = compatVideoFile;
   }
 
   private async uploadC2CVideo (peerUid: string, video: PacketMsgVideoElement): Promise<void> {
@@ -402,13 +394,6 @@ export class PacketHighwayContext {
     const thumbIndex = preRespData.upload.msgInfo.msgInfoBody[1]?.index;
     if (!videoIndex || !thumbIndex) {
       throw new Error('[Highway] uploadC2CVideo response is missing video or thumbnail MsgInfo');
-    }
-    if (!preRespData.upload.compatQMsg?.length) {
-      throw new Error('[Highway] uploadC2CVideo response is missing compatQMsg');
-    }
-    const compatVideoFile = new NapProtoMsg(proto.VideoFile).decode(preRespData.upload.compatQMsg);
-    if (!compatVideoFile.fileUuid || !compatVideoFile.fileMd5.length || !compatVideoFile.thumbFileMd5.length) {
-      throw new Error('[Highway] uploadC2CVideo compatQMsg is incomplete');
     }
     const ukey = preRespData.upload.uKey;
     if (ukey && ukey !== '') {
@@ -464,7 +449,6 @@ export class PacketHighwayContext {
       this.logger.debug(`[Highway] uploadC2CVideoReq get upload invalid thumb ukey ${subFile?.uKey ?? ''}, don't need upload!`);
     }
     video.msgInfo = preRespData.upload.msgInfo;
-    video.compatVideoFile = compatVideoFile;
   }
 
   private async uploadGroupPtt (groupUin: number, ptt: PacketMsgPttElement): Promise<void> {
