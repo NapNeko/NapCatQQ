@@ -20,7 +20,11 @@ import {
   FaceType,
   MessageElement,
   NTMsgAtType,
+  NTVideoType,
   PicType,
+  Peer,
+} from '@/napcat-core/types/msg';
+import {
   SendArkElement,
   SendFaceElement,
   SendFileElement,
@@ -32,8 +36,7 @@ import {
   SendMultiForwardMsgElement,
   SendTextElement,
   SendVideoElement,
-  Peer,
-} from '@/napcat-core/index';
+} from '@/napcat-core/types/element';
 import { ForwardMsgBuilder } from '@/napcat-core/helper/forward-msg-builder';
 import { PacketMsg, PacketSendMsgElement } from '@/napcat-core/packet/message/message';
 
@@ -387,8 +390,10 @@ export class PacketMsgPicElement extends IPacketMsgElement<SendPicElement> {
   }
 
   static override parseElement = (elem: NapProtoDecodeStructType<typeof Elem>): ParseElementFnR => {
-    if (elem?.commonElem?.serviceType === 48 || [10, 20].includes(elem?.commonElem?.businessType ?? 0)) {
-      const extra = new NapProtoMsg(MsgInfo).decode(elem.commonElem!.pbElem!);
+    if (elem?.commonElem?.serviceType === 48 &&
+      [10, 20].includes(elem.commonElem.businessType ?? 0) &&
+      elem.commonElem.pbElem) {
+      const extra = new NapProtoMsg(MsgInfo).decode(elem.commonElem.pbElem);
       const msgInfoBody = extra.msgInfoBody[0];
       const index = msgInfoBody?.index;
       return [{
@@ -406,7 +411,7 @@ export class PacketMsgPicElement extends IPacketMsgElement<SendPicElement> {
           summary: '[图片]',
           thumbPath: new Map(),
         },
-        elementType: ElementType.UNKNOWN,
+        elementType: ElementType.PIC,
         elementId: '',
       }, elem];
     }
@@ -446,8 +451,13 @@ export class PacketMsgPicElement extends IPacketMsgElement<SendPicElement> {
 }
 
 export class PacketMsgVideoElement extends IPacketMsgElement<SendVideoElement> {
+  fileName: string;
   fileSize?: string;
   filePath?: string;
+  fileTime: number;
+  fileFormat: NTVideoType;
+  fileWidth?: number;
+  fileHeight?: number;
   thumbSize?: number;
   thumbPath?: string;
   fileMd5?: string;
@@ -456,12 +466,18 @@ export class PacketMsgVideoElement extends IPacketMsgElement<SendVideoElement> {
   thumbSha1?: string;
   thumbWidth?: number;
   thumbHeight?: number;
+  businessType: 11 | 21 = 21;
   msgInfo: NapProtoEncodeStructType<typeof MsgInfo> | null = null;
 
   constructor (element: SendVideoElement) {
     super(element);
+    this.fileName = element.videoElement.fileName;
     this.fileSize = element.videoElement.fileSize;
     this.filePath = element.videoElement.filePath;
+    this.fileTime = Math.max(0, Math.round(element.videoElement.fileTime ?? 0));
+    this.fileFormat = element.videoElement.fileFormat ?? NTVideoType.VIDEO_FORMAT_MP4;
+    this.fileWidth = element.videoElement.fileWidth;
+    this.fileHeight = element.videoElement.fileHeight;
     this.thumbSize = element.videoElement.thumbSize;
     this.thumbPath = element.videoElement.thumbPath?.get(0) as string | undefined;
     this.fileMd5 = element.videoElement.videoMd5;
@@ -480,10 +496,44 @@ export class PacketMsgVideoElement extends IPacketMsgElement<SendVideoElement> {
       commonElem: {
         serviceType: 48,
         pbElem: new NapProtoMsg(MsgInfo).encode(this.msgInfo),
-        businessType: 21,
+        businessType: this.businessType,
       },
     }];
   }
+
+  static override parseElement = (elem: NapProtoDecodeStructType<typeof Elem>): ParseElementFnR => {
+    if (elem?.commonElem?.serviceType !== 48 ||
+      ![11, 21].includes(elem.commonElem.businessType ?? 0) ||
+      !elem.commonElem.pbElem) {
+      return undefined;
+    }
+    const extra = new NapProtoMsg(MsgInfo).decode(elem.commonElem.pbElem);
+    const videoIndex = extra.msgInfoBody[0]?.index;
+    const thumbIndex = extra.msgInfoBody[1]?.index;
+    if (!videoIndex) return undefined;
+    return [{
+      videoElement: {
+        filePath: '',
+        fileName: videoIndex.info.fileName || videoIndex.info.fileHash,
+        videoMd5: videoIndex.info.fileHash,
+        thumbMd5: thumbIndex?.info.fileHash,
+        fileTime: videoIndex.info.time,
+        fileFormat: (videoIndex.info.type.videoFormat || NTVideoType.VIDEO_FORMAT_MP4) as NTVideoType,
+        fileSize: String(videoIndex.info.fileSize),
+        fileWidth: videoIndex.info.width,
+        fileHeight: videoIndex.info.height,
+        thumbWidth: thumbIndex?.info.width,
+        thumbHeight: thumbIndex?.info.height,
+        thumbSize: thumbIndex?.info.fileSize,
+        thumbPath: new Map(),
+        fileUuid: videoIndex.fileUuid,
+        busiType: 0,
+        subBusiType: 0,
+      },
+      elementType: ElementType.VIDEO,
+      elementId: '',
+    }, elem];
+  };
 
   override toPreview (): string {
     return '[视频]';
