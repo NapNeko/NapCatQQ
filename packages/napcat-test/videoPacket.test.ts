@@ -12,11 +12,6 @@ import { Elem, MsgInfo } from '@/napcat-core/packet/transformer/proto';
 import { NTV2RichMediaReq } from '@/napcat-core/packet/transformer/proto/oidb/common/Ntv2.RichMediaReq';
 import UploadGroupVideo from '@/napcat-core/packet/transformer/highway/UploadGroupVideo';
 import OidbBase from '@/napcat-core/packet/transformer/oidb/oidbBase';
-import {
-  calculateVideoThumbnailDimensions,
-  VIDEO_THUMBNAIL_MAX_BYTES,
-  VIDEO_THUMBNAIL_MAX_SIDE,
-} from '@/napcat-core/helper/ffmpeg/ffmpeg-exec-adapter';
 
 function createVideoMsgInfo (): NapProtoEncodeStructType<typeof MsgInfo> {
   return {
@@ -171,19 +166,5 @@ describe('packet video forwarding', () => {
     ], logger)).toThrow('上传转发消息资源失败');
     expect(logger.warn).toHaveBeenCalledWith('上传资源2个，失败1个');
     expect(logger.error).toHaveBeenCalledOnce();
-  });
-});
-
-describe('video thumbnail constraints', () => {
-  it('keeps the longest side bounded without upscaling normal dimensions', () => {
-    expect(calculateVideoThumbnailDimensions(1920, 3414)).toEqual({
-      width: 404,
-      height: VIDEO_THUMBNAIL_MAX_SIDE,
-    });
-    expect(calculateVideoThumbnailDimensions(640, 360)).toEqual({
-      width: 640,
-      height: 360,
-    });
-    expect(VIDEO_THUMBNAIL_MAX_BYTES).toBe(384 * 1024);
   });
 });

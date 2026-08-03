@@ -129,7 +129,7 @@ export class OneBotFileApi {
     }
     const thumbDir = path.replace(`${pathLib.sep}Ori${pathLib.sep}`, `${pathLib.sep}Thumb${pathLib.sep}`);
     fs.mkdirSync(pathLib.dirname(thumbDir), { recursive: true });
-    const thumbPath = pathLib.join(pathLib.dirname(thumbDir), `${md5}_0.png`);
+    const thumbPath = pathLib.join(pathLib.dirname(thumbDir), `${md5}_0.jpg`);
     try {
       videoInfo = await FFmpegService.getVideoInfo(filePath, thumbPath);
       if (!fs.existsSync(thumbPath)) {

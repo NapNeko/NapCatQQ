@@ -22,8 +22,10 @@ import { FFmpegService } from '@/napcat-core/helper/ffmpeg/ffmpeg';
 import { defaultVideoThumbB64 } from '@/napcat-core/helper/ffmpeg/video';
 import { calculateFileMD5 } from 'napcat-common/src/file';
 import { randomUUID } from 'node:crypto';
+import { imageSizeFallBack } from 'napcat-image-size/src/index';
 
 export const BlockSize = 1024 * 1024;
+const VIDEO_THUMBNAIL_MAX_BYTES = 1024 * 1024;
 
 interface HighwayServerAddr {
   ip: string;
@@ -122,13 +124,23 @@ export class PacketHighwayContext {
           thumbExists = false;
         }
       }
-      if (!video.thumbPath || !thumbExists) {
-        cleanupThumbPaths.push(await this.ensureVideoThumb(video));
+
+      let shouldGenerateThumb = !video.thumbPath || !thumbExists;
+      if (!shouldGenerateThumb) {
+        try {
+          await this.updateVideoThumbInfo(video);
+          if ((video.thumbSize ?? 0) > VIDEO_THUMBNAIL_MAX_BYTES) {
+            this.logger.warn(`[Highway] Video thumbnail is too large: ${video.thumbSize} bytes, regenerating`);
+            shouldGenerateThumb = true;
+          }
+        } catch (e) {
+          this.logger.warn(`[Highway] Failed to inspect video thumbnail, regenerating. Reason: ${e instanceof Error ? e.message : e}`);
+          shouldGenerateThumb = true;
+        }
       }
-      const sourceThumbPath = video.thumbPath!;
-      const normalizedThumbPath = await this.normalizeVideoThumb(video);
-      if (normalizedThumbPath !== sourceThumbPath) {
-        cleanupThumbPaths.push(normalizedThumbPath);
+
+      if (shouldGenerateThumb) {
+        cleanupThumbPaths.push(await this.ensureVideoThumb(video));
       }
       video.businessType = peer.chatType === ChatType.KCHATTYPEGROUP ? 21 : 11;
 
@@ -154,7 +166,7 @@ export class PacketHighwayContext {
   }
 
   /**
-   * 确保视频缩略图存在，如果不存在则自动生成
+   * 使用当前 FFmpeg 适配器生成符合 QQ 大小限制的视频缩略图
    * @returns 生成的临时缩略图路径，用于后续清理
    */
   private async ensureVideoThumb (video: PacketMsgVideoElement): Promise<string> {
@@ -165,9 +177,10 @@ export class PacketHighwayContext {
     // 生成缩略图路径
     const videoDir = path.dirname(video.filePath);
     const videoBasename = path.basename(video.filePath, path.extname(video.filePath));
-    const thumbPath = path.join(videoDir, `${videoBasename}_thumb_source_${randomUUID()}.bmp`);
+    const thumbPath = path.join(videoDir, `${videoBasename}_thumb_${randomUUID()}.jpg`);
 
     this.logger.debug(`[Highway] Video thumb missing, generating at: ${thumbPath}`);
+    video.thumbPath = thumbPath;
 
     try {
       // 尝试使用 FFmpeg 提取视频缩略图
@@ -178,46 +191,34 @@ export class PacketHighwayContext {
       } catch {
         throw new Error('FFmpeg failed to generate thumbnail');
       }
+      await this.updateVideoThumbInfo(video);
+      if ((video.thumbSize ?? 0) > VIDEO_THUMBNAIL_MAX_BYTES) {
+        throw new Error(`generated thumbnail is too large: ${video.thumbSize} bytes`);
+      }
     } catch (e) {
       // FFmpeg 失败时（包括未初始化的情况）使用默认缩略图
       this.logger.warn(`[Highway] Failed to extract thumbnail, using default. Reason: ${e instanceof Error ? e.message : e}`);
       await fs.promises.writeFile(thumbPath, Buffer.from(defaultVideoThumbB64, 'base64'));
+      await this.updateVideoThumbInfo(video);
     }
 
-    video.thumbPath = thumbPath;
     return thumbPath;
   }
 
-  private async normalizeVideoThumb (video: PacketMsgVideoElement): Promise<string> {
+  private async updateVideoThumbInfo (video: PacketMsgVideoElement): Promise<void> {
     if (!video.thumbPath) {
-      throw new Error('video.thumbPath is empty, cannot normalize thumbnail');
+      throw new Error('video.thumbPath is empty, cannot inspect thumbnail');
     }
-    const sourceThumbPath = video.thumbPath;
-    const thumbDir = video.filePath ? path.dirname(video.filePath) : path.dirname(sourceThumbPath);
-    const videoBasename = video.filePath
-      ? path.basename(video.filePath, path.extname(video.filePath))
-      : path.basename(sourceThumbPath, path.extname(sourceThumbPath));
-    const normalizedThumbPath = path.join(thumbDir, `${videoBasename}_thumb_${randomUUID()}.jpg`);
-    let width = 240;
-    let height = 383;
-    let size = 0;
-    try {
-      const normalized = await FFmpegService.normalizeVideoThumbnail(sourceThumbPath, normalizedThumbPath);
-      width = normalized.width;
-      height = normalized.height;
-      size = normalized.size;
-    } catch (e) {
-      this.logger.warn(`[Highway] Failed to normalize video thumbnail, using default. Reason: ${e instanceof Error ? e.message : e}`);
-      await fs.promises.writeFile(normalizedThumbPath, Buffer.from(defaultVideoThumbB64, 'base64'));
-      size = (await fs.promises.stat(normalizedThumbPath)).size;
-    }
-    video.thumbPath = normalizedThumbPath;
-    video.thumbSize = size;
-    video.thumbMd5 = await calculateFileMD5(normalizedThumbPath);
-    video.thumbWidth = width;
-    video.thumbHeight = height;
-    this.logger.debug(`[Highway] Video thumbnail normalized: ${width}x${height}, ${size} bytes`);
-    return normalizedThumbPath;
+    const [thumbStat, thumbMd5, dimensions] = await Promise.all([
+      fs.promises.stat(video.thumbPath),
+      calculateFileMD5(video.thumbPath),
+      imageSizeFallBack(video.thumbPath),
+    ]);
+    video.thumbSize = thumbStat.size;
+    video.thumbMd5 = thumbMd5;
+    video.thumbWidth = dimensions.width;
+    video.thumbHeight = dimensions.height;
+    this.logger.debug(`[Highway] Video thumbnail ready: ${dimensions.width}x${dimensions.height}, ${thumbStat.size} bytes`);
   }
 
   async uploadPtt (peer: Peer, ptt: PacketMsgPttElement): Promise<void> {
