@@ -21,13 +21,13 @@ export interface VideoInfo {
   /** Video duration in seconds */
   duration: number;
 
-  /** Container format name (e.g., "mp4", "mkv", "avi") */
+  /** Generated thumbnail image format */
   format: string;
 
   /** Video codec name (e.g., "h264", "hevc", "vp9") */
   videoCodec: string;
 
-  /** First frame thumbnail as BMP image buffer */
+  /** First frame thumbnail as JPEG image buffer */
   image: Buffer;
 }
 

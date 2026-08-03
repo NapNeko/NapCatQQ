@@ -118,6 +118,8 @@ export interface VideoElement {
   thumbSize?: number; // byte
   fileFormat?: NTVideoType;  // 2表示mp4 参考下面条目
   fileSize?: string;  // byte
+  fileWidth?: number;
+  fileHeight?: number;
   thumbWidth?: number;
   thumbHeight?: number;
   busiType?: 0; //

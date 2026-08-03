@@ -21,8 +21,11 @@ import { PacketClientContext } from '@/napcat-core/packet/context/clientContext'
 import { FFmpegService } from '@/napcat-core/helper/ffmpeg/ffmpeg';
 import { defaultVideoThumbB64 } from '@/napcat-core/helper/ffmpeg/video';
 import { calculateFileMD5 } from 'napcat-common/src/file';
+import { randomUUID } from 'node:crypto';
+import { imageSizeFallBack } from 'napcat-image-size/src/index';
 
 export const BlockSize = 1024 * 1024;
+const VIDEO_THUMBNAIL_MAX_BYTES = 1024 * 1024;
 
 interface HighwayServerAddr {
   ip: string;
@@ -110,22 +113,37 @@ export class PacketHighwayContext {
       throw new Error(`[Highway] 视频文件过大: ${(+(video.fileSize ?? 0) / (1024 * 1024)).toFixed(2)} MB > 100 MB，请使用文件上传！`);
     }
 
-    // 如果缺少视频缩略图，自动生成一个
-    let tempThumbPath: string | null = null;
-    let thumbExists = false;
-    if (video.thumbPath) {
-      try {
-        await fs.promises.access(video.thumbPath, fs.constants.F_OK);
-        thumbExists = true;
-      } catch {
-        thumbExists = false;
-      }
-    }
-    if (!video.thumbPath || !thumbExists) {
-      tempThumbPath = await this.ensureVideoThumb(video);
-    }
-
+    const cleanupThumbPaths: string[] = [];
     try {
+      let thumbExists = false;
+      if (video.thumbPath) {
+        try {
+          await fs.promises.access(video.thumbPath, fs.constants.F_OK);
+          thumbExists = true;
+        } catch {
+          thumbExists = false;
+        }
+      }
+
+      let shouldGenerateThumb = !video.thumbPath || !thumbExists;
+      if (!shouldGenerateThumb) {
+        try {
+          await this.updateVideoThumbInfo(video);
+          if ((video.thumbSize ?? 0) > VIDEO_THUMBNAIL_MAX_BYTES) {
+            this.logger.warn(`[Highway] Video thumbnail is too large: ${video.thumbSize} bytes, regenerating`);
+            shouldGenerateThumb = true;
+          }
+        } catch (e) {
+          this.logger.warn(`[Highway] Failed to inspect video thumbnail, regenerating. Reason: ${e instanceof Error ? e.message : e}`);
+          shouldGenerateThumb = true;
+        }
+      }
+
+      if (shouldGenerateThumb) {
+        cleanupThumbPaths.push(await this.ensureVideoThumb(video));
+      }
+      video.businessType = peer.chatType === ChatType.KCHATTYPEGROUP ? 21 : 11;
+
       if (peer.chatType === ChatType.KCHATTYPEGROUP) {
         await this.uploadGroupVideo(+peer.peerUid, video);
       } else if (peer.chatType === ChatType.KCHATTYPEC2C) {
@@ -134,23 +152,21 @@ export class PacketHighwayContext {
         throw new Error(`[Highway] unsupported chatType: ${peer.chatType}`);
       }
     } finally {
-      // 清理临时生成的缩略图文件
-      if (tempThumbPath) {
-        const thumbToClean = tempThumbPath;
-        fs.promises.unlink(thumbToClean)
-          .then(() => this.logger.debug(`[Highway] Cleaned up temp thumbnail: ${thumbToClean}`))
-          .catch((e) => {
-            // 文件不存在时忽略错误
-            if ((e as NodeJS.ErrnoException).code !== 'ENOENT') {
-              this.logger.warn(`[Highway] Failed to clean up temp thumbnail: ${thumbToClean}, reason: ${e instanceof Error ? e.message : e}`);
-            }
-          });
-      }
+      await Promise.allSettled(cleanupThumbPaths.map(async (thumbToClean) => {
+        try {
+          await fs.promises.unlink(thumbToClean);
+          this.logger.debug(`[Highway] Cleaned up temp thumbnail: ${thumbToClean}`);
+        } catch (e) {
+          if ((e as NodeJS.ErrnoException).code !== 'ENOENT') {
+            this.logger.warn(`[Highway] Failed to clean up temp thumbnail: ${thumbToClean}, reason: ${e instanceof Error ? e.message : e}`);
+          }
+        }
+      }));
     }
   }
 
   /**
-   * 确保视频缩略图存在，如果不存在则自动生成
+   * 使用当前 FFmpeg 适配器生成符合 QQ 大小限制的视频缩略图
    * @returns 生成的临时缩略图路径，用于后续清理
    */
   private async ensureVideoThumb (video: PacketMsgVideoElement): Promise<string> {
@@ -161,9 +177,10 @@ export class PacketHighwayContext {
     // 生成缩略图路径
     const videoDir = path.dirname(video.filePath);
     const videoBasename = path.basename(video.filePath, path.extname(video.filePath));
-    const thumbPath = path.join(videoDir, `${videoBasename}_thumb.png`);
+    const thumbPath = path.join(videoDir, `${videoBasename}_thumb_${randomUUID()}.jpg`);
 
     this.logger.debug(`[Highway] Video thumb missing, generating at: ${thumbPath}`);
+    video.thumbPath = thumbPath;
 
     try {
       // 尝试使用 FFmpeg 提取视频缩略图
@@ -174,24 +191,34 @@ export class PacketHighwayContext {
       } catch {
         throw new Error('FFmpeg failed to generate thumbnail');
       }
+      await this.updateVideoThumbInfo(video);
+      if ((video.thumbSize ?? 0) > VIDEO_THUMBNAIL_MAX_BYTES) {
+        throw new Error(`generated thumbnail is too large: ${video.thumbSize} bytes`);
+      }
     } catch (e) {
       // FFmpeg 失败时（包括未初始化的情况）使用默认缩略图
       this.logger.warn(`[Highway] Failed to extract thumbnail, using default. Reason: ${e instanceof Error ? e.message : e}`);
       await fs.promises.writeFile(thumbPath, Buffer.from(defaultVideoThumbB64, 'base64'));
+      await this.updateVideoThumbInfo(video);
     }
 
-    // 更新视频元素的缩略图信息
-    video.thumbPath = thumbPath;
-    const thumbStat = await fs.promises.stat(thumbPath);
-    video.thumbSize = thumbStat.size;
-    video.thumbMd5 = await calculateFileMD5(thumbPath);
-    // 默认缩略图尺寸（与 defaultVideoThumbB64 匹配的尺寸）
-    if (!video.thumbWidth) video.thumbWidth = 240;
-    if (!video.thumbHeight) video.thumbHeight = 383;
-
-    this.logger.debug(`[Highway] Video thumb info set: path=${thumbPath}, size=${video.thumbSize}, md5=${video.thumbMd5}`);
-
     return thumbPath;
+  }
+
+  private async updateVideoThumbInfo (video: PacketMsgVideoElement): Promise<void> {
+    if (!video.thumbPath) {
+      throw new Error('video.thumbPath is empty, cannot inspect thumbnail');
+    }
+    const [thumbStat, thumbMd5, dimensions] = await Promise.all([
+      fs.promises.stat(video.thumbPath),
+      calculateFileMD5(video.thumbPath),
+      imageSizeFallBack(video.thumbPath),
+    ]);
+    video.thumbSize = thumbStat.size;
+    video.thumbMd5 = thumbMd5;
+    video.thumbWidth = dimensions.width;
+    video.thumbHeight = dimensions.height;
+    this.logger.debug(`[Highway] Video thumbnail ready: ${dimensions.width}x${dimensions.height}, ${thumbStat.size} bytes`);
   }
 
   async uploadPtt (peer: Peer, ptt: PacketMsgPttElement): Promise<void> {
@@ -296,13 +323,17 @@ export class PacketHighwayContext {
     const req = trans.UploadGroupVideo.build(groupUin, video);
     const resp = await this.client.sendOidbPacket(req, true);
     const preRespData = trans.UploadGroupVideo.parse(resp);
+    const videoIndex = preRespData.upload.msgInfo.msgInfoBody[0]?.index;
+    const thumbIndex = preRespData.upload.msgInfo.msgInfoBody[1]?.index;
+    if (!videoIndex || !thumbIndex) {
+      throw new Error('[Highway] uploadGroupVideo response is missing video or thumbnail MsgInfo');
+    }
     const ukey = preRespData.upload.uKey;
     if (ukey && ukey !== '') {
       this.logger.debug(`[Highway] uploadGroupVideoReq get upload video ukey: ${ukey}, need upload!`);
-      const index = preRespData.upload.msgInfo.msgInfoBody[0]!.index;
-      const md5 = Buffer.from(index.info.fileHash, 'hex');
+      const md5 = Buffer.from(videoIndex.info.fileHash, 'hex');
       const extend = new NapProtoMsg(proto.NTV2RichMediaHighwayExt).encode({
-        fileUuid: index.fileUuid,
+        fileUuid: videoIndex.fileUuid,
         uKey: ukey,
         network: {
           ipv4S: oidbIpv4s2HighwayIpv4s(preRespData.upload.ipv4S),
@@ -324,16 +355,15 @@ export class PacketHighwayContext {
       this.logger.debug(`[Highway] uploadGroupVideoReq get upload invalid ukey ${ukey}, don't need upload!`);
     }
     const subFile = preRespData.upload.subFileInfos[0];
-    if (subFile!.uKey && subFile!.uKey !== '') {
-      this.logger.debug(`[Highway] uploadGroupVideoReq get upload video thumb ukey: ${subFile!.uKey}, need upload!`);
-      const index = preRespData.upload.msgInfo.msgInfoBody[1]!.index;
-      const md5 = Buffer.from(index.info.fileHash, 'hex');
-      const sha1 = Buffer.from(index.info.fileSha1, 'hex');
+    if (subFile?.uKey && subFile.uKey !== '') {
+      this.logger.debug(`[Highway] uploadGroupVideoReq get upload video thumb ukey: ${subFile.uKey}, need upload!`);
+      const md5 = Buffer.from(thumbIndex.info.fileHash, 'hex');
+      const sha1 = Buffer.from(thumbIndex.info.fileSha1, 'hex');
       const extend = new NapProtoMsg(proto.NTV2RichMediaHighwayExt).encode({
-        fileUuid: index.fileUuid,
-        uKey: subFile!.uKey,
+        fileUuid: thumbIndex.fileUuid,
+        uKey: subFile.uKey,
         network: {
-          ipv4S: oidbIpv4s2HighwayIpv4s(subFile!.ipv4S),
+          ipv4S: oidbIpv4s2HighwayIpv4s(subFile.ipv4S),
         },
         msgInfoBody: preRespData.upload.msgInfo.msgInfoBody,
         blockSize: BlockSize,
@@ -349,7 +379,7 @@ export class PacketHighwayContext {
         extend
       );
     } else {
-      this.logger.debug(`[Highway] uploadGroupVideoReq get upload invalid thumb ukey ${subFile!.uKey}, don't need upload!`);
+      this.logger.debug(`[Highway] uploadGroupVideoReq get upload invalid thumb ukey ${subFile?.uKey ?? ''}, don't need upload!`);
     }
     video.msgInfo = preRespData.upload.msgInfo;
   }
@@ -361,13 +391,17 @@ export class PacketHighwayContext {
     const req = trans.UploadPrivateVideo.build(peerUid, video);
     const resp = await this.client.sendOidbPacket(req, true);
     const preRespData = trans.UploadPrivateVideo.parse(resp);
+    const videoIndex = preRespData.upload.msgInfo.msgInfoBody[0]?.index;
+    const thumbIndex = preRespData.upload.msgInfo.msgInfoBody[1]?.index;
+    if (!videoIndex || !thumbIndex) {
+      throw new Error('[Highway] uploadC2CVideo response is missing video or thumbnail MsgInfo');
+    }
     const ukey = preRespData.upload.uKey;
     if (ukey && ukey !== '') {
       this.logger.debug(`[Highway] uploadC2CVideoReq get upload video ukey: ${ukey}, need upload!`);
-      const index = preRespData.upload.msgInfo.msgInfoBody[0]!.index;
-      const md5 = Buffer.from(index.info.fileHash, 'hex');
+      const md5 = Buffer.from(videoIndex.info.fileHash, 'hex');
       const extend = new NapProtoMsg(proto.NTV2RichMediaHighwayExt).encode({
-        fileUuid: index.fileUuid,
+        fileUuid: videoIndex.fileUuid,
         uKey: ukey,
         network: {
           ipv4S: oidbIpv4s2HighwayIpv4s(preRespData.upload.ipv4S),
@@ -389,16 +423,15 @@ export class PacketHighwayContext {
       this.logger.debug(`[Highway] uploadC2CVideoReq get upload invalid ukey ${ukey}, don't need upload!`);
     }
     const subFile = preRespData.upload.subFileInfos[0];
-    if (subFile!.uKey && subFile!.uKey !== '') {
-      this.logger.debug(`[Highway] uploadC2CVideoReq get upload video thumb ukey: ${subFile!.uKey}, need upload!`);
-      const index = preRespData.upload.msgInfo.msgInfoBody[1]!.index;
-      const md5 = Buffer.from(index.info.fileHash, 'hex');
-      const sha1 = Buffer.from(index.info.fileSha1, 'hex');
+    if (subFile?.uKey && subFile.uKey !== '') {
+      this.logger.debug(`[Highway] uploadC2CVideoReq get upload video thumb ukey: ${subFile.uKey}, need upload!`);
+      const md5 = Buffer.from(thumbIndex.info.fileHash, 'hex');
+      const sha1 = Buffer.from(thumbIndex.info.fileSha1, 'hex');
       const extend = new NapProtoMsg(proto.NTV2RichMediaHighwayExt).encode({
-        fileUuid: index.fileUuid,
-        uKey: subFile!.uKey,
+        fileUuid: thumbIndex.fileUuid,
+        uKey: subFile.uKey,
         network: {
-          ipv4S: oidbIpv4s2HighwayIpv4s(subFile!.ipv4S),
+          ipv4S: oidbIpv4s2HighwayIpv4s(subFile.ipv4S),
         },
         msgInfoBody: preRespData.upload.msgInfo.msgInfoBody,
         blockSize: BlockSize,
@@ -414,7 +447,7 @@ export class PacketHighwayContext {
         extend
       );
     } else {
-      this.logger.debug(`[Highway] uploadC2CVideoReq get upload invalid thumb ukey ${subFile!.uKey}, don't need upload!`);
+      this.logger.debug(`[Highway] uploadC2CVideoReq get upload invalid thumb ukey ${subFile?.uKey ?? ''}, don't need upload!`);
     }
     video.msgInfo = preRespData.upload.msgInfo;
   }

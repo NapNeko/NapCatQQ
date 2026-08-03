@@ -2,7 +2,7 @@ import { NapCatOneBot11Adapter } from '@/napcat-onebot/index';
 import { encodeSilk } from '@/napcat-core/helper/audio';
 import { FFmpegService } from '@/napcat-core/helper/ffmpeg/ffmpeg';
 import { calculateFileMD5 } from 'napcat-common/src/file';
-import { ElementType, NapCatCore, PicElement, PicSubType, SendFileElement, SendPicElement, SendPttElement, SendVideoElement } from 'napcat-core';
+import { ElementType, NapCatCore, NTVideoType, PicElement, PicSubType, SendFileElement, SendPicElement, SendPttElement, SendVideoElement } from 'napcat-core';
 import { getFileTypeForSendType } from 'napcat-core/helper/msg';
 import { imageSizeFallBack } from 'napcat-image-size';
 import { SendMessageContext } from './msg';
@@ -12,6 +12,21 @@ import fsPromises from 'fs/promises';
 import fs from 'fs';
 import { randomUUID } from 'crypto';
 import { defaultVideoThumbB64 } from '@/napcat-core/helper/ffmpeg/video';
+
+const videoFormatByExtension: Partial<Record<string, NTVideoType>> = {
+  afs: NTVideoType.VIDEO_FORMAT_AFS,
+  avi: NTVideoType.VIDEO_FORMAT_AVI,
+  mkv: NTVideoType.VIDEO_FORMAT_MKV,
+  mod: NTVideoType.VIDEO_FORMAT_MOD,
+  mov: NTVideoType.VIDEO_FORMAT_MOV,
+  mp4: NTVideoType.VIDEO_FORMAT_MP4,
+  mts: NTVideoType.VIDEO_FORMAT_MTS,
+  rm: NTVideoType.VIDEO_FORMAT_RM,
+  rmvb: NTVideoType.VIDEO_FORMAT_RMVB,
+  ts: NTVideoType.VIDEO_FORMAT_TS,
+  wmv: NTVideoType.VIDEO_FORMAT_WMV,
+};
+
 export class OneBotFileApi {
   obContext: NapCatOneBot11Adapter;
   core: NapCatCore;
@@ -114,7 +129,7 @@ export class OneBotFileApi {
     }
     const thumbDir = path.replace(`${pathLib.sep}Ori${pathLib.sep}`, `${pathLib.sep}Thumb${pathLib.sep}`);
     fs.mkdirSync(pathLib.dirname(thumbDir), { recursive: true });
-    const thumbPath = pathLib.join(pathLib.dirname(thumbDir), `${md5}_0.png`);
+    const thumbPath = pathLib.join(pathLib.dirname(thumbDir), `${md5}_0.jpg`);
     try {
       videoInfo = await FFmpegService.getVideoInfo(filePath, thumbPath);
       if (!fs.existsSync(thumbPath)) {
@@ -135,7 +150,6 @@ export class OneBotFileApi {
     context.deleteAfterSentFiles.push(thumbPath);
     const thumbSize = (await fsPromises.stat(thumbPath)).size;
     const thumbMd5 = await calculateFileMD5(thumbPath);
-    context.deleteAfterSentFiles.push(thumbPath);
 
     const uploadName = (fileName || _fileName).toLocaleLowerCase().endsWith(`.${fileExt.toLocaleLowerCase()}`) ? (fileName || _fileName) : `${fileName || _fileName}.${fileExt}`;
     return {
@@ -146,7 +160,10 @@ export class OneBotFileApi {
         filePath: path,
         videoMd5: md5,
         thumbMd5,
-        fileTime: videoInfo.time,
+        fileTime: Math.max(0, Math.round(videoInfo.time)),
+        fileFormat: videoFormatByExtension[fileExt.toLowerCase()] ?? NTVideoType.VIDEO_FORMAT_MP4,
+        fileWidth: videoInfo.width,
+        fileHeight: videoInfo.height,
         thumbPath: new Map([[0, thumbPath]]),
         thumbSize,
         thumbWidth: videoInfo.width,
