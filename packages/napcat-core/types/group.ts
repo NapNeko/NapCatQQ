@@ -74,6 +74,20 @@ export interface EXTInfo {
   groupSquareSwitch: number;
 }
 
+export type GroupMemberInvitePolicy =
+  | 'disabled'
+  | 'require_approval'
+  | 'no_approval'
+  | 'no_approval_under_100';
+
+export interface GroupManagementSettings {
+  memberInvite?: GroupMemberInvitePolicy;
+  allowMemberUploadAlbum?: boolean;
+  allowMemberTemporarySession?: boolean;
+  allowMemberCreateGroup?: boolean;
+  newMembersSeeRecentHistory?: boolean;
+}
+
 export interface GroupGuildIDS {
   guildIds: any[];
 }

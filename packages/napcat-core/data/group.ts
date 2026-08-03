@@ -1,4 +1,142 @@
-import { GroupDetailInfoV2Param, GroupExtInfo, GroupExtFilter } from '../types';
+import { GroupDetailInfoV2Param, GroupExtInfo, GroupExtFilter, GroupManagementSettings } from '../types';
+
+const MEMBER_INVITE_PRIVILEGE_MASK = 0x06100000;
+const MEMBER_UPLOAD_ALBUM_PRIVILEGE_MASK = 0x1;
+const MEMBER_CREATE_GROUP_FLAG = 0x8000;
+const MEMBER_TEMPORARY_SESSION_FLAG = 0x10000;
+const NEW_MEMBER_RECENT_HISTORY_FLAG = 0x4;
+
+function mergeMaskedFlag (currentFlag: number, requestedFlag: number, maskValue: number): number {
+  const mask = BigInt(maskValue);
+  return Number((BigInt(currentFlag) & ~mask) | (BigInt(requestedFlag) & mask));
+}
+
+export function applyGroupManagementSettings (
+  param: GroupDetailInfoV2Param,
+  settings: GroupManagementSettings
+): boolean {
+  let changed = false;
+
+  if (settings.memberInvite !== undefined) {
+    const privilegeByPolicy = {
+      disabled: 0x04000000,
+      require_approval: 0,
+      no_approval: 0x00100000,
+      no_approval_under_100: 0x02000000,
+    } satisfies Record<NonNullable<GroupManagementSettings['memberInvite']>, number>;
+
+    param.filter.allowMemberInvite = 1;
+    param.modifyInfo.allowMemberInvite = settings.memberInvite === 'disabled' ? 0 : 1;
+    param.filter.appPrivilegeFlag = 1;
+    param.filter.appPrivilegeMask = 1;
+    param.modifyInfo.appPrivilegeMask |= MEMBER_INVITE_PRIVILEGE_MASK;
+    param.modifyInfo.appPrivilegeFlag |= privilegeByPolicy[settings.memberInvite];
+    changed = true;
+  }
+
+  if (settings.allowMemberUploadAlbum !== undefined) {
+    param.filter.appPrivilegeFlag = 1;
+    param.filter.appPrivilegeMask = 1;
+    param.modifyInfo.appPrivilegeMask |= MEMBER_UPLOAD_ALBUM_PRIVILEGE_MASK;
+    if (!settings.allowMemberUploadAlbum) param.modifyInfo.appPrivilegeFlag |= MEMBER_UPLOAD_ALBUM_PRIVILEGE_MASK;
+    changed = true;
+  }
+
+  if (settings.allowMemberTemporarySession !== undefined) {
+    param.filter.appPrivilegeFlag = 1;
+    param.filter.appPrivilegeMask = 1;
+    param.modifyInfo.appPrivilegeMask |= MEMBER_TEMPORARY_SESSION_FLAG;
+    if (!settings.allowMemberTemporarySession) param.modifyInfo.appPrivilegeFlag |= MEMBER_TEMPORARY_SESSION_FLAG;
+    changed = true;
+  }
+
+  if (settings.allowMemberCreateGroup !== undefined) {
+    param.filter.appPrivilegeFlag = 1;
+    param.filter.appPrivilegeMask = 1;
+    param.modifyInfo.appPrivilegeMask |= MEMBER_CREATE_GROUP_FLAG;
+    if (!settings.allowMemberCreateGroup) param.modifyInfo.appPrivilegeFlag |= MEMBER_CREATE_GROUP_FLAG;
+    changed = true;
+  }
+
+  if (settings.newMembersSeeRecentHistory !== undefined) {
+    param.filter.groupFlagExt4 = 1;
+    param.filter.groupFlagExt4Mask = 1;
+    param.modifyInfo.groupFlagExt4Mask |= NEW_MEMBER_RECENT_HISTORY_FLAG;
+    if (settings.newMembersSeeRecentHistory) param.modifyInfo.groupFlagExt4 |= NEW_MEMBER_RECENT_HISTORY_FLAG;
+    changed = true;
+  }
+
+  return changed;
+}
+
+export function createGroupManagementRequests (
+  groupCode: string,
+  settings: GroupManagementSettings,
+  initialAppPrivilegeFlag = 0,
+  initialGroupFlagExt4 = 0
+) {
+  const requests: Array<{ setting: string, param: GroupDetailInfoV2Param, operationType: number; }> = [];
+  const requestSettings: Array<{
+    setting: string,
+    value: GroupManagementSettings,
+    operationType: number;
+  }> = [
+    { setting: 'member_invite', value: { memberInvite: settings.memberInvite }, operationType: 0 },
+    {
+      setting: 'new_members_see_recent_history',
+      value: { newMembersSeeRecentHistory: settings.newMembersSeeRecentHistory },
+      operationType: 0,
+    },
+    {
+      setting: 'allow_member_upload_album',
+      value: { allowMemberUploadAlbum: settings.allowMemberUploadAlbum },
+      operationType: 8,
+    },
+    {
+      setting: 'allow_member_temporary_session',
+      value: { allowMemberTemporarySession: settings.allowMemberTemporarySession },
+      operationType: 8,
+    },
+    {
+      setting: 'allow_member_create_group',
+      value: { allowMemberCreateGroup: settings.allowMemberCreateGroup },
+      operationType: 8,
+    },
+  ];
+
+  let currentAppPrivilegeFlag = initialAppPrivilegeFlag;
+  let currentGroupFlagExt4 = initialGroupFlagExt4;
+  for (const requestSetting of requestSettings) {
+    const param = createGroupDetailInfoV2Param(groupCode);
+    if (applyGroupManagementSettings(param, requestSetting.value)) {
+      if (param.filter.appPrivilegeFlag) {
+        const nextAppPrivilegeFlag = mergeMaskedFlag(
+          currentAppPrivilegeFlag,
+          param.modifyInfo.appPrivilegeFlag,
+          param.modifyInfo.appPrivilegeMask
+        );
+        if (requestSetting.operationType === 8 && nextAppPrivilegeFlag === currentAppPrivilegeFlag) continue;
+        currentAppPrivilegeFlag = nextAppPrivilegeFlag;
+        // Linux NTQQ's wrapper builds this field from the current complete privilege value.
+        // Supplying only the targeted bit makes zero-valued clears get acknowledged but ignored.
+        param.modifyInfo.appPrivilegeFlag = currentAppPrivilegeFlag;
+      }
+      if (param.filter.groupFlagExt4) {
+        const nextGroupFlagExt4 = mergeMaskedFlag(
+          currentGroupFlagExt4,
+          param.modifyInfo.groupFlagExt4,
+          param.modifyInfo.groupFlagExt4Mask
+        );
+        if (nextGroupFlagExt4 === currentGroupFlagExt4) continue;
+        currentGroupFlagExt4 = nextGroupFlagExt4;
+        param.modifyInfo.groupFlagExt4 = currentGroupFlagExt4;
+      }
+      requests.push({ setting: requestSetting.setting, param, operationType: requestSetting.operationType });
+    }
+  }
+
+  return requests;
+}
 
 export function createGroupDetailInfoV2Param (group_code: string): GroupDetailInfoV2Param {
   return {
