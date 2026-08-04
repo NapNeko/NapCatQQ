@@ -17,18 +17,18 @@ import {
 } from './plugin/types';
 import { PluginRouterRegistryImpl } from './plugin/router-registry';
 
-export { PluginPackageJson } from './plugin/types';
-export { PluginConfigItem } from './plugin/types';
-export { PluginConfigUIController } from './plugin/types';
+export type { PluginPackageJson } from './plugin/types';
+export type { PluginConfigItem } from './plugin/types';
+export type { PluginConfigUIController } from './plugin/types';
 export { NapCatConfig } from './plugin/config';
-export { PluginConfigSchema } from './plugin/types';
-export { PluginLogger } from './plugin/types';
-export { NapCatPluginContext } from './plugin/types';
-export { PluginModule } from './plugin/types';
-export { PluginStatusConfig } from './plugin/types';
-export { PluginRouterRegistry, PluginRequestHandler, PluginApiRouteDefinition, PluginPageDefinition, HttpMethod } from './plugin/types';
-export { PluginHttpRequest, PluginHttpResponse, PluginNextFunction } from './plugin/types';
-export { MemoryStaticFile, MemoryFileGenerator } from './plugin/types';
+export type { PluginConfigSchema } from './plugin/types';
+export type { PluginLogger } from './plugin/types';
+export type { NapCatPluginContext } from './plugin/types';
+export type { PluginModule } from './plugin/types';
+export type { PluginStatusConfig } from './plugin/types';
+export type { PluginRouterRegistry, PluginRequestHandler, PluginApiRouteDefinition, PluginPageDefinition, HttpMethod } from './plugin/types';
+export type { PluginHttpRequest, PluginHttpResponse, PluginNextFunction } from './plugin/types';
+export type { MemoryStaticFile, MemoryFileGenerator } from './plugin/types';
 export { PluginRouterRegistryImpl } from './plugin/router-registry';
 export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> implements IPluginManager {
   private readonly pluginPath: string;

@@ -44,7 +44,8 @@ export default defineConfig(({ mode }) => {
               // if (id.includes('@heroui/')) {
               //   return 'heroui';
               // }
-              if (id.includes('react-dom')) {
+              // react 核心库与 react-dom 合并到同一 chunk，避免与 react-router-dom 形成循环依赖
+              if (id.includes('react-dom') || id.includes('node_modules/react/')) {
                 return 'react-dom';
               }
               if (id.includes('react-router-dom')) {

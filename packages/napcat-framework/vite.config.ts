@@ -32,6 +32,14 @@ const FrameworkBaseConfigPlugin: PluginOption[] = [
       { src: './renderer.js', dest: 'dist' },
       { src: '../../package.json', dest: 'dist' },
       { src: '../../logo.png', dest: 'dist' },
+      // 内置插件：拷贝构建产物到 plugins 目录
+      { src: '../napcat-plugin-builtin/dist/index.mjs', dest: 'dist/plugins/napcat-plugin-builtin/' },
+      { src: '../napcat-plugin-builtin/package.json', dest: 'dist/plugins/napcat-plugin-builtin/' },
+      { src: '../napcat-plugin-builtin/webui/', dest: 'dist/plugins/napcat-plugin-builtin/webui/', flatten: false },
+      // JNI 插件：拷贝构建产物 + 桥接 JAR + 示例 Java 插件
+      { src: '../napcat-JNI/dist/index.mjs', dest: 'dist/plugins/napcat-plugin-jni/' },
+      { src: '../napcat-JNI/package.json', dest: 'dist/plugins/napcat-plugin-jni/' },
+      { src: '../../NapCatSDK/target/napcat-jni-bridge.jar', dest: 'dist/plugins/napcat-plugin-jni/' },
     ],
   }),
   nodeResolve(),

@@ -1,2 +1,10 @@
 packages:
   - packages/*
+allowBuilds:
+  '@heroui/shared-utils': false
+  '@homebridge/node-pty-prebuilt-multiarch': false
+  '@swc/core': false
+  esbuild: false
+  sharp: false
+  ttf2woff2: false
+  unrs-resolver: false

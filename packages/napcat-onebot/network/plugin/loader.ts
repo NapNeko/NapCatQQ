@@ -16,6 +16,7 @@ const OFFICIAL_PLUGIN_IDS = new Set<string>([
   'napcat-plugin-cleaner',
   'napcat-plugin-ssqq',
   'napcat-plugin-qce',
+  'napcat-plugin-jni',
 ]);
 
 /**
