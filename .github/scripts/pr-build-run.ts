@@ -52,7 +52,7 @@ function getTargetSteps (target: BuildTarget): BuildStep[] {
       // Framework 构建前置：Java SDK fat-jar + JNI 插件
       {
         name: 'Build Java SDK (fat-jar bridge)',
-        command: 'mvn -q -Pdev -Pbridge clean package -DskipTests',
+        command: 'mvn -q -Pdev -Pbridge -f NapCatSDK/pom.xml clean package -DskipTests',
         errorMessage: 'Java SDK build failed',
       },
       {
