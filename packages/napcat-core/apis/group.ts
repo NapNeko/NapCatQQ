@@ -12,11 +12,17 @@ import {
   ShutUpGroupMember,
   Peer,
   ChatType,
+  GroupManagementSettings,
 } from '@/napcat-core/index';
 import { isNumeric, solveAsyncProblem } from 'napcat-common/src/helper';
 import { LimitedHashTable } from 'napcat-common/src/message-unique';
 import { CancelableTask, TaskExecutor } from 'napcat-common/src/cancel-task';
-import { createGroupDetailInfoV2Param, createGroupExtFilter, createGroupExtInfo } from '../data';
+import {
+  createGroupDetailInfoV2Param,
+  createGroupExtFilter,
+  createGroupExtInfo,
+  createGroupManagementRequests,
+} from '../data';
 import { NTEventWrapper } from '../helper/event';
 
 export class NTQQGroupApi {
@@ -166,6 +172,54 @@ export class NTQQGroupApi {
     }
     param.modifyInfo.addOption = option.addOption;
     return this.context.session.getGroupService().modifyGroupDetailInfoV2(param, 0);
+  }
+
+  async setGroupMemberInvitePolicy (
+    groupCode: string,
+    policy: NonNullable<GroupManagementSettings['memberInvite']>
+  ) {
+    return this.modifyGroupManagementSettings(groupCode, { memberInvite: policy });
+  }
+
+  async setGroupMemberPermissions (
+    groupCode: string,
+    permissions: Pick<
+      GroupManagementSettings,
+      'allowMemberUploadAlbum' | 'allowMemberTemporarySession' | 'allowMemberCreateGroup'
+    >
+  ) {
+    return this.modifyGroupManagementSettings(groupCode, permissions);
+  }
+
+  async setGroupNewMemberHistoryVisibility (groupCode: string, visible: boolean) {
+    return this.modifyGroupManagementSettings(groupCode, { newMembersSeeRecentHistory: visible });
+  }
+
+  private async modifyGroupManagementSettings (groupCode: string, settings: GroupManagementSettings) {
+    const results: Array<{ setting: string, result: GeneralCallResult; }> = [];
+    const changesKnownFlags = settings.memberInvite !== undefined ||
+      settings.allowMemberUploadAlbum !== undefined ||
+      settings.allowMemberTemporarySession !== undefined ||
+      settings.allowMemberCreateGroup !== undefined ||
+      settings.newMembersSeeRecentHistory !== undefined;
+    const currentDetail = changesKnownFlags ? await this.fetchGroupDetail(groupCode) : undefined;
+
+    for (const request of createGroupManagementRequests(
+      groupCode,
+      settings,
+      currentDetail?.privilegeFlag,
+      currentDetail?.groupFlagExt4
+    )) {
+      results.push({
+        setting: request.setting,
+        result: await this.context.session.getGroupService().modifyGroupDetailInfoV2(
+          request.param,
+          request.operationType
+        ),
+      });
+    }
+
+    return results;
   }
 
   async setGroupSearch (groupCode: string, option: {
