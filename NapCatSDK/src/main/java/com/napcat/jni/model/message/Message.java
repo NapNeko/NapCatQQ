@@ -1,5 +1,7 @@
 package com.napcat.jni.model.message;
 
+import com.napcat.jni.util.Kv;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -30,7 +32,7 @@ import java.util.Map;
  *       .build();
  *
  *   // 直接使用 MessageSegment 静态方法
- *   List<MessageSegment> msg4 = List.of(
+ *   List<MessageSegment> msg4 = Kv.list(
  *       MessageSegment.at("123456"),
  *       MessageSegment.text(" hello")
  *   );
@@ -62,7 +64,7 @@ public class Message {
     /**
      * 快捷方式：纯文本消息
      * <p>
-     * 等价于 {@code List.of(MessageSegment.text(text))}
+     * 等价于 {@code Kv.list(MessageSegment.text(text))}
      */
     public static List<MessageSegment> ofText(String text) {
         return Collections.singletonList(MessageSegment.text(text));
@@ -183,7 +185,7 @@ public class Message {
 
     /** 添加位置段（含内容） */
     public Message location(double lat, double lon, String title, String content) {
-        segments.add(new MessageSegment("location", Map.of(
+        segments.add(new MessageSegment("location", Kv.map(
                 "lat", lat, "lon", lon,
                 "title", title == null ? "" : title,
                 "content", content == null ? "" : content

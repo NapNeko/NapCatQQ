@@ -1,12 +1,14 @@
 package com.napcat.jni.examples;
 
 import com.napcat.jni.model.message.Message;
+import com.napcat.jni.model.message.MessageSegment;
 import com.napcat.jni.model.result.LoginInfo;
 import com.napcat.jni.model.result.SendMsgResult;
 import com.napcat.jni.plugin.NapCatPlugin;
 import com.napcat.jni.plugin.NapCatPluginContext;
 import com.napcat.jni.plugin.PluginLoader;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -96,7 +98,7 @@ public class DemoPlugin implements NapCatPlugin {
 
         } else if (raw.startsWith("!image")) {
             // 使用消息构建器发送图片 + 文字
-            var message = Message.builder()
+            List<MessageSegment> message = Message.builder()
                     .image("https://www.example.com/logo.png")
                     .text("这是一张图片")
                     .build();
@@ -109,7 +111,7 @@ public class DemoPlugin implements NapCatPlugin {
 
         } else if (raw.contains("@") && selfId != null && raw.contains(selfId)) {
             // 被 @时回复，使用构建器组合 @ + 文本
-            var message = Message.builder()
+            List<MessageSegment> message = Message.builder()
                     .at(selfId)
                     .text(" 你好呀~")
                     .build();
@@ -123,7 +125,7 @@ public class DemoPlugin implements NapCatPlugin {
             // 查询群信息（强类型）
             ctx.getActions().getGroupInfoTyped(finalPeer)
                     .thenAccept(info -> {
-                        var reply = Message.ofText(String.format(
+                        List<MessageSegment> reply = Message.ofText(String.format(
                                 "群信息\n  群号: %d\n  群名: %s\n  成员数: %d",
                                 info.groupId, info.groupName, info.memberCount
                         ));

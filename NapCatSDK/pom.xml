@@ -8,7 +8,7 @@
     <!-- ==================== Maven Central 发布坐标 ==================== -->
     <groupId>io.github.cindifind</groupId>
     <artifactId>napcat-jni-sdk</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
 
     <name>NapCat JNI SDK</name>
@@ -45,8 +45,12 @@
 
     <!-- ==================== 全局属性 ==================== -->
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <!-- Java 8 字节码兼容，JDK 8 ~ JDK 26 均可作为运行时。
+             编译时使用 JDK 11+，通过 release=8 参数确保仅调用 Java 8 API。 -->
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+        <maven.compiler.release>8</maven.compiler.release>
+        <maven.compiler.plugin.version>3.13.0</maven.compiler.plugin.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- 签名插件需要：禁止读取 gpg.executable / passphrase 默认值 -->
         <gpg.skip>false</gpg.skip>
@@ -100,6 +104,19 @@
     <build>
         <finalName>napcat-jni-sdk</finalName>
         <plugins>
+            <!-- 显式指定编译器插件：使用 release=8 确保 Java 8 API 边界 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven.compiler.plugin.version}</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                    <release>${maven.compiler.release}</release>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+            </plugin>
+
             <!-- 基础 jar 插件：保留主类清单（可选，便于运行 Demo） -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

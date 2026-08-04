@@ -9,6 +9,7 @@ import com.napcat.jni.model.params.FileParams;
 import com.napcat.jni.model.params.GroupParams;
 import com.napcat.jni.model.params.RequestParams;
 import com.napcat.jni.model.result.*;
+import com.napcat.jni.util.Kv;
 
 import java.util.List;
 import java.util.Map;
@@ -60,7 +61,7 @@ public interface Actions {
      * @param message 消息内容，使用 {@link Message} 构建
      */
     default CompletableFuture<SendMsgResult> sendPrivateMsgTyped(String userId, List<MessageSegment> message) {
-        return call("send_private_msg", Map.of(
+        return call("send_private_msg", Kv.map(
                 "user_id", userId,
                 "message", message
         )).thenApply(obj -> MAPPER.convertValue(obj, SendMsgResult.class));
@@ -73,7 +74,7 @@ public interface Actions {
      * @param message 消息内容，使用 {@link Message} 构建
      */
     default CompletableFuture<SendMsgResult> sendGroupMsgTyped(String groupId, List<MessageSegment> message) {
-        return call("send_group_msg", Map.of(
+        return call("send_group_msg", Kv.map(
                 "group_id", groupId,
                 "message", message
         )).thenApply(obj -> MAPPER.convertValue(obj, SendMsgResult.class));
@@ -88,13 +89,13 @@ public interface Actions {
      */
     default CompletableFuture<SendMsgResult> sendMsgTyped(String messageType, String peerId, List<MessageSegment> message) {
         if ("group".equalsIgnoreCase(messageType)) {
-            return call("send_msg", Map.of(
+            return call("send_msg", Kv.map(
                     "message_type", "group",
                     "group_id", peerId,
                     "message", message
             )).thenApply(obj -> MAPPER.convertValue(obj, SendMsgResult.class));
         }
-        return call("send_msg", Map.of(
+        return call("send_msg", Kv.map(
                 "message_type", "private",
                 "user_id", peerId,
                 "message", message
@@ -105,20 +106,20 @@ public interface Actions {
 
     /** 发送私聊消息 */
     default CompletableFuture<Object> sendPrivateMessage(String userId, Object message) {
-        return call("send_private_msg", Map.of("user_id", userId, "message", message));
+        return call("send_private_msg", Kv.map("user_id", userId, "message", message));
     }
 
     /** 发送群聊消息 */
     default CompletableFuture<Object> sendGroupMessage(String groupId, Object message) {
-        return call("send_group_msg", Map.of("group_id", groupId, "message", message));
+        return call("send_group_msg", Kv.map("group_id", groupId, "message", message));
     }
 
     /** 发送通用消息 */
     default CompletableFuture<Object> sendMsg(String messageType, String peerId, Object message) {
         if ("group".equalsIgnoreCase(messageType)) {
-            return call("send_msg", Map.of("message_type", "group", "group_id", peerId, "message", message));
+            return call("send_msg", Kv.map("message_type", "group", "group_id", peerId, "message", message));
         }
-        return call("send_msg", Map.of("message_type", "private", "user_id", peerId, "message", message));
+        return call("send_msg", Kv.map("message_type", "private", "user_id", peerId, "message", message));
     }
 
     /** 发送纯文本私聊消息 */
@@ -135,39 +136,39 @@ public interface Actions {
 
     /** 撤回消息 */
     default CompletableFuture<Object> deleteMsg(long messageId) {
-        return call("delete_msg", Map.of("message_id", messageId));
+        return call("delete_msg", Kv.map("message_id", messageId));
     }
 
     /** 撤回消息（字符串 ID） */
     default CompletableFuture<Object> deleteMsg(String messageId) {
-        return call("delete_msg", Map.of("message_id", messageId));
+        return call("delete_msg", Kv.map("message_id", messageId));
     }
 
     /** 获取消息（返回强类型） */
     default CompletableFuture<MsgInfo> getMsgTyped(long messageId) {
-        return call("get_msg", Map.of("message_id", messageId))
+        return call("get_msg", Kv.map("message_id", messageId))
                 .thenApply(obj -> MAPPER.convertValue(obj, MsgInfo.class));
     }
 
     /** 获取消息（返回强类型，字符串 ID） */
     default CompletableFuture<MsgInfo> getMsgTyped(String messageId) {
-        return call("get_msg", Map.of("message_id", messageId))
+        return call("get_msg", Kv.map("message_id", messageId))
                 .thenApply(obj -> MAPPER.convertValue(obj, MsgInfo.class));
     }
 
     /** 标记消息已读 */
     default CompletableFuture<Object> markMsgAsRead(long messageId) {
-        return call("mark_msg_as_read", Map.of("message_id", messageId));
+        return call("mark_msg_as_read", Kv.map("message_id", messageId));
     }
 
     /** 标记私聊消息已读 */
     default CompletableFuture<Object> markPrivateMsgAsRead(String userId) {
-        return call("mark_private_msg_as_read", Map.of("user_id", userId));
+        return call("mark_private_msg_as_read", Kv.map("user_id", userId));
     }
 
     /** 标记群消息已读 */
     default CompletableFuture<Object> markGroupMsgAsRead(String groupId) {
-        return call("mark_group_msg_as_read", Map.of("group_id", groupId));
+        return call("mark_group_msg_as_read", Kv.map("group_id", groupId));
     }
 
     /** 标记所有消息已读 */
@@ -177,18 +178,18 @@ public interface Actions {
 
     /** 获取合并转发消息 */
     default CompletableFuture<Object> getForwardMsg(String id) {
-        return call("get_forward_msg", Map.of("id", id));
+        return call("get_forward_msg", Kv.map("id", id));
     }
 
     /** 发送合并转发消息（群） */
     default CompletableFuture<SendMsgResult> sendGroupForwardMsgTyped(String groupId, List<MessageSegment> nodes) {
-        return call("send_group_forward_msg", Map.of("group_id", groupId, "messages", nodes))
+        return call("send_group_forward_msg", Kv.map("group_id", groupId, "messages", nodes))
                 .thenApply(obj -> MAPPER.convertValue(obj, SendMsgResult.class));
     }
 
     /** 发送合并转发消息（私聊） */
     default CompletableFuture<SendMsgResult> sendPrivateForwardMsgTyped(String userId, List<MessageSegment> nodes) {
-        return call("send_private_forward_msg", Map.of("user_id", userId, "messages", nodes))
+        return call("send_private_forward_msg", Kv.map("user_id", userId, "messages", nodes))
                 .thenApply(obj -> MAPPER.convertValue(obj, SendMsgResult.class));
     }
 
@@ -236,20 +237,20 @@ public interface Actions {
 
     /** 群聊戳一戳 */
     default CompletableFuture<Object> groupPoke(String groupId, String userId) {
-        return call("group_poke", Map.of("group_id", groupId, "user_id", userId));
+        return call("group_poke", Kv.map("group_id", groupId, "user_id", userId));
     }
 
     // ==================== 群信息查询（Model 化） ====================
 
     /** 获取群信息 */
     default CompletableFuture<GroupInfo> getGroupInfoTyped(String groupId) {
-        return call("get_group_info", Map.of("group_id", groupId))
+        return call("get_group_info", Kv.map("group_id", groupId))
                 .thenApply(obj -> MAPPER.convertValue(obj, GroupInfo.class));
     }
 
     /** 获取群信息（不使用缓存） */
     default CompletableFuture<GroupInfo> getGroupInfoTyped(String groupId, boolean noCache) {
-        return call("get_group_info", Map.of("group_id", groupId, "no_cache", noCache))
+        return call("get_group_info", Kv.map("group_id", groupId, "no_cache", noCache))
                 .thenApply(obj -> MAPPER.convertValue(obj, GroupInfo.class));
     }
 
@@ -273,7 +274,7 @@ public interface Actions {
 
     /** 获取群成员列表（返回强类型列表） */
     default CompletableFuture<List<GroupMemberInfo>> getGroupMemberListTyped(String groupId) {
-        return call("get_group_member_list", Map.of("group_id", groupId))
+        return call("get_group_member_list", Kv.map("group_id", groupId))
                 .thenApply(obj -> MAPPER.convertValue(obj, new TypeReference<List<GroupMemberInfo>>() {}));
     }
 
@@ -287,17 +288,17 @@ public interface Actions {
 
     /** 发送好友赞（点赞） */
     default CompletableFuture<Object> sendLike(String userId, int times) {
-        return call("send_like", Map.of("user_id", userId, "times", times));
+        return call("send_like", Kv.map("user_id", userId, "times", times));
     }
 
     /** 私聊戳一戳 */
     default CompletableFuture<Object> friendPoke(String userId) {
-        return call("friend_poke", Map.of("user_id", userId));
+        return call("friend_poke", Kv.map("user_id", userId));
     }
 
     /** 设置好友备注 */
     default CompletableFuture<Object> setFriendRemark(String userId, String remark) {
-        return call("set_friend_remark", Map.of("user_id", userId, "remark", remark));
+        return call("set_friend_remark", Kv.map("user_id", userId, "remark", remark));
     }
 
     // ==================== 请求处理（Model 化） ====================
@@ -400,7 +401,7 @@ public interface Actions {
 
     /** 对消息发送表情回应 */
     default CompletableFuture<Object> setMsgEmojiLike(String messageId, String emojiId) {
-        return call("set_msg_emoji_like", Map.of("message_id", messageId, "emoji_id", emojiId));
+        return call("set_msg_emoji_like", Kv.map("message_id", messageId, "emoji_id", emojiId));
     }
 
     // ==================== 旧版便捷方法（向后兼容） ====================
@@ -427,21 +428,21 @@ public interface Actions {
 
     /** 获取群成员列表 */
     default CompletableFuture<Object> getGroupMemberList(String groupId) {
-        return call("get_group_member_list", Map.of("group_id", groupId));
+        return call("get_group_member_list", Kv.map("group_id", groupId));
     }
 
     /** 撤回消息 */
     default CompletableFuture<Object> deleteMsg(int messageId) {
-        return call("delete_msg", Map.of("message_id", messageId));
+        return call("delete_msg", Kv.map("message_id", messageId));
     }
 
     /** 获取消息 */
     default CompletableFuture<Object> getMsg(int messageId) {
-        return call("get_msg", Map.of("message_id", messageId));
+        return call("get_msg", Kv.map("message_id", messageId));
     }
 
     /** 构造文本消息段 */
     static List<Map<String, Object>> textSegments(String text) {
-        return List.of(Map.of("type", "text", "data", Map.of("text", text)));
+        return Kv.list(Kv.map("type", "text", "data", Kv.map("text", text)));
     }
 }

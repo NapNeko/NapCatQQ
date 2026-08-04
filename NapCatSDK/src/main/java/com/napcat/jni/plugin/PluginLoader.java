@@ -6,10 +6,13 @@ import com.napcat.jni.protocol.ProtocolTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -113,7 +116,7 @@ public class PluginLoader {
             java.util.jar.JarEntry propEntry = jf.getJarEntry("META-INF/napcat-plugin.properties");
             if (propEntry != null) {
                 Properties prop = new Properties();
-                try (var in = jf.getInputStream(propEntry)) {
+                try (InputStream in = jf.getInputStream(propEntry)) {
                     prop.load(in);
                 }
                 return buildInfoFromProperties(prop, jar.getName());
@@ -137,8 +140,8 @@ public class PluginLoader {
             // 3) ServiceLoader
             java.util.jar.JarEntry svc = jf.getJarEntry("META-INF/services/" + NapCatPlugin.class.getName());
             if (svc != null) {
-                try (var in = jf.getInputStream(svc)) {
-                    String first = new String(in.readAllBytes()).split("\\s+")[0];
+                try (InputStream in = jf.getInputStream(svc)) {
+                    String first = new String(readAllBytes(in), StandardCharsets.UTF_8).split("\\s+")[0];
                     if (!first.isEmpty()) {
                         return new ProtocolTypes.JavaPluginInfo(
                                 jar.getName(), jar.getName(), "1.0.0", "", "", first, true
@@ -154,14 +157,14 @@ public class PluginLoader {
         File propFile = new File(dir, "META-INF/napcat-plugin.properties");
         if (propFile.isFile()) {
             Properties prop = new Properties();
-            try (var in = Files.newInputStream(propFile.toPath())) {
+            try (InputStream in = Files.newInputStream(propFile.toPath())) {
                 prop.load(in);
             }
             return buildInfoFromProperties(prop, dir.getName());
         }
         File services = new File(dir, "META-INF/services/" + NapCatPlugin.class.getName());
         if (services.isFile()) {
-            String first = Files.readString(services.toPath()).split("\\s+")[0];
+            String first = new String(Files.readAllBytes(services.toPath()), StandardCharsets.UTF_8).split("\\s+")[0];
             if (!first.isEmpty()) {
                 return new ProtocolTypes.JavaPluginInfo(
                         dir.getName(), dir.getName(), "1.0.0", "", "", first, true
@@ -169,6 +172,16 @@ public class PluginLoader {
             }
         }
         return null;
+    }
+
+    private static byte[] readAllBytes(InputStream in) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] buf = new byte[4096];
+        int n;
+        while ((n = in.read(buf)) > 0) {
+            baos.write(buf, 0, n);
+        }
+        return baos.toByteArray();
     }
 
     private ProtocolTypes.JavaPluginInfo buildInfoFromProperties(Properties p, String fallbackId) {

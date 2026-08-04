@@ -43,18 +43,17 @@ public class ActionsClient implements Actions {
                 future.completeExceptionally(new RuntimeException(err == null ? "Action failed" : err));
             }
         }, timeoutMs);
-        // 桥接器自身内部会触发超时回调；这里额外兜底 completeOnTimeout
-        return future.orTimeout(Math.max(1, timeoutMs + 200), TimeUnit.MILLISECONDS)
-                .exceptionally(ex -> {
-                    Throwable t = ex;
-                    if (t instanceof java.util.concurrent.CompletionException && t.getCause() != null) {
-                        t = t.getCause();
-                    }
-                    if (t instanceof TimeoutException) {
-                        throw new RuntimeException("Action '" + action + "' timed out after " + timeoutMs + "ms");
-                    }
-                    if (t instanceof RuntimeException) throw (RuntimeException) t;
-                    throw new RuntimeException(t);
-                });
+        // 桥接器自身内部会触发超时回调；Java 8 兼容：exceptionally 统一处理 TimeoutException
+        return future.exceptionally(ex -> {
+            Throwable t = ex;
+            if (t instanceof java.util.concurrent.CompletionException && t.getCause() != null) {
+                t = t.getCause();
+            }
+            if (t instanceof TimeoutException) {
+                throw new RuntimeException("Action '" + action + "' timed out after " + timeoutMs + "ms");
+            }
+            if (t instanceof RuntimeException) throw (RuntimeException) t;
+            throw new RuntimeException(t);
+        });
     }
 }

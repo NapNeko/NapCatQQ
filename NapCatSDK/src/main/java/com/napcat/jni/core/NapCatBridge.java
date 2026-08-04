@@ -8,6 +8,7 @@ import com.napcat.jni.protocol.JsonRpcErrorResult;
 import com.napcat.jni.protocol.JsonRpcNotification;
 import com.napcat.jni.protocol.JsonRpcRequest;
 import com.napcat.jni.protocol.JsonRpcSuccessResult;
+import com.napcat.jni.util.Kv;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -294,7 +295,7 @@ public class NapCatBridge {
 
     /** 发送日志通知到 Node 侧插件日志器 */
     public void sendLog(String level, String message, Object... args) {
-        sendNotification("log", Map.of(
+        sendNotification("log", Kv.map(
                 "level", level,
                 "message", message == null ? "" : message,
                 "args", args == null ? new Object[0] : args
@@ -340,10 +341,10 @@ public class NapCatBridge {
                 }
             }
         }, timeoutMs, TimeUnit.MILLISECONDS);
-        sendNotification("action", Map.of(
+        sendNotification("action", Kv.map(
                 "requestId", requestId,
                 "action", action,
-                "params", params == null ? Map.of() : params
+                "params", params == null ? Kv.map() : params
         ));
     }
 
@@ -351,7 +352,7 @@ public class NapCatBridge {
      * Java → Node 推送自定义事件（OneBot 自定义事件）
      */
     public void emitEvent(Object event) {
-        sendNotification("event", Map.of("event", event == null ? Map.of() : event));
+        sendNotification("event", Kv.map("event", event == null ? Kv.map() : event));
     }
 
     // ==================== 辅助方法 ====================

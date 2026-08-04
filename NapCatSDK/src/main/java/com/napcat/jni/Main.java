@@ -10,6 +10,7 @@ import com.napcat.jni.plugin.NapCatPluginContext;
 import com.napcat.jni.plugin.PluginLoader;
 import com.napcat.jni.plugin.PluginLogger;
 import com.napcat.jni.protocol.ProtocolTypes;
+import com.napcat.jni.util.Kv;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -143,7 +144,7 @@ public class Main {
         NapCatPluginContext ctx = createContextFor(p.pluginId);
         pluginContexts.put(p.pluginId, ctx);
         pluginLoader.load(p.pluginId, ctx);
-        return Map.of("ok", true, "pluginId", p.pluginId);
+        return Kv.map("ok", true, "pluginId", p.pluginId);
     }
 
     private static Object handleUnloadPlugin(Object id, JsonNode params) {
@@ -153,7 +154,7 @@ public class Main {
         NapCatPluginContext ctx = pluginContexts.get(p.pluginId);
         boolean ok = pluginLoader.unload(p.pluginId, ctx);
         pluginContexts.remove(p.pluginId);
-        return Map.of("ok", ok, "pluginId", p.pluginId);
+        return Kv.map("ok", ok, "pluginId", p.pluginId);
     }
 
     private static Object handleCleanup(Object id, JsonNode params) {
@@ -175,7 +176,7 @@ public class Main {
             }
             bridge.stop();
         }, "napcat-jni-cleanup-exit").start();
-        return Map.of("ok", true);
+        return Kv.map("ok", true);
     }
 
     // ==================== 通知处理 ====================

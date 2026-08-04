@@ -2,7 +2,7 @@
 
 > 版本：1.0.0 · 适用于 NapCat JNI 插件桥接器
 > 通信方式：子进程 + NDJSON / JSON-RPC 2.0
-> 最低 JDK：11
+> **Java 版本兼容：JDK 8 ~ JDK 26（编译时 targeting Java 8 字节码）**
 > **Maven Central 坐标**：`io.github.cindifind:napcat-jni-sdk:1.0.0`
 > **Central Portal Namespace**：`io.github.cindifind`
 
