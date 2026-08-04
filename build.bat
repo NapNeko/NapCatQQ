@@ -48,8 +48,9 @@ if not exist node_modules (
 echo.
 if "%NO_MAVEN%"=="0" (
     echo [2/5] 构建 Java SDK （NapCatSDK）...
+    echo        Profile: bridge（构建运行时 fat-jar）+ dev（跳过 GPG 签名）
     pushd NapCatSDK
-    call mvn -q clean package -DskipTests
+    call mvn -q -Pdev -Pbridge clean package -DskipTests
     if errorlevel 1 (
         echo [错误] Maven 构建失败
         popd

@@ -362,7 +362,7 @@ router.post('/call', handleCallApi);
  */
 router.post('/close/:adapterName', async (req: Request, res: Response) => {
   try {
-    const { adapterName } = req.params;
+    const adapterName = req.params['adapterName'] as string;
     if (!adapterName) {
       return sendError(res, '缺少 adapterName 参数');
     }

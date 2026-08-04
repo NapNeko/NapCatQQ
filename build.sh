@@ -42,8 +42,9 @@ fi
 echo
 if [ "$NO_MAVEN" = "0" ]; then
     echo "[2/5] 构建 Java SDK (NapCatSDK)..."
+    echo "        Profile: bridge（构建运行时 fat-jar）+ dev（跳过 GPG 签名）"
     pushd NapCatSDK >/dev/null
-    mvn -q clean package -DskipTests
+    mvn -q -Pdev -Pbridge clean package -DskipTests
     popd >/dev/null
     if [ -f "NapCatSDK/target/napcat-jni-bridge.jar" ]; then
         cp -f NapCatSDK/target/napcat-jni-bridge.jar packages/napcat-JNI/napcat-jni-bridge.jar

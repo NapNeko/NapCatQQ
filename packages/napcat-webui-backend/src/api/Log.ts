@@ -70,7 +70,7 @@ export const GetTerminalListHandler: RequestHandler = (_, res) => {
 };
 
 export const CloseTerminalHandler: RequestHandler = (req, res) => {
-  const id = req.params['id'];
+  const id = req.params['id'] as string;
   if (!id) {
     return sendError(res, 'ID不能为空');
   }

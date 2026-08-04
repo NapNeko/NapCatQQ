@@ -649,7 +649,7 @@ export const ImportLocalPluginHandler: RequestHandler = async (req, res) => {
  * 获取插件图标
  */
 export const GetPluginIconHandler: RequestHandler = async (req, res) => {
-  const pluginId = req.params['pluginId'];
+  const pluginId = req.params['pluginId'] as string;
   if (!pluginId) return sendError(res, 'Plugin ID is required');
 
   const pluginManager = getPluginManager();

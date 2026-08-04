@@ -21,7 +21,7 @@ function wrapRequest (req: Request): PluginHttpRequest {
     query: req.query as Record<string, string | string[] | undefined>,
     body: req.body,
     headers: req.headers as Record<string, string | string[] | undefined>,
-    params: req.params,
+    params: req.params as Record<string, string>,
     raw: req,
   };
 }
