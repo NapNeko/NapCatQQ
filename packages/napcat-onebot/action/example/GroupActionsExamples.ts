@@ -1,4 +1,21 @@
 export const GroupActionsExamples = {
+  SetGroupMemberInvitePolicy: {
+    payload: { group_id: '123456', policy: 'require_approval' },
+    response: null,
+  },
+  SetGroupMemberPermissions: {
+    payload: {
+      group_id: '123456',
+      allow_member_upload_album: true,
+      allow_member_temporary_session: true,
+      allow_member_create_group: true,
+    },
+    response: null,
+  },
+  SetGroupNewMemberHistoryVisibility: {
+    payload: { group_id: '123456', visible: true },
+    response: null,
+  },
   DelEssenceMsg: {
     payload: { message_id: 123456 },
     response: null,
