@@ -8,7 +8,7 @@ import type {
   PluginConfigUIController,
   NapCatPluginContext,
 } from 'napcat-types/napcat-onebot/network/plugin-manger';
-import { JniBridge, createJniBridge, DEFAULT_BRIDGE_JAR, DEFAULT_JAVA_PLUGIN_DIR } from './bridge';
+import { JniBridge, DEFAULT_BRIDGE_JAR, DEFAULT_JAVA_PLUGIN_DIR } from './bridge';
 import type { InitParams, InitResult, JavaPluginInfo } from './protocol';
 
 // ==================== 配置类型 ====================
@@ -136,31 +136,19 @@ async function startBridge (ctx: NapCatPluginContext, javaPluginPath: string): P
 
   const bridgeJarPath = resolvePath(ctx.pluginPath, currentConfig.bridgeJar);
 
-  const initParams: InitParams = {
-    dataPath: ctx.dataPath,
-    javaPluginPath,
-    adapterName: ctx.adapterName,
-    javaPath: currentConfig.javaPath,
-    jvmArgs: currentConfig.jvmArgs,
-    bridgeJar: bridgeJarPath,
-    classpath: currentConfig.classpath,
-  };
-
-  const { bridge: b, info } = await createJniBridge({
+  const b = new JniBridge({
     javaPath: currentConfig.javaPath,
     jvmArgs: currentConfig.jvmArgs,
     bridgeJar: bridgeJarPath,
     classpath: currentConfig.classpath,
     callTimeout: currentConfig.callTimeout,
     logger: ctx.logger,
-  }, initParams);
+  });
 
-  bridge = b;
-  javaPlugins = info.plugins ?? [];
-
-  // 监听 Java → Node.js 的 Action 调用
-  b.on('action', (params) => handleJavaAction(ctx, params));
-  // 监听 Java 侧主动推送的事件
+  // 关键：在 init 之前注册事件监听器
+  // Java 侧在 handleInit 期间会自动加载插件，插件 onInit 可能立即发起 Action 调用
+  // 如果监听器在 init 之后才注册，这些 Action 通知会被丢弃，导致超时
+  b.on('action', (params) => handleJavaAction(ctx, b, params));
   b.on('event', (event) => {
     try {
       ctx.oneBot.networkManager.emitEvent(event as any);
@@ -170,22 +158,40 @@ async function startBridge (ctx: NapCatPluginContext, javaPluginPath: string): P
   });
   b.on('exit', (code, signal) => {
     logger?.warn(`[JNI] Java 桥接进程退出 (code=${code}, signal=${signal})`);
-    bridge = null;
+    if (bridge === b) bridge = null;
   });
+
+  // 启动 Java 进程并等待 ready
+  await b.start();
+
+  // 发送 init 请求（期间插件可能已发起 Action 调用，监听器已就绪）
+  const initParams: InitParams = {
+    dataPath: ctx.dataPath,
+    javaPluginPath,
+    adapterName: ctx.adapterName,
+    javaPath: currentConfig.javaPath,
+    jvmArgs: currentConfig.jvmArgs,
+    bridgeJar: bridgeJarPath,
+    classpath: currentConfig.classpath,
+  };
+  const info = await b.call<InitResult>('init', initParams);
+
+  bridge = b;
+  javaPlugins = info.plugins ?? [];
 }
 
 /** 处理 Java 侧发起的 OneBot Action 调用 */
 async function handleJavaAction (
   ctx: NapCatPluginContext,
+  b: JniBridge,
   params: { requestId: number | string; action: string; params?: unknown }
 ): Promise<void> {
-  if (!bridge) return;
   const { requestId, action, params: actionParams } = params;
   try {
     const data = await callAction(ctx, action, actionParams);
-    bridge.replyAction(requestId, true, data);
+    b.replyAction(requestId, true, data);
   } catch (e) {
-    bridge.replyAction(requestId, false, undefined, (e as Error).message);
+    b.replyAction(requestId, false, undefined, (e as Error).message);
   }
 }
 

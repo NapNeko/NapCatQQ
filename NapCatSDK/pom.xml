@@ -5,54 +5,102 @@
                              https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.napcat</groupId>
+    <!-- ==================== Maven Central 发布坐标 ==================== -->
+    <groupId>io.github.cindifind</groupId>
     <artifactId>napcat-jni-sdk</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
 
     <name>NapCat JNI SDK</name>
     <description>Java SDK for NapCat Java Plugin Bridge - 通过子进程 NDJSON/JSON-RPC 与 NapCat 通信</description>
+    <url>https://github.com/cindifind/NapCatJNI</url>
 
+    <!-- ==================== 开源许可：与主仓库保持一致 ==================== -->
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <!-- ==================== 开发者信息 ==================== -->
+    <developers>
+        <developer>
+            <id>cindifind</id>
+            <name>CindiFind</name>
+            <email>cindifind@users.noreply.github.com</email>
+            <organization>CindiFind</organization>
+            <organizationUrl>https://github.com/cindifind</organizationUrl>
+        </developer>
+    </developers>
+
+    <!-- ==================== 源码仓库地址（Central 校验必填） ==================== -->
+    <scm>
+        <connection>scm:git:git://github.com/cindifind/NapCatJNI.git</connection>
+        <developerConnection>scm:git:ssh://github.com:cindifind/NapCatJNI.git</developerConnection>
+        <url>https://github.com/cindifind/NapCatJNI/tree/main/NapCatSDK</url>
+        <tag>HEAD</tag>
+    </scm>
+
+    <!-- ==================== 全局属性 ==================== -->
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jackson.version>2.17.0</jackson.version>
+        <!-- 签名插件需要：禁止读取 gpg.executable / passphrase 默认值 -->
+        <gpg.skip>false</gpg.skip>
     </properties>
 
+    <!-- ==================== 依赖 ==================== -->
     <dependencies>
-        <!-- JSON 序列化 -->
+        <!-- jackson 三件套：手动指定每个模块版本（不再用统一属性管理）
+             原因：jackson-annotations 的版本号方案与 core/databind 不同（无补丁号）
+             CVE 修复：jackson-core 受影响 >=2.19.0 <2.21.1，2.22.1 满足修复要求
+             - jackson-core:       2.22.1 (2026-07-08, 2.22 线最新)
+             - jackson-databind:   2.22.1 (2026-07-08, 2.22 线最新)
+             - jackson-annotations: 2.22  (2026-05-31, 2.22 线最新, 无补丁号) -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.22.1</version>
+        </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
+            <version>2.22.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.22</version>
         </dependency>
 
-        <!-- 注解处理 -->
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
-            <version>24.1.0</version>
+            <version>26.0.1</version>
             <scope>provided</scope>
         </dependency>
 
-        <!-- 日志（桥接到 stderr，便于 Node 侧接收） -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>2.0.13</version>
+            <version>2.0.18</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>2.0.13</version>
+            <version>2.0.18</version>
             <scope>runtime</scope>
         </dependency>
     </dependencies>
 
+    <!-- ==================== 构建配置 ==================== -->
     <build>
-        <finalName>napcat-jni-bridge</finalName>
+        <finalName>napcat-jni-sdk</finalName>
         <plugins>
+            <!-- 基础 jar 插件：保留主类清单（可选，便于运行 Demo） -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -65,28 +113,131 @@
                     </archive>
                 </configuration>
             </plugin>
+
+            <!-- ==== Maven Central 强制要求 1/4：源码 jar ==== -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.6.0</version>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.3.1</version>
                 <executions>
                     <execution>
-                        <phase>package</phase>
+                        <id>attach-sources</id>
                         <goals>
-                            <goal>shade</goal>
+                            <goal>jar-no-fork</goal>
                         </goals>
-                        <configuration>
-                            <createDependencyReducedPom>false</createDependencyReducedPom>
-                            <transformers>
-                                <transformer
-                                    implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.napcat.jni.Main</mainClass>
-                                </transformer>
-                            </transformers>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- ==== Maven Central 强制要求 2/4：javadoc jar ==== -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.7.0</version>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                    <docencoding>UTF-8</docencoding>
+                    <charset>UTF-8</charset>
+                    <!-- 允许 JDK 17+ 下缺失 @param/@return 等警告不阻塞构建 -->
+                    <additionalOptions>-Xdoclint:none</additionalOptions>
+                    <failOnError>false</failOnError>
+                    <failOnWarnings>false</failOnWarnings>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- ==== Maven Central 强制要求 3/4：GPG 签名 ==== -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>3.2.7</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <!-- CI 环境从 serverId / 属性读取；不允许 gpg-agent 交互 -->
+                    <gpgArguments>
+                        <arg>--pinentry-mode</arg>
+                        <arg>loopback</arg>
+                        <arg>--batch</arg>
+                        <arg>--yes</arg>
+                    </gpgArguments>
+                    <skip>${gpg.skip}</skip>
+                </configuration>
+            </plugin>
+
+            <!-- ==== Maven Central 强制要求 4/4：通过新 Central Portal 直接发布 ==== -->
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.9.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <!-- 生成后自动发布到 Central（校验通过即出现在中央库） -->
+                    <publishingType>AUTOMATIC</publishingType>
+                    <!-- 跳过发布后状态轮询：Sonatype 后端新加了 warnings 字段，
+                         旧版 DeploymentApiResponse 模型无法识别会导致反序列化失败。
+                         上传+publish 请求成功后即视为构建通过，状态可在
+                         https://central.sonatype.com/publishing/deployments 查看 -->
+                    <waitUntilDeployed>false</waitUntilDeployed>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
+
+    <!-- ==================== Profile：构建 NapCat 运行时所需的 fat-jar ==================== -->
+    <!-- 主仓库 build.bat / build.sh 激活：mvn -Pbridge package -->
+    <profiles>
+        <profile>
+            <id>bridge</id>
+            <build>
+                <finalName>napcat-jni-bridge</finalName>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-shade-plugin</artifactId>
+                        <version>3.6.0</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>shade</goal>
+                                </goals>
+                                <configuration>
+                                    <createDependencyReducedPom>false</createDependencyReducedPom>
+                                    <transformers>
+                                        <transformer
+                                            implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                            <mainClass>com.napcat.jni.Main</mainClass>
+                                        </transformer>
+                                    </transformers>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- 跳过签名的本地开发 profile：mvn -Pdev package -->
+        <profile>
+            <id>dev</id>
+            <properties>
+                <gpg.skip>true</gpg.skip>
+            </properties>
+        </profile>
+    </profiles>
 </project>

@@ -253,15 +253,29 @@ public class PluginLoader {
     private ClassLoader createClassLoader(String pluginId) throws IOException {
         return classLoaders.computeIfAbsent(pluginId, id -> {
             try {
-                Path pluginPath;
+                LOG.info("[PluginLoader] createClassLoader for pluginId={}, pluginDir={}", id, pluginDir.getAbsolutePath());
+                // 打印目录内容用于诊断
+                File[] debugEntries = pluginDir.listFiles();
+                if (debugEntries != null) {
+                    for (File de : debugEntries) {
+                        LOG.info("[PluginLoader]   dir entry: {} (isFile={}, isDir={}, len={})",
+                                de.getName(), de.isFile(), de.isDirectory(), de.length());
+                    }
+                }
+
+                Path pluginPath = null;
                 // 优先找同名 jar
                 File jarFile = new File(pluginDir, id + ".jar");
+                LOG.info("[PluginLoader] checking same-name jar: {} -> exists={}", jarFile.getAbsolutePath(), jarFile.isFile());
                 if (jarFile.isFile()) {
                     pluginPath = jarFile.toPath();
                 } else {
                     File dir = new File(pluginDir, id);
-                    if (dir.isDirectory()) pluginPath = dir.toPath();
-                    else {
+                    LOG.info("[PluginLoader] checking same-name dir: {} -> isDir={}", dir.getAbsolutePath(), dir.isDirectory());
+                    if (dir.isDirectory()) {
+                        pluginPath = dir.toPath();
+                    } else {
+                        // 遍历目录，根据 properties 中的 id 匹配实际文件
                         File[] entries = pluginDir.listFiles();
                         if (entries != null) {
                             for (File f : entries) {
@@ -269,18 +283,26 @@ public class PluginLoader {
                                     ProtocolTypes.JavaPluginInfo info = f.getName().toLowerCase().endsWith(".jar")
                                             ? readJarManifest(f) : readDirManifest(f);
                                     if (info != null && id.equals(info.id)) {
+                                        LOG.info("[PluginLoader] matched plugin file: {} (id={})", f.getAbsolutePath(), info.id);
                                         pluginPath = f.toPath();
                                         break;
                                     }
-                                } catch (IOException ignore) {
+                                } catch (IOException e) {
+                                    LOG.warn("[PluginLoader] readJarManifest failed for {}: {}", f.getName(), e.getMessage(), e);
                                 }
                             }
                         }
-                        pluginPath = jarFile.toPath();
+                        // 兜底：循环没匹配到，报错而不是静默使用不存在的路径
+                        if (pluginPath == null) {
+                            LOG.error("[PluginLoader] no plugin file found for id={} in dir={}", id, pluginDir.getAbsolutePath());
+                            throw new IOException("Plugin file not found for id: " + id
+                                    + " in directory: " + pluginDir.getAbsolutePath());
+                        }
                     }
                 }
                 List<URL> urls = new ArrayList<>();
                 urls.add(pluginPath.toUri().toURL());
+                LOG.info("[PluginLoader] classloader URL: {}", pluginPath.toUri().toURL());
                 // 引入插件目录下的 lib 目录
                 File libDir = new File(pluginPath.toFile().isDirectory()
                         ? pluginPath.toFile() : pluginDir, "lib");
@@ -290,7 +312,9 @@ public class PluginLoader {
                         for (File lib : libs) urls.add(lib.toURI().toURL());
                     }
                 }
-                return new URLClassLoader(urls.toArray(new URL[0]), this.getClass().getClassLoader());
+                URLClassLoader cl = new URLClassLoader(urls.toArray(new URL[0]), this.getClass().getClassLoader());
+                LOG.info("[PluginLoader] classloader created with {} urls, parent={}", urls.size(), cl.getParent());
+                return cl;
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

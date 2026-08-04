@@ -3,6 +3,8 @@
 > 版本：1.0.0 · 适用于 NapCat JNI 插件桥接器
 > 通信方式：子进程 + NDJSON / JSON-RPC 2.0
 > 最低 JDK：11
+> **Maven Central 坐标**：`io.github.cindifind:napcat-jni-sdk:1.0.0`
+> **Central Portal Namespace**：`io.github.cindifind`
 
 NapCat Java SDK 让你用 Java 编写 QQ 机器人插件，通过 OneBot 11 协议与 NapCat 主程序交互。本 SDK 封装了进程间通信、插件生命周期、Action 调用、日志、事件推送等能力，开发者只需实现 `NapCatPlugin` 接口即可。
 
@@ -23,8 +25,8 @@ NapCat Java SDK 让你用 Java 编写 QQ 机器人插件，通过 OneBot 11 协�
   - [5.1 NapCatBridge（桥接器核心）](#51-napcatbridge桥接器核心)
   - [5.2 ProtocolTypes（协议类型）](#52-protocoltypes协议类型)
 - [六、完整示例](#六完整示例)
-- [七、构建与部署](#七构建与部署)
-- [八、常见问题](#八常见问题)
+- [七、常见问题](#七常见问题)
+- [附录 A：发布到 Maven Central Portal](#附录-a发布到-maven-central-portal)
 
 ---
 
@@ -87,7 +89,7 @@ entry=com.example.HelloPlugin
 
 ```xml
 <dependency>
-    <groupId>com.napcat</groupId>
+    <groupId>io.github.cindifind</groupId>
     <artifactId>napcat-jni-sdk</artifactId>
     <version>1.0.0</version>
     <scope>provided</scope>
@@ -95,6 +97,11 @@ entry=com.example.HelloPlugin
 ```
 
 > `scope=provided`：运行时由桥接器 `napcat-jni-bridge.jar` 提供，避免你的 JAR 重复打包依赖冲突。
+>
+> Gradle：
+> ```gradle
+> compileOnly 'io.github.cindifind:napcat-jni-sdk:1.0.0'
+> ```
 
 ---
 
@@ -684,98 +691,7 @@ public class ConfigPlugin implements NapCatPlugin {
 
 ---
 
-## 七、构建与部署
-
-### 7.1 构建 SDK 本身
-
-```bash
-cd NapCatSDK
-mvn clean package
-# 产物：target/napcat-jni-bridge.jar
-```
-
-### 7.2 构建你的插件
-
-**`pom.xml` 示例：**
-
-```xml
-<project>
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>com.example</groupId>
-    <artifactId>my-plugin</artifactId>
-    <version>1.0.0</version>
-
-    <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-    </properties>
-
-    <dependencies>
-        <dependency>
-            <groupId>com.napcat</groupId>
-            <artifactId>napcat-jni-sdk</artifactId>
-            <version>1.0.0</version>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
-
-    <build>
-        <finalName>my-plugin</finalName>
-    </build>
-</project>
-```
-
-> ⚠️ **重要**：SDK 依赖必须用 `provided` 作用域，否则会与桥接器中的依赖冲突。
-
-**本地安装 SDK 到 Maven 仓库：**
-
-```bash
-cd NapCatSDK
-mvn install -DskipTests
-```
-
-之后在你的插件项目中就能引用 `com.napcat:napcat-jni-sdk:1.0.0`。
-
-**构建插件 JAR：**
-
-```bash
-cd my-plugin-project
-mvn clean package
-# 产物：target/my-plugin.jar
-```
-
-### 7.3 部署插件
-
-1. 把 `my-plugin.jar` 复制到：
-
-   ```
-   <NapCat工作目录>/config/plugins/napcat-plugin-jni/java-plugins/
-   ```
-
-2. 在 WebUI「插件管理」中找到 `napcat-plugin-jni`，点击「重载」。
-
-3. 查看日志确认加载成功：
-
-   ```
-   [PluginLoader] loaded plugin: my-plugin (1.0.0)
-   ```
-
-### 7.4 多插件共存
-
-`java-plugins/` 目录下可放置多个 JAR，每个 JAR 一个插件：
-
-```
-java-plugins/
-├── hello-plugin.jar
-├── welcome-plugin.jar
-└── schedule-plugin.jar
-```
-
-桥接器启动时会扫描所有 JAR 并分别加载。
-
----
-
-## 八、常见问题
+## 七、常见问题
 
 ### Q1：插件加载失败，提示 `ClassNotFoundException`
 
@@ -860,4 +776,3 @@ ctx.emitEvent(customEvent);
 
 ---
 
-> 更多示例请参考 SDK 自带的 [DemoPlugin.java](src/main/java/com/napcat/jni/examples/DemoPlugin.java)。

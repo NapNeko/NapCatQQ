@@ -1,0 +1,123 @@
+# ============================================================
+# NapCat JNI SDK - 自动发布到 Sonatype Maven Central Portal
+# Namespace: io.github.cindifind
+# 触发条件：
+#   1. 推送 tag: v*   (例如 v1.0.0)
+#   2. Actions 页面手动 workflow_dispatch 触发（便于调试）
+# ============================================================
+name: Publish to Maven Central Portal
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: 'Override version to publish (optional). Default = tag version.'
+        required: false
+        default: ''
+
+env:
+  JAVA_VERSION: '11'
+  JAVA_DISTRIBUTION: 'temurin'
+  MAVEN_ARGS: '-B -ntp --show-version'
+
+jobs:
+  publish:
+    name: Build, Sign & Publish to Central Portal
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Java ${{ env.JAVA_VERSION }} (${{ env.JAVA_DISTRIBUTION }})
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          # settings.xml 自动写入 serverId=central 的凭据
+          server-id: central
+          server-username: CENTRAL_PORTAL_USERNAME
+          server-password: CENTRAL_PORTAL_PASSWORD
+          # GPG 私钥与密码（必须是 secret 引用，不能是字符串）
+          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+          gpg-passphrase: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+          cache: maven
+
+      - name: Derive version from tag
+        id: version
+        shell: bash
+        run: |
+          if [[ -n "${{ github.event.inputs.release_version }}" ]]; then
+            VER="${{ github.event.inputs.release_version }}"
+          elif [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            VER="${GITHUB_REF#refs/tags/v}"
+          else
+            echo "No tag or manual version. Publish cannot continue."
+            exit 1
+          fi
+          echo "version=${VER}" >> "$GITHUB_OUTPUT"
+          echo "Publishing version: ${VER}"
+
+      - name: Override pom.xml version
+        run: |
+          mvn $MAVEN_ARGS versions:set -DnewVersion="${{ steps.version.outputs.version }}" -DprocessAllModules=true -DgenerateBackupPoms=false
+
+      - name: Verify GPG keyring (diagnostic)
+        shell: bash
+        env:
+          GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+        run: |
+          echo "=== Secret keys in keyring ==="
+          gpg --batch --list-secret-keys --keyid-format LONG || true
+          echo ""
+          echo "=== Try signing a test payload ==="
+          echo "test" > /tmp/test.txt
+          if gpg --batch --yes --pinentry-mode loopback --passphrase "${GPG_PASSPHRASE}" \
+                 --detach-sign --armor /tmp/test.txt; then
+            echo "[OK] GPG signing works"
+            rm -f /tmp/test.txt /tmp/test.txt.asc
+          else
+            echo "[FAIL] GPG signing failed - passphrase may be wrong or key not imported"
+            exit 1
+          fi
+
+      - name: Show generated settings.xml (diagnostic)
+        run: |
+          echo "=== ~/.m2/settings.xml ==="
+          cat ~/.m2/settings.xml 2>/dev/null || echo "(not found)"
+
+      - name: Build, Javadoc, Sources, Sign & Publish to Central Portal
+        env:
+          CENTRAL_PORTAL_USERNAME: ${{ secrets.CENTRAL_PORTAL_USERNAME }}
+          CENTRAL_PORTAL_PASSWORD: ${{ secrets.CENTRAL_PORTAL_PASSWORD }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+        run: |
+          # 将完整输出保存到文件，便于失败时上传 artifact
+          set +e
+          mvn $MAVEN_ARGS clean deploy \
+            -DskipTests \
+            -Dgpg.passphrase="${MAVEN_GPG_PASSPHRASE}" \
+            -e 2>&1 | tee /tmp/mvn-deploy.log
+          MVN_EXIT=${PIPESTATUS[0]}
+          echo "Maven exit code: ${MVN_EXIT}"
+          # 复制日志到 target 便于上传
+          mkdir -p target
+          cp /tmp/mvn-deploy.log target/mvn-deploy.log
+          exit ${MVN_EXIT}
+
+      - name: Upload build artifacts (on success or failure)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: napcat-jni-sdk-build
+          path: |
+            target/*.jar
+            target/*.pom
+            target/*.asc
+            target/mvn-deploy.log
+          if-no-files-found: ignore
