@@ -71,6 +71,19 @@ jobs:
           echo "NAPCAT_VERSION=${VERSION}" >> $GITHUB_ENV
           echo "Latest tag: ${LATEST_TAG}"
           echo "Build version: ${VERSION}"
+      - name: Setup JDK 11 (for Java SDK build)
+        if: matrix.target.name == 'Framework'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+
+      - name: Setup Maven (for Java SDK build)
+        if: matrix.target.name == 'Framework'
+        uses: stCarolas/setup-maven@v5
+        with:
+          maven-version: 3.9.6
+
       - name: Build NapCat.${{ matrix.target.name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -78,6 +91,15 @@ jobs:
         run: |
           pnpm i
           pnpm --filter napcat-webui-frontend run build || exit 1
+          # Framework 构建需要前置：Java SDK + JNI 插件
+          if [ "${{ matrix.target.name }}" = "Framework" ]; then
+            echo "构建 Java SDK (fat-jar bridge)..."
+            cd NapCatSDK && mvn -q -Pdev -Pbridge clean package -DskipTests && cd ..
+            echo "拷贝 napcat-jni-bridge.jar 到 packages/napcat-JNI/..."
+            cp -f NapCatSDK/target/napcat-jni-bridge.jar packages/napcat-JNI/napcat-jni-bridge.jar
+            echo "构建 JNI 插件..."
+            pnpm run build:plugin-jni || exit 1
+          fi
           pnpm run ${{ matrix.target.build_cmd }}
           pnpm --filter napcat-plugin-builtin run build || exit 1
           mv ${{ matrix.target.src_dir }} ${{ matrix.target.dist_dir }}

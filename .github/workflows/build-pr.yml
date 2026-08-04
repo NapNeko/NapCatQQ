@@ -180,6 +180,17 @@ jobs:
           version: 9
           run_install: false
 
+      - name: Setup JDK 11 (for Java SDK build)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+
+      - name: Setup Maven (for Java SDK build)
+        uses: stCarolas/setup-maven@v5
+        with:
+          maven-version: 3.9.6
+
       - name: Generate Version
         id: version
         working-directory: workspace

@@ -49,6 +49,22 @@ function getCommonSteps (): BuildStep[] {
 function getTargetSteps (target: BuildTarget): BuildStep[] {
   if (target === 'framework') {
     return [
+      // Framework 构建前置：Java SDK fat-jar + JNI 插件
+      {
+        name: 'Build Java SDK (fat-jar bridge)',
+        command: 'mvn -q -Pdev -Pbridge clean package -DskipTests',
+        errorMessage: 'Java SDK build failed',
+      },
+      {
+        name: 'Copy napcat-jni-bridge.jar',
+        command: 'cp -f NapCatSDK/target/napcat-jni-bridge.jar packages/napcat-JNI/napcat-jni-bridge.jar',
+        errorMessage: 'Failed to copy napcat-jni-bridge.jar',
+      },
+      {
+        name: 'Build JNI plugin',
+        command: 'pnpm run build:plugin-jni',
+        errorMessage: 'JNI plugin build failed',
+      },
       {
         name: 'Build Framework',
         command: 'pnpm run build:framework',
