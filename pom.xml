@@ -6,11 +6,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <!--
-        鏍圭洰褰?aggregator POM
-        浣滅敤锛氳 CI 鍦ㄤ粨搴撴牴鐩綍鎵ц mvn 鏃惰兘鎵惧埌椤圭洰锛?        鑷姩鏋勫缓 NapCatSDK 瀛愭ā鍧椼€?        鏈湴寮€鍙戜粛鎺ㄨ崘 cd NapCatSDK && mvn ... 鏂瑰紡銆?    -->
+        根目录 aggregator POM
+        作用：让 CI 在仓库根目录执行 mvn 时能找到项目，
+        自动构建 NapCatSDK 子模块。
+        本地开发仍推荐 cd NapCatSDK && mvn ... 方式。
+    -->
     <groupId>io.github.cindifind</groupId>
     <artifactId>napcat-jni-parent</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <packaging>pom</packaging>
 
     <name>NapCat JNI Parent</name>

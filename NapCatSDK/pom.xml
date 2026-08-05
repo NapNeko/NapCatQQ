@@ -8,7 +8,7 @@
     <!-- ==================== Maven Central 发布坐标 ==================== -->
     <groupId>io.github.cindifind</groupId>
     <artifactId>napcat-jni-sdk</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
 
     <name>NapCat JNI SDK</name>

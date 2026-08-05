@@ -1,9 +1,9 @@
 # NapCat Java SDK 使用文档
 
-> 版本：1.0.0 · 适用于 NapCat JNI 插件桥接器
+> 版本：1.0.1 · 适用于 NapCat JNI 插件桥接器
 > 通信方式：子进程 + NDJSON / JSON-RPC 2.0
 > **Java 版本兼容：JDK 8 ~ JDK 26（编译时 targeting Java 8 字节码）**
-> **Maven Central 坐标**：`io.github.cindifind:napcat-jni-sdk:1.0.0`
+> **Maven Central 坐标**：`io.github.cindifind:napcat-jni-sdk:1.0.1`
 > **Central Portal Namespace**：`io.github.cindifind`
 
 NapCat Java SDK 让你用 Java 编写 QQ 机器人插件，通过 OneBot 11 协议与 NapCat 主程序交互。本 SDK 封装了进程间通信、插件生命周期、Action 调用、日志、事件推送等能力，开发者只需实现 `NapCatPlugin` 接口即可。
@@ -91,7 +91,7 @@ entry=com.example.HelloPlugin
 <dependency>
     <groupId>io.github.cindifind</groupId>
     <artifactId>napcat-jni-sdk</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <scope>provided</scope>
 </dependency>
 ```
@@ -100,7 +100,7 @@ entry=com.example.HelloPlugin
 >
 > Gradle：
 > ```gradle
-> compileOnly 'io.github.cindifind:napcat-jni-sdk:1.0.0'
+> compileOnly 'io.github.cindifind:napcat-jni-sdk:1.0.1'
 > ```
 
 ---
