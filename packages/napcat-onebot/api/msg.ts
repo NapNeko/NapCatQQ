@@ -74,6 +74,7 @@ type Ob11ToRawConverters = {
 export type SendMessageContext = {
   deleteAfterSentFiles: string[],
   peer: Peer;
+  usePacketVideoMetadata?: boolean;
 };
 
 export type RecvMessageContext = {
@@ -1219,7 +1220,10 @@ export class OneBotMsgApi {
   async createSendElements (
     messageData: OB11MessageData[],
     peer: Peer,
-    ignoreTypes: OB11MessageDataType[] = []
+    ignoreTypes: OB11MessageDataType[] = [],
+    options: {
+      usePacketVideoMetadata?: boolean;
+    } = {}
   ) {
     const deleteAfterSentFiles: string[] = [];
     const callResultList: Array<Promise<SendMessageElement | undefined>> = [];
@@ -1236,7 +1240,11 @@ export class OneBotMsgApi {
       }
       const callResult = converter(
         sendMsg,
-        { peer, deleteAfterSentFiles }
+        {
+          peer,
+          deleteAfterSentFiles,
+          usePacketVideoMetadata: options.usePacketVideoMetadata,
+        }
       )?.catch(undefined);
       callResultList.push(callResult);
     }

@@ -245,7 +245,12 @@ export class SendMsgBase extends OneBotAction<SendMsgPayload, ReturnDataType> {
             });
           }
         } else {
-          const sendElementsCreateReturn = await this.obContext.apis.MsgApi.createSendElements(OB11Data, msgPeer);
+          const sendElementsCreateReturn = await this.obContext.apis.MsgApi.createSendElements(
+            OB11Data,
+            msgPeer,
+            [],
+            { usePacketVideoMetadata: true }
+          );
           sendElements = sendElementsCreateReturn.sendElements;
           delFiles.push(...sendElementsCreateReturn.deleteAfterSentFiles);
         }

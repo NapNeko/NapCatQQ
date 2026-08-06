@@ -129,9 +129,16 @@ export class OneBotFileApi {
     }
     const thumbDir = path.replace(`${pathLib.sep}Ori${pathLib.sep}`, `${pathLib.sep}Thumb${pathLib.sep}`);
     fs.mkdirSync(pathLib.dirname(thumbDir), { recursive: true });
-    const thumbPath = pathLib.join(pathLib.dirname(thumbDir), `${md5}_0.jpg`);
+    const usePacketVideoMetadata = context.usePacketVideoMetadata === true;
+    const thumbExtension = usePacketVideoMetadata ? 'jpg' : 'png';
+    const thumbPath = pathLib.join(pathLib.dirname(thumbDir), `${md5}_0.${thumbExtension}`);
     try {
-      videoInfo = await FFmpegService.getVideoInfo(filePath, thumbPath);
+      if (usePacketVideoMetadata) {
+        videoInfo = await FFmpegService.getVideoInfo(filePath, thumbPath);
+      } else {
+        videoInfo = await FFmpegService.getVideoInfo(filePath, '');
+        await FFmpegService.extractLegacyVideoThumbnail(filePath, thumbPath);
+      }
       if (!fs.existsSync(thumbPath)) {
         this.core.context.logger.logError('获取视频缩略图失败', new Error('缩略图不存在'));
         throw new Error('获取视频缩略图失败');
@@ -152,6 +159,16 @@ export class OneBotFileApi {
     const thumbMd5 = await calculateFileMD5(thumbPath);
 
     const uploadName = (fileName || _fileName).toLocaleLowerCase().endsWith(`.${fileExt.toLocaleLowerCase()}`) ? (fileName || _fileName) : `${fileName || _fileName}.${fileExt}`;
+    const videoMetadata = usePacketVideoMetadata
+      ? {
+        fileTime: Math.max(0, Math.round(videoInfo.time)),
+        fileFormat: videoFormatByExtension[fileExt.toLowerCase()] ?? NTVideoType.VIDEO_FORMAT_MP4,
+        fileWidth: videoInfo.width,
+        fileHeight: videoInfo.height,
+      }
+      : {
+        fileTime: videoInfo.time,
+      };
     return {
       elementType: ElementType.VIDEO,
       elementId: '',
@@ -160,10 +177,7 @@ export class OneBotFileApi {
         filePath: path,
         videoMd5: md5,
         thumbMd5,
-        fileTime: Math.max(0, Math.round(videoInfo.time)),
-        fileFormat: videoFormatByExtension[fileExt.toLowerCase()] ?? NTVideoType.VIDEO_FORMAT_MP4,
-        fileWidth: videoInfo.width,
-        fileHeight: videoInfo.height,
+        ...videoMetadata,
         thumbPath: new Map([[0, thumbPath]]),
         thumbSize,
         thumbWidth: videoInfo.width,
