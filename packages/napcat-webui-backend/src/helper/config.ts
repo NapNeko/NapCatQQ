@@ -1,5 +1,4 @@
 import { webUiPathWrapper, getInitialWebUiToken } from '@/napcat-webui-backend/index';
-import { Type, Static } from '@sinclair/typebox';
 import { TypeCompiler } from '@sinclair/typebox/compiler';
 import { Value } from '@sinclair/typebox/value';
 import fs, { constants } from 'node:fs/promises';
@@ -7,39 +6,9 @@ import fs, { constants } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 import { deepMerge } from '../utils/object';
-import { themeType } from '../types/theme';
-import { getRandomToken } from '../utils/url';
+import { WebUiConfigSchema, type WebUiConfigType } from './config-schema';
 
-// 限制尝试端口的次数，避免死循环
-// 定义配置的类型
-const WebUiConfigSchema = Type.Object({
-  host: Type.String({ default: '::' }),
-  port: Type.Number({ default: 6099 }),
-  token: Type.String({ default: getRandomToken(12) }),
-  loginRate: Type.Number({ default: 10 }),
-  autoLoginAccount: Type.String({ default: '' }),
-  theme: themeType,
-  // 是否关闭WebUI
-  disableWebUI: Type.Boolean({ default: false }),
-  // 网络访问控制模式: 'none' | 'whitelist' | 'blacklist'
-  accessControlMode: Type.Union([
-    Type.Literal('none'),
-    Type.Literal('whitelist'),
-    Type.Literal('blacklist'),
-  ], { default: 'none' }),
-  // IP白名单列表
-  ipWhitelist: Type.Array(Type.String(), { default: [] }),
-  // IP黑名单列表
-  ipBlacklist: Type.Array(Type.String(), { default: [] }),
-  // 是否启用 X-Forwarded-For 获取真实IP
-  enableXForwardedFor: Type.Boolean({ default: false }),
-  // 是否启用双因素认证（2FA）
-  enable2FA: Type.Boolean({ default: false }),
-  // TOTP 密钥
-  totpSecret: Type.String({ default: '' }),
-});
-
-export type WebUiConfigType = Static<typeof WebUiConfigSchema>;
+export { resolveAutoLoginAccount, WebUiConfigSchema, type WebUiConfigType } from './config-schema';
 
 // 读取当前目录下名为 webui.json 的配置文件，如果不存在则创建初始化配置文件
 export class WebUiConfigWrapper {
@@ -240,6 +209,14 @@ export class WebUiConfigWrapper {
   // 更新自动登录账号
   async UpdateAutoLoginAccount (uin: string): Promise<void> {
     await this.UpdateWebUIConfig({ autoLoginAccount: uin });
+  }
+
+  getLastLoginAccount (): string | undefined {
+    return this.WebUiConfigData?.lastLoginAccount;
+  }
+
+  async UpdateLastLoginAccount (uin: string): Promise<void> {
+    await this.UpdateWebUIConfig({ lastLoginAccount: uin });
   }
 
   // 获取主题内容

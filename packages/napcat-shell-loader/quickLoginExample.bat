@@ -1,6 +1,6 @@
 @echo off
 REM 快速登录示例脚本
-REM -q 参数是可选的，不传则使用二维码登录
+REM QQ 号参数是可选的，作为启动脚本的第一个参数传入；不传则使用二维码登录
 REM 
 REM 使用方法（删掉对应系统那行的 REM）：
 REM ./launcher-user.bat 123456

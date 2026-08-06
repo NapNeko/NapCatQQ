@@ -24,7 +24,7 @@ import { createHash } from 'node:crypto';
 import { LoginListItem, NodeIKernelLoginService } from 'napcat-core/services';
 import qrcode from 'napcat-qrcode/lib/main';
 import { NapCatAdapterManager } from 'napcat-adapter';
-import { InitWebUi } from 'napcat-webui-backend/index';
+import { InitWebUi, WebUiConfig } from 'napcat-webui-backend/index';
 import { WebUiDataRuntime } from 'napcat-webui-backend/src/helper/Data';
 import { napCatVersion } from 'napcat-common/src/version';
 import { NodeIO3MiscListener } from 'napcat-core/listeners/NodeIO3MiscListener';
@@ -142,6 +142,11 @@ async function handleLogin (
   loginListener.onQRCodeLoginSucceed = async (loginResult) => {
     context.isLogined = true;
     WebUiDataRuntime.setQQLoginStatus(true);
+    try {
+      await WebUiConfig.UpdateLastLoginAccount(loginResult.uin);
+    } catch (error) {
+      logger.logWarn('[NapCat] [Login] 保存最近登录账号失败:', error);
+    }
     inner_resolve({
       uid: loginResult.uid,
       uin: loginResult.uin,
@@ -481,28 +486,18 @@ async function handleLoginInner (context: { isLogined: boolean; }, logger: LogWr
       if (!success && !attempted && !context.isLogined) loginService.getQRCodePicture();
     }
   } else {
-    logger.log('没有 -q 指令指定快速登录，将使用二维码登录方式');
+    logger.log('没有 -q 指令指定快速登录，将尝试配置账号或最近登录账号');
     if (historyLoginList.length > 0) {
       logger.log(`可用于快速登录 of QQ：\n${historyLoginList
         .map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`)
         .join('\n')
         }`);
     }
-    let hasAttemptedFallback = false;
     try {
-      // 检查是否配置了自动登录账号，并尝试 WebUi 快速/密码回退登录。
-      // 这可以避免在已经有自动登录配置的情况下过早输出二维码。
-      const quickLoginList = WebUiDataRuntime.getQQQuickLoginList() || [];
-      const hasAutoLogin = process.env['NAPCAT_QUICK_ACCOUNT'] || (quickLoginList.length > 0); // 假如有历史登录列表
-      if (hasAutoLogin || process.env['NAPCAT_QUICK_PASSWORD'] || process.env['NAPCAT_QUICK_PASSWORD_MD5']) {
-        hasAttemptedFallback = true;
-      }
       await WebUiDataRuntime.runWebUiConfigQuickFunction();
     } catch (error) {
       logger.logError('WebUi 快速登录失败 执行失败', error);
-    }
-    if (!hasAttemptedFallback && !context.isLogined) {
-      loginService.getQRCodePicture();
+      if (!context.isLogined) loginService.getQRCodePicture();
     }
   }
 
@@ -648,7 +643,8 @@ export async function NCoreInitShell () {
 
   logger.log('[NapCat] [Core] NapCat.Core Version: ' + napCatVersion);
   WebUiDataRuntime.setWorkingEnv(NapCatCoreWorkingEnv.Shell);
-  InitWebUi(logger, pathWrapper, logSubscription, statusHelperSubscription).then().catch(e => logger.logError(e));
+  await InitWebUi(logger, pathWrapper, logSubscription, statusHelperSubscription)
+    .catch(e => logger.logError(e));
   const engine = wrapper.NodeIQQNTWrapperEngine.get();
   const loginService = wrapper.NodeIKernelLoginService.get();
   let session: NodeIQQNTWrapperSession;
