@@ -6,6 +6,7 @@ import { platform } from 'node:os';
 import { LogWrapper } from '@/napcat-core/helper/log';
 import { FFmpegAdapterFactory } from './ffmpeg-adapter-factory';
 import type { IFFmpegAdapter } from './ffmpeg-adapter-interface';
+import { FFmpegExecAdapter } from './ffmpeg-exec-adapter';
 
 const getFFmpegPath = (tool: string, binaryPath?: string): string => {
   if (process.platform === 'win32' && binaryPath) {
@@ -91,6 +92,15 @@ export class FFmpegService {
      */
   public static async extractThumbnail (videoPath: string, thumbnailPath: string): Promise<void> {
     const adapter = await this.getAdapter();
+    await adapter.extractThumbnail(videoPath, thumbnailPath);
+  }
+
+  /**
+   * 直接发送到 QQ kernel 的旧视频元素使用 PNG 缩略图。
+   * Packet/forward 路径继续使用当前适配器生成的 JPEG。
+   */
+  public static async extractLegacyVideoThumbnail (videoPath: string, thumbnailPath: string): Promise<void> {
+    const adapter = new FFmpegExecAdapter(FFMPEG_CMD, FFPROBE_CMD);
     await adapter.extractThumbnail(videoPath, thumbnailPath);
   }
 
