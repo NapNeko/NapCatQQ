@@ -65,6 +65,10 @@ interface ApiListType {
   QuickActionApi: OneBotQuickActionApi;
   FileApi: OneBotFileApi;
 }
+
+const RECALL_EVENT_DEDUP_MAX_SIZE = 1_000;
+const RECALL_UPDATE_CLOCK_SKEW_SECONDS = 30;
+
 // OneBot实现类
 export class NapCatOneBot11Adapter {
   readonly core: NapCatCore;
@@ -76,6 +80,8 @@ export class NapCatOneBot11Adapter {
   actions: ActionMap;
   private readonly bootTime = Date.now() / 1000;
   recallEventCache = new Map<string, NodeJS.Timeout>();
+  private readonly reportedRecallEventCache = new Map<string, true>();
+  private readonly processingRecallEvents = new Map<string, Promise<void>>();
   constructor (core: NapCatCore, context: InstanceContext, pathWrapper: NapCatPathWrapper) {
     this.core = core;
     this.context = context;
@@ -384,36 +390,34 @@ export class NapCatOneBot11Adapter {
         this.context.logger.logError('处理发送消息失败', error);
       }
     };
+
+    msgListener.onMsgInfoListUpdate = async (msgList: RawMessage[]) => {
+      for (const msg of msgList) {
+        const element = this.getRecallElement(msg);
+        if (element && this.isCurrentRecallUpdate(msg)) {
+          // The gray-tip update is authoritative; the recall callback's sequence query can return a newer message.
+          await this.handleRecallMessage(msg, element);
+        }
+      }
+    };
+
     msgListener.onMsgRecall = async (chatType: ChatType, uid: string, msgSeq: string) => {
       const peer: Peer = {
         chatType,
         peerUid: uid,
         guildId: '',
       };
-      let msg = (await this.core.apis.MsgApi.queryMsgsWithFilterExWithSeq(peer, msgSeq)).msgList.find(e => e.msgType === NTMsgType.KMSGTYPEGRAYTIPS);
-      const element = msg?.elements.find(e => !!e.grayTipElement?.revokeElement);
-      if (msg && element?.grayTipElement?.revokeElement.isSelfOperate) {
-        const isSelfDevice = this.recallEventCache.has(msg.msgId);
-        if (isSelfDevice) {
-          await this.core.eventWrapper.registerListen('NodeIKernelMsgListener/onMsgRecall',
-            (chatType: ChatType, uid: string, msgSeq: string) => {
-              return chatType === msg?.chatType && uid === msg?.peerUid && msgSeq === msg?.msgSeq;
-            }
-          ).catch(() => {
-            msg = undefined;
-            this.context.logger.logDebug('自操作消息撤回事件');
-          });
+      try {
+        const msg = (await this.core.apis.MsgApi.queryMsgsWithFilterExWithSeq(peer, msgSeq)).msgList
+          .find(message => this.getRecallElement(message));
+        const element = msg && this.getRecallElement(msg);
+        if (msg && element) {
+          await this.handleRecallMessage(msg, element);
+        } else {
+          this.context.logger.logDebug(`撤回回调暂未查询到灰条消息，等待消息更新: ${chatType}/${uid}/${msgSeq}`);
         }
-      }
-      if (msg && element) {
-        const recallEvent = await this.emitRecallMsg(msg, element);
-        try {
-          if (recallEvent) {
-            await this.networkManager.emitEvent(recallEvent);
-          }
-        } catch (e) {
-          this.context.logger.logError('处理消息撤回失败', e);
-        }
+      } catch (e) {
+        this.context.logger.logError('查询撤回消息失败', e);
       }
     };
     msgListener.onKickedOffLine = async (kick) => {
@@ -659,6 +663,86 @@ export class NapCatOneBot11Adapter {
       }
     } catch (e) {
       this.context.logger.logError('constructPrivateEvent error: ', e);
+    }
+  }
+
+  private getRecallElement (message: RawMessage): MessageElement | undefined {
+    if (message.msgType !== NTMsgType.KMSGTYPEGRAYTIPS) {
+      return undefined;
+    }
+    return message.elements.find(element => !!element.grayTipElement?.revokeElement);
+  }
+
+  private isCurrentRecallUpdate (message: RawMessage): boolean {
+    const recallTime = Number(message.recallTime);
+    if (!Number.isFinite(recallTime) || recallTime <= 0) {
+      return false;
+    }
+    const recallTimeInSeconds = recallTime > 10_000_000_000 ? recallTime / 1000 : recallTime;
+    return recallTimeInSeconds >= this.bootTime - RECALL_UPDATE_CLOCK_SKEW_SECONDS;
+  }
+
+  private getRecallEventKey (message: RawMessage): string {
+    return `${message.chatType}/${message.peerUid}/${message.msgId}`;
+  }
+
+  private hasReportedRecallEvent (key: string): boolean {
+    return this.reportedRecallEventCache.has(key);
+  }
+
+  private markRecallEventReported (key: string): void {
+    this.reportedRecallEventCache.delete(key);
+    this.reportedRecallEventCache.set(key, true);
+    while (this.reportedRecallEventCache.size > RECALL_EVENT_DEDUP_MAX_SIZE) {
+      const oldestKey = this.reportedRecallEventCache.keys().next().value;
+      if (oldestKey === undefined) break;
+      this.reportedRecallEventCache.delete(oldestKey);
+    }
+  }
+
+  private async handleRecallMessage (message: RawMessage, element: MessageElement): Promise<void> {
+    const revokeElement = element.grayTipElement?.revokeElement;
+    if (!revokeElement) return;
+
+    if (revokeElement.isSelfOperate) {
+      const selfRecallTimeout = this.recallEventCache.get(message.msgId);
+      if (selfRecallTimeout) {
+        clearTimeout(selfRecallTimeout);
+        this.recallEventCache.delete(message.msgId);
+        this.context.logger.logDebug('自操作消息撤回事件');
+      }
+    }
+
+    const key = this.getRecallEventKey(message);
+    while (!this.hasReportedRecallEvent(key)) {
+      const processing = this.processingRecallEvents.get(key);
+      if (processing) {
+        // A duplicate callback becomes the retry path if the in-flight report fails.
+        await processing;
+        continue;
+      }
+
+      const task = (async () => {
+        try {
+          const recallEvent = await this.emitRecallMsg(message, element);
+          if (recallEvent) {
+            await this.networkManager.emitEvent(recallEvent);
+            this.markRecallEventReported(key);
+          }
+        } catch (e) {
+          this.context.logger.logError('处理消息撤回失败', e);
+        }
+      })();
+
+      this.processingRecallEvents.set(key, task);
+      try {
+        await task;
+      } finally {
+        if (this.processingRecallEvents.get(key) === task) {
+          this.processingRecallEvents.delete(key);
+        }
+      }
+      return;
     }
   }
 
