@@ -28,7 +28,7 @@ echo (async () =^> {await import("file:///%NAPCAT_MAIN_PATH%")})() > "%NAPCAT_LO
 
 "%NAPCAT_LAUNCHER_PATH%" "%QQPath%" "%NAPCAT_INJECT_PATH%" %*
 
-REM Optional: -q <QQ_NUMBER> for quick login, omit for QR code login
-REM Example: "%NAPCAT_LAUNCHER_PATH%" "%QQPath%" "%NAPCAT_INJECT_PATH%" -q 123456
+REM Optional: pass the QQ number as the first argument for quick login; omit it for QR code login
+REM Example: "%~f0" 123456
 
 pause
