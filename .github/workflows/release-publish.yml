@@ -12,7 +12,7 @@ permissions: write-all
 
 env:
   OPENAI_API_URL: https://openrouter.ai/api/v1/chat/completions
-  OPENAI_MODEL: "z-ai/glm-4.5-air:free"
+  OPENAI_MODEL: "google/gemma-4-26b-a4b-it:free"
   RELEASE_NAME: "NapCat"
 
 jobs:
@@ -90,7 +90,7 @@ jobs:
           mkdir -p /tmp/napcat-downloads
           cd /tmp/napcat-downloads
 
-          NT_URL="https://dldir1v6.qq.com/qqfile/qq/QQNT/32876254/QQ9.9.27.45627_x64.exe"
+          NT_URL="https://qqdl.gtimg.cn/qqfile/QQNT/9.9.32/beta/a33ab721/QQ9.9.32.50969_x64.exe"
           echo "Downloading QQ installer..."
           aria2c -x16 -s16 -k1M -o "QQ_x64.exe" "$NT_URL"
 
