@@ -247,6 +247,7 @@ async function startWorker (passQuickLogin: boolean = true, secretKey?: string, 
       ...(preferredPort ? { NAPCAT_WEBUI_PREFERRED_PORT: String(preferredPort) } : {}),
     },
     stdio: isElectron ? 'pipe' : ['inherit', 'pipe', 'pipe', 'ipc'],
+    ...(!isElectron ? { execArgv: ['--no-sandbox'] } : {}),
   });
 
   currentWorker = child;

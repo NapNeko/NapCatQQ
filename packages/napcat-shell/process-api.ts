@@ -34,6 +34,7 @@ export interface IWorkerProcess {
 export interface ProcessOptions {
   env: NodeJS.ProcessEnv;
   stdio: 'pipe' | 'ignore' | 'inherit' | Array<'pipe' | 'ignore' | 'inherit' | 'ipc'>;
+  execArgv?: string[];
 }
 
 /**
@@ -168,7 +169,7 @@ export async function createProcessManager (): Promise<{
   manager: IProcessManager;
   isElectron: boolean;
 }> {
-  const isElectron = typeof process.versions['electron'] !== 'undefined';
+  const isElectron = process.env['NAPCAT_FORCE_NODE_PROCESS'] !== '1' && typeof process.versions['electron'] !== 'undefined';
 
   if (isElectron) {
     // @ts-ignore - electron 运行时存在但类型声明可能缺失
