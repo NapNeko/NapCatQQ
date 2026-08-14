@@ -187,14 +187,14 @@ export class LogWrapper implements ILogWrapper {
 
   _log (level: LogLevel, ...args: any[]) {
     if (this.consoleLogEnabled || this.fileLogEnabled) {
-      const message = this.formatMsg(args);
+      // eslint-disable-next-line no-control-regex
+      const message = this.formatMsg(args).replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]|\x1B\[[0-?]*[ -/]*[@-~]|\x1B/g, '');
       if (this.consoleLogEnabled && this.fileLogEnabled) {
         this.logger.log(level, message);
       } else if (this.consoleLogEnabled) {
         this.logger.log(level, message);
       } else if (this.fileLogEnabled) {
-        // eslint-disable-next-line no-control-regex
-        this.logger.log(level, message.replace(/\x1B[@-_][0-?]*[ -/]*[@-~]/g, ''));
+        this.logger.log(level, message);
       }
       logSubscription.notify(JSON.stringify({ level, message }));
     }
