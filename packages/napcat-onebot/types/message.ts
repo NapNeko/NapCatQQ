@@ -71,6 +71,7 @@ export const OB11MessageReplySchema = Type.Object({
   data: Type.Object({
     id: Type.Optional(Type.String({ description: '消息ID的短ID映射' })),
     seq: Type.Optional(Type.Number({ description: '消息序列号，优先使用' })),
+    text: Type.Optional(Type.String({ description: '被引用消息文本（记录命中时直接携带，避免二次查询）' })),
   }),
 }, { $id: 'OB11MessageReply', description: '回复消息段' });
 
