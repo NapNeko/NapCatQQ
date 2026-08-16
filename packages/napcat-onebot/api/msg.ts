@@ -287,19 +287,27 @@ export class OneBotMsgApi {
       };
 
       // 创建回复数据的通用方法
-      const createReplyData = (msgId: string): OB11MessageData => ({
+      const createReplyData = (msgId: string, text?: string): OB11MessageData => ({
         type: OB11MessageDataType.reply,
         data: {
           id: MessageUnique.createUniqueMsgId(peer, msgId).toString(),
+          ...(text ? { text } : {}),
         },
       });
 
       // 查找记录
       const records = msg.records.find(msgRecord => msgRecord.msgId === element?.sourceMsgIdInRecords);
 
-      // 特定账号的特殊处理
-      if (records && (records.peerUin === '284840486' || records.peerUin === '1094950020')) {
-        return createReplyData(records.msgId);
+      // 记录命中时直接用记录中的 msgId 构造 reply 段。
+      // 原实现只对特定账号（开发者测试号）走此捷径，其余账号走下方 seq 查询链；
+      // 但私聊中引用消息的 replayMsgSeq 常被解析为 0（引用 bot 或自己发的消息时尤甚），
+      // 查询链必然全部失败 → reply 段被静默丢弃（参见 #1508）。
+      // records.msgId 即被引用消息的真实 msgId，直接使用无需再查询。
+      if (records && records.msgId && records.msgId !== '0') {
+        const quotedText = (element?.sourceMsgTextElems || [])
+          .map(el => el.textElemContent ?? '')
+          .join('');
+        return createReplyData(records.msgId, quotedText);
       }
 
       // 获取消息的通用方法组
