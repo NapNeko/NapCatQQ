@@ -14,7 +14,7 @@
     "napcat-vite": "workspace:*"
   },
   "devDependencies": {
-    "tsx": "^4.7.1",
+    "tsx": "^4.23.12",
     "vite": "^6.0.0"
   }
 }
