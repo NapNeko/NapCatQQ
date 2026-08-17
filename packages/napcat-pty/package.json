@@ -14,7 +14,7 @@
         }
     },
     "dependencies": {
-        "@homebridge/node-pty-prebuilt-multiarch":"^0.12.0"
+        "@homebridge/node-pty-prebuilt-multiarch":"^0.14.1"
 
     },
     "devDependencies": {
