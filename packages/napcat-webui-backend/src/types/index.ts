@@ -39,11 +39,22 @@ export enum NapCatCoreWorkingEnv {
   Shell = 1,
   Framework = 2,
 }
+
+export type QQLoginPhase =
+  | 'waiting_qrcode'
+  | 'generating_qrcode'
+  | 'qrcode_scanned'
+  | 'initializing'
+  | 'ready'
+  | 'offline'
+  | 'reconnecting';
+
 export interface LoginRuntimeType {
   workingEnv: NapCatCoreWorkingEnv;
   LoginCurrentTime: number;
   LoginCurrentRate: number;
   QQLoginStatus: boolean;
+  QQLoginPhase: QQLoginPhase;
   QQQRCodeURL: string;
   QQLoginUin: string;
   QQLoginInfo: SelfInfo;
