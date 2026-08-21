@@ -860,12 +860,23 @@ export class OneBotMsgApi {
       // 获取签名服务地址
       let signUrl = this.obContext.configLoader.configData.musicSignUrl;
       if (!signUrl) {
-        signUrl = 'https://ss.xingzhige.com/music_card/card';// 感谢思思！已获思思许可 其余地方使用请自行询问
+        signUrl = 'https://qqbotark.569879.xyz/'; //首选,yibai音卡签名
       }
 
       // 请求签名服务
       try {
-        const musicJson = await RequestUtil.HttpGetJson<string>(signUrl, 'POST', postData);
+        let musicJson: string;
+        try {
+          musicJson = await RequestUtil.HttpGetJson<string>(signUrl, 'POST', postData);
+        } catch {
+          // 首选失败，降级到备选
+          this.core.context.logger.logError('[音乐卡片签名] 首选地址失败，尝试备选地址...');
+          musicJson = await RequestUtil.HttpGetJson<string>(
+            'https://ss.xingzhige.com/music_card/card', //思思的音卡签名
+            'POST',
+            postData
+          );
+        }
         return this.ob11ToRawConverters.json({
           data: { data: musicJson },
           type: OB11MessageDataType.json,
