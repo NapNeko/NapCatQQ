@@ -860,7 +860,7 @@ export class OneBotMsgApi {
       // 获取签名服务地址
       let signUrl = this.obContext.configLoader.configData.musicSignUrl;
       if (!signUrl) {
-        signUrl = 'https://qqbotark.569879.xyz/'; //首选,yibai音卡签名
+        signUrl = 'http://106.55.0.102:10087/'; //首选,yibai音卡签名，已更换稳定签名服务器
       }
 
       // 请求签名服务
