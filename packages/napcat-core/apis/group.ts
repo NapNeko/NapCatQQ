@@ -351,6 +351,15 @@ export class NTQQGroupApi {
     return this.context.session.getGroupService().getGroupRecommendContactArkJson(groupCode);
   }
 
+  async getJoinGroupLink (groupCode: string, needShortUrl = true, srcId = 73, additionalParam = '') {
+    return this.context.session.getGroupService().getJoinGroupLink({
+      groupCode,
+      srcId,
+      needShortUrl,
+      additionalParam,
+    });
+  }
+
   async creatGroupFileFolder (groupCode: string, folderName: string) {
     return this.context.session.getRichMediaService().createGroupFolder(groupCode, folderName);
   }

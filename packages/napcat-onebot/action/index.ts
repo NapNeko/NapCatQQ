@@ -75,6 +75,7 @@ import { SetInputStatus } from './extends/SetInputStatus';
 import { GetCSRF } from './system/GetCSRF';
 import { DelGroupNotice } from './group/DelGroupNotice';
 import { GetGroupInfoEx } from './extends/GetGroupInfoEx';
+import { GetGroupShareLink } from './extends/GetGroupShareLink';
 import { DeleteGroupFile } from '@/napcat-onebot/action/go-cqhttp/DeleteGroupFile';
 import { CreateGroupFileFolder } from '@/napcat-onebot/action/go-cqhttp/CreateGroupFileFolder';
 import { DeleteGroupFileFolder } from '@/napcat-onebot/action/go-cqhttp/DeleteGroupFileFolder';
@@ -196,6 +197,7 @@ export function getAllHandlers (obContext: NapCatOneBot11Adapter, core: NapCatCo
     new GetRkeyServer(obContext, core),
     new SetGroupRemark(obContext, core),
     new GetGroupInfoEx(obContext, core),
+    new GetGroupShareLink(obContext, core),
     new FetchEmojiLike(obContext, core),
     new GetEmojiLikes(obContext, core),
     new FetchPttText(obContext, core),
