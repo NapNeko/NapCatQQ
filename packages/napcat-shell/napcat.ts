@@ -247,7 +247,14 @@ async function startWorker (passQuickLogin: boolean = true, secretKey?: string, 
       ...(preferredPort ? { NAPCAT_WEBUI_PREFERRED_PORT: String(preferredPort) } : {}),
     },
     stdio: isElectron ? 'pipe' : ['inherit', 'pipe', 'pipe', 'ipc'],
-    ...(!isElectron ? { execArgv: ['--no-sandbox'] } : {}),
+    // --no-sandbox 是 Chromium 开关，仅当子进程完整引导 Electron（未设 ELECTRON_RUN_AS_NODE）时
+    // 才会被解析；纯 Node / Electron node 模式子进程会因 bad option 以退出码 9 拒绝启动
+    // （ELECTRON_RUN_AS_NODE 变量存在即触发 node 模式，与取值无关）
+    ...(!isElectron &&
+      process.versions['electron'] &&
+      process.env['ELECTRON_RUN_AS_NODE'] === undefined
+      ? { execArgv: ['--no-sandbox'] }
+      : {}),
   });
 
   currentWorker = child;
