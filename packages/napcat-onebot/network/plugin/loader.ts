@@ -249,7 +249,7 @@ export class PluginLoader {
     if (hit) {
       return `sensitive keyword "${hit}"`;
     }
-    return "not in official plugin whitelist";
+    return 'not in official plugin whitelist';
   }
 
   /**

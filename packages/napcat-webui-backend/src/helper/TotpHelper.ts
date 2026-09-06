@@ -10,7 +10,7 @@ export class TotpHelper {
    * @param length 密钥长度（字节），默认16字节
    * @returns Base32编码的密钥
    */
-  static generateSecret(length: number = 16): string {
+  static generateSecret (length: number = 16): string {
     const buffer = crypto.randomBytes(length);
     return this.toBase32(buffer);
   }
@@ -23,7 +23,7 @@ export class TotpHelper {
    * @param window 允许的时间窗口（前后各多少个时间步长），默认1
    * @returns 是否验证通过
    */
-  static verifyTotp(
+  static verifyTotp (
     secret: string,
     code: string,
     timeStep: number = 30,
@@ -47,7 +47,7 @@ export class TotpHelper {
    * @param counter 计数器
    * @returns 6位数字验证码
    */
-  private static generateHotp(secret: string, counter: number): string {
+  private static generateHotp (secret: string, counter: number): string {
     // 将 Base32 密钥转换为字节
     const key = this.base32ToBytes(secret);
 
@@ -93,7 +93,7 @@ export class TotpHelper {
    * @param issuer 发行方名称
    * @returns otpauth:// URL
    */
-  static generateQrCodeUrl(
+  static generateQrCodeUrl (
     secret: string,
     account: string,
     issuer: string
@@ -108,7 +108,7 @@ export class TotpHelper {
    * @param buffer 字节数组
    * @returns Base32编码字符串
    */
-  private static toBase32(buffer: Buffer): string {
+  private static toBase32 (buffer: Buffer): string {
     const base32Alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
     let output = '';
 
@@ -138,7 +138,7 @@ export class TotpHelper {
    * @param base32 Base32编码字符串
    * @returns 字节数组
    */
-  private static base32ToBytes(base32: string): Buffer {
+  private static base32ToBytes (base32: string): Buffer {
     const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
     const base32Clean = base32.toUpperCase().replace(/=+$/, '');
 

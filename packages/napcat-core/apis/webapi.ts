@@ -490,10 +490,10 @@ export class NTQQWebApi {
     const client_key = Date.now() * 1000;
     return await this.context.session.getAlbumService().doQunComment(
       random_seq, {
-      map_info: [],
-      map_bytes_info: [],
-      map_user_account: [],
-    },
+        map_info: [],
+        map_bytes_info: [],
+        map_user_account: [],
+      },
       qunId,
       2,
       createAlbumMediaFeed(uin, albumId, lloc),

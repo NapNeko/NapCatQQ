@@ -457,99 +457,101 @@ const WebUIConfigCard = () => {
           </span>
         </div>
 
-        {twoFAStatus.enable2FA ? (
-          <div className='bg-green-50 border border-green-200 rounded-lg p-4'>
-            <div className='text-sm text-green-700 mb-3'>✅ 双因素认证已启用</div>
-            <div className='mb-3'>
-              <div className='text-sm text-default-600 mb-2'>输入验证码以禁用</div>
-              <input
-                type='text'
-                inputMode='numeric'
-                pattern='[0-9]*'
-                maxLength={6}
-                value={disableTotpCode}
-                onChange={(e) => setDisableTotpCode(e.target.value.replace(/\D/g, ''))}
-                placeholder='000000'
-                className='w-32 px-3 py-2 border border-default-300 rounded-lg text-center text-lg tracking-widest'
-              />
-            </div>
-            <Button
-              color='danger'
-              variant='flat'
-              onPress={disableTwoFA}
-              isLoading={isDisabling2FA}
-              disabled={!disableTotpCode || disableTotpCode.length !== 6}
-              className='w-fit'
-            >
-              禁用双因素认证
-            </Button>
-          </div>
-        ) : (
-          <>
-            <div className='text-sm text-default-400 mb-2'>
-              启用双因素认证后，登录时需要额外输入Authenticator应用生成的验证码
-            </div>
-            <div className='bg-default-50 border border-default-200 rounded-lg p-4'>
+        {twoFAStatus.enable2FA
+          ? (
+            <div className='bg-green-50 border border-green-200 rounded-lg p-4'>
+              <div className='text-sm text-green-700 mb-3'>✅ 双因素认证已启用</div>
+              <div className='mb-3'>
+                <div className='text-sm text-default-600 mb-2'>输入验证码以禁用</div>
+                <input
+                  type='text'
+                  inputMode='numeric'
+                  pattern='[0-9]*'
+                  maxLength={6}
+                  value={disableTotpCode}
+                  onChange={(e) => setDisableTotpCode(e.target.value.replace(/\D/g, ''))}
+                  placeholder='000000'
+                  className='w-32 px-3 py-2 border border-default-300 rounded-lg text-center text-lg tracking-widest'
+                />
+              </div>
               <Button
-                color='secondary'
+                color='danger'
                 variant='flat'
-                onPress={generateTwoFASecret}
-                isLoading={isGeneratingSecret}
-                className='w-fit mb-4'
+                onPress={disableTwoFA}
+                isLoading={isDisabling2FA}
+                disabled={!disableTotpCode || disableTotpCode.length !== 6}
+                className='w-fit'
               >
-                <IoQrCode className='mr-2' />
-                生成密钥
+                禁用双因素认证
               </Button>
+            </div>
+          )
+          : (
+            <>
+              <div className='text-sm text-default-400 mb-2'>
+                启用双因素认证后，登录时需要额外输入Authenticator应用生成的验证码
+              </div>
+              <div className='bg-default-50 border border-default-200 rounded-lg p-4'>
+                <Button
+                  color='secondary'
+                  variant='flat'
+                  onPress={generateTwoFASecret}
+                  isLoading={isGeneratingSecret}
+                  className='w-fit mb-4'
+                >
+                  <IoQrCode className='mr-2' />
+                  生成密钥
+                </Button>
 
-              {twoFASecret && (
-                <>
-                  <div className='mb-4'>
-                    <div className='text-sm text-default-600 mb-2'>请使用 Authenticator 应用扫描下方二维码</div>
-                    <div className='flex items-center gap-4'>
-                      <div className='bg-white border border-default-300 rounded-lg p-3'>
-                        <QRCodeSVG
-                          value={twoFAQrCodeUrl}
-                          size={128}
-                          level='M'
-                          includeMargin={false}
-                        />
-                      </div>
-                      <div>
-                        <div className='text-xs text-default-500 mb-1'>密钥（手动输入用）</div>
-                        <div className='font-mono text-sm bg-default-100 px-3 py-2 rounded break-all max-w-[200px]'>
-                          {twoFASecret}
+                {twoFASecret && (
+                  <>
+                    <div className='mb-4'>
+                      <div className='text-sm text-default-600 mb-2'>请使用 Authenticator 应用扫描下方二维码</div>
+                      <div className='flex items-center gap-4'>
+                        <div className='bg-white border border-default-300 rounded-lg p-3'>
+                          <QRCodeSVG
+                            value={twoFAQrCodeUrl}
+                            size={128}
+                            level='M'
+                            includeMargin={false}
+                          />
+                        </div>
+                        <div>
+                          <div className='text-xs text-default-500 mb-1'>密钥（手动输入用）</div>
+                          <div className='font-mono text-sm bg-default-100 px-3 py-2 rounded break-all max-w-[200px]'>
+                            {twoFASecret}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                  <div className='mb-4'>
-                    <div className='text-sm text-default-600 mb-2'>输入Authenticator验证码</div>
-                    <input
-                      type='text'
-                      inputMode='numeric'
-                      pattern='[0-9]*'
-                      maxLength={6}
-                      value={twoFATotpCode}
-                      onChange={(e) => setTwoFATotpCode(e.target.value.replace(/\D/g, ''))}
-                      placeholder='000000'
-                      className='w-32 px-3 py-2 border border-default-300 rounded-lg text-center text-lg tracking-widest'
-                    />
-                  </div>
-                  <Button
-                    color='primary'
-                    variant='flat'
-                    onPress={enableTwoFA}
-                    isLoading={isEnabling2FA}
-                    disabled={!twoFATotpCode || twoFATotpCode.length !== 6}
-                    className='w-fit'
-                  >
-                    启用双因素认证
-                  </Button>
-                </>
-              )}
-            </div>
-          </>
-        )}
+                    <div className='mb-4'>
+                      <div className='text-sm text-default-600 mb-2'>输入Authenticator验证码</div>
+                      <input
+                        type='text'
+                        inputMode='numeric'
+                        pattern='[0-9]*'
+                        maxLength={6}
+                        value={twoFATotpCode}
+                        onChange={(e) => setTwoFATotpCode(e.target.value.replace(/\D/g, ''))}
+                        placeholder='000000'
+                        className='w-32 px-3 py-2 border border-default-300 rounded-lg text-center text-lg tracking-widest'
+                      />
+                    </div>
+                    <Button
+                      color='primary'
+                      variant='flat'
+                      onPress={enableTwoFA}
+                      isLoading={isEnabling2FA}
+                      disabled={!twoFATotpCode || twoFATotpCode.length !== 6}
+                      className='w-fit'
+                    >
+                      启用双因素认证
+                    </Button>
+                  </>
+                )}
+              </div>
+            </>
+          )}
       </div>
 
       <SaveButtons

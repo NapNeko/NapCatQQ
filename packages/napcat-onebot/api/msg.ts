@@ -860,7 +860,7 @@ export class OneBotMsgApi {
       // 获取签名服务地址
       let signUrl = this.obContext.configLoader.configData.musicSignUrl;
       if (!signUrl) {
-        signUrl = 'http://106.55.0.102:10087/'; //首选,yibai音卡签名，已更换稳定签名服务器
+        signUrl = 'http://106.55.0.102:10087/'; // 首选,yibai音卡签名，已更换稳定签名服务器
       }
 
       // 请求签名服务
@@ -872,7 +872,7 @@ export class OneBotMsgApi {
           // 首选失败，降级到备选
           this.core.context.logger.logError('[音乐卡片签名] 首选地址失败，尝试备选地址...');
           musicJson = await RequestUtil.HttpGetJson<string>(
-            'https://ss.xingzhige.com/music_card/card', //思思的音卡签名
+            'https://ss.xingzhige.com/music_card/card', // 思思的音卡签名
             'POST',
             postData
           );
