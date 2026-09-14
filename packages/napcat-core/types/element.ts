@@ -235,8 +235,16 @@ export interface StructLongMsgElement {
   resId: string;
 }
 
+export interface ReplyTextElem {
+  replyAbsElemType?: number;
+  textElemContent?: string;
+  faceElem?: unknown;
+  picElem?: unknown;
+}
+
 export interface ReplyElement {
   sourceMsgIdInRecords?: string;
+  sourceMsgTextElems?: ReplyTextElem[];
   replayMsgSeq: string;
   replayMsgId: string;
   senderUin: string;
