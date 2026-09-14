@@ -35,6 +35,11 @@ jobs:
         uses: actions/checkout@v5
         with:
           ref: ${{ inputs.version }}
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
       - name: Use Node.js 20.x
         uses: actions/setup-node@v6
         with:
@@ -43,7 +48,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          npm i -g pnpm
           pnpm i
           pnpm --filter napcat-webui-frontend run build || exit 1
           pnpm run ${{ matrix.target.build_cmd }}
@@ -414,11 +418,16 @@ jobs:
             NapCat.Shell.Windows.OneKey.zip
           draft: false
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
       - name: Update apifox
         env:
           APIFOX_TOKEN: ${{ secrets.APIFOX_TOKEN }}
         run: |
-          npm i -g pnpm
           pnpm i --ignore-scripts
           pnpm run build:openapi
 
