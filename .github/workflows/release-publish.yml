@@ -65,6 +65,11 @@ jobs:
   assemble-windows-node:
     needs: build
     runs-on: ubuntu-latest
+    env:
+      # QQ 9.9.31.49738; SHA256 matches the microsoft/winget-pkgs installer manifest.
+      QQ_URL: https://github.com/Rodert/qq-versions/releases/download/qq-packages-20260528-3e8913a2/QQ_9.9.31_260528_x64_01.exe
+      QQ_SHA256: 0beb5cb4ff776cba822caa0abadbd53f5892f12628a86dabea1b372c82c086bc
+      NODE_VERSION: '22.11.0'
     steps:
       - uses: actions/checkout@v5
         with:
@@ -80,12 +85,18 @@ jobs:
           sudo apt update
           sudo apt install -y aria2 unzip zip p7zip-full curl jq
 
+      - name: Generate download cache key
+        id: download-cache-key
+        run: |
+          DOWNLOAD_HASH=$(printf '%s\n' "$QQ_URL" "$QQ_SHA256" "$NODE_VERSION" | sha256sum | cut -d ' ' -f 1)
+          echo "key=napcat-downloads-v2-$DOWNLOAD_HASH" >> "$GITHUB_OUTPUT"
+
       - name: Cache QQ and Node.js downloads
         id: cache-downloads
         uses: actions/cache@v4
         with:
           path: /tmp/napcat-downloads
-          key: napcat-downloads-qq9.9.27.45627-node22.11.0
+          key: ${{ steps.download-cache-key.outputs.key }}
 
       - name: Download QQ and Node.js
         if: steps.cache-downloads.outputs.cache-hit != 'true'
@@ -94,14 +105,19 @@ jobs:
           mkdir -p /tmp/napcat-downloads
           cd /tmp/napcat-downloads
 
-          NT_URL="https://qqdl.gtimg.cn/qqfile/QQNT/9.9.32/beta/a33ab721/QQ9.9.32.50969_x64.exe"
           echo "Downloading QQ installer..."
-          aria2c -x16 -s16 -k1M -o "QQ_x64.exe" "$NT_URL"
+          # Retry download errors, including HTTP 404 responses.
+          curl --fail --location --retry 5 --retry-all-errors --retry-delay 5 \
+            --connect-timeout 30 --max-time 600 --user-agent "Mozilla/5.0" \
+            --output "QQ_x64.exe" "$QQ_URL"
 
-          NODE_VER="22.11.0"
-          NODE_URL="https://nodejs.org/dist/v$NODE_VER/node-v$NODE_VER-win-x64.zip"
-          echo "Downloading Node.js $NODE_VER..."
+          NODE_URL="https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-win-x64.zip"
+          echo "Downloading Node.js $NODE_VERSION..."
           aria2c -x1 -s1 -k1M -o "node-win-x64.zip" "$NODE_URL"
+
+      - name: Verify QQ installer
+        run: |
+          echo "$QQ_SHA256  /tmp/napcat-downloads/QQ_x64.exe" | sha256sum --check --strict -
 
       - name: Assemble NapCat.Shell.Windows.Node.zip
         run: |
@@ -159,8 +175,7 @@ jobs:
           # -----------------------------
           # 7) 拷贝 Node.exe 到 NapCat.Shell.Windows.Node
           # -----------------------------
-          NODE_VER="22.11.0"
-          cp -a "$NODE_EXTRACT/node-v$NODE_VER-win-x64/node.exe" "$OUT_DIR/" || true
+          cp -a "$NODE_EXTRACT/node-v$NODE_VERSION-win-x64/node.exe" "$OUT_DIR/" || true
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v6
