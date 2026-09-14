@@ -23,7 +23,7 @@
     "express": "^5.0.0",
     "express-rate-limit": "^7.5.0",
     "json5": "^2.2.3",
-    "multer": "^2.0.1",
+    "multer": "^2.3.0",
     "napcat-common": "workspace:*",
     "napcat-dpapi": "workspace:*",
     "napcat-pty": "workspace:*",
@@ -32,7 +32,7 @@
   "devDependencies": {
     "@types/compression": "^1.8.1",
     "@types/express": "^5.0.0",
-    "@types/multer": "^1.4.12",
+    "@types/multer": "^2.2.0",
     "@types/node": "^22.0.1",
     "@types/ws": "^8.5.12"
   },
