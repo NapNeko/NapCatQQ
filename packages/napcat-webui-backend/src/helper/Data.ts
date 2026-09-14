@@ -1,12 +1,13 @@
 import store from 'napcat-common/src/store';
 import { napCatVersion } from 'napcat-common/src/version';
-import { NapCatCoreWorkingEnv, type LoginRuntimeType } from '../types';
+import { NapCatCoreWorkingEnv, type LoginRuntimeType, type QQLoginPhase } from '../types';
 
 const LoginRuntime: LoginRuntimeType = {
   workingEnv: NapCatCoreWorkingEnv.Unknown,
   LoginCurrentTime: Date.now(),
   LoginCurrentRate: 0,
   QQLoginStatus: false, // 已实现 但太傻了 得去那边注册个回调刷新
+  QQLoginPhase: 'waiting_qrcode',
   QQQRCodeURL: '',
   QQLoginUin: '',
   QQLoginInfo: {
@@ -99,6 +100,14 @@ export const WebUiDataRuntime = {
 
   setQQLoginStatus (status: LoginRuntimeType['QQLoginStatus']): void {
     LoginRuntime.QQLoginStatus = status;
+  },
+
+  setQQLoginPhase (phase: QQLoginPhase): void {
+    LoginRuntime.QQLoginPhase = phase;
+  },
+
+  getQQLoginPhase (): QQLoginPhase {
+    return LoginRuntime.QQLoginPhase;
   },
 
   setQQLoginQrcodeURL (url: LoginRuntimeType['QQQRCodeURL']): void {
@@ -238,7 +247,23 @@ export const WebUiDataRuntime = {
   },
 
   refreshQRCode: async function () {
+    const previousQRCodeUrl = LoginRuntime.QQQRCodeURL;
     LoginRuntime.QQLoginError = '';
+    LoginRuntime.QQLoginPhase = 'generating_qrcode';
     await LoginRuntime.onRefreshQRCode();
+
+    const refreshTimeout = 10_000;
+    const deadline = Date.now() + refreshTimeout;
+    while (Date.now() < deadline) {
+      const qrcodeUrl = LoginRuntime.QQQRCodeURL;
+      if (qrcodeUrl && qrcodeUrl !== previousQRCodeUrl) {
+        LoginRuntime.QQLoginPhase = 'waiting_qrcode';
+        return qrcodeUrl;
+      }
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+
+    LoginRuntime.QQLoginPhase = previousQRCodeUrl ? 'waiting_qrcode' : 'offline';
+    throw new Error('二维码刷新超时：QQ 登录服务未返回新的二维码');
   },
 };

@@ -32,14 +32,23 @@ export default class QQManager {
 
   public static async checkQQLoginStatusWithQrcode () {
     const data = await serverRequest.post<
-      ServerResponse<{ qrcodeurl: string; isLogin: boolean; isOffline?: boolean; loginError?: string; }>
+      ServerResponse<{
+        qrcodeurl: string;
+        isLogin: boolean;
+        isOffline?: boolean;
+        loginError?: string;
+        loginPhase?: 'waiting_qrcode' | 'generating_qrcode' | 'qrcode_scanned' | 'initializing' | 'ready' | 'offline' | 'reconnecting';
+        qrLoginAccepted?: boolean;
+        coreReady?: boolean;
+      }>
     >('/QQLogin/CheckLoginStatus');
 
     return data.data.data;
   }
 
   public static async refreshQRCode () {
-    await serverRequest.post<ServerResponse<null>>('/QQLogin/RefreshQRcode');
+    const data = await serverRequest.post<ServerResponse<{ qrcodeurl: string; restarting?: boolean; }>>('/QQLogin/RefreshQRcode');
+    return data.data.data;
   }
 
   public static async getQQLoginQrcode () {

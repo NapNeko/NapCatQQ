@@ -105,6 +105,13 @@ export async function NCoreInitFramework (
       loginContext.isLogined = true;
       WebUiDataRuntime.setQQLoginStatus(true);
       WebUiDataRuntime.setQQLoginError('');
+      const oneBotContext = WebUiDataRuntime.getOneBotContext();
+      if (oneBotContext?.core?.selfInfo) {
+        oneBotContext.core.selfInfo.online = true;
+        WebUiDataRuntime.setQQLoginPhase('ready');
+      } else {
+        WebUiDataRuntime.setQQLoginPhase('initializing');
+      }
       await new Promise<void>(resolve => {
         registerInitCallback(() => resolve());
       });
@@ -118,6 +125,8 @@ export async function NCoreInitFramework (
 
     loginListener.onQRCodeGetPicture = ({ qrcodeUrl }) => {
       WebUiDataRuntime.setQQLoginQrcodeURL(qrcodeUrl);
+      WebUiDataRuntime.setQQLoginError('');
+      WebUiDataRuntime.setQQLoginPhase('waiting_qrcode');
       logger.log('[NapCat] [Framework] 二维码已更新, URL:', qrcodeUrl);
     };
 
@@ -146,9 +155,14 @@ export async function NCoreInitFramework (
         WebUiDataRuntime.setQQQuickLoginList(list.map((item) => item.uin.toString()));
         WebUiDataRuntime.setQQNewLoginList(list);
       }).catch(e => logger.logError('[NapCat] [Framework] 获取登录列表失败:', e));
+      if (!loginContext.isLogined) {
+        const requested = loginService.getQRCodePicture();
+        logger.logWarn('[NapCat] [Framework] 登录服务连接完成，正在获取二维码', { requested, msfStatus: loginService.getMsfStatus() });
+      }
     };
 
     loginListener.onQRCodeSessionUserScaned = () => {
+      WebUiDataRuntime.setQQLoginPhase('qrcode_scanned');
       logger.log('[NapCat] [Framework] 二维码已被扫描，等待确认...');
     };
 
@@ -194,11 +208,34 @@ export async function NCoreInitFramework (
   const oneBotAdapter = adapterManager.getOneBotAdapter();
   if (oneBotAdapter) {
     WebUiDataRuntime.setOneBotContext(oneBotAdapter);
+    if (WebUiDataRuntime.getQQLoginStatus()) {
+      WebUiDataRuntime.setQQLoginPhase('ready');
+    }
   }
 
   // 监听下线通知并同步到 WebUI（兜底保障，防止 WebUI 状态不同步）
-  loaderObject.core.event.on('KickedOffLine', () => {
+  let restartRequested = false;
+  loaderObject.core.event.on('KickedOffLine', (tips: string) => {
     WebUiDataRuntime.setQQLoginStatus(false);
+    WebUiDataRuntime.setQQLoginQrcodeURL('');
+    WebUiDataRuntime.setQQLoginError(tips);
+    WebUiDataRuntime.setQQLoginPhase('reconnecting');
+    if (restartRequested) return;
+    restartRequested = true;
+    setTimeout(() => {
+      WebUiDataRuntime.requestRestartProcess().then((restartResult) => {
+        logger.logWarn('[NapCat] [Framework] 账号被踢下线，正在重启 Worker 以重新创建 QQ 登录服务', restartResult);
+        if (!restartResult.result) {
+          restartRequested = false;
+          WebUiDataRuntime.setQQLoginPhase('offline');
+          WebUiDataRuntime.setQQLoginError(`${tips}\n登录服务重启失败：${restartResult.message}`);
+        }
+      }).catch((error) => {
+        restartRequested = false;
+        WebUiDataRuntime.setQQLoginPhase('offline');
+        WebUiDataRuntime.setQQLoginError(`${tips}\n登录服务重启失败：${(error as Error).message}`);
+      });
+    }, 3_500);
   });
 }
 
@@ -209,7 +246,22 @@ function registerWebUiLoginCallbacks (
 ) {
   // 刷新二维码
   WebUiDataRuntime.setRefreshQRCodeCallback(async () => {
-    loginService.getQRCodePicture();
+    loginContext.isLogined = false;
+    const msfStatus = loginService.getMsfStatus();
+    if (msfStatus === 2) {
+      WebUiDataRuntime.setQQLoginPhase('reconnecting');
+      const connected = loginService.connect();
+      logger.logWarn('[NapCat] [Framework] 登录服务离线，正在重连以获取二维码', { connected, msfStatus });
+      if (!connected) {
+        throw new Error('QQ 登录服务无法重新连接');
+      }
+      return;
+    }
+    const requested = loginService.getQRCodePicture();
+    logger.logWarn('[NapCat] [Framework] 请求刷新二维码', { requested, msfStatus });
+    if (!requested) {
+      throw new Error('QQ 未接受二维码刷新请求');
+    }
   });
 
   // 快速登录

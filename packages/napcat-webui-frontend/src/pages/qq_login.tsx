@@ -53,6 +53,11 @@ export default function QQLoginPage () {
   const [uinValue, setUinValue] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [qrcode, setQrcode] = useState<string>('');
+  const [loginPhase, setLoginPhase] = useState<string>('waiting_qrcode');
+  const [isRecoveringLoginService, setIsRecoveringLoginService] = useState(false);
+  const qrcodeRef = useRef<string>('');
+  const qrcodeRequestVersionRef = useRef(0);
+  const isRefreshingQRCodeRef = useRef(false);
   const [loginError, setLoginError] = useState<string>('');
   const lastErrorRef = useRef<string>('');
   const [qqList, setQQList] = useState<(QQItem | LoginListItem)[]>([]);
@@ -199,9 +204,14 @@ export default function QQLoginPage () {
   };
 
   const onUpdateQrCode = async () => {
+    const requestVersion = qrcodeRequestVersionRef.current;
     if (firstLoad.current) setIsLoading(true);
     try {
       const data = await QQManager.checkQQLoginStatusWithQrcode();
+      setLoginPhase(data.loginPhase || (data.isLogin ? 'ready' : 'waiting_qrcode'));
+      if (data.loginPhase === 'reconnecting') {
+        setIsRecoveringLoginService(true);
+      }
 
       if (firstLoad.current) {
         setIsLoading(false);
@@ -211,17 +221,26 @@ export default function QQLoginPage () {
         toast.success('QQ登录成功');
         navigate('/', { replace: true });
       } else {
-        setQrcode(data.qrcodeurl);
+        // 刷新二维码是一个需要等待结果的操作。忽略在它开始前发出的
+        // 轮询响应，避免旧 URL 在刷新完成后覆盖刚拿到的新二维码。
+        if (requestVersion === qrcodeRequestVersionRef.current && !isRefreshingQRCodeRef.current) {
+          qrcodeRef.current = data.qrcodeurl;
+          setQrcode(data.qrcodeurl);
+          if (data.qrcodeurl) {
+            setIsRecoveringLoginService(false);
+          }
+        }
         if (data.loginError && data.loginError !== lastErrorRef.current) {
           lastErrorRef.current = data.loginError;
           setLoginError(data.loginError);
           const friendlyMsg = parseLoginError(data.loginError);
 
-          // 仅在扫码登录 Tab 下才弹窗，或者错误不是"二维码已过期"
-          // 如果是 "二维码已过期"，且不在 qrcode tab，则不弹窗
+          // 被踢下线时页面会自动进入登录服务恢复流程。它不是可由用户
+          // 处理的登录表单错误，也不应弹出对话框遮住恢复状态。
+          const isRecovering = data.loginPhase === 'reconnecting' || isRecoveringLoginService;
           const isQrCodeExpired = friendlyMsg.includes('二维码') && (friendlyMsg.includes('过期') || friendlyMsg.includes('失效'));
 
-          if (!isQrCodeExpired || activeTab === 'qrcode') {
+          if (!isRecovering && (!isQrCodeExpired || activeTab === 'qrcode')) {
             dialog.alert({
               title: '登录失败',
               content: friendlyMsg,
@@ -235,8 +254,11 @@ export default function QQLoginPage () {
       }
     } catch (error) {
       const msg = (error as Error).message;
-
-      toast.error(`获取二维码失败: ${msg}`);
+      // Worker 重启时，旧连接被关闭是预期现象。恢复状态持续轮询即可，
+      // 不要把 ERR_EMPTY_RESPONSE 作为用户可操作的错误反复弹出。
+      if (!isRecoveringLoginService) {
+        toast.error(`获取二维码失败: ${msg}`);
+      }
     }
   };
 
@@ -271,29 +293,74 @@ export default function QQLoginPage () {
   };
 
   const onRefreshQRCode = async () => {
+    if (isRecoveringLoginService || loginPhase === 'reconnecting') {
+      toast('QQ 登录服务正在恢复，请等待新的二维码…', { icon: '⏳' });
+      return;
+    }
+    if (isRefreshingQRCodeRef.current) {
+      return;
+    }
+    qrcodeRequestVersionRef.current += 1;
+    isRefreshingQRCodeRef.current = true;
+    setIsRefreshingQRCode(true);
     try {
       lastErrorRef.current = '';
       setLoginError('');
-      await QQManager.refreshQRCode();
-      toast.success('已发送刷新请求');
+      const { qrcodeurl, restarting } = await QQManager.refreshQRCode();
+      if (restarting) {
+        setIsRecoveringLoginService(true);
+        setLoginPhase('reconnecting');
+        return;
+      }
+      if (!qrcodeurl || qrcodeurl === qrcodeRef.current) {
+        throw new Error('未获取到新的二维码');
+      }
+      qrcodeRef.current = qrcodeurl;
+      setQrcode(qrcodeurl);
+      toast.success('二维码已刷新');
     } catch (error) {
       const msg = (error as Error).message;
-      toast.error(`刷新二维码失败: ${msg}`);
+      if (msg.includes('QQ_LOGIN_SERVICE_RESTARTING')) {
+        setIsRecoveringLoginService(true);
+        setLoginPhase('reconnecting');
+        toast('QQ 登录服务正在重启，正在生成新的二维码…', { icon: '⏳' });
+      } else if (msg.includes('二维码刷新超时')) {
+        toast.error('未能取得新的二维码，请稍后重试');
+      } else {
+        toast.error(`刷新二维码失败: ${msg}`);
+      }
+    } finally {
+      qrcodeRequestVersionRef.current += 1;
+      isRefreshingQRCodeRef.current = false;
+      setIsRefreshingQRCode(false);
     }
   };
 
   const [showGUIDManager, setShowGUIDManager] = useState(false);
+  const [isRefreshingQRCode, setIsRefreshingQRCode] = useState(false);
 
   useEffect(() => {
+    const isLoginTransitioning = loginPhase === 'qrcode_scanned' || loginPhase === 'initializing' || loginPhase === 'reconnecting' || isRecoveringLoginService;
+    const pollInterval = isRefreshingQRCode || isLoginTransitioning ? 500 : 3000;
     const timer = setInterval(() => {
       onUpdateQrCode();
-    }, 3000);
+    }, pollInterval);
 
     onUpdateQrCode();
     onUpdateQQList();
 
     return () => clearInterval(timer);
-  }, []);
+  }, [isRefreshingQRCode, loginPhase, isRecoveringLoginService]);
+
+  useEffect(() => {
+    if (!isRecoveringLoginService) return;
+    const timer = setTimeout(() => {
+      setIsRecoveringLoginService(false);
+      setLoginPhase('offline');
+      setLoginError('QQ 登录服务恢复超时，请稍后重试');
+    }, 180_000);
+    return () => clearTimeout(timer);
+  }, [isRecoveringLoginService]);
 
   return (
     <>
@@ -369,6 +436,9 @@ export default function QQLoginPage () {
                     loginError={parseLoginError(loginError)}
                     qrcode={qrcode}
                     onRefresh={onRefreshQRCode}
+                    isRefreshing={isRefreshingQRCode}
+                    loginPhase={loginPhase}
+                    isRecoveringLoginService={isRecoveringLoginService}
                   />
                 </Tab>
               </Tabs>

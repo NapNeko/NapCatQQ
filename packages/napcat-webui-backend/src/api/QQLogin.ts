@@ -94,13 +94,19 @@ export const QQCheckLoginStatusHandler: RequestHandler = async (_, res) => {
   const selfInfo = oneBotContext?.core?.selfInfo;
   const isOnline = selfInfo?.online;
   const qqLoginStatus = WebUiDataRuntime.getQQLoginStatus();
+  const loginPhase = WebUiDataRuntime.getQQLoginPhase();
   // 必须同时满足：已登录且在线（online 必须明确为 true）
+  // 登录状态以 QQ 登录成功和 Core 明确在线为准。loginPhase 用于展示进度，
+  // 不能作为跳转的额外门槛，否则 phase 事件延迟时会卡在扫码页。
   const isLogin = qqLoginStatus && isOnline === true;
   // 检测掉线状态：已登录但不在线
   const isOffline = qqLoginStatus && isOnline === false;
   const data = {
     isLogin,
     isOffline,
+    loginPhase,
+    qrLoginAccepted: qqLoginStatus && (loginPhase === 'qrcode_scanned' || loginPhase === 'initializing'),
+    coreReady: qqLoginStatus && isOnline === true,
     qrcodeurl: WebUiDataRuntime.getQQLoginQrcodeURL(),
     loginError: WebUiDataRuntime.getQQLoginError(),
   };
@@ -174,14 +180,25 @@ export const setAutoLoginAccountHandler: RequestHandler = async (req, res) => {
 
 // 刷新QQ登录二维码
 export const QQRefreshQRcodeHandler: RequestHandler = async (_, res) => {
-  // 判断是否已经登录
-  if (WebUiDataRuntime.getQQLoginStatus()) {
+  // 与 CheckLoginStatus 保持一致：运行时登录标记可能在账号下线后
+  // 尚未同步，但 core.selfInfo.online 已能反映实际在线状态。
+  const oneBotContext = WebUiDataRuntime.getOneBotContext();
+  const isOnline = oneBotContext?.core?.selfInfo?.online === true;
+  if (WebUiDataRuntime.getQQLoginStatus() && isOnline) {
     // 已经登录
     return sendError(res, 'QQ Is Logined');
   }
-  // 刷新二维码
-  await WebUiDataRuntime.refreshQRCode();
-  return sendSuccess(res, null);
+  // 被踢下线后，后台会从 KickedOffLine 事件异步重启 Worker。不要在这个
+  // HTTP 请求里再次触发刷新/重启，否则 Worker 退出会打断该响应。
+  if (WebUiDataRuntime.getQQLoginPhase() === 'reconnecting') {
+    return sendSuccess(res, { qrcodeurl: '', restarting: true });
+  }
+  try {
+    const qrcodeurl = await WebUiDataRuntime.refreshQRCode();
+    return sendSuccess(res, { qrcodeurl });
+  } catch (error) {
+    return sendError(res, `QRCode Refresh Error: ${(error as Error).message}`);
+  }
 };
 
 // 密码登录
