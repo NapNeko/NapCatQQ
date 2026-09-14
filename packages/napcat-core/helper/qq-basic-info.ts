@@ -79,10 +79,11 @@ export class QQBasicInfoWrapper {
 
   getAppidV2 (): { appid: string; qua: string; } {
     // 通过已有表 性能好
-    const appidTbale = AppidTable as unknown as QQAppidTableType;
+    const appidTable = AppidTable as unknown as QQAppidTableType;
     const fullVersion = this.getFullQQVersion();
     if (fullVersion) {
-      const data = appidTbale[fullVersion];
+      // 同一 Linux 版本的 x64 和 arm64 使用不同的 AppID，优先匹配架构。
+      const data = appidTable[`${fullVersion}-${process.arch}`] ?? appidTable[fullVersion];
       if (data) {
         return data;
       }
