@@ -107,9 +107,19 @@ export class RkeyManager {
     for (const url of availableUrls) {
       try {
         let temp = await RequestUtil.HttpGetJson<ServerRkeyData>(url, 'GET');
-        if ('retcode' in temp) {
+        if (typeof temp === 'object' && temp !== null && 'retcode' in temp) {
           // 支持Onebot Ret风格
           temp = (temp as unknown as OneBotApiRet).data;
+        }
+        if (
+          typeof temp?.group_rkey !== 'string' ||
+          typeof temp?.private_rkey !== 'string' ||
+          typeof temp?.expired_time !== 'number' ||
+          temp.group_rkey.length <= 6 ||
+          temp.private_rkey.length <= 6 ||
+          temp.expired_time <= 0
+        ) {
+          throw new Error('Rkey 服务返回格式无效：group_rkey/private_rkey/expired_time 缺失或不合法');
         }
         this.rkeyData = {
           group_rkey: temp.group_rkey.slice(6),
