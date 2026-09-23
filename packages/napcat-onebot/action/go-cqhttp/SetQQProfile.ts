@@ -26,7 +26,7 @@ export class SetQQProfile extends OneBotAction<SetQQProfilePayload, any> {
     return await this.core.apis.UserApi.modifySelfProfile({
       nick: payload.nickname,
       longNick: (payload?.personal_note ?? OldProfile?.longNick) || '',
-      sex: parseInt(payload?.sex ? payload?.sex.toString() : OldProfile?.sex!.toString()),
+      sex: parseInt(payload.sex != null && payload.sex !== '' ? payload.sex.toString() : OldProfile?.sex!.toString()),
       birthday: {
         birthday_year: OldProfile?.birthday_year!.toString(),
         birthday_month: OldProfile?.birthday_month!.toString(),
