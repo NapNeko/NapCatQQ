@@ -385,6 +385,30 @@ export class OneBotMsgApi {
         this.core.context.logger.logError('所有查找方法均失败，获取不到旧客户端的引用消息', element.replayMsgSeq);
       }
 
+      // 私聊引用：replayMsgSeq 常为 0（客户端未填序号），seq 查询链与协议兜底都会落空，
+      // 而引用元素里的 replyMsgClientSeq / replyMsgTime 此时依然准确，用它反查被引用消息。
+      if (element.replyMsgClientSeq) {
+        try {
+          const replyMsgTime = element.replyMsgTime ?? records?.msgTime;
+          if (replyMsgTime) {
+            const byClientSeq = await this.core.apis.MsgApi.getMsgByClientSeqAndTime(
+              peer,
+              element.replyMsgClientSeq,
+              replyMsgTime
+            );
+            const replyMsg = byClientSeq.msgList?.find(msg => msg.msgId);
+            if (replyMsg) {
+              return createReplyData(replyMsg.msgId);
+            }
+            this.core.context.logger.logWarn(
+              `按 clientSeq 查询未命中，序号: ${element.replayMsgSeq}, clientSeq: ${element.replyMsgClientSeq}`
+            );
+          }
+        } catch (error) {
+          this.core.context.logger.logError('按 clientSeq 查询引用消息出错', error);
+        }
+      }
+
       // 协议兜底：尝试通过协议直接获取消息
       if (this.core.apis.PacketApi.packetStatus) {
         try {
