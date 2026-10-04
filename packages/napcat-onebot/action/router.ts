@@ -28,6 +28,8 @@ export const ActionName = {
   DoGroupAlbumComment: 'do_group_album_comment',
   GetGroupAlbumMediaList: 'get_group_album_media_list',
   UploadImageToQunAlbum: 'upload_image_to_qun_album',
+  UploadImagesToQunAlbum: 'upload_images_to_qun_album',
+  UploadVideoToQunAlbum: 'upload_video_to_qun_album',
   GetQunAlbumList: 'get_qun_album_list',
   SetGroupTodo: 'set_group_todo',
   CompleteGroupTodo: 'complete_group_todo',
