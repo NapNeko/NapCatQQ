@@ -194,18 +194,23 @@ describe('群相册分片上传', () => {
     expect(fetchMock).toHaveBeenCalledTimes(3);
     expect(result).toMatchObject({ success: true, sVid: 'SV123' });
 
-    const form = fetchMock.mock.calls[0]?.[1]?.body as unknown as FormData;
-    expect(form.get('appid')).toBe('video_qun');
-    expect(form.get('cmd')).toBe('FileUploadVideo');
-    expect(form.get('session')).toBe('SESSION');
-    expect(form.get('seq')).toBe('0');
-    expect(form.get('offset')).toBe('0');
-    expect(form.get('end')).toBe('16384');
-    expect(form.get('slice_size')).toBe('16384');
+    // 分片是并发发出的，调用顺序不确定，按 seq 建索引再断言
+    const forms = new Map(fetchMock.mock.calls.map((call) => {
+      const form = call[1]?.body as unknown as FormData;
+      return [form.get('seq'), form] as const;
+    }));
+    const first = forms.get('0');
+    expect(first).toBeDefined();
+    expect(first?.get('appid')).toBe('video_qun');
+    expect(first?.get('cmd')).toBe('FileUploadVideo');
+    expect(first?.get('session')).toBe('SESSION');
+    expect(first?.get('offset')).toBe('0');
+    expect(first?.get('end')).toBe('16384');
+    expect(first?.get('slice_size')).toBe('16384');
 
     const urls = fetchMock.mock.calls.map(call => String(call[0]));
-    expect(urls[0]).toContain('seq=0&retry=0&offset=0&end=16384&total=40000');
-    expect(urls[2]).toContain('seq=2&retry=0&offset=32768&end=40000&total=40000');
+    expect(urls.some(url => url.includes('seq=0&retry=0&offset=0&end=16384&total=40000'))).toBe(true);
+    expect(urls.some(url => url.includes('seq=2&retry=0&offset=32768&end=40000&total=40000'))).toBe(true);
   });
 
   it('不传 appid/cmd 时退回图片口径', async () => {
@@ -223,7 +228,8 @@ describe('群相册分片上传', () => {
   it('分片失败时抛出带序号与原因的错误', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ ret: -1, msg: 'boom' }), { status: 200 })));
 
+    // 分片是并发上传的，Promise.all 抛出的是最先失败的那一片，序号不确定
     await expect(createApi().uploadQunAlbumSlice(sliceFile, 'SESSION', 'SKEY', 'PSKEY', UIN, 16384))
-      .rejects.toThrow('分片 0 上传失败: boom');
+      .rejects.toThrow(/分片 \d+ 上传失败: boom/);
   });
 });
