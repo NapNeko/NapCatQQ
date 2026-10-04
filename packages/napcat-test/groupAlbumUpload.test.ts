@@ -211,9 +211,11 @@ describe('群相册分片上传', () => {
     const urls = fetchMock.mock.calls.map(call => String(call[0]));
     expect(urls.some(url => url.includes('seq=0&retry=0&offset=0&end=16384&total=40000'))).toBe(true);
     expect(urls.some(url => url.includes('seq=2&retry=0&offset=32768&end=40000&total=40000'))).toBe(true);
+    // 路径必须跟随 cmd：视频走 /sliceUpload/FileUploadVideo，否则服务端不返回 sVid
+    expect(urls.every(url => url.includes('/webapp/json/sliceUpload/FileUploadVideo?'))).toBe(true);
   });
 
-  it('不传 appid/cmd 时退回图片口径', async () => {
+  it('不传 appid/cmd 时退回图片口径（路径也是 FileUpload）', async () => {
     const fetchMock = vi.fn(async (_url: string, _init: RequestInit) => new Response(JSON.stringify({ ret: 0, msg: '' }), { status: 200 }));
     vi.stubGlobal('fetch', fetchMock);
 
@@ -222,6 +224,7 @@ describe('群相册分片上传', () => {
     const form = fetchMock.mock.calls[0]?.[1]?.body as unknown as FormData;
     expect(form.get('appid')).toBe('qun');
     expect(form.get('cmd')).toBe('FileUpload');
+    expect(String(fetchMock.mock.calls[0]?.[0])).toContain('/webapp/json/sliceUpload/FileUpload?');
     expect(result.sVid).toBeUndefined();
   });
 
