@@ -10,7 +10,7 @@ describe('QQ AppID lookup', () => {
   beforeEach(() => {
     Object.defineProperty(process, 'arch', { ...archDescriptor, value: 'x64' });
     info = Object.create(QQBasicInfoWrapper.prototype);
-    info.context = { logger: { log: vi.fn() } } as QQBasicInfoWrapper['context'];
+    info.context = { logger: { log: vi.fn() } } as unknown as QQBasicInfoWrapper['context'];
     vi.spyOn(info, 'getFullQQVersion');
     vi.spyOn(info, 'getAppidV2ByMajor').mockReturnValue('537999999');
   });
