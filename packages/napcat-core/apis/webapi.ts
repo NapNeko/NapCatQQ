@@ -436,7 +436,7 @@ export class NTQQWebApi {
 
   async uploadQunAlbumSlice (
     path: string, session: string, skey: string, pskey: string, uin: string, slice_size: number,
-    options: { appid?: string, cmd?: string, buffer?: Buffer } = {}
+    options: { appid?: string, cmd?: string, buffer?: Buffer; } = {}
   ) {
     const appid = options.appid ?? 'qun';
     const cmd = options.cmd ?? 'FileUpload';
