@@ -495,7 +495,9 @@ export class NTQQWebApi {
           form.append('slice_size', slice_size.toString());
           form.append('biz_req.iUploadType', '0');
 
-          const api = `https://h5.qzone.qq.com/webapp/json/sliceUpload/FileUpload?seq=${slice.seq}&retry=0&offset=${slice.offset}&end=${slice.end}&total=${img_size}&type=form&g_tk=${GTK}`;
+          // 分片路径必须与 cmd 一致：视频走 /sliceUpload/FileUploadVideo，
+          // 否则服务端按图片处理，分片会「成功」但响应里没有 sVid
+          const api = `https://h5.qzone.qq.com/webapp/json/sliceUpload/${cmd}?seq=${slice.seq}&retry=0&offset=${slice.offset}&end=${slice.end}&total=${img_size}&type=form&g_tk=${GTK}`;
           const response = await fetch(api, {
             method: 'POST',
             headers: {
