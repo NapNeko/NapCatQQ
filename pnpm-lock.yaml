@@ -332,6 +332,9 @@ importers:
         specifier: workspace:*
         version: link:../napcat-vite
     devDependencies:
+      '@types/node':
+        specifier: ^22.0.1
+        version: 22.19.1
       tsx:
         specifier: ^4.7.1
         version: 4.21.0
@@ -394,6 +397,9 @@ importers:
         specifier: workspace:*
         version: link:../napcat-rpc
     devDependencies:
+      '@types/node':
+        specifier: ^22.0.1
+        version: 22.19.1
       vitest:
         specifier: ^4.0.9
         version: 4.0.9(@types/debug@4.1.12)(@types/node@22.19.1)(@vitest/ui@4.0.9)(jiti@1.21.7)(tsx@4.21.0)(yaml@2.8.2)
