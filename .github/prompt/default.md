@@ -5,12 +5,14 @@
 **注意QQ版本推荐使用 40768+ 版本 最低可以使用40768版本**
 **默认WebUi密钥为随机密码 控制台查看**
 
-**[9.9.26-44343 X64 Win](https://dldir1.qq.com/qqfile/qq/QQNT/40d6045a/QQ9.9.26.44343_x64.exe)**
-[LinuxX64 DEB 44343 ](https://dldir1.qq.com/qqfile/qq/QQNT/94704804/linuxqq_3.2.23-44343_amd64.deb)
-[LinuxX64 RPM 44343 ](https://dldir1.qq.com/qqfile/qq/QQNT/94704804/linuxqq_3.2.23-44343_x86_64.rpm)
-[LinuxArm64 DEB 44343 ](https://dldir1.qq.com/qqfile/qq/QQNT/94704804/linuxqq_3.2.23-44343_arm64.deb)
-[LinuxArm64 RPM  44343 ](https://dldir1.qq.com/qqfile/qq/QQNT/94704804/linuxqq_3.2.23-44343_aarch64.rpm)
-[MAC   DMG   40990 ](https://dldir1v6.qq.com/qqfile/qq/QQNT/c6cb0f5d/QQ_v6.9.82.40990.dmg)
+以下均为腾讯官方 CDN 链接，腾讯会不定期下架旧版本，链接失效时可以在 [Rodert/qq-versions](https://github.com/Rodert/qq-versions/releases) 找同版本的镜像
+
+**[9.9.33-52230 X64 Win（官方 CDN）](https://qqdl.gtimg.cn/qqfile/QQNT/9.9.33/release/497e2f1f/QQ_9.9.33_260813_x64_01.exe)**
+[LinuxX64 DEB 52194（官方 CDN）](https://qqdl.gtimg.cn/qqfile/QQNT/9.9.33/release/3f89efc5/QQ_3.2.32_260812_amd64_01.deb)
+[LinuxX64 RPM 52194（官方 CDN）](https://qqdl.gtimg.cn/qqfile/QQNT/9.9.33/release/3f89efc5/QQ_3.2.32_260812_x86_64_01.rpm)
+[LinuxArm64 DEB 52194（官方 CDN）](https://qqdl.gtimg.cn/qqfile/QQNT/9.9.33/release/3f89efc5/QQ_3.2.32_260812_arm64_01.deb)
+[LinuxArm64 RPM 52194（官方 CDN）](https://qqdl.gtimg.cn/qqfile/QQNT/9.9.33/release/3f89efc5/QQ_3.2.32_260812_aarch64_01.rpm)
+**MacOS 暂不支持**
 ## 如果WinX64缺少运行库或者xxx.dll？
 [安装运行库](https://aka.ms/vs/17/release/vc_redist.x64.exe)
 
