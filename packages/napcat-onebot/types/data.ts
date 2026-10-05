@@ -105,4 +105,7 @@ export interface OB11GroupFileFolder {
   creator: number; // 创建者ID
   creator_name: string; // 创建者名称
   total_file_count: number; // 文件总数
+  modify_time: number; // 最后修改时间
+  modifier: number; // 最后修改者ID
+  modifier_name: string; // 最后修改者名称
 }

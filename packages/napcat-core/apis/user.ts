@@ -198,6 +198,7 @@ export class NTQQUserApi {
         .add(() => this.context.session.getUixConvertService().getUid([uin]).then((data) => data.uidInfo.get(uin)))
         .add(() => this.context.session.getProfileService().getUidByUin('FriendsServiceImpl', [uin]).get(uin))
         .add(() => this.context.session.getGroupService().getUidByUins([uin]).then((data) => data.uids.get(uin)))
+        .add(() => this.core.apis.GroupApi.getUidFromMemberCache(uin))
         .add(() => this.getUserDetailInfoByUin(uin).then((data) => data.detail.uid));
 
     const uid = await fallback.run().catch(() => '');

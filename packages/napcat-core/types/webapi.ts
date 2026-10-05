@@ -78,6 +78,7 @@ export interface WebApiGroupNoticeFeed {
     remind_ts: number
     tip_window_type: number
     confirm_required: number
+    inst_no_pinned?: number // 仅 inst 条目有：0 = 置顶中，1 = 未置顶
   };
   read_num: number;
   is_read: number;
@@ -92,6 +93,7 @@ export interface WebApiGroupNoticeRet {
   read_only: number
   role: number
   feeds: WebApiGroupNoticeFeed[]
+  inst?: WebApiGroupNoticeFeed[] // 「发给新成员」类公告，不在 feeds 里
   group: {
     group_id: number
     class_ext: number
