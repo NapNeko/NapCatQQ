@@ -19,7 +19,7 @@
     "@simplewebauthn/server": "^13.2.2",
     "@sinclair/typebox": "^0.34.38",
     "compressing": "^1.10.3",
-    "compression": "^1.8.1",
+    "compression": "^1.8.2",
     "express": "^5.0.0",
     "express-rate-limit": "^7.5.0",
     "json5": "^2.2.3",
