@@ -261,8 +261,14 @@ export class NapCatCore {
     };
     profileListener.onSelfStatusChanged = (Info: SelfStatusInfo) => {
       if (Info.status === 20) {
+        // 静默离线：服务端判定会话失效，但不会下发 KickedOffLine 通知。
+        // 仅在 在线 -> 离线 的跳变上广播一次，供上层复用下线恢复链路。
+        const wasOnline = this.selfInfo.online === true;
         this.selfInfo.online = false;
         this.context.logger.log('账号状态变更为离线');
+        if (wasOnline) {
+          this.event.emit('SelfOffline', '[SelfOffline] 账号状态变更为离线（未收到 KickedOffLine 通知）');
+        }
       } else {
         this.selfInfo.online = true;
       }
