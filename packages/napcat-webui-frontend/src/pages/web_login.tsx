@@ -3,7 +3,7 @@ import { CardBody, CardHeader } from '@heroui/card';
 import { Image } from '@heroui/image';
 import { Input } from '@heroui/input';
 import { useLocalStorage } from '@uidotdev/usehooks';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { IoKeyOutline, IoArrowBack } from 'react-icons/io5';
 import { useNavigate } from 'react-router-dom';
@@ -20,6 +20,10 @@ import WebUIManager from '@/controllers/webui_manager';
 import PureLayout from '@/layouts/pure';
 import { motion } from 'motion/react';
 
+// Passkey 检查的最长等待时间。部分手机浏览器在本机没有对应 Passkey 时，
+// navigator.credentials.get 会一直不返回，不能让它无限期占住登录流程。
+const PASSKEY_TIMEOUT_MS = 30_000;
+
 export default function WebLoginPage () {
   const urlSearchParams = new URLSearchParams(window.location.search);
   const token = urlSearchParams.get('token');
@@ -27,6 +31,7 @@ export default function WebLoginPage () {
   const [tokenValue, setTokenValue] = useState<string>(token || '');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isPasskeyLoading, setIsPasskeyLoading] = useState<boolean>(true); // 初始为true，表示正在检查passkey
+  const passkeyAbortRef = useRef<AbortController | null>(null);
   const [, setLocalToken] = useLocalStorage<string>(key.token, '');
 
   // 2FA相关状态
@@ -57,6 +62,9 @@ export default function WebLoginPage () {
       // toast.error('当前浏览器/环境不支持 Passkey 登录。');
       return;
     }
+    const controller = new AbortController();
+    passkeyAbortRef.current = controller;
+    const timer = setTimeout(() => controller.abort(), PASSKEY_TIMEOUT_MS);
     try {
       // 检查是否有passkey
       const options = await WebUIManager.generatePasskeyAuthenticationOptions();
@@ -71,7 +79,9 @@ export default function WebLoginPage () {
             transports: cred.transports,
           })),
           userVerification: options.userVerification,
+          timeout: PASSKEY_TIMEOUT_MS,
         },
+        signal: controller.signal,
       }) as PublicKeyCredential;
 
       if (!credential) {
@@ -95,6 +105,10 @@ export default function WebLoginPage () {
       // 验证认证
       const data = await WebUIManager.verifyPasskeyAuthentication(response);
 
+      // 用户已改用 Token 登录，不再用 Passkey 的结果覆盖
+      if (controller.signal.aborted) {
+        return false;
+      }
       if (data && data.Credential) {
         setLocalToken(data.Credential);
         navigate('/qq_login', { replace: true });
@@ -103,6 +117,11 @@ export default function WebLoginPage () {
     } catch (error) {
       // passkey登录失败，继续显示token登录界面
       console.log('Passkey login failed or not available:', error);
+    } finally {
+      clearTimeout(timer);
+      if (passkeyAbortRef.current === controller) {
+        passkeyAbortRef.current = null;
+      }
     }
     return false; // 登录失败
   };
@@ -113,6 +132,8 @@ export default function WebLoginPage () {
       toast.error('请输入token');
       return;
     }
+    // 改用 Token 登录时放弃仍在等待的 Passkey 验证
+    passkeyAbortRef.current?.abort();
     setIsLoading(true);
     try {
       const data = await WebUIManager.loginWithToken(tokenValue);
@@ -169,7 +190,7 @@ export default function WebLoginPage () {
 
   // 处理全局键盘事件
   const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === 'Enter' && !isLoading && !isPasskeyLoading) {
+    if (e.key === 'Enter' && !isLoading) {
       if (require2FA) {
         onSubmit2FA();
       } else {
@@ -185,7 +206,7 @@ export default function WebLoginPage () {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [tokenValue, totpCode, isLoading, isPasskeyLoading, require2FA]); // 依赖项包含用于登录的状态
+  }, [tokenValue, totpCode, isLoading, require2FA]); // 依赖项包含用于登录的状态
 
   useEffect(() => {
     // 如果URL中有token，直接登录
@@ -200,6 +221,9 @@ export default function WebLoginPage () {
     tryPasskeyLogin().finally(() => {
       setIsPasskeyLoading(false);
     });
+    return () => {
+      passkeyAbortRef.current?.abort();
+    };
   }, []);
 
   return (
@@ -233,7 +257,7 @@ export default function WebLoginPage () {
             <CardBody className='flex gap-5 py-5 px-5 md:px-10'>
               {isPasskeyLoading && (
                 <div className='text-center text-small text-default-600 dark:text-default-400 px-2'>
-                  🔐 正在检查Passkey...
+                  🔐 正在检查Passkey，也可以直接输入Token登录
                 </div>
               )}
 
@@ -354,7 +378,7 @@ export default function WebLoginPage () {
                             '!cursor-text',
                           ],
                         }}
-                        isDisabled={isLoading || isPasskeyLoading}
+                        isDisabled={isLoading}
                         label='Token'
                         placeholder='请输入token'
                         radius='lg'
