@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest';
+import type { GeneralCallResultStatus } from '../napcat-core/services/common';
 import {
   applyGroupManagementSettings,
   createGroupDetailInfoV2Param,
@@ -10,7 +11,8 @@ describe('NTQQ group operations', () => {
   test('reports the exact native setting that failed', () => {
     expect(() => assertGroupManagementResults('设置群成员功能权限', [{
       setting: 'allow_member_create_group',
-      result: { result: 1006, errMsg: '未知错误' },
+      // 枚举里只有 OK/ERROR，这里刻意用一个任意的原生错误码
+      result: { result: 1006 as GeneralCallResultStatus, errMsg: '未知错误' },
     }])).toThrow(/allow_member_create_group.*1006.*未知错误/);
     expect(() => assertGroupManagementResults('设置群成员功能权限', []))
       .not.toThrow();

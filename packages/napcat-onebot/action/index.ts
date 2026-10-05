@@ -134,6 +134,8 @@ import { CancelGroupTodo } from './packet/CancelGroupTodo';
 import { SetGroupTodo } from './packet/SetGroupTodo';
 import { GetQunAlbumList } from './extends/GetQunAlbumList';
 import { UploadImageToQunAlbum } from './extends/UploadImageToQunAlbum';
+import { UploadImagesToQunAlbum } from './extends/UploadImagesToQunAlbum';
+import { UploadVideoToQunAlbum } from './extends/UploadVideoToQunAlbum';
 import { DoGroupAlbumComment } from './extends/DoGroupAlbumComment';
 import { GetGroupAlbumMediaList } from './extends/GetGroupAlbumMediaList';
 import { SetGroupAlbumMediaLike, CancelGroupAlbumMediaLike } from './extends/SetGroupAlbumMediaLike';
@@ -182,6 +184,8 @@ export function getAllHandlers (obContext: NapCatOneBot11Adapter, core: NapCatCo
     new GetGroupAlbumMediaList(obContext, core),
     new GetQunAlbumList(obContext, core),
     new UploadImageToQunAlbum(obContext, core),
+    new UploadImagesToQunAlbum(obContext, core),
+    new UploadVideoToQunAlbum(obContext, core),
     new SetGroupTodo(obContext, core),
     new CompleteGroupTodo(obContext, core),
     new CancelGroupTodo(obContext, core),

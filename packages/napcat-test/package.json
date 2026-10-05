@@ -5,9 +5,11 @@
   "type": "module",
   "scripts": {
     "test": "vitest",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "typecheck": "tsc --noEmit --skipLibCheck -p tsconfig.json"
   },
   "devDependencies": {
+    "@types/node": "^22.0.1",
     "vitest": "^4.0.9"
   },
   "dependencies": {
