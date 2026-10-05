@@ -3,7 +3,7 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { NTQQWebApi } from '@/napcat-core/apis/webapi';
-import { qunAlbumControl, qunAlbumVideoControl, qunAlbumVideoCoverControl } from '@/napcat-core/data/webapi';
+import { nextQunAlbumBatchId, qunAlbumControl, qunAlbumVideoControl, qunAlbumVideoCoverControl } from '@/napcat-core/data/webapi';
 
 const GROUP_ID = '2161015335';
 const ALBUM_ID = 'V624Oe3c1Dk7pX4et6lh4703uM49iGAR';
@@ -46,6 +46,13 @@ describe('群相册图片组包', () => {
     expect(req.biz_req?.stExtendInfo?.mapParams).toEqual({ photo_num: '1', video_num: '0', batch_num: '1' });
     // 每张图各自成批时，批次号仍是 10 位秒级时间戳
     expect(String(req.biz_req?.iBatchID)).toHaveLength(10);
+  });
+
+  it('同一秒内的两次上传批次号不同，不会被相册并成一条', () => {
+    const first = imageReq().biz_req?.iBatchID;
+    const second = imageReq().biz_req?.iBatchID;
+    expect(second).toBeGreaterThan(first ?? Infinity);
+    expect(nextQunAlbumBatchId()).toBeGreaterThan(second ?? Infinity);
   });
 
   it('多图同批：共用批次号，张数与序号按批上报', () => {
@@ -226,6 +233,43 @@ describe('群相册分片上传', () => {
     expect(form.get('cmd')).toBe('FileUpload');
     expect(String(fetchMock.mock.calls[0]?.[0])).toContain('/webapp/json/sliceUpload/FileUpload?');
     expect(result.sVid).toBeUndefined();
+  });
+
+  it('最后一片等其它分片全部传完才发', async () => {
+    // 100000 字节 / 16384 = 7 片（seq 0~6）
+    await writeFile(sliceFile, Buffer.alloc(100000, 7));
+    let finished = 0;
+    let finishedWhenLastSent = -1;
+    const fetchMock = vi.fn(async (_url: string, init: RequestInit) => {
+      const seq = Number((init.body as unknown as FormData).get('seq'));
+      if (seq === 6) {
+        finishedWhenLastSent = finished;
+      } else {
+        // 前面的分片故意慢一点、倒序完成
+        await new Promise(resolve => setTimeout(resolve, (6 - seq) * 5));
+        finished++;
+      }
+      return new Response(JSON.stringify({ ret: 0, msg: '' }), { status: 200 });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    await createApi().uploadQunAlbumSlice(sliceFile, 'SESSION', 'SKEY', 'PSKEY', UIN, 16384);
+
+    expect(fetchMock).toHaveBeenCalledTimes(7);
+    expect(finishedWhenLastSent).toBe(6);
+  });
+
+  it('前面的分片失败时不再发最后一片', async () => {
+    const fetchMock = vi.fn(async (_url: string, init: RequestInit) => {
+      const seq = (init.body as unknown as FormData).get('seq');
+      return new Response(JSON.stringify(seq === '1' ? { ret: -1, msg: 'boom' } : { ret: 0, msg: '' }), { status: 200 });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(createApi().uploadQunAlbumSlice(sliceFile, 'SESSION', 'SKEY', 'PSKEY', UIN, 16384))
+      .rejects.toThrow('分片 1 上传失败: boom');
+    const seqs = fetchMock.mock.calls.map(call => (call[1]?.body as unknown as FormData).get('seq'));
+    expect(seqs).not.toContain('2');
   });
 
   it('分片失败时抛出带序号与原因的错误', async () => {

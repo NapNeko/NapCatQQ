@@ -12,7 +12,7 @@ import { createReadStream, existsSync, statSync } from 'node:fs';
 import { open, unlink, writeFile, type FileHandle } from 'node:fs/promises';
 import { createHash, randomUUID } from 'node:crypto';
 import { basename, join } from 'node:path';
-import { qunAlbumControl, qunAlbumVideoControl, qunAlbumVideoCoverControl, QunAlbumBatch } from '../data/webapi';
+import { qunAlbumControl, qunAlbumVideoControl, qunAlbumVideoCoverControl, QunAlbumBatch, nextQunAlbumBatchId } from '../data/webapi';
 import { createAlbumCommentRequest, createAlbumFeedPublish, createAlbumMediaFeed } from '../data/album';
 import { FFmpegService } from '../helper/ffmpeg/ffmpeg';
 import { defaultVideoThumbB64 } from '../helper/ffmpeg/video';
@@ -58,7 +58,11 @@ function hashFile (path: string, algorithm: 'md5' | 'sha1'): Promise<string> {
 // 按需读取单个分片：并发上传时的内存占用只有「并发数 × 分片大小」
 async function readSlice (handle: FileHandle, offset: number, length: number): Promise<Buffer> {
   const buffer = Buffer.alloc(length);
-  await handle.read(buffer, 0, length, offset);
+  const { bytesRead } = await handle.read(buffer, 0, length, offset);
+  // 读不满说明文件在上传过程中被改短了，继续传只会传上去一段补零的数据
+  if (bytesRead !== length) {
+    throw new Error(`读取分片失败: offset=${offset} 预期 ${length} 字节，实际 ${bytesRead} 字节`);
+  }
   return buffer;
 }
 
@@ -461,7 +465,7 @@ export class NTQQWebApi {
     const GTK = this.getBknFromSKey(skey);
     const cookie = `p_uin=o${uin}; p_skey=${pskey}; skey=${skey}; uin=o${uin}`;
 
-    // 只记分片位置，不预先读内容；再分批并发上传（串行上传在几 MB 的图上要几十秒）
+    // 只记分片位置，不预先读内容；再并发上传（串行上传在几 MB 的图上要几十秒）
     const slices: { seq: number, offset: number, end: number; }[] = [];
     let seq = 0;
     let offset = 0;
@@ -476,49 +480,68 @@ export class NTQQWebApi {
     let sVid: string | undefined;
 
     const handle = await open(path, 'r');
-    try {
-      for (let i = 0; i < slices.length; i += QUN_ALBUM_SLICE_CONCURRENCY) {
-        await Promise.all(slices.slice(i, i + QUN_ALBUM_SLICE_CONCURRENCY).map(async (slice) => {
-          const chunk = await readSlice(handle, slice.offset, slice.end - slice.offset);
-          const form = new FormData();
-          form.append('uin', uin);
-          form.append('appid', appid);
-          form.append('session', session);
-          form.append('offset', slice.offset.toString());
-          form.append('data', new Blob([chunk], { type: 'application/octet-stream' }), 'blob');
-          form.append('checksum', '');
-          form.append('check_type', '0');
-          form.append('retry', '0');
-          form.append('seq', slice.seq.toString());
-          form.append('end', slice.end.toString());
-          form.append('cmd', cmd);
-          form.append('slice_size', slice_size.toString());
-          form.append('biz_req.iUploadType', '0');
+    const uploadSlice = async (slice: { seq: number, offset: number, end: number; }) => {
+      const chunk = await readSlice(handle, slice.offset, slice.end - slice.offset);
+      const form = new FormData();
+      form.append('uin', uin);
+      form.append('appid', appid);
+      form.append('session', session);
+      form.append('offset', slice.offset.toString());
+      form.append('data', new Blob([chunk], { type: 'application/octet-stream' }), 'blob');
+      form.append('checksum', '');
+      form.append('check_type', '0');
+      form.append('retry', '0');
+      form.append('seq', slice.seq.toString());
+      form.append('end', slice.end.toString());
+      form.append('cmd', cmd);
+      form.append('slice_size', slice_size.toString());
+      form.append('biz_req.iUploadType', '0');
 
-          // 分片路径必须与 cmd 一致：视频走 /sliceUpload/FileUploadVideo，
-          // 否则服务端按图片处理，分片会「成功」但响应里没有 sVid
-          const api = `https://h5.qzone.qq.com/webapp/json/sliceUpload/${cmd}?seq=${slice.seq}&retry=0&offset=${slice.offset}&end=${slice.end}&total=${img_size}&type=form&g_tk=${GTK}`;
-          const response = await fetch(api, {
-            method: 'POST',
-            headers: {
-              Cookie: cookie,
-            },
-            body: form,
-          });
+      // 分片路径必须与 cmd 一致：视频走 /sliceUpload/FileUploadVideo，
+      // 否则服务端按图片处理，分片会「成功」但响应里没有 sVid
+      const api = `https://h5.qzone.qq.com/webapp/json/sliceUpload/${cmd}?seq=${slice.seq}&retry=0&offset=${slice.offset}&end=${slice.end}&total=${img_size}&type=form&g_tk=${GTK}`;
+      const response = await fetch(api, {
+        method: 'POST',
+        headers: {
+          Cookie: cookie,
+        },
+        body: form,
+      });
 
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-
-          const post = await response.json() as { ret: number, msg: string, data?: { biz?: { sVid?: string; }; }; };
-          if (post.ret !== 0) {
-            throw new Error(`分片 ${slice.seq} 上传失败: ${post.msg}`);
-          }
-          if (!sVid && typeof post.data?.biz?.sVid === 'string' && post.data.biz.sVid) {
-            sVid = post.data.biz.sVid;
-          }
-        }));
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+
+      const post = await response.json() as { ret: number, msg: string, data?: { biz?: { sVid?: string; }; }; };
+      if (post.ret !== 0) {
+        throw new Error(`分片 ${slice.seq} 上传失败: ${post.msg}`);
+      }
+      if (!sVid && typeof post.data?.biz?.sVid === 'string' && post.data.biz.sVid) {
+        sVid = post.data.biz.sVid;
+      }
+    };
+
+    try {
+      // 最后一片要等前面的全部传完再发：服务端收到最后一片就认为文件传完了，
+      // 并发时它可能比前面的分片先到
+      const lastSlice = slices.pop();
+      let next = 0;
+      let failure: { error: unknown; } | undefined;
+      // 固定数量的 worker 各自领下一片，慢的分片不会拖住整批
+      const worker = async () => {
+        while (!failure) {
+          const slice = slices[next++];
+          if (!slice) break;
+          try {
+            await uploadSlice(slice);
+          } catch (error) {
+            if (!failure) failure = { error };
+          }
+        }
+      };
+      await Promise.all(Array.from({ length: Math.min(QUN_ALBUM_SLICE_CONCURRENCY, slices.length) }, worker));
+      if (failure) throw failure.error;
+      if (lastSlice) await uploadSlice(lastSlice);
     } finally {
       await handle.close();
     }
@@ -532,17 +555,17 @@ export class NTQQWebApi {
     const skey = await this.core.apis.UserApi.getSKey() || '';
     const pskey = (await this.core.apis.UserApi.getPSkey(['qzone.qq.com'])).domainPskeyMap.get('qzone.qq.com') || '';
     const uin = this.core.selfInfo.uin || '10001';
-    const batchId = Math.floor(Date.now() / 1000);
+    const batchId = nextQunAlbumBatchId();
     const count = paths.length.toString();
 
     for (const [index, path] of paths.entries()) {
       const img_md5 = await hashFile(path, 'md5');
-      const data = (await this.createQunAlbumSession(
+      const post = await this.createQunAlbumSession(
         gc, sAlbumID, sAlbumName, path, skey, pskey, img_md5, uin,
         { batchId, count, index: index.toString() }
-      )).data;
-      if (!data?.session) throw new Error('创建群相册会话失败');
-      await this.uploadQunAlbumSlice(path, data.session, skey, pskey, uin, this.resolveQunAlbumSliceSize(data.slice_size));
+      );
+      if (!post.data?.session) throw new Error(`创建群相册会话失败: ${post.msg || post.ret}`);
+      await this.uploadQunAlbumSlice(path, post.data.session, skey, pskey, uin, this.resolveQunAlbumSliceSize(post.data.slice_size));
     }
   }
 
@@ -553,10 +576,10 @@ export class NTQQWebApi {
   /**
    * 上传视频到群相册。
    *
-   * 分三段（字段依据见 docs/group-album-speedup-and-video-upload.md 第 4 节）：
-   * 1. 视频主体：appid=video_qun / cmd=FileUploadVideo / SHA1 校验，此时**不带相册**
-   * 2. 分片上传，从响应里拿 sVid
-   * 3. 封面二段：走图片口径，用 vid 把封面挂到视频上——**相册与批次号都在这一步**
+   * 分三步：
+   * 1. 建视频会话：appid=video_qun / cmd=FileUploadVideo / SHA1 校验，此时不带相册
+   * 2. 分片上传视频，从分片响应里拿 sVid
+   * 3. 按图片上传封面并用 vid 关联视频，相册和批次号在这一步带上，视频随封面进相册
    */
   async uploadVideoToQunAlbum (gc: string, sAlbumID: string, sAlbumName: string, path: string) {
     const skey = await this.core.apis.UserApi.getSKey() || '';
@@ -566,7 +589,7 @@ export class NTQQWebApi {
     const cookie = `p_uin=o${uin}; p_skey=${pskey}; skey=${skey}; uin=o${uin}`;
     const video_sha1 = await hashFile(path, 'sha1');
 
-    // 时长：ffmpeg 不可用时回落 0（与 LLOneBot 一致）
+    // 时长：ffmpeg 不可用时上报 0
     let playTime = 0;
     try {
       playTime = Math.max(0, Math.round(await FFmpegService.getDuration(path)));
@@ -590,7 +613,7 @@ export class NTQQWebApi {
       Cookie: cookie,
       'Content-Type': 'application/json',
     });
-    if (!videoSession.data?.session) throw new Error('创建群相册视频会话失败');
+    if (!videoSession.data?.session) throw new Error(`创建群相册视频会话失败: ${videoSession.msg || videoSession.ret}`);
 
     const uploaded = await this.uploadQunAlbumSlice(path, videoSession.data.session, skey, pskey, uin,
       this.resolveQunAlbumSliceSize(videoSession.data.slice_size), { appid: 'video_qun', cmd: 'FileUploadVideo' });
@@ -627,7 +650,7 @@ export class NTQQWebApi {
         Cookie: cookie,
         'Content-Type': 'application/json',
       });
-      if (!coverSession.data?.session) throw new Error('创建群相册视频封面会话失败');
+      if (!coverSession.data?.session) throw new Error(`创建群相册视频封面会话失败: ${coverSession.msg || coverSession.ret}`);
 
       await this.uploadQunAlbumSlice(coverPath, coverSession.data.session, skey, pskey, uin,
         this.resolveQunAlbumSliceSize(coverSession.data.slice_size));

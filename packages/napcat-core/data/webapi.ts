@@ -113,6 +113,89 @@ export interface QunAlbumBatch {
   index: string
 }
 
+let lastQunAlbumBatchId = 0;
+
+// 批次号取秒级时间戳。同一秒里发起的两次上传要错开，不然会被相册并成同一条
+export function nextQunAlbumBatchId () {
+  lastQunAlbumBatchId = Math.max(Math.floor(Date.now() / 1000), lastQunAlbumBatchId + 1);
+  return lastQunAlbumBatchId;
+}
+
+// control_req 的外层（鉴权、来源、会话），图片、视频、封面都一样
+function buildQunAlbumControlReq (
+  { uin, pskey, appid, checksum, check_type, file_len, refer = 'qzone', cmd }: {
+    uin: string,
+    pskey: string,
+    appid: string,
+    checksum: string,
+    check_type: number,
+    file_len: number,
+    refer?: string,
+    cmd?: string
+  },
+  biz_req: BizReq
+): ControlReq {
+  const req: ControlReq = {
+    uin,
+    token: { type: 4, data: pskey, appid: 5 },
+    appid,
+    checksum,
+    check_type,
+    file_len,
+    env: { refer, deviceInfo: 'h5' },
+    model: 0,
+    biz_req,
+    session: '',
+    asy_upload: 0,
+  };
+  if (cmd) req.cmd = cmd;
+  return req;
+}
+
+// biz_req 里三种上传都要带的基础字段
+function buildQunAlbumBizBase (
+  { iUploadType, sAlbumName = '', sAlbumID = '', iBatchID = 0, sPicTitle = '' }: {
+    iUploadType: number,
+    sAlbumName?: string,
+    sAlbumID?: string,
+    iBatchID?: number,
+    sPicTitle?: string
+  }
+): BizReq {
+  return {
+    sPicTitle,
+    sPicDesc: '',
+    sAlbumName,
+    sAlbumID,
+    iAlbumTypeID: 0,
+    iBitmap: 0,
+    iUploadType,
+    iUpPicType: 0,
+    iBatchID,
+    sPicPath: '',
+    iPicWidth: 0,
+    iPicHight: 0,
+    iWaterType: 0,
+    iDistinctUse: 0,
+    iUploadTime: Math.floor(Date.now() / 1000),
+  };
+}
+
+// 进相册的那一步（图片、视频封面）要带的群与批次信息
+function buildQunAlbumFeedFields (group_id: string, mapParams: MapParams, batchIndex: string) {
+  return {
+    iNeedFeeds: 1,
+    mapExt: { appid: 'qun', userid: group_id },
+    stExtendInfo: { mapParams },
+    mutliPicInfo: {
+      iBatUploadNum: mapParams.batch_num,
+      iCurUpload: batchIndex,
+      iSuccNum: 0,
+      iFailNum: 0,
+    },
+  };
+}
+
 export function qunAlbumControl ({
   uin,
   group_id,
@@ -125,7 +208,7 @@ export function qunAlbumControl ({
   photo_num = '1',
   video_num = '0',
   batch_num = '1',
-  batchId = Math.floor(Date.now() / 1000),
+  batchId = nextQunAlbumBatchId(),
   batchIndex = '0',
 }: {
   uin: string,
@@ -145,65 +228,14 @@ export function qunAlbumControl ({
 ): {
     control_req: ControlReq[]
   } {
-  const timestamp = Math.floor(Date.now() / 1000);
-
   return {
-    control_req: [
+    control_req: [buildQunAlbumControlReq(
+      { uin, pskey, appid: 'qun', checksum: pic_md5, check_type: 0, file_len: img_size, cmd: 'FileUpload' },
       {
-        uin,
-        token: {
-          type: 4,
-          data: pskey,
-          appid: 5,
-        },
-        appid: 'qun',
-        checksum: pic_md5,
-        check_type: 0,
-        file_len: img_size,
-        env: {
-          refer: 'qzone',
-          deviceInfo: 'h5',
-        },
-        model: 0,
-        biz_req: {
-          sPicTitle: img_name,
-          sPicDesc: '',
-          sAlbumName,
-          sAlbumID,
-          iAlbumTypeID: 0,
-          iBitmap: 0,
-          iUploadType: 0,
-          iUpPicType: 0,
-          iBatchID: batchId,
-          sPicPath: '',
-          iPicWidth: 0,
-          iPicHight: 0,
-          iWaterType: 0,
-          iDistinctUse: 0,
-          iNeedFeeds: 1,
-          iUploadTime: timestamp,
-          mapExt: {
-            appid: 'qun',
-            userid: group_id,
-          },
-          stExtendInfo: {
-            mapParams: {
-              photo_num,
-              video_num,
-              batch_num,
-            },
-          },
-          mutliPicInfo: {
-            iBatUploadNum: batch_num,
-            iCurUpload: batchIndex,
-            iSuccNum: 0,
-            iFailNum: 0,
-          },
-        },
-        session: '',
-        asy_upload: 0,
-        cmd: 'FileUpload',
-      }],
+        ...buildQunAlbumBizBase({ iUploadType: 0, sAlbumName, sAlbumID, iBatchID: batchId, sPicTitle: img_name }),
+        ...buildQunAlbumFeedFields(group_id, { photo_num, video_num, batch_num }, batchIndex),
+      }
+    )],
   };
 }
 
@@ -241,9 +273,8 @@ export function createStreamUpload (
 /**
  * 视频主体上传的控制体。
  *
- * 注意：视频这一步**不带相册**（sAlbumID / sAlbumName 留空，iBatchID 为 0），
- * 它只是先把视频传成一份素材，拿到分片响应里的 sVid 之后，
- * 再由封面二段上传（qunAlbumVideoCoverControl）把视频挂进相册。
+ * 视频这一步不进相册（相册留空，iBatchID 为 0），只是先把视频传成素材；
+ * 分片响应里拿到 sVid 后，再由封面上传（qunAlbumVideoCoverControl）把视频挂进相册。
  */
 export function qunAlbumVideoControl ({
   uin,
@@ -268,73 +299,37 @@ export function qunAlbumVideoControl ({
 }): {
     control_req: ControlReq[]
   } {
-  const timestamp = Math.floor(Date.now() / 1000);
-
   return {
-    control_req: [
+    control_req: [buildQunAlbumControlReq(
+      { uin, pskey, appid: 'video_qun', checksum: video_sha1, check_type: 1, file_len: video_size, cmd: 'FileUploadVideo' },
       {
-        uin,
-        token: {
-          type: 4,
-          data: pskey,
-          appid: 5,
+        ...buildQunAlbumBizBase({ iUploadType: 3 }),
+        sTitle: '',
+        sDesc: '',
+        sCoverUrl: '',
+        iFlag: 0,
+        iPlayTime: play_time,
+        iIsNew: 111,
+        iIsOriginalVideo: 0,
+        iIsFormatF20: 0,
+        extend_info: {
+          video_type: '3',
+          domainid: '5',
+          photo_num,
+          video_num,
+          batch_num,
+          qun_id: group_id,
         },
-        appid: 'video_qun',
-        checksum: video_sha1,
-        check_type: 1,
-        file_len: video_size,
-        env: {
-          refer: 'qzone',
-          deviceInfo: 'h5',
-        },
-        model: 0,
-        biz_req: {
-          sPicTitle: '',
-          sPicDesc: '',
-          sAlbumName: '',
-          sAlbumID: '',
-          iAlbumTypeID: 0,
-          iBitmap: 0,
-          iUploadType: 3,
-          iUpPicType: 0,
-          iBatchID: 0,
-          sPicPath: '',
-          iPicWidth: 0,
-          iPicHight: 0,
-          iWaterType: 0,
-          iDistinctUse: 0,
-          sTitle: '',
-          sDesc: '',
-          iFlag: 0,
-          iUploadTime: timestamp,
-          iPlayTime: play_time,
-          sCoverUrl: '',
-          iIsNew: 111,
-          iIsOriginalVideo: 0,
-          iIsFormatF20: 0,
-          extend_info: {
-            video_type: '3',
-            domainid: '5',
-            photo_num,
-            video_num,
-            batch_num,
-            qun_id: group_id,
-          },
-        },
-        session: '',
-        asy_upload: 0,
-        cmd: 'FileUploadVideo',
-      }],
+      }
+    )],
   };
 }
 
 /**
- * 视频封面二段上传的控制体。
+ * 视频封面上传的控制体。
  *
- * 这一步走图片口径（appid=qun / cmd=FileUpload），但：
- * - 用 stExtendInfo.mapParams.vid 把封面挂到已上传的视频上
- * - 只有这一步带相册（sAlbumID / sAlbumName）与批次号（iBatchID），视频正是靠它进相册
- * - stExternalMapExt 声明这是客户端上传的封面，并允许与图片混在同一条动态里
+ * 按图片上传，但 iUploadType 为 2，并用 mapParams.vid 指向已上传的视频。
+ * 相册和批次号只在这一步出现，视频是靠封面进的相册。
  */
 export function qunAlbumVideoCoverControl ({
   uin,
@@ -345,7 +340,7 @@ export function qunAlbumVideoCoverControl ({
   cover_md5,
   cover_size,
   vid,
-  batchId = Math.floor(Date.now() / 1000),
+  batchId = nextQunAlbumBatchId(),
   batchIndex = '0',
   photo_num = '0',
   video_num = '1',
@@ -367,75 +362,25 @@ export function qunAlbumVideoCoverControl ({
 }): {
     control_req: ControlReq[]
   } {
-  const timestamp = Math.floor(Date.now() / 1000);
-
   return {
-    control_req: [
+    control_req: [buildQunAlbumControlReq(
+      { uin, pskey, appid: 'qun', checksum: cover_md5, check_type: 0, file_len: cover_size, refer: 'huodong' },
       {
-        uin,
-        token: {
-          type: 4,
-          data: pskey,
-          appid: 5,
+        ...buildQunAlbumBizBase({ iUploadType: 2, sAlbumName, sAlbumID, iBatchID: batchId }),
+        ...buildQunAlbumFeedFields(group_id, { vid, photo_num, video_num, batch_num }, batchIndex),
+        // 标明封面由客户端上传，且允许和图片出现在同一条动态里
+        stExternalMapExt: {
+          is_client_upload_cover: '1',
+          is_pic_video_mix_feeds: '1',
         },
-        appid: 'qun',
-        checksum: cover_md5,
-        check_type: 0,
-        file_len: cover_size,
-        env: {
-          refer: 'huodong',
-          deviceInfo: 'h5',
-        },
-        model: 0,
-        biz_req: {
-          sPicTitle: '',
-          sPicDesc: '',
-          sAlbumName,
-          sAlbumID,
-          iAlbumTypeID: 0,
-          iBitmap: 0,
-          iUploadType: 2,
-          iUpPicType: 0,
-          iBatchID: batchId,
-          sPicPath: '',
-          iPicWidth: 0,
-          iPicHight: 0,
-          iWaterType: 0,
-          iDistinctUse: 0,
-          iNeedFeeds: 1,
-          iUploadTime: timestamp,
-          mutliPicInfo: {
-            iBatUploadNum: batch_num,
-            iCurUpload: batchIndex,
-            iSuccNum: 0,
-            iFailNum: 0,
-          },
-          stExtendInfo: {
-            mapParams: {
-              vid,
-              photo_num,
-              video_num,
-              batch_num,
-            },
-          },
-          stExternalMapExt: {
-            is_client_upload_cover: '1',
-            is_pic_video_mix_feeds: '1',
-          },
-          mapExt: {
-            appid: 'qun',
-            userid: group_id,
-          },
-          sExif_CameraMaker: '',
-          sExif_CameraModel: '',
-          sExif_Time: '',
-          sExif_LatitudeRef: '',
-          sExif_Latitude: '',
-          sExif_LongitudeRef: '',
-          sExif_Longitude: '',
-        },
-        session: '',
-        asy_upload: 0,
-      }],
+        sExif_CameraMaker: '',
+        sExif_CameraModel: '',
+        sExif_Time: '',
+        sExif_LatitudeRef: '',
+        sExif_Latitude: '',
+        sExif_LongitudeRef: '',
+        sExif_Longitude: '',
+      }
+    )],
   };
 }
