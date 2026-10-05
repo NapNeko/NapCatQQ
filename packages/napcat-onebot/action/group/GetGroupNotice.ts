@@ -21,6 +21,8 @@ const ReturnSchema = Type.Array(Type.Object({
   }, { description: '公告内容' }),
   settings: Type.Optional(Type.Any({ description: '设置项' })),
   read_num: Type.Optional(Type.Number({ description: '阅读数' })),
+  send_to_new_member: Type.Optional(Type.Boolean({ description: '是否为「发给新成员」公告' })),
+  pinned: Type.Optional(Type.Boolean({ description: '是否置顶（仅「发给新成员」公告可读到）' })),
 }), { description: '群公告列表' });
 
 type ReturnType = Static<typeof ReturnSchema>;
@@ -44,30 +46,44 @@ export class GetGroupNotice extends OneBotAction<PayloadType, ReturnType> {
       throw new Error('获取公告失败');
     }
     const retNotices: ReturnType = [];
-    for (const key in ret.feeds) {
-      if (!ret.feeds[key]) {
-        continue;
+    const seen = new Set<string>();
+    // 「发给新成员」类公告只出现在 inst 里，追加在 feeds 之后，保持原有条目的顺序不变
+    for (const [list, sendToNewMember] of [[ret.feeds, false], [ret.inst, true]] as const) {
+      for (const retApiNotice of Array.isArray(list) ? list : []) {
+        if (!retApiNotice || seen.has(retApiNotice.fid)) {
+          continue;
+        }
+        seen.add(retApiNotice.fid);
+        retNotices.push(this.toNotice(retApiNotice, sendToNewMember));
       }
-      const retApiNotice: WebApiGroupNoticeFeed = ret.feeds[key];
-      const image = retApiNotice.msg.pics?.map((pic) => {
-        return { id: pic.id, height: pic.h, width: pic.w };
-      }) || [];
-
-      const retNotice: ReturnType[number] = {
-        notice_id: retApiNotice.fid,
-        sender_id: retApiNotice.u,
-        publish_time: retApiNotice.pubt,
-        message: {
-          text: retApiNotice.msg.text,
-          image,
-          images: image,
-        },
-        settings: retApiNotice.settings,
-        read_num: retApiNotice.read_num,
-      };
-      retNotices.push(retNotice);
     }
 
     return retNotices;
+  }
+
+  private toNotice (retApiNotice: WebApiGroupNoticeFeed, sendToNewMember: boolean): ReturnType[number] {
+    const image = retApiNotice.msg.pics?.map((pic) => {
+      return { id: pic.id, height: pic.h, width: pic.w };
+    }) || [];
+
+    const retNotice: ReturnType[number] = {
+      notice_id: retApiNotice.fid,
+      sender_id: retApiNotice.u,
+      publish_time: retApiNotice.pubt,
+      message: {
+        text: retApiNotice.msg.text,
+        image,
+        images: image,
+      },
+      settings: retApiNotice.settings,
+      read_num: retApiNotice.read_num,
+      send_to_new_member: sendToNewMember,
+    };
+    // 置顶状态只在 inst 条目的 settings.inst_no_pinned 里：0 = 置顶中，1 = 未置顶
+    const instNoPinned = retApiNotice.settings?.inst_no_pinned;
+    if (typeof instNoPinned === 'number') {
+      retNotice.pinned = instNoPinned === 0;
+    }
+    return retNotice;
   }
 }
