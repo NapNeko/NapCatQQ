@@ -9,8 +9,8 @@ on:
         type: string
 
 env:
-  QQ_URL_X86_64: 'https://qqdl.gtimg.cn/qqfile/QQNT/9.9.32/beta/fd40a3ec/linuxqq_3.2.30-50969_x86_64.AppImage'
-  QQ_URL_ARM64: 'https://qqdl.gtimg.cn/qqfile/QQNT/9.9.32/beta/fd40a3ec/linuxqq_3.2.30-50969_arm64.AppImage'
+  QQ_URL_X86_64: 'https://qqdl.gtimg.cn/qqfile/QQNT/9.9.33/release/3f89efc5/QQ_3.2.32_260812_x86_64_01.AppImage'
+  QQ_URL_ARM64: 'https://qqdl.gtimg.cn/qqfile/QQNT/9.9.33/release/3f89efc5/QQ_3.2.32_260812_arm64_01.AppImage'
 
 jobs:
   get-version:
