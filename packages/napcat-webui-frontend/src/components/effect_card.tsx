@@ -2,6 +2,10 @@ import { Card, CardProps } from '@heroui/card';
 import clsx from 'clsx';
 import React from 'react';
 
+// Firefox 里 backdrop-filter 和 3D transform 作用在同一个元素上时，卡片内容会画不出来
+// （#2083，macOS 上的 Firefox 157 复现），所以 Firefox 下不做倾斜，只保留光晕。
+const tiltEnabled = !/firefox/i.test(navigator.userAgent);
+
 export interface HoverEffectCardProps extends CardProps {
   children: React.ReactNode
   maxXRotation?: number
@@ -36,20 +40,22 @@ const HoverEffectCard: React.FC<HoverEffectCardProps> = (props) => {
         'relative overflow-hidden bg-opacity-50 backdrop-blur-lg',
         className
       )}
-      style={{
-        willChange: 'transform',
-        transform:
-          'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)',
-        ...style,
-      }}
+      style={tiltEnabled
+        ? {
+          willChange: 'transform',
+          transform:
+              'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)',
+          ...style,
+        }
+        : style}
       onMouseEnter={() => {
-        if (cardRef.current) {
+        if (tiltEnabled && cardRef.current) {
           cardRef.current.style.transition = 'transform 0.3s ease-out';
         }
       }}
       onMouseLeave={() => {
         setIsShowLight(false);
-        if (cardRef.current) {
+        if (tiltEnabled && cardRef.current) {
           cardRef.current.style.transition = 'transform 0.5s';
           cardRef.current.style.transform =
             'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
@@ -77,6 +83,10 @@ const HoverEffectCard: React.FC<HoverEffectCardProps> = (props) => {
             left,
             top,
           });
+
+          if (!tiltEnabled) {
+            return;
+          }
 
           cardRef.current.style.transition = 'transform 0.1s';
 
