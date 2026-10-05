@@ -297,6 +297,9 @@ export class NTQQGroupApi {
     const updateCache = async () => {
       try {
         const members = await this.getGroupMemberAll(groupCode, true);
+        if (!members?.result?.infos) {
+          throw new Error(`errCode: ${members?.errCode}, errMsg: ${members?.errMsg}`);
+        }
         this.groupMemberCache.set(groupCode, members.result.infos);
       } catch (e) {
         this.context.logger.logError(`刷新群成员缓存失败, 群号: ${groupCode}, 错误: ${e}`);
@@ -326,25 +329,42 @@ export class NTQQGroupApi {
 
     // 获取群成员缓存
     let members = this.groupMemberCache.get(groupCodeStr);
+    const cached = !!members;
     if (!members) {
       members = (await this.refreshGroupMemberCache(groupCodeStr, true));
     }
 
+    // 刚入的群可能拉不到成员列表，这时 members 为空，不能直接抛错，否则整条群消息都上报不出去
     const getMember = () => {
+      if (!members) {
+        return undefined;
+      }
       if (isNumeric(memberUinOrUidStr)) {
-        return Array.from(members!.values()).find(member => member.uin === memberUinOrUidStr);
+        return Array.from(members.values()).find(member => member.uin === memberUinOrUidStr);
       } else {
-        return members!.get(memberUinOrUidStr);
+        return members.get(memberUinOrUidStr);
       }
     };
 
     let member = getMember();
-    // 如果缓存中不存在该成员，尝试刷新缓存
-    if (!member) {
+    // 缓存里没有该成员（比如新入群），刷新一次；上面刚刷新过就不再重复拉取
+    if (!member && cached) {
       members = (await this.refreshGroupMemberCache(groupCodeStr, true));
       member = getMember();
     }
     return member;
+  }
+
+  // 从已缓存的群成员里按 QQ 号找 uid，供 uin 转 uid 兜底
+  getUidFromMemberCache (uin: string) {
+    for (const members of this.groupMemberCache.values()) {
+      for (const [uid, member] of members) {
+        if (member.uin === uin) {
+          return uid;
+        }
+      }
+    }
+    return undefined;
   }
 
   async getGroupRecommendContactArkJson (groupCode: string) {

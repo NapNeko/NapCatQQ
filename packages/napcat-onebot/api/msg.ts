@@ -1165,8 +1165,8 @@ export class OneBotMsgApi {
     resMsg.sub_type = 'normal';
     resMsg.group_id = parseInt(msg.peerUin);
     resMsg.group_name = msg.peerName;
-    let member = await this.core.apis.GroupApi.getGroupMember(msg.peerUin, msg.senderUin);
-    if (!member) member = await this.core.apis.GroupApi.getGroupMember(msg.peerUin, msg.senderUin);
+    // getGroupMember 找不到成员时内部已经刷新过一次缓存，这里不用再查第二遍
+    const member = await this.core.apis.GroupApi.getGroupMember(msg.peerUin, msg.senderUin);
     if (member) {
       resMsg.sender.role = OB11Construct.groupMemberRole(member.role);
       resMsg.sender.nickname = member.nick;
@@ -1189,9 +1189,12 @@ export class OneBotMsgApi {
     resMsg.sub_type = 'group';
     const ret = await this.core.apis.MsgApi.getTempChatInfo(ChatType.KCHATTYPETEMPC2CFROMGROUP, msg.senderUid);
     if (ret.result === 0) {
-      // 避免uin:'' uid非空，uid一般不空
-      const member = await this.core.apis.GroupApi.getGroupMember(msg.peerUin, await this.core.apis.UserApi.getUinByUidV2(msg.senderUid));
-      resMsg.group_id = parseInt(ret.tmpChatInfo!.groupCode);
+      // 临时会话的 peerUin 是对方 QQ 号，成员要去来源群里找；uid 一般不空，优先用 uid 查
+      const groupCode = ret.tmpChatInfo!.groupCode;
+      const member = groupCode
+        ? await this.core.apis.GroupApi.getGroupMember(groupCode, msg.senderUid || msg.senderUin)
+        : undefined;
+      resMsg.group_id = parseInt(groupCode);
       resMsg.sender.nickname = member?.nick ?? member?.cardName ?? '临时会话';
       resMsg.temp_source = 0;
     } else {
