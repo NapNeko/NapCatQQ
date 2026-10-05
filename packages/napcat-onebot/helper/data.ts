@@ -135,6 +135,9 @@ export class OB11Construct {
       creator: +folder.createUin,
       creator_name: folder.creatorName,
       total_file_count: folder.totalFileCount,
+      modify_time: folder.modifyTime,
+      modifier: +folder.modifyUin,
+      modifier_name: folder.modifyName,
     };
   }
 }
