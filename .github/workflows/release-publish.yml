@@ -47,6 +47,7 @@ jobs:
       - name: Build NapCat.${{ matrix.target.name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NAPCAT_VERSION: ${{ inputs.version }}
         run: |
           pnpm i
           pnpm --filter napcat-webui-frontend run build || exit 1
@@ -192,6 +193,9 @@ jobs:
     needs: assemble-windows-node
     runs-on: windows-latest
     steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.version }}
       - uses: actions/download-artifact@v7
         with:
           name: NapCat.Shell.Windows.Node
@@ -204,6 +208,16 @@ jobs:
           & .\node.exe --check .\index.js
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           & .\node.exe -e "const wrapper = require('./wrapper.node'); if (!wrapper.NodeQQNTWrapperUtil) throw new Error('Missing NodeQQNTWrapperUtil'); console.log('wrapper.node native-load PASS'); process.exit(0);"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Verify Windows loader file queries
+        shell: pwsh
+        run: |
+          cmake -S .github/tests/windows-loader -B "$env:RUNNER_TEMP/windows-loader-test" -A x64
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cmake --build "$env:RUNNER_TEMP/windows-loader-test" --config Release
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & "$env:RUNNER_TEMP/windows-loader-test/Release/windows-loader-test.exe" "$pwd/windows-node/napcat/NapCatWinBootHook.dll" "$pwd/windows-node/napcat/loadNapCat.js"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
   release-napcat:
