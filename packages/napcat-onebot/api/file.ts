@@ -59,7 +59,7 @@ export class OneBotFileApi {
     };
   }
 
-  async createValidSendPicElement (context: SendMessageContext, picPath: string, summary: string = '', subType: PicSubType = 0, _isLocal: boolean = false): Promise<SendPicElement> {
+  async createValidSendPicElement (context: SendMessageContext, picPath: string, summary: string = '', subType: PicSubType = 0, isFlash: boolean = false, _isLocal: boolean = false): Promise<SendPicElement> {
     const { md5, fileName, path, fileSize } = await this.core.apis.FileApi.uploadFile(picPath, ElementType.PIC, subType);
     if (fileSize === 0) {
       throw new Error('文件异常，大小为0');
@@ -79,6 +79,8 @@ export class OneBotFileApi {
         original: true,
         picType: await getFileTypeForSendType(picPath),
         picSubType: subType,
+        // 闪照：NT 协议通过 picElement.isFlashPic 布尔字段标识（内核 EncodeFlashPicElem 读取），仅 true 时携带
+        ...(isFlash ? { isFlashPic: true } : {}),
         fileUuid: '',
         fileSubId: '',
         thumbFileSize: 0,

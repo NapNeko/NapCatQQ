@@ -146,6 +146,8 @@ export interface PicElement {
   original: boolean;
   picType: PicType;
   picSubType?: PicSubType;
+  // NT 协议闪照标记（内核 EncodeFlashPicElem 依赖该布尔字段，非 picSubType）
+  isFlashPic?: boolean;
   fileUuid: string;
   fileSubId: string;
   thumbFileSize: number;

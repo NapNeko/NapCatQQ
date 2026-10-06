@@ -98,6 +98,8 @@ export const OB11MessageImageSchema = Type.Object({
     Type.Object({
       summary: Type.Optional(Type.String({ description: '图片摘要' })),
       sub_type: Type.Optional(Type.Number({ description: '图片子类型' })),
+      // 闪照标记：兼容 true / 1 / "1" / "true" 等写法（对应 NT 协议 picElement.isFlashPic）
+      flash: Type.Optional(Type.Union([Type.Boolean(), Type.String(), Type.Number()], { description: '是否作为闪照发送' })),
     }),
   ]),
 }, { $id: 'OB11MessageImage', description: '图片消息段' });

@@ -140,6 +140,8 @@ export class OneBotMsgApi {
             summary: element.summary,
             file: element.fileName,
             sub_type: element.picSubType,
+            // 闪照回传：收到闪照时标记 flash，便于下游识别
+            ...(element.isFlashPic ? { flash: true } : {}),
             url: disableGetUrl ? (element.filePath ?? '') : await this.core.apis.FileApi.getImageUrl(element),
             file_size: element.fileSize,
           },
@@ -762,11 +764,15 @@ export class OneBotMsgApi {
     // File service
     [OB11MessageDataType.image]: async (sendMsg, context) => {
       const result = await this.handleOb11FileLikeMessage(sendMsg, context);
+      // 闪照标记归一化：兼容 true / 1 / "1" / "true"
+      const flash = sendMsg.data.flash;
+      const isFlash = flash === true || flash === 1 || flash === '1' || flash === 'true';
       return await this.obContext.apis.FileApi.createValidSendPicElement(
         context,
         result.path,
         sendMsg.data.summary,
         sendMsg.data.sub_type,
+        isFlash,
         result.isLocal
       );
     },
