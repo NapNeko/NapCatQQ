@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from 'vitest';
 import { copyFileSync, mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -77,20 +77,13 @@ describe('loader paths', () => {
     copyFileSync(process.execPath, path.join(installDir, 'node.exe'));
     copyFileSync(path.join(packageRoot, 'napcat-develop/napcat.bat'), path.join(installDir, 'napcat.bat'));
     writeFileSync(path.join(installDir, 'index.js'), 'console.log(JSON.stringify({ cwd: process.cwd(), args: process.argv.slice(2) })); process.exitCode = 7;');
-    let exitStatus: number | null = null;
-    let output = '';
-    try {
-      output = execFileSync('cmd.exe', ['/d', '/s', '/c', `""${path.join(installDir, 'napcat.bat')}" -q 123456"`], {
-        cwd: fixtureRoot,
-        encoding: 'utf8',
-        windowsVerbatimArguments: true,
-      });
-    } catch (error) {
-      const result = error as { status: number; stdout: string };
-      exitStatus = result.status;
-      output = result.stdout;
-    }
-    expect(exitStatus).toBe(7);
-    expect(JSON.parse(output)).toEqual({ cwd: installDir, args: ['-q', '123456'] });
+    const result = spawnSync('cmd.exe', ['/d', '/s', '/c', `""${path.join(installDir, 'napcat.bat')}" -q 123456"`], {
+      cwd: fixtureRoot,
+      encoding: 'utf8',
+      windowsVerbatimArguments: true,
+    });
+    expect(result.error).toBeUndefined();
+    expect(result.status).toBe(7);
+    expect(JSON.parse(result.stdout)).toEqual({ cwd: installDir, args: ['-q', '123456'] });
   });
 });
