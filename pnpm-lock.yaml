@@ -422,6 +422,9 @@ importers:
       tsc-alias:
         specifier: ^1.8.16
         version: 1.8.16
+      typescript:
+        specifier: ^5.3.0
+        version: 5.9.3
 
   packages/napcat-universal:
     dependencies:
