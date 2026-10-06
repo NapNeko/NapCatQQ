@@ -12,6 +12,12 @@
       "napcat-core": [
         "../../packages/napcat-core/index.ts"
       ],
+      "napcat-core/*": [
+        "../../packages/napcat-core/*"
+      ],
+      "napcat-webui-backend/*": [
+        "../../packages/napcat-webui-backend/*"
+      ],
       "napcat-onebot": [
         "../../packages/napcat-onebot/index.ts"
       ],
@@ -40,6 +46,8 @@
   },
   "include": [
     "./index.ts",
+    "../napcat-pty/node-pty.d.ts",
+    "../napcat-pty/native.d.ts",
     "../napcat-core/**/*.ts",
     "../napcat-onebot/**/*.ts",
     "../napcat-common/**/*.ts"

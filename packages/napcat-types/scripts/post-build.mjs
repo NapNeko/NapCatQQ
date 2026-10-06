@@ -1,6 +1,7 @@
 import { readdir, readFile, writeFile, rename } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import ts from 'typescript';
 
 const __dirname = fileURLToPath(new URL('../', import.meta.url));
 const distDir = join(__dirname, 'dist');
@@ -41,9 +42,21 @@ function replaceExternalTypes (content) {
   let result = content;
 
   // 替换带泛型的类型（先处理复杂的）
-  result = result.replace(/NapProtoDecodeStructType<[^>]+>/g, 'any');
-  result = result.replace(/NapProtoEncodeStructType<[^>]+>/g, 'any');
-  result = result.replace(/ValidateFunction<[^>]+>/g, 'any');
+  const sourceFile = ts.createSourceFile('declaration.d.ts', result, ts.ScriptTarget.Latest, true);
+  const genericTypeNames = new Set(['NapProtoDecodeStructType', 'NapProtoEncodeStructType', 'ValidateFunction']);
+  const replacements = [];
+  const visit = (node) => {
+    const typeName = ts.isTypeReferenceNode(node) ? node.typeName : ts.isImportTypeNode(node) ? node.qualifier : undefined;
+    if (typeName && genericTypeNames.has(typeName.getText(sourceFile).split('.').at(-1))) {
+      replacements.push({ start: node.getStart(sourceFile), end: node.getEnd() });
+      return;
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sourceFile);
+  for (const replacement of replacements.reverse()) {
+    result = result.slice(0, replacement.start) + 'any' + result.slice(replacement.end);
+  }
 
   // 替换 winston.Logger 等带命名空间的类型
   result = result.replace(/winston\.Logger/g, 'any');
@@ -102,6 +115,11 @@ async function processFile (filePath) {
 
   // 3. Replace "export declare enum" with "export enum"
   content = content.replace(/export declare enum/g, 'export enum');
+
+  const parsed = ts.createSourceFile(filePath, content, ts.ScriptTarget.Latest, true);
+  if (parsed.parseDiagnostics.length > 0) {
+    throw new Error(`Invalid generated declaration ${filePath}: ${parsed.parseDiagnostics.map(diagnostic => ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')).join('\n')}`);
+  }
 
   // Write back the modified content
   await writeFile(filePath, content, 'utf-8');
