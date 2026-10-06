@@ -1,4 +1,6 @@
 @echo off
+setlocal DisableDelayedExpansion
+cd /d "%~dp0" || exit /b 1
 chcp 65001 >nul
 net session >nul 2>&1
 if %ERRORLEVEL% == 0 (
@@ -9,11 +11,11 @@ if %ERRORLEVEL% == 0 (
     exit
 )
 
-set NAPCAT_PATCH_PACKAGE=%cd%\qqnt.json
-set NAPCAT_LOAD_PATH=%cd%\loadNapCat.js
-set NAPCAT_INJECT_PATH=%cd%\NapCatWinBootHook.dll
-set NAPCAT_LAUNCHER_PATH=%cd%\NapCatWinBootMain.exe
-set NAPCAT_MAIN_PATH=%cd%\napcat.mjs
+set "NAPCAT_PATCH_PACKAGE=%cd%\qqnt.json"
+set "NAPCAT_LOAD_PATH=%cd%\loadNapCat.js"
+set "NAPCAT_INJECT_PATH=%cd%\NapCatWinBootHook.dll"
+set "NAPCAT_LAUNCHER_PATH=%cd%\NapCatWinBootMain.exe"
+set "NAPCAT_MAIN_PATH=%cd%\napcat.mjs"
 :loop_read
 for /f "tokens=2*" %%a in ('reg query "HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\QQ" /v "UninstallString"') do (
     set "RetString=%%~b"
@@ -32,9 +34,6 @@ if not exist "%QQPath%" (
     pause
     exit /b
 )
-set NAPCAT_MAIN_PATH=%NAPCAT_MAIN_PATH:\=/%
-echo (async () =^> {await import("file:///%NAPCAT_MAIN_PATH%")})() > "%NAPCAT_LOAD_PATH%"
-
 "%NAPCAT_LAUNCHER_PATH%" "%QQPath%" "%NAPCAT_INJECT_PATH%" %*
 
 REM Optional: -q <QQ_NUMBER> for quick login, omit for QR code login

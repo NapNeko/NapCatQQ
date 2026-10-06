@@ -1,5 +1,6 @@
 const path = require('path');
-const CurrentPath = path.dirname(__filename);
+const { pathToFileURL } = require('url');
+const mainPath = process.env.NAPCAT_MAIN_PATH || path.join(__dirname, 'napcat.mjs');
 (async () => {
-  await import('file://' + path.join(CurrentPath, './napcat/napcat.mjs'));
+  await import(pathToFileURL(mainPath).href);
 })();

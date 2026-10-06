@@ -153,9 +153,14 @@ jobs:
           # -----------------------------
           # 5) 拷贝 QQ 文件到 NapCat.Shell.Windows.Node
           # -----------------------------
-          QQ_TARGETS=("avif_convert.dll" "broadcast_ipc.dll" "config.json" "libglib-2.0-0.dll" "libgobject-2.0-0.dll" "libvips-42.dll" "ncnn.dll" "opencv.dll" "package.json" "QBar.dll" "wrapper.node" "LightQuic.dll")
+          QQ_TARGETS=("avif_convert.dll" "broadcast_ipc.dll" "config.json" "crypto.dll" "ssl.dll" "libglib-2.0-0.dll" "libgobject-2.0-0.dll" "libvips-42.dll" "ncnn.dll" "opencv.dll" "package.json" "QBar.dll" "wrapper.node" "LightQuic.dll")
           for name in "${QQ_TARGETS[@]}"; do
-            find "$QQ_EXTRACT" -iname "$name" -exec cp -a {} "$OUT_DIR" \; || true
+            source_file=$(find "$QQ_EXTRACT" -type f -iname "$name" -print -quit)
+            if [ -z "$source_file" ]; then
+              echo "Missing required QQ file: $name" >&2
+              exit 1
+            fi
+            cp -a "$source_file" "$OUT_DIR/"
           done
 
           # -----------------------------
@@ -183,8 +188,26 @@ jobs:
           name: NapCat.Shell.Windows.Node
           path: NapCat.Shell.Windows.Node
 
+  validate-windows-node:
+    needs: assemble-windows-node
+    runs-on: windows-latest
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          name: NapCat.Shell.Windows.Node
+          path: windows-node
+
+      - name: Verify bundled Node and QQ native dependencies
+        shell: pwsh
+        working-directory: windows-node
+        run: |
+          & .\node.exe --check .\index.js
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & .\node.exe -e "const wrapper = require('./wrapper.node'); if (!wrapper.NodeQQNTWrapperUtil) throw new Error('Missing NodeQQNTWrapperUtil'); console.log('wrapper.node native-load PASS'); process.exit(0);"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
   release-napcat:
-    needs: [build, assemble-windows-node]
+    needs: [build, assemble-windows-node, validate-windows-node]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

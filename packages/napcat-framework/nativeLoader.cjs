@@ -1,5 +1,6 @@
 // const fs = require('fs');
 const path = require('path');
+const { pathToFileURL } = require('url');
 
 async function initializeNapCat (session, loginService, registerCallback) {
   // const logFile = path.join(currentPath, 'napcat.log');
@@ -12,7 +13,7 @@ async function initializeNapCat (session, loginService, registerCallback) {
 
   try {
     const currentPath = path.dirname(__filename);
-    const { NCoreInitFramework } = await import('file://' + path.join(currentPath, './napcat.mjs'));
+    const { NCoreInitFramework } = await import(pathToFileURL(path.join(currentPath, './napcat.mjs')).href);
     await NCoreInitFramework(session, loginService, (callback) => { registerCallback(callback); });
   } catch (error) {
     console.log('[NapCat] [Error] 初始化NapCat', error);

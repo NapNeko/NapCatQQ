@@ -1,8 +1,10 @@
 @echo off
+setlocal DisableDelayedExpansion
+cd /d "%~dp0" || exit /b 1
 chcp 65001
-set NAPCAT_INJECT_PATH=%cd%\napiloader.dll
-set NAPCAT_LAUNCHER_PATH=%cd%\napimain.exe
-set NAPCAT_MAIN_PATH=%cd%\nativeLoader.cjs
+set "NAPCAT_INJECT_PATH=%cd%\napiloader.dll"
+set "NAPCAT_LAUNCHER_PATH=%cd%\napimain.exe"
+set "NAPCAT_MAIN_PATH=%cd%\nativeLoader.cjs"
 :loop_read
 for /f "tokens=2*" %%a in ('reg query "HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\QQ" /v "UninstallString"') do (
      set "RetString=%%~b"
