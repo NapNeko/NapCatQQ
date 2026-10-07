@@ -26,7 +26,13 @@ export default class SetGroupLeave extends OneBotAction<PayloadType, ReturnType>
   override returnExample = GroupActionsExamples.SetGroupLeave.response;
 
   async _handle (payload: PayloadType): Promise<null> {
-    await this.core.apis.GroupApi.quitGroup(payload.group_id.toString());
+    const groupCode = payload.group_id.toString();
+    // is_dismiss 既可能是布尔值，也可能是字符串 'true'（与 approve 等字段保持一致）
+    if (payload.is_dismiss === true || payload.is_dismiss === 'true') {
+      await this.core.apis.GroupApi.destroyGroup(groupCode);
+    } else {
+      await this.core.apis.GroupApi.quitGroup(groupCode);
+    }
     return null;
   }
 }
