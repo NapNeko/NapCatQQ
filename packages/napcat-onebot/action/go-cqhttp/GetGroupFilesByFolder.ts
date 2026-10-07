@@ -43,7 +43,8 @@ export class GetGroupFilesByFolder extends OneBotAction<PayloadType, ReturnType>
     return {
       files: ret.filter(item => item.fileInfo)
         .map(item => OB11Construct.file(item.peerId, item.fileInfo!)),
-      folders: [],
+      folders: ret.filter(item => item.folderInfo)
+        .map(item => OB11Construct.folder(item.peerId, item.folderInfo!)),
     };
   }
 }
