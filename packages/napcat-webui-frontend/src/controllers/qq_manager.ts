@@ -272,6 +272,57 @@ export default class QQManager {
   }
 
   // ============================================================
+  // macOS GUID 管理
+  // ============================================================
+
+  public static async getMacGUIDInfo () {
+    const data = await serverRequest.post<ServerResponse<{
+      guid: string;
+      guidUuid: string;
+      machineId: string;
+      sn: string;
+      mac: string;
+      platformUuid: string;
+      source: 'machineid-info' | 'mac-fallback';
+    }>>('/QQLogin/GetMacGUIDInfo');
+    return data.data.data;
+  }
+
+  public static async getMacHardwareInfo () {
+    const data = await serverRequest.post<ServerResponse<{
+      platformUuid: string;
+      serialNumber: string;
+      diskSerial: string;
+      mac: string;
+    }>>('/QQLogin/GetMacHardwareInfo');
+    return data.data.data;
+  }
+
+  public static async setMacMachineId (machineId: string, sn?: string) {
+    const data = await serverRequest.post<ServerResponse<{ guid: string; guidUuid: string; }>>(
+      '/QQLogin/SetMacMachineId', { machineId, sn });
+    return data.data.data;
+  }
+
+  public static async getMacInfoBackups () {
+    const data = await serverRequest.post<ServerResponse<string[]>>('/QQLogin/GetMacInfoBackups');
+    return data.data.data;
+  }
+
+  public static async createMacInfoBackup () {
+    const data = await serverRequest.post<ServerResponse<{ path: string; }>>('/QQLogin/CreateMacInfoBackup');
+    return data.data.data;
+  }
+
+  public static async restoreMacInfoBackup (backupName: string) {
+    await serverRequest.post<ServerResponse<null>>('/QQLogin/RestoreMacInfoBackup', { backupName });
+  }
+
+  public static async resetMacDeviceID () {
+    await serverRequest.post<ServerResponse<null>>('/QQLogin/ResetMacDeviceID');
+  }
+
+  // ============================================================
   // NapCat 配置管理
   // ============================================================
 

@@ -5,7 +5,18 @@ import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
 import { WebUiConfig } from '@/napcat-webui-backend/index';
 import { isEmpty } from '@/napcat-webui-backend/src/utils/check';
 import { sendError, sendSuccess } from '@/napcat-webui-backend/src/utils/response';
-import { Registry20Utils, MachineInfoUtils } from '@/napcat-webui-backend/src/utils/guid';
+import {
+  Registry20Utils,
+  MachineInfoUtils,
+  getGlobalDataPath,
+  MacMachineInfoUtils,
+  computeMacGuidInfo,
+  getMacPlatformUuid,
+  getMacSn,
+  getMacSerialNumber,
+  getMacDiskSerial,
+  getMacPrimaryMac,
+} from '@/napcat-webui-backend/src/utils/guid';
 import os from 'node:os';
 
 // oidb 新设备验证请求辅助函数
@@ -39,8 +50,8 @@ function oidbRequest (uid: string, body: Record<string, unknown>): Promise<Recor
   });
 }
 
-// 获取 Registry20 路径的辅助函数
-const getRegistryPath = () => {
+// 获取 QQ 数据根目录 (dataPath)
+const getQQDataPath = (): string => {
   // 优先从 WebUiDataRuntime 获取早期设置的 dataPath
   let dataPath = WebUiDataRuntime.getQQDataPath();
   if (!dataPath) {
@@ -51,20 +62,17 @@ const getRegistryPath = () => {
   if (!dataPath) {
     throw new Error('QQ data path not available yet');
   }
-  return Registry20Utils.getRegistryPath(dataPath);
+  return dataPath;
+};
+
+// 获取 Registry20 路径的辅助函数
+const getRegistryPath = () => {
+  return Registry20Utils.getRegistryPath(getQQDataPath());
 };
 
 // 获取 machine-info 路径的辅助函数 (Linux)
 const getMachineInfoPath = () => {
-  let dataPath = WebUiDataRuntime.getQQDataPath();
-  if (!dataPath) {
-    const oneBotContext = WebUiDataRuntime.getOneBotContext();
-    dataPath = oneBotContext?.core?.dataPath;
-  }
-  if (!dataPath) {
-    throw new Error('QQ data path not available yet');
-  }
-  return MachineInfoUtils.getMachineInfoPath(dataPath);
+  return MachineInfoUtils.getMachineInfoPath(getQQDataPath());
 };
 
 // 获取QQ登录二维码
@@ -510,6 +518,120 @@ export const QQResetLinuxDeviceIDHandler: RequestHandler = async (_, res) => {
 
     MachineInfoUtils.delete(machineInfoPath);
     return sendSuccess(res, { message: 'Device ID reset successfully (machine-info deleted)' });
+  } catch (e) {
+    return sendError(res, `Failed to reset Device ID: ${(e as Error).message}`);
+  }
+};
+
+// ============================================================
+// macOS GUID 管理 (machineid-info / TEA)
+// ============================================================
+
+// macOS: 当前生效的 GUID 与来源信息
+export const QQGetMacGUIDInfoHandler: RequestHandler = async (_, res) => {
+  try {
+    const dataPathGlobal = getGlobalDataPath(getQQDataPath());
+    const info = computeMacGuidInfo(dataPathGlobal);
+    return sendSuccess(res, info);
+  } catch (e) {
+    return sendError(res, `Failed to get macOS GUID: ${(e as Error).message}`);
+  }
+};
+
+// macOS: 本机硬件信息 (UUID / SN / 主网卡 MAC)
+export const QQGetMacHardwareInfoHandler: RequestHandler = async (_, res) => {
+  try {
+    const mac = getMacPrimaryMac();
+    return sendSuccess(res, {
+      platformUuid: getMacPlatformUuid() ?? '',
+      serialNumber: getMacSerialNumber() ?? '',
+      diskSerial: getMacDiskSerial() ?? '',
+      mac: mac ? mac.toString('hex') : '',
+    });
+  } catch (e) {
+    return sendError(res, `Failed to get macOS hardware info: ${(e as Error).message}`);
+  }
+};
+
+// macOS: 修改 machine_id (写入 TEA 加密的 machineid-info)
+export const QQSetMacMachineIdHandler: RequestHandler = async (req, res) => {
+  const { machineId, sn } = req.body;
+  if (!machineId || typeof machineId !== 'string' || !/^[0-9a-fA-F]{16}$/.test(machineId)) {
+    return sendError(res, 'Invalid machine_id, must be 16 hex characters');
+  }
+  try {
+    const dataPathGlobal = getGlobalDataPath(getQQDataPath());
+    const uuid = getMacPlatformUuid();
+    if (!uuid) {
+      return sendError(res, 'IOPlatformUUID not available, cannot derive TEA key');
+    }
+    const key = MacMachineInfoUtils.keyFromUuid(uuid);
+    const machineIdInfoPath = MacMachineInfoUtils.getMachineIdInfoPath(dataPathGlobal);
+    // 自动备份
+    try {
+      MacMachineInfoUtils.backup(machineIdInfoPath);
+    } catch { }
+    const snValue = (typeof sn === 'string' && sn) ? sn : getMacSn();
+    MacMachineInfoUtils.writeMachineIdInfo(machineIdInfoPath, Buffer.from(machineId, 'hex'), snValue, key);
+    const guid = MacMachineInfoUtils.computeGuid(Buffer.from(machineId, 'hex'), snValue);
+    return sendSuccess(res, {
+      message: 'machine_id set successfully',
+      guid: guid.toString('hex'),
+      guidUuid: MacMachineInfoUtils.guidToUuidStyle(guid),
+    });
+  } catch (e) {
+    return sendError(res, `Failed to set machine_id: ${(e as Error).message}`);
+  }
+};
+
+// macOS: machineid-info 备份列表
+export const QQGetMacInfoBackupsHandler: RequestHandler = async (_, res) => {
+  try {
+    const dataPathGlobal = getGlobalDataPath(getQQDataPath());
+    const backups = MacMachineInfoUtils.getBackups(MacMachineInfoUtils.getMachineIdInfoPath(dataPathGlobal));
+    return sendSuccess(res, backups);
+  } catch (e) {
+    return sendError(res, `Failed to get backups: ${(e as Error).message}`);
+  }
+};
+
+// macOS: 创建 machineid-info 备份
+export const QQCreateMacInfoBackupHandler: RequestHandler = async (_, res) => {
+  try {
+    const dataPathGlobal = getGlobalDataPath(getQQDataPath());
+    const backupPath = MacMachineInfoUtils.backup(MacMachineInfoUtils.getMachineIdInfoPath(dataPathGlobal));
+    return sendSuccess(res, { message: 'Backup created', path: backupPath });
+  } catch (e) {
+    return sendError(res, `Failed to backup: ${(e as Error).message}`);
+  }
+};
+
+// macOS: 恢复 machineid-info 备份
+export const QQRestoreMacInfoBackupHandler: RequestHandler = async (req, res) => {
+  const { backupName } = req.body;
+  if (!backupName) {
+    return sendError(res, 'Backup name is required');
+  }
+  try {
+    const dataPathGlobal = getGlobalDataPath(getQQDataPath());
+    MacMachineInfoUtils.restore(MacMachineInfoUtils.getMachineIdInfoPath(dataPathGlobal), backupName);
+    return sendSuccess(res, { message: 'Restored successfully' });
+  } catch (e) {
+    return sendError(res, `Failed to restore: ${(e as Error).message}`);
+  }
+};
+
+// macOS: 重置设备信息 (删除 machineid-info, 回退到 MAC)
+export const QQResetMacDeviceIDHandler: RequestHandler = async (_, res) => {
+  try {
+    const dataPathGlobal = getGlobalDataPath(getQQDataPath());
+    const machineIdInfoPath = MacMachineInfoUtils.getMachineIdInfoPath(dataPathGlobal);
+    // 自动备份
+    try {
+      MacMachineInfoUtils.backup(machineIdInfoPath);
+    } catch { }
+    MacMachineInfoUtils.delete(machineIdInfoPath);
+    return sendSuccess(res, { message: 'Device ID reset successfully (machineid-info deleted)' });
   } catch (e) {
     return sendError(res, `Failed to reset Device ID: ${(e as Error).message}`);
   }

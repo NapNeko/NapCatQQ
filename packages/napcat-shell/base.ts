@@ -64,7 +64,10 @@ function getDataPaths (wrapper: WrapperNodeApi): [string, string] {
     dataPath = path.resolve(os.homedir(), './.config/QQ');
     fs.mkdirSync(dataPath, { recursive: true });
   }
-  const dataPathGlobal = path.resolve(dataPath, './nt_qq/global');
+  // Linux: global 直接位于数据目录下; Windows: global 位于 nt_qq 子目录下
+  const dataPathGlobal = os.platform() === 'linux'
+    ? path.resolve(dataPath, './global')
+    : path.resolve(dataPath, './nt_qq/global');
   return [dataPath, dataPathGlobal];
 }
 
