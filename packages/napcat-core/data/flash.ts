@@ -214,15 +214,19 @@ export enum UploadSceneType {
   KUPLOADSCENEAIOFILESELECTOR,
   KUPLOADSCENEAIOSHORTCUTKEYCTRLCV,
 }
+/** 闪传文件集默认有效期（秒）：14 天 */
+export const DEFAULT_FLASH_VALIDITY_SECONDS = 1209600;
+
 export interface StartFlashTaskRequests {
-  screen: number; // 1 PC-QQ
+  scene: number; // 1 PC-QQ
   name?: string;
   uploaders: UploaderInfo[];
-  permission?: {};
+  permission?: { code: number; };
   coverPath?: string;
   paths: string[];   // 文件的绝对路径，可以是文件夹
   excludePaths?: string[];
   expireLeftTime?: number, // 0
+  validitySeconds: number, // 文件集有效期（秒）：14 天 1209600 / 90 天 7776000 / 180 天 15552000，必须传，否则新版内核段错误
   isNeedDelDeviceInfo: boolean,
   isNeedDelLocation: boolean,
   coverOriginalInfos?: {
@@ -234,6 +238,12 @@ export interface StartFlashTaskRequests {
     exists: boolean,
     allDetectResults: {};
   };
+  announcement: {
+    announcementSegments: unknown[],
+    modifyTime: string,
+    avatarUrl: string;
+  };
+  albumFilePathList: unknown[];
 }
 export enum BusiScene {
   KBUSISCENEINVALID,

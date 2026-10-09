@@ -2,6 +2,7 @@ import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 import path from 'node:path';
+import { DEFAULT_FLASH_VALIDITY_SECONDS } from '@/napcat-core/data/flash';
 
 const richMediaList = [
   '.mp4', '.mov', '.avi', '.wmv', '.mpeg', '.mpg', '.flv', '.mkv',
@@ -15,6 +16,7 @@ export const CreateFlashTaskPayloadSchema = Type.Object({
   ], { description: '文件列表或单个文件路径' }),
   name: Type.Optional(Type.String({ description: '任务名称' })),
   thumb_path: Type.Optional(Type.String({ description: '缩略图路径' })),
+  validitySeconds: Type.Optional(Type.Number({ description: '文件集有效期（秒），可选 14 天 1209600 / 90 天 7776000 / 180 天 15552000，默认 1209600' })),
 });
 export type CreateFlashTaskPayload = Static<typeof CreateFlashTaskPayloadSchema>;
 
@@ -27,6 +29,7 @@ export class CreateFlashTask extends OneBotAction<CreateFlashTaskPayload, any> {
   override payloadExample = {
     files: 'C:\\test.jpg',
     name: 'test_task',
+    validitySeconds: DEFAULT_FLASH_VALIDITY_SECONDS,
   };
 
   override returnExample = {
@@ -67,6 +70,7 @@ export class CreateFlashTask extends OneBotAction<CreateFlashTaskPayload, any> {
     } else {
       normalPath = toPlatformPath(thumbPath);
     }
-    return await this.core.apis.FlashApi.createFlashTransferUploadTask(fileList, normalPath, payload.name || '');
+    const validitySeconds = payload.validitySeconds ?? DEFAULT_FLASH_VALIDITY_SECONDS;
+    return await this.core.apis.FlashApi.createFlashTransferUploadTask(fileList, normalPath, payload.name || '', validitySeconds);
   }
 }

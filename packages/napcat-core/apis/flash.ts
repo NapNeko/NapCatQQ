@@ -1,6 +1,7 @@
 import { GeneralCallResult, InstanceContext, NapCatCore } from '@/napcat-core';
 import {
   createFlashTransferResult,
+  DEFAULT_FLASH_VALIDITY_SECONDS,
   FileListResponse,
   FlashFileSetInfo,
   SendStatus,
@@ -22,8 +23,9 @@ export class NTQQFlashApi {
    * @param fileListToUpload 上传文件绝对路径的列表，可以是文件夹！！
    * @param thumbnailPath
    * @param filesetName
+   * @param validitySeconds 文件集有效期（秒），默认 1209600（14 天），可选 90 天 / 180 天，必须传否则新版内核段错误
    */
-  async createFlashTransferUploadTask (fileListToUpload: string[], thumbnailPath: string, filesetName: string): Promise<GeneralCallResult & {
+  async createFlashTransferUploadTask (fileListToUpload: string[], thumbnailPath: string, filesetName: string, validitySeconds: number = DEFAULT_FLASH_VALIDITY_SECONDS): Promise<GeneralCallResult & {
     createFlashTransferResult: createFlashTransferResult;
     seq: number;
   }> {
@@ -33,14 +35,17 @@ export class NTQQFlashApi {
     const selfInfo = this.core.selfInfo;
 
     const fileUploadArg = {
-      screen: 1, // 1
+      scene: 1, // 1
       name: filesetName,
       uploaders: [{
         uin: selfInfo.uin,
+        nickname: selfInfo.nick,
         uid: selfInfo.uid,
         sendEntrance: '',
-        nickname: selfInfo.nick,
       }],
+      permission: {
+        code: 0,
+      },
       coverPath: thumbnailPath,
       paths: fileListToUpload,
       excludePaths: [],
@@ -56,8 +61,15 @@ export class NTQQFlashApi {
       uploadSceneType: UploadSceneType.KUPLOADSCENEAIOFILESELECTOR, // 不知道怎么枚举 先硬编码吧 (PC QQ 10)
       detectPrivacyInfoResult: {
         exists: false,
-        allDetectResults: new Map(),
+        allDetectResults: {},
       },
+      announcement: {
+        announcementSegments: [],
+        modifyTime: '',
+        avatarUrl: '',
+      },
+      albumFilePathList: [],
+      validitySeconds,
     };
 
     const uploadResult = await flashService.createFlashTransferUploadTask(timestamp, fileUploadArg);
