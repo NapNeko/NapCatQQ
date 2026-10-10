@@ -7,11 +7,14 @@ set "NAPCAT_LOAD_PATH=%cd%\loadNapCat.js"
 set "NAPCAT_INJECT_PATH=%cd%\NapCatWinBootHook.dll"
 set "NAPCAT_LAUNCHER_PATH=%cd%\NapCatWinBootMain.exe"
 set "NAPCAT_MAIN_PATH=%cd%\napcat.mjs"
-:loop_read
+set "RetString="
 for /f "tokens=2*" %%a in ('reg query "HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\QQ" /v "UninstallString"') do (
     set "RetString=%%~b"
     goto :napcat_boot
 )
+echo QQ installation was not found in the registry.
+pause
+exit /b 1
 
 :napcat_boot
 for %%a in ("%RetString%") do (
@@ -23,11 +26,13 @@ set "QQPath=%pathWithoutUninstall%QQ.exe"
 if not exist "%QQpath%" (
     echo provided QQ path is invalid
     pause
-    exit /b
+    exit /b 1
 )
 "%NAPCAT_LAUNCHER_PATH%" "%QQPath%" "%NAPCAT_INJECT_PATH%" %*
+set "napcat_exit_code=%ERRORLEVEL%"
 
 REM Optional: -q <QQ_NUMBER> for quick login, omit for QR code login
 REM Example: "%NAPCAT_LAUNCHER_PATH%" "%QQPath%" "%NAPCAT_INJECT_PATH%" -q 123456
 
 pause
+exit /b %napcat_exit_code%

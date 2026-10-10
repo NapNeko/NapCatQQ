@@ -1,0 +1,32 @@
+name: Windows launcher
+
+on:
+  push:
+    paths:
+      - packages/napcat-shell-loader/launcher*
+      - .github/tests/windows-launcher/**
+      - .github/workflows/windows-launcher.yml
+  pull_request:
+    paths:
+      - packages/napcat-shell-loader/launcher*
+      - .github/tests/windows-launcher/**
+      - .github/workflows/windows-launcher.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  launchers:
+    runs-on: windows-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check paths, registry, arguments and elevation
+        shell: pwsh
+        run: ./.github/tests/windows-launcher/validation.ps1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: windows-launcher-results
+          path: ${{ runner.temp }}/napcat-windows-launcher-tests/results.json
