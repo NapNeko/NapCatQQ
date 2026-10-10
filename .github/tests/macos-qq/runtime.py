@@ -14,11 +14,11 @@ application = Path(sys.argv[1]).resolve()
 distribution = Path(sys.argv[2]).resolve()
 evidence = Path('qq-runtime-evidence')
 evidence.mkdir(exist_ok=True)
-signature = subprocess.run(['/usr/bin/codesign', '-d', '--entitlements', '-', str(application)],
+signature = subprocess.run(['/usr/bin/codesign', '-d', '--entitlements', ':-', str(application)],
                            capture_output=True, check=True, timeout=20)
-entitlements = plistlib.loads(signature.stdout)
 (evidence / 'entitlements.plist').write_bytes(signature.stdout)
 (evidence / 'signature.txt').write_bytes(signature.stderr)
+entitlements = plistlib.loads(signature.stdout)
 print(json.dumps({'entitlements': entitlements}, ensure_ascii=False), flush=True)
 
 documents = Path.home() / 'Library/Containers/com.tencent.qq/Data/Documents'

@@ -32,12 +32,19 @@ jobs:
       QQ_SHA256: d270b78f0b210532637076532a883dc8659851b6daa92451983985ab9f3216f0
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        id: qq-cache
+        with:
+          path: QQ.dmg
+          key: macos-qq-d270b78f0b210532
       - name: Download verified QQ and NapCat
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          curl -fLsS --connect-timeout 20 --max-time 300 \
-            https://github.com/A-Randomm-User/macOS-save/releases/download/qq/QQ_v7.0.2.53644.dmg -o QQ.dmg
+          if [ ! -f QQ.dmg ]; then
+            curl -fLsS --connect-timeout 20 --max-time 300 \
+              https://github.com/A-Randomm-User/macOS-save/releases/download/qq/QQ_v7.0.2.53644.dmg -o QQ.dmg
+          fi
           echo "$QQ_SHA256  QQ.dmg" | shasum -a 256 -c -
           gh release download "$NAPCAT_VERSION" --repo NapNeko/NapCatQQ --pattern NapCat.Shell.zip
           mkdir NapCat
