@@ -1,10 +1,16 @@
 import { describe, it, expect } from 'vitest';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import {
   teaEncryptBlock,
   teaDecryptBlock,
   containerEncrypt,
   containerDecrypt,
   MacMachineInfoUtils,
+  MachineInfoUtils,
+  Registry20Utils,
+  resolveBackupPath,
 } from '@/napcat-webui-backend/src/utils/guid';
 
 // 参考实现: qq_guid_tool/macos (逆向自 macOS wrapper.node)
@@ -143,5 +149,72 @@ describe('macOS machineid-info', () => {
     const parsed = MacMachineInfoUtils.parseMachineIdInfo(back!);
     expect(parsed.machineId.toString('hex')).toBe('0011223344556677');
     expect(parsed.sn).toBe('SN123456');
+  });
+});
+
+function withTempDir (fn: (dir: string) => void): void {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'napcat-guid-test-'));
+  try {
+    fn(dir);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+describe('backup naming', () => {
+  it('does not overwrite when creating backups in quick succession', () => {
+    withTempDir((dir) => {
+      const target = path.join(dir, 'machineid-info');
+      fs.writeFileSync(target, Buffer.from('payload'));
+      const first = MacMachineInfoUtils.backup(target);
+      const second = MacMachineInfoUtils.backup(target);
+      const third = MachineInfoUtils.backup(target);
+      expect(new Set([first, second, third]).size).toBe(3);
+      for (const backup of [first, second, third]) {
+        expect(fs.existsSync(backup)).toBe(true);
+      }
+      expect(MacMachineInfoUtils.getBackups(target)).toHaveLength(3);
+    });
+  });
+});
+
+describe('restore path validation', () => {
+  it('accepts legacy and new backup names present in the whitelist', () => {
+    withTempDir((dir) => {
+      const target = path.join(dir, 'Registry20');
+      fs.writeFileSync(target, Buffer.from('x'));
+      fs.writeFileSync(`${target}.bak.20251009123456`, Buffer.from('legacy'));
+      const created = Registry20Utils.backup(target);
+      const list = Registry20Utils.getBackups(target);
+      expect(resolveBackupPath(target, path.basename(`${target}.bak.20251009123456`), list))
+        .toBe(`${target}.bak.20251009123456`);
+      expect(resolveBackupPath(target, path.basename(created), list)).toBe(created);
+    });
+  });
+
+  it('rejects directory traversal and unknown backup names', () => {
+    withTempDir((dir) => {
+      const target = path.join(dir, 'machine-info');
+      fs.writeFileSync(target, Buffer.from('x'));
+      const list = MachineInfoUtils.getBackups(target);
+      expect(() => resolveBackupPath(target, '../../../non-backup.txt', list)).toThrow();
+      expect(() => resolveBackupPath(target, '../machine-info.bak.20251009123456', list)).toThrow();
+      expect(() => resolveBackupPath(target, 'machine-info.bak.20251009123456', list)).toThrow();
+      expect(() => resolveBackupPath(target, '/etc/passwd', list)).toThrow();
+      expect(() => resolveBackupPath(target, 'other.bak.20251009123456', list)).toThrow();
+    });
+  });
+
+  it('refuses to restore a backup whose content is not a valid device file', () => {
+    withTempDir((dir) => {
+      const target = path.join(dir, 'machine-info');
+      fs.writeFileSync(target, Buffer.from('x'));
+      const evil = `${target}.bak.20251009123456`;
+      fs.writeFileSync(evil, Buffer.from('not-a-machine-info'));
+
+      expect(() => MachineInfoUtils.restore(target, path.basename(evil))).toThrow();
+      // 原始文件未被破坏
+      expect(fs.readFileSync(target).toString()).toBe('x');
+    });
   });
 });

@@ -531,7 +531,7 @@ export const QQResetLinuxDeviceIDHandler: RequestHandler = async (_, res) => {
 export const QQGetMacGUIDInfoHandler: RequestHandler = async (_, res) => {
   try {
     const dataPathGlobal = getGlobalDataPath(getQQDataPath());
-    const info = computeMacGuidInfo(dataPathGlobal);
+    const info = await computeMacGuidInfo(dataPathGlobal);
     return sendSuccess(res, info);
   } catch (e) {
     return sendError(res, `Failed to get macOS GUID: ${(e as Error).message}`);
@@ -541,11 +541,16 @@ export const QQGetMacGUIDInfoHandler: RequestHandler = async (_, res) => {
 // macOS: 本机硬件信息 (UUID / SN / 主网卡 MAC)
 export const QQGetMacHardwareInfoHandler: RequestHandler = async (_, res) => {
   try {
-    const mac = getMacPrimaryMac();
+    const [mac, platformUuid, serialNumber, diskSerial] = await Promise.all([
+      getMacPrimaryMac(),
+      getMacPlatformUuid(),
+      getMacSerialNumber(),
+      getMacDiskSerial(),
+    ]);
     return sendSuccess(res, {
-      platformUuid: getMacPlatformUuid() ?? '',
-      serialNumber: getMacSerialNumber() ?? '',
-      diskSerial: getMacDiskSerial() ?? '',
+      platformUuid: platformUuid ?? '',
+      serialNumber: serialNumber ?? '',
+      diskSerial: diskSerial ?? '',
       mac: mac ? mac.toString('hex') : '',
     });
   } catch (e) {
@@ -561,17 +566,24 @@ export const QQSetMacMachineIdHandler: RequestHandler = async (req, res) => {
   }
   try {
     const dataPathGlobal = getGlobalDataPath(getQQDataPath());
-    const uuid = getMacPlatformUuid();
+    const uuid = await getMacPlatformUuid();
     if (!uuid) {
       return sendError(res, 'IOPlatformUUID not available, cannot derive TEA key');
     }
     const key = MacMachineInfoUtils.keyFromUuid(uuid);
     const machineIdInfoPath = MacMachineInfoUtils.getMachineIdInfoPath(dataPathGlobal);
+    // SN 留空 = 沿用当前生效值: 优先 machineid-info 内已有 SN, 其次本机硬件 SN
+    let snValue: string;
+    if (typeof sn === 'string' && sn.length > 0) {
+      snValue = sn;
+    } else {
+      const existing = MacMachineInfoUtils.readMachineIdInfo(machineIdInfoPath, key);
+      snValue = existing?.sn || (await getMacSn());
+    }
     // 自动备份
     try {
       MacMachineInfoUtils.backup(machineIdInfoPath);
     } catch { }
-    const snValue = (typeof sn === 'string' && sn) ? sn : getMacSn();
     MacMachineInfoUtils.writeMachineIdInfo(machineIdInfoPath, Buffer.from(machineId, 'hex'), snValue, key);
     const guid = MacMachineInfoUtils.computeGuid(Buffer.from(machineId, 'hex'), snValue);
     return sendSuccess(res, {

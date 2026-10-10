@@ -82,12 +82,20 @@ const GUIDManager: React.FC<GUIDManagerProps> = ({ showRestart = true, compact =
     return MD5(mid.concat(Utf8.parse(sn))).toString();
   }, []);
 
-  // macOS: 实时预览 (基于输入的 machine_id / sn)
+  // macOS: SN 留空 = 沿用当前生效值 (与后端一致)
+  const effectiveMacSn = inputSn === '' ? macInfo.sn : inputSn;
+
+  // macOS: 实时预览 (基于输入的 machine_id / 有效 SN)
   const computedMacGUID = useMemo(() => {
     if (!isMac) return '';
     if (!isValidMachineId(inputMachineId)) return '';
-    return macGuidOf(inputMachineId, inputSn);
-  }, [isMac, inputMachineId, inputSn, macGuidOf]);
+    return macGuidOf(inputMachineId, effectiveMacSn);
+  }, [isMac, inputMachineId, effectiveMacSn, macGuidOf]);
+
+  // macOS: machine_id 或 SN 任一与当前值不同即视为可保存
+  const macDirty = isValidMachineId(inputMachineId) && (
+    inputMachineId.trim().toLowerCase() !== macInfo.machineId || effectiveMacSn !== macInfo.sn
+  );
 
   // 检测平台
   const fetchPlatform = useCallback(async () => {
@@ -600,7 +608,7 @@ const GUIDManager: React.FC<GUIDManagerProps> = ({ showRestart = true, compact =
               color='primary'
               variant='flat'
               isLoading={saving}
-              isDisabled={!isValidMachineId(inputMachineId) || inputMachineId.trim().toLowerCase() === macInfo.machineId}
+              isDisabled={!macDirty}
               onPress={handleMacSave}
               startContent={<MdSave size={16} />}
             >

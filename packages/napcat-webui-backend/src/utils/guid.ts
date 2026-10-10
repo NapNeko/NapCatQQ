@@ -2,11 +2,16 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import crypto from 'node:crypto';
-import { execFileSync } from 'node:child_process';
+import { execFile } from 'node:child_process';
 import { protectData, unprotectData } from 'napcat-dpapi';
 
 const GUID_HEADER = Buffer.from([0x00, 0x00, 0x00, 0x14]);
 const XOR_KEY = 0x10;
+
+/** 备份文件统一后缀，形如 `<原文件名>.bak.20251010031234567-1a2b3c4d` */
+const BACKUP_SUFFIX = '.bak.';
+/** 兼容历史命名（秒级、无随机后缀）以及新命名（毫秒级+随机后缀） */
+const BACKUP_SUFFIX_PATTERN = /^\.bak\.\d{8,20}(?:-[0-9a-f]{1,32})?$/i;
 
 /**
  * 由 QQ 数据根目录推导 global 目录。
@@ -19,6 +24,81 @@ export function getGlobalDataPath (dataPath: string): string {
     return path.join(dataPath, 'nt_qq', 'global');
   }
   return path.join(dataPath, 'global');
+}
+
+/**
+ * 生成毫秒级（UTC）时间戳，避免同一秒内的连续备份互相覆盖。
+ */
+function backupTimestamp (): string {
+  const now = new Date();
+  const pad = (value: number, width = 2) => String(value).padStart(width, '0');
+  return [
+    now.getUTCFullYear(),
+    pad(now.getUTCMonth() + 1),
+    pad(now.getUTCDate()),
+    pad(now.getUTCHours()),
+    pad(now.getUTCMinutes()),
+    pad(now.getUTCSeconds()),
+    pad(now.getUTCMilliseconds(), 3),
+  ].join('');
+}
+
+/**
+ * 创建备份文件。使用 `COPYFILE_EXCL` 落盘，杜绝同秒/连击时的无感知覆盖。
+ */
+function createBackupFile (filePath: string, missingMessage: string): string {
+  if (!fs.existsSync(filePath)) {
+    throw new Error(missingMessage);
+  }
+  const timestamp = backupTimestamp();
+  for (let attempt = 0; attempt < 8; attempt++) {
+    const randomSuffix = crypto.randomBytes(4).toString('hex');
+    const backupPath = `${filePath}${BACKUP_SUFFIX}${timestamp}-${randomSuffix}`;
+    try {
+      fs.copyFileSync(filePath, backupPath, fs.constants.COPYFILE_EXCL);
+      return backupPath;
+    } catch (e) {
+      // 仅在同名冲突时重试，其余错误（权限/磁盘等）直接抛出
+      if ((e as NodeJS.ErrnoException).code !== 'EEXIST') throw e;
+    }
+  }
+  throw new Error('Failed to create backup: too many name collisions');
+}
+
+/**
+ * 校验并解析备份文件名，返回可安全读取的绝对路径。
+ *
+ * 安全约束（防止目录穿越与任意文件覆盖）：
+ *  - 必须是纯文件名，不能包含路径分隔符或 `..`；
+ *  - 必须匹配 `<原文件名>.bak.<时间戳>[-随机后缀]`；
+ *  - 必须存在于调用方提供的备份白名单中（来自 `readdirSync`）。
+ */
+export function resolveBackupPath (filePath: string, backupFileName: string, backupList: string[]): string {
+  if (typeof backupFileName !== 'string' || backupFileName.length === 0) {
+    throw new Error('Backup name is required');
+  }
+  if (
+    backupFileName !== path.basename(backupFileName) ||
+    backupFileName.includes('/') ||
+    backupFileName.includes('\\') ||
+    backupFileName.includes('..')
+  ) {
+    throw new Error('Invalid backup name');
+  }
+
+  const baseName = path.basename(filePath);
+  if (!backupFileName.startsWith(baseName)) {
+    throw new Error('Invalid backup name');
+  }
+  const suffix = backupFileName.slice(baseName.length);
+  if (!BACKUP_SUFFIX_PATTERN.test(suffix)) {
+    throw new Error('Invalid backup name');
+  }
+  if (!backupList.includes(backupFileName)) {
+    throw new Error('Backup file not found');
+  }
+
+  return path.join(path.dirname(filePath), backupFileName);
 }
 
 /**
@@ -105,20 +185,14 @@ export class Registry20Utils {
   }
 
   static backup (registryPath: string): string {
-    if (!fs.existsSync(registryPath)) {
-      throw new Error('Registry20 does not exist');
-    }
-    const timestamp = new Date().toISOString().replace(/[-:T.]/g, '').slice(0, 14);
-    const backupPath = `${registryPath}.bak.${timestamp}`;
-    fs.copyFileSync(registryPath, backupPath);
-    return backupPath;
+    return createBackupFile(registryPath, 'Registry20 does not exist');
   }
 
   static restore (registryPath: string, backupFileName: string): void {
-    const dir = path.dirname(registryPath);
-    const backupPath = path.join(dir, backupFileName);
-    if (!fs.existsSync(backupPath)) {
-      throw new Error('Backup file not found');
+    const backupPath = resolveBackupPath(registryPath, backupFileName, Registry20Utils.getBackups(registryPath));
+    // 内容校验: DPAPI 密文不可能为空
+    if (fs.statSync(backupPath).size === 0) {
+      throw new Error('Invalid backup content');
     }
     fs.copyFileSync(backupPath, registryPath);
   }
@@ -257,24 +331,20 @@ export class MachineInfoUtils {
    * 创建备份
    */
   static backup (machineInfoPath: string): string {
-    if (!fs.existsSync(machineInfoPath)) {
-      throw new Error('machine-info file does not exist');
-    }
-    const timestamp = new Date().toISOString().replace(/[-:T.]/g, '').slice(0, 14);
-    const backupPath = `${machineInfoPath}.bak.${timestamp}`;
-    fs.copyFileSync(machineInfoPath, backupPath);
-    return backupPath;
+    return createBackupFile(machineInfoPath, 'machine-info file does not exist');
   }
 
   /**
    * 恢复备份
    */
   static restore (machineInfoPath: string, backupFileName: string): void {
-    const dir = path.dirname(machineInfoPath);
-    const backupPath = path.join(dir, backupFileName);
-    if (!fs.existsSync(backupPath)) {
-      throw new Error('Backup file not found');
-    }
+    const backupPath = resolveBackupPath(
+      machineInfoPath,
+      backupFileName,
+      MachineInfoUtils.getBackups(machineInfoPath)
+    );
+    // 内容校验: 必须符合 machine-info 的 be32 长度 + ROT13 结构
+    MachineInfoUtils.readMac(backupPath);
     fs.copyFileSync(backupPath, machineInfoPath);
   }
 
@@ -547,20 +617,15 @@ export class MacMachineInfoUtils {
   }
 
   static backup (filePath: string): string {
-    if (!fs.existsSync(filePath)) {
-      throw new Error('machineid-info file does not exist');
-    }
-    const timestamp = new Date().toISOString().replace(/[-:T.]/g, '').slice(0, 14);
-    const backupPath = `${filePath}.bak.${timestamp}`;
-    fs.copyFileSync(filePath, backupPath);
-    return backupPath;
+    return createBackupFile(filePath, 'machineid-info file does not exist');
   }
 
   static restore (filePath: string, backupFileName: string): void {
-    const dir = path.dirname(filePath);
-    const backupPath = path.join(dir, backupFileName);
-    if (!fs.existsSync(backupPath)) {
-      throw new Error('Backup file not found');
+    const backupPath = resolveBackupPath(filePath, backupFileName, MacMachineInfoUtils.getBackups(filePath));
+    // 内容校验: TEA 容器按 8 字节分组, 至少 16 字节
+    const size = fs.statSync(backupPath).size;
+    if (size < 16 || size % 8 !== 0) {
+      throw new Error('Invalid backup content');
     }
     fs.copyFileSync(backupPath, filePath);
   }
@@ -576,77 +641,173 @@ export class MacMachineInfoUtils {
 // macOS 本机硬件读取 (与 wrapper.node 的行为保持一致)
 // ============================================================
 
-function ioregProperty (className: string, property: string): string | null {
-  try {
-    const out = execFileSync('ioreg', ['-rd1', '-c', className], { timeout: 10000, encoding: 'utf8' });
-    for (const line of out.split('\n')) {
-      if (line.includes(`"${property}"`) && line.includes('=')) {
-        return line.split('=')[1]!.trim().replace(/^"|"$/g, '');
+interface HardwareCacheEntry<T> {
+  promise: Promise<T>;
+}
+
+const hardwareCache = new Map<string, HardwareCacheEntry<unknown>>();
+
+/**
+ * 进程内硬件信息缓存。硬件标识在进程生命周期内不会变化，
+ * 缓存 `Promise` 可避免并发请求重复拉起 `ioreg`/`diskutil`。
+ */
+function cachedHardware<T> (key: string, factory: () => Promise<T>): Promise<T> {
+  const existing = hardwareCache.get(key);
+  if (existing) return existing.promise as Promise<T>;
+  const entry: HardwareCacheEntry<T> = { promise: factory() };
+  hardwareCache.set(key, entry as HardwareCacheEntry<unknown>);
+  return entry.promise;
+}
+
+function runCommand (file: string, args: string[]): Promise<string | null> {
+  return new Promise((resolve) => {
+    execFile(file, args, { timeout: 10000, encoding: 'utf8', maxBuffer: 4 * 1024 * 1024 }, (error, stdout) => {
+      if (error) {
+        resolve(null);
+        return;
       }
+      resolve(stdout);
+    });
+  });
+}
+
+/**
+ * 从 `ioreg` 输出中解析 `"property" = <value>`。
+ */
+function parseIoregProperty (out: string, property: string): string | null {
+  for (const line of out.split('\n')) {
+    if (line.includes(`"${property}"`) && line.includes('=')) {
+      const raw = line.split('=').slice(1).join('=').trim();
+      return raw.replace(/^"|"$/g, '');
     }
-  } catch {
-    return null;
   }
   return null;
+}
+
+/**
+ * 运行 `ioreg -rd1 -c <className>` 并缓存结果。
+ */
+function ioregClassOutput (className: string): Promise<string | null> {
+  return cachedHardware(`ioreg:${className}`, () => runCommand('ioreg', ['-rd1', '-c', className]));
 }
 
 /**
  * TEA 密钥来源: IOPlatformUUID
  */
-export function getMacPlatformUuid (): string | null {
-  return ioregProperty('IOPlatformExpertDevice', 'IOPlatformUUID');
+export function getMacPlatformUuid (): Promise<string | null> {
+  return cachedHardware('mac:platformUuid', async () => {
+    const out = await ioregClassOutput('IOPlatformExpertDevice');
+    return out ? parseIoregProperty(out, 'IOPlatformUUID') : null;
+  });
 }
 
 /**
  * 序列号回退: IOPlatformSerialNumber
  */
-export function getMacSerialNumber (): string | null {
-  return ioregProperty('IOPlatformExpertDevice', 'IOPlatformSerialNumber');
+export function getMacSerialNumber (): Promise<string | null> {
+  return cachedHardware('mac:serialNumber', async () => {
+    const out = await ioregClassOutput('IOPlatformExpertDevice');
+    return out ? parseIoregProperty(out, 'IOPlatformSerialNumber') : null;
+  });
 }
 
 /**
  * 优先 /dev/disk0 的序列号 (对应 wrapper.node sub_414CD1C)
  */
-export function getMacDiskSerial (): string | null {
-  try {
-    const out = execFileSync('diskutil', ['info', '/dev/disk0'], { timeout: 10000, encoding: 'utf8' });
+export function getMacDiskSerial (): Promise<string | null> {
+  return cachedHardware('mac:diskSerial', async () => {
+    const out = await runCommand('diskutil', ['info', '/dev/disk0']);
+    if (!out) return null;
     for (const line of out.split('\n')) {
       if (line.includes('Serial Number') || line.includes('设备序列号')) {
         return line.split(':').slice(1).join(':').trim();
       }
     }
-  } catch {
     return null;
-  }
-  return null;
+  });
 }
 
 /**
  * macOS 序列号: 优先 /dev/disk0, 失败回退 IOPlatformSerialNumber
  */
-export function getMacSn (): string {
-  return getMacDiskSerial() ?? getMacSerialNumber() ?? '';
+export async function getMacSn (): Promise<string> {
+  return (await getMacDiskSerial()) ?? (await getMacSerialNumber()) ?? '';
 }
 
 /**
- * 主网卡 MAC: 按 wrapper.node 的逻辑取 IOEthernetInterface 上的 IOMACAddress
+ * 从 ioreg 节点行中提取 `"IOMACAddress" = <...>` 的 6 字节 MAC。
  */
-export function getMacPrimaryMac (): Buffer | null {
-  try {
-    const out = execFileSync('ioreg', ['-rd1', '-c', 'IOEthernetInterface'], { timeout: 10000, encoding: 'utf8' });
-    for (const line of out.split('\n')) {
-      if (line.includes('"IOMACAddress"')) {
-        const blob = line.split('=')[1] ?? '';
-        const hex = (blob.match(/[0-9a-fA-F]/g) ?? []).join('');
-        if (hex.length >= 12) {
-          return Buffer.from(hex.slice(0, 12), 'hex');
-        }
-      }
-    }
-  } catch {
-    return null;
+function parseIomacAddress (line: string): Buffer | null {
+  const blob = line.split('=').slice(1).join('=');
+  const hex = (blob.match(/[0-9a-fA-F]{2}/g) ?? []).join('');
+  if (hex.length >= 12) {
+    return Buffer.from(hex.slice(0, 12), 'hex');
   }
   return null;
+}
+
+/** 按 `+-o ` 节点行切分 ioreg 输出。 */
+function splitIoregNodes (out: string): string[] {
+  const nodes: string[] = [];
+  let current: string[] = [];
+  for (const line of out.split('\n')) {
+    if (line.includes('+-o ')) {
+      if (current.length > 0) nodes.push(current.join('\n'));
+      current = [line];
+    } else if (current.length > 0) {
+      current.push(line);
+    }
+  }
+  if (current.length > 0) nodes.push(current.join('\n'));
+  return nodes;
+}
+
+/** 从节点文本中取 IOMACAddress。 */
+function nodeMac (node: string): Buffer | null {
+  const line = node.split('\n').find((l) => l.includes('"IOMACAddress"'));
+  return line ? parseIomacAddress(line) : null;
+}
+
+/**
+ * 主网卡 MAC。
+ *
+ * wrapper.node 取的是 IOEthernetInterface 上（或其父控制器上）的 IOMACAddress。
+ * 真实 ioreg 层级里 IOMACAddress 通常挂在父级控制器（如 en0 对应的
+ * IOEthernetController）上，且同一层级下可能有多个接口，因此这里：
+ *  1. 优先匹配 BSD Name 为 en0 的接口；
+ *  2. 其次匹配第一个 USB/以太网控制器上的接口；
+ *  3. 若接口自身没有该属性，则回到 `ioreg -c IOEthernetInterface` 的整个子树中查找，
+ *     兼容 IOMACAddress 挂在父级控制器的情况。
+ */
+export function getMacPrimaryMac (): Promise<Buffer | null> {
+  return cachedHardware('mac:primaryMac', async () => {
+    const ifOut = await ioregClassOutput('IOEthernetInterface');
+    const nodes = ifOut ? splitIoregNodes(ifOut) : [];
+    const en0 = nodes.find((node) => node.includes('"BSD Name" = "en0"'));
+
+    // 1. en0 接口自身的 IOMACAddress
+    if (en0) {
+      const mac = nodeMac(en0);
+      if (mac) return mac;
+    }
+
+    // 2. 父级以太网控制器上的 IOMACAddress（真实机器上多数情况下挂在这里）
+    const controllerOut = await ioregClassOutput('IOEthernetController');
+    if (controllerOut) {
+      for (const node of splitIoregNodes(controllerOut)) {
+        const mac = nodeMac(node);
+        if (mac) return mac;
+      }
+    }
+
+    // 3. 任意 IOEthernetInterface 自身的 IOMACAddress
+    for (const node of nodes) {
+      const mac = nodeMac(node);
+      if (mac) return mac;
+    }
+
+    return null;
+  });
 }
 
 export interface MacGuidInfo {
@@ -664,12 +825,12 @@ export interface MacGuidInfo {
  *   guid = MD5(machine_id[8] || sn)
  *   machine_id 优先从 machineid-info (TEA) 读取, 否则回退成 MAC + 00 00
  */
-export function computeMacGuidInfo (dataPathGlobal: string, uuidOverride?: string, snOverride?: string): MacGuidInfo {
-  const platformUuid = uuidOverride ?? getMacPlatformUuid() ?? '';
+export async function computeMacGuidInfo (dataPathGlobal: string, uuidOverride?: string, snOverride?: string): Promise<MacGuidInfo> {
+  const platformUuid = uuidOverride ?? (await getMacPlatformUuid()) ?? '';
   const key = MacMachineInfoUtils.keyFromUuid(platformUuid);
-  const sn = snOverride ?? getMacSn();
+  const sn = snOverride ?? (await getMacSn());
   const machineIdInfoPath = MacMachineInfoUtils.getMachineIdInfoPath(dataPathGlobal);
-  const primaryMac = getMacPrimaryMac();
+  const primaryMac = await getMacPrimaryMac();
 
   let machineId: Buffer | null = null;
   let source: MacGuidInfo['source'] = 'machineid-info';
