@@ -45,7 +45,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: NapNeko/ffmpegAddon
-          ref: 3a6e99cea9a856ca71f7d70e11d6d769498121d9
+          ref: 7a68e99b52921a47f7f6d99864ed6217a0a90e7d
           path: ffmpeg-native-tests
       - name: Verify packaged FFmpeg
         working-directory: ffmpeg-native-tests
@@ -53,4 +53,4 @@ jobs:
           FFMPEG_ADDON_PATH: ${{ github.workspace }}/packages/napcat-native/ffmpeg/ffmpegAddon.darwin.${{ matrix.arch }}.node
         run: |
           npm ci --ignore-scripts
-          node --test test/video-info.test.js
+          npm test

@@ -14,7 +14,7 @@ interface OffsetType {
 const typedOffset: OffsetType = offset;
 // 0 send 1 recv
 export interface NativePacketExportType {
-  initHook?: (send: string, recv: string, callback: (type: PacketType, uin: string, cmd: string, seq: number, hex_data: string) => void, o3_hook: boolean) => boolean;
+  initHook?: (send: string, recv: string, callback: (type: PacketType, uin: string, cmd: string, seq: number, hex_data: string) => void, o3_hook: boolean) => string;
 }
 
 export type PacketType = 0 | 1; // 0: send, 1: recv
@@ -38,10 +38,15 @@ export class NativePacketHandler {
     this.logger = logger;
     try {
       const platform = process.platform + '.' + process.arch;
+      if (!this.supportedPlatforms.includes(platform)) {
+        this.logger.logWarn(`NativePacketClient: 不支持的平台: ${platform}`);
+        return;
+      }
       const moehoo_path = path.join(dirname(fileURLToPath(import.meta.url)), './native/packet/MoeHoo.' + platform + '.node');
       if (!fs.existsSync(moehoo_path)) {
         this.logger.logWarn(`NativePacketClient: 缺失运行时文件: ${moehoo_path}`);
         this.loaded = false;
+        return;
       }
       process.dlopen(this.MoeHooExport, moehoo_path, constants.dlopen.RTLD_LAZY);
       this.loaded = true;
@@ -213,9 +218,13 @@ export class NativePacketHandler {
         return false;
       }
 
-      this.MoeHooExport.exports.initHook?.(send, recv, (type: PacketType, uin: string, cmd: string, seq: number, hex_data: string) => {
+      const result = this.MoeHooExport.exports.initHook?.(send, recv, (type: PacketType, uin: string, cmd: string, seq: number, hex_data: string) => {
         this.emitPacket(type, uin, cmd, seq, hex_data);
       }, o3HookMode);
+      if (result !== 'success') {
+        this.logger.logError(`[PacketHandler] 初始化失败: ${result}`);
+        return false;
+      }
       this.logger.log('[PacketHandler] 初始化成功');
       return true;
     } catch (error) {

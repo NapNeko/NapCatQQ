@@ -3,14 +3,10 @@
  * 使用 execFile 调用 FFmpeg 命令行工具的适配器实现
  */
 
-import { readFileSync, existsSync, mkdirSync, openSync, readSync, closeSync } from 'fs';
-import { dirname, join } from 'path';
+import { existsSync, mkdirSync, openSync, readSync, closeSync } from 'fs';
+import { dirname } from 'path';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
-import { fileTypeFromFile } from 'file-type';
-import { imageSizeFallBack } from 'napcat-image-size/src/index';
-import { downloadFFmpegIfNotExists } from './download-ffmpeg';
-import { LogWrapper } from '@/napcat-core/helper/log';
 import type { IFFmpegAdapter, VideoInfoResult } from './ffmpeg-adapter-interface';
 
 const execFileAsync = promisify(execFile);
@@ -30,52 +26,24 @@ function ensureDirExists (filePath: string): void {
  */
 export class FFmpegExecAdapter implements IFFmpegAdapter {
   public readonly name = 'FFmpegExec';
-  private downloadAttempted = false;
 
   constructor (
     private ffmpegPath: string = 'ffmpeg',
-    private ffprobePath: string = 'ffprobe',
-    private binaryPath?: string,
-    private logger?: LogWrapper
+    private ffprobePath: string = 'ffprobe'
   ) { }
 
   /**
-     * 检查 FFmpeg 是否可用，如果不可用则尝试下载
+     * 检查 FFmpeg 和 FFprobe 是否可用
      */
   async isAvailable (): Promise<boolean> {
     // 首先检查当前路径
     try {
-      await execFileAsync(this.ffmpegPath, ['-version']);
+      await Promise.all([
+        execFileAsync(this.ffmpegPath, ['-version'], { timeout: 10000, windowsHide: true }),
+        execFileAsync(this.ffprobePath, ['-version'], { timeout: 10000, windowsHide: true }),
+      ]);
       return true;
     } catch {
-      // 如果失败且未尝试下载，尝试下载
-      if (!this.downloadAttempted && this.binaryPath && this.logger) {
-        this.downloadAttempted = true;
-
-        if (process.env['NAPCAT_DISABLE_FFMPEG_DOWNLOAD']) {
-          return false;
-        }
-
-        this.logger.log('[FFmpeg] 未找到可用的 FFmpeg，尝试自动下载...');
-        const result = await downloadFFmpegIfNotExists(this.logger);
-
-        if (result.path && result.reset) {
-          // 更新路径
-          if (process.platform === 'win32') {
-            this.ffmpegPath = join(result.path, 'ffmpeg.exe');
-            this.ffprobePath = join(result.path, 'ffprobe.exe');
-            this.logger.log('[FFmpeg] 已更新路径:', this.ffmpegPath);
-
-            // 再次检查
-            try {
-              await execFileAsync(this.ffmpegPath, ['-version']);
-              return true;
-            } catch {
-              return false;
-            }
-          }
-        }
-      }
       return false;
     }
   }
@@ -98,40 +66,29 @@ export class FFmpegExecAdapter implements IFFmpegAdapter {
      * 获取视频信息
      */
   async getVideoInfo (videoPath: string): Promise<VideoInfoResult> {
-    // 获取文件大小和类型
-    const [fileType, duration] = await Promise.all([
-      fileTypeFromFile(videoPath).catch(() => null),
-      this.getDuration(videoPath).catch(() => 60),
+    const [probe, frame] = await Promise.all([
+      execFileAsync(this.ffprobePath, [
+        '-v', 'error', '-select_streams', 'v:0',
+        '-show_entries', 'stream=width,height:format=duration,format_name',
+        '-of', 'json', videoPath,
+      ], { timeout: 30000, windowsHide: true }),
+      execFileAsync(this.ffmpegPath, [
+        '-v', 'error', '-i', videoPath, '-frames:v', '1',
+        '-f', 'image2pipe', '-vcodec', 'mjpeg', 'pipe:1',
+      ], { encoding: 'buffer', maxBuffer: 16 * 1024 * 1024, timeout: 30000, windowsHide: true }),
     ]);
-
-    // 创建临时缩略图路径
-    const thumbnailPath = `${videoPath}.thumbnail.bmp`;
-    let width = 100;
-    let height = 100;
-    let thumbnail: Buffer | undefined;
-
-    try {
-      await this.extractThumbnail(videoPath, thumbnailPath);
-
-      // 获取图片尺寸
-      const dimensions = await imageSizeFallBack(thumbnailPath);
-      width = dimensions.width ?? 100;
-      height = dimensions.height ?? 100;
-
-      // 读取缩略图
-      if (existsSync(thumbnailPath)) {
-        thumbnail = readFileSync(thumbnailPath);
-      }
-    } catch (_error) {
-      // 使用默认值
+    const metadata = JSON.parse(probe.stdout);
+    const stream = metadata.streams[0];
+    const duration = Number(metadata.format.duration);
+    if (!stream || !Number.isFinite(duration) || duration < 0 || frame.stdout.length === 0) {
+      throw new Error('FFmpeg 无法读取视频信息或首帧: ' + videoPath);
     }
-
     return {
-      width,
-      height,
+      width: stream.width,
+      height: stream.height,
       duration,
-      format: fileType?.ext ?? 'mp4',
-      thumbnail,
+      format: metadata.format.format_name,
+      thumbnail: frame.stdout,
     };
   }
 
@@ -147,10 +104,10 @@ export class FFmpegExecAdapter implements IFFmpegAdapter {
       '-of',
       'default=noprint_wrappers=1:nokey=1',
       filePath,
-    ]);
+    ], { timeout: 30000, windowsHide: true });
 
     const duration = parseFloat(stdout.trim());
-    if (isNaN(duration)) {
+    if (!Number.isFinite(duration) || duration < 0) {
       throw new Error(`ffprobe 返回了无效的时长值: "${stdout.trim()}"`);
     }
     return duration;
@@ -186,7 +143,7 @@ export class FFmpegExecAdapter implements IFFmpegAdapter {
         '-ac', '1',
         '-f', 's16le',
         pcmPath,
-      ]);
+      ], { timeout: 120000, windowsHide: true });
 
       if (!existsSync(pcmPath)) {
         throw new Error('转换PCM失败，输出文件不存在');
@@ -207,25 +164,22 @@ export class FFmpegExecAdapter implements IFFmpegAdapter {
 
       const params = format === 'amr'
         ? [
-          '-f', 's16le',
-          '-ar', '24000',
-          '-ac', '1',
           '-i', inputFile,
+          '-vn', '-ac', '1',
           '-ar', '8000',
           '-b:a', '12.2k',
           '-y',
           outputFile,
         ]
         : [
-          '-f', 's16le',
-          '-ar', '24000',
-          '-ac', '1',
           '-i', inputFile,
+          '-vn', '-ac', '1',
+          ...(format === 'spx' ? ['-ar', '32000'] : []),
           '-y',
           outputFile,
         ];
 
-      await execFileAsync(this.ffmpegPath, params);
+      await execFileAsync(this.ffmpegPath, params, { timeout: 120000, windowsHide: true });
 
       if (!existsSync(outputFile)) {
         throw new Error('转换失败,输出文件不存在');
@@ -245,11 +199,10 @@ export class FFmpegExecAdapter implements IFFmpegAdapter {
 
       const { stderr } = await execFileAsync(this.ffmpegPath, [
         '-i', videoPath,
-        '-ss', '00:00:01.000',
         '-vframes', '1',
         '-y', // 覆盖输出文件
         thumbnailPath,
-      ]);
+      ], { timeout: 30000, windowsHide: true });
 
       if (!existsSync(thumbnailPath)) {
         throw new Error(`提取缩略图失败，输出文件不存在: ${stderr}`);
@@ -260,7 +213,11 @@ export class FFmpegExecAdapter implements IFFmpegAdapter {
     }
   }
 
-  async convertToNTSilkTct (_inputFile: string, _outputFile: string): Promise<void> {
-    throw new Error('convertToNTSilkTct is not implemented in FFmpegExecAdapter');
+  async convertToNTSilkTct (inputFile: string, outputFile: string): Promise<void> {
+    ensureDirExists(outputFile);
+    await execFileAsync(this.ffmpegPath, [
+      '-v', 'error', '-y', '-i', inputFile, '-vn', '-ac', '1', '-ar', '24000',
+      '-c:a', 'ntsilk_s16le', '-f', 'ntsilk_s16le', outputFile,
+    ], { timeout: 120000, windowsHide: true });
   }
 }

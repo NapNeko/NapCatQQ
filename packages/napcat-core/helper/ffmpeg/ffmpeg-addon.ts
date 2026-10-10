@@ -53,7 +53,7 @@ export interface FFmpeg {
   /**
      * Get video information including resolution, duration, format, codec and first frame thumbnail
      */
-  getVideoInfo (filePath: string, format?: 'bmp' | 'bmp24'): Promise<VideoInfo>;
+  getVideoInfo (filePath: string, format?: 'jpg' | 'png'): Promise<VideoInfo>;
 
   /**
      * Get duration of audio or video file in seconds

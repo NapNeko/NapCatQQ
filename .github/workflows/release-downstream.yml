@@ -9,8 +9,8 @@ on:
         type: string
 
 env:
-  QQ_URL_X86_64: 'https://qqdl.gtimg.cn/qqfile/QQNT/9.9.33/release/3f89efc5/QQ_3.2.32_260812_x86_64_01.AppImage'
-  QQ_URL_ARM64: 'https://qqdl.gtimg.cn/qqfile/QQNT/9.9.33/release/3f89efc5/QQ_3.2.32_260812_arm64_01.AppImage'
+  QQ_URL_X86_64: 'https://qqdl.gtimg.cn/qqfile/QQNT/9.9.36/beta/9ee04bef/linuxqq_3.2.34-53644_x86_64.AppImage'
+  QQ_URL_ARM64: 'https://qqdl.gtimg.cn/qqfile/QQNT/9.9.36/beta/9ee04bef/linuxqq_3.2.34-53644_arm64.AppImage'
 
 jobs:
   get-version:
@@ -86,17 +86,19 @@ jobs:
           git push
 
   shell-docker:
+    needs: get-version
     runs-on: ubuntu-latest
     steps:
       - name: Trigger NapCat-Docker docker-publish workflow
         env:
           GH_TOKEN: ${{ secrets.NAPCAT_BUILD }}
+          NAPCAT_VERSION: ${{ needs.get-version.outputs.latest_tag }}
         run: |
           curl -X POST \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer $GH_TOKEN" \
             https://api.github.com/repos/NapNeko/NapCat-Docker/actions/workflows/docker-publish.yml/dispatches \
-            -d '{"ref":"main"}'
+            -d "{\"ref\":\"main\",\"inputs\":{\"napcat_version\":\"${NAPCAT_VERSION}\"}}"
 
   framework-docker:
     runs-on: ubuntu-latest

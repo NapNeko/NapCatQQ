@@ -4,7 +4,8 @@
  */
 
 import { LogWrapper } from '@/napcat-core/helper/log';
-import { FFmpegAddonAdapter } from './ffmpeg-addon-adapter';
+import { FFmpegAddonAdapter, getAddonPath } from './ffmpeg-addon-adapter';
+import { existsSync } from 'node:fs';
 import { FFmpegExecAdapter } from './ffmpeg-exec-adapter';
 import type { IFFmpegAdapter } from './ffmpeg-adapter-interface';
 
@@ -58,8 +59,8 @@ export class FFmpegAdapterFactory {
     ffprobePath: string,
     binaryPath?: string
   ): Promise<IFFmpegAdapter> {
-    // 1. 优先尝试使用 Native Addon
-    if (binaryPath) {
+    const useCommandLine = Boolean(process.env['FFMPEG_PATH'] || process.env['FFPROBE_PATH']);
+    if (binaryPath && !useCommandLine && existsSync(getAddonPath(binaryPath))) {
       const addonAdapter = new FFmpegAddonAdapter(binaryPath);
 
       logger.log('[FFmpeg] 检查 Native Addon 可用性...');
@@ -68,13 +69,10 @@ export class FFmpegAdapterFactory {
         return addonAdapter;
       }
 
-      logger.log('[FFmpeg] Native Addon 不可用，尝试使用命令行工具');
-    } else {
-      logger.log('[FFmpeg] 未提供 binaryPath，跳过 Native Addon 检测');
+      throw new Error('FFmpeg Native Addon 加载失败: ' + getAddonPath(binaryPath));
     }
 
-    // 2. 降级到 execFile 实现
-    const execAdapter = new FFmpegExecAdapter(ffmpegPath, ffprobePath, binaryPath, logger);
+    const execAdapter = new FFmpegExecAdapter(ffmpegPath, ffprobePath);
 
     logger.log(`[FFmpeg] 检查命令行工具可用性: ${ffmpegPath}`);
     if (await execAdapter.isAvailable()) {
@@ -82,9 +80,7 @@ export class FFmpegAdapterFactory {
       return execAdapter;
     }
 
-    // 3. 都不可用，返回 execAdapter 但会在使用时报错
-    logger.logError('[FFmpeg] 警告: FFmpeg 不可用，将使用命令行适配器但可能失败');
-    return execAdapter;
+    throw new Error('FFmpeg 命令行工具不可用，请检查 ffmpeg 和 ffprobe 路径: ' + ffmpegPath + ', ' + ffprobePath);
   }
 
   /**
@@ -105,20 +101,14 @@ export class FFmpegAdapterFactory {
     logger: LogWrapper,
     ffmpegPath: string,
     ffprobePath: string
-  ): Promise<void> {
-    // 如果当前使用的是 Exec 适配器,更新路径
-    if (this.instance && this.instance instanceof FFmpegExecAdapter) {
-      logger.log(`[FFmpeg] 更新 FFmpeg 路径: ${ffmpegPath}`);
-      this.instance.setFFmpegPath(ffmpegPath);
-      this.instance.setFFprobePath(ffprobePath);
-
-      // 验证新路径是否可用
-      if (await this.instance.isAvailable()) {
-        logger.log('[FFmpeg] 新路径验证成功 ✓');
-      } else {
-        logger.logError('[FFmpeg] 警告: 新 FFmpeg 路径不可用');
-      }
+  ): Promise<IFFmpegAdapter> {
+    const adapter = new FFmpegExecAdapter(ffmpegPath, ffprobePath);
+    if (!await adapter.isAvailable()) {
+      throw new Error('FFmpeg 路径不可用: ' + ffmpegPath + ', ' + ffprobePath);
     }
+    this.instance = adapter;
+    logger.log('[FFmpeg] 已更新命令行工具路径:', ffmpegPath, ffprobePath);
+    return adapter;
   }
 
   /**

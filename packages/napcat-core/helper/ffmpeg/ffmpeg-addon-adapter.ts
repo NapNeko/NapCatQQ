@@ -3,9 +3,8 @@
  * 使用原生 Node.js Addon 实现的 FFmpeg 适配器
  */
 
-import { platform, arch } from 'node:os';
 import path from 'node:path';
-import { existsSync, openSync, readSync, closeSync } from 'node:fs';
+import { openSync, readSync, closeSync } from 'node:fs';
 import { writeFile } from 'node:fs/promises';
 import type { FFmpeg } from './ffmpeg-addon';
 import type { IFFmpegAdapter, VideoInfoResult } from './ffmpeg-adapter-interface';
@@ -15,15 +14,9 @@ import { dlopen } from 'node:process';
  * 获取 Native Addon 路径
  * @param binaryPath 二进制文件路径(来自 pathWrapper.binaryPath)
  */
-function getAddonPath (binaryPath: string): string {
-  const platformName = platform();
-  const archName = arch();
-
+export function getAddonPath (binaryPath: string): string {
   const addonFileName: string = process.platform + '.' + process.arch;
   const addonPath = path.join(binaryPath, './native/ffmpeg/', `ffmpegAddon.${addonFileName}.node`);
-  if (!existsSync(addonPath)) {
-    throw new Error(`Unsupported platform: ${platformName} ${archName} - Addon not found at ${addonPath}`);
-  }
   return addonPath;
 }
 
@@ -130,9 +123,9 @@ export class FFmpegAddonAdapter implements IFFmpegAdapter {
   /**
      * 提取缩略图
      */
-  async extractThumbnail (videoPath: string, thumbnailPath: string): Promise<void> {
+  async extractThumbnail (videoPath: string, thumbnailPath: string, format: 'jpg' | 'png' = 'jpg'): Promise<void> {
     const addon = this.ensureAddon();
-    const info = await addon.getVideoInfo(videoPath);
+    const info = await addon.getVideoInfo(videoPath, format);
 
     // 将缩略图写入文件
     await writeFile(thumbnailPath, info.image);

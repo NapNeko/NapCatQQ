@@ -38,7 +38,8 @@ export class NativePacketClient {
   }
 
   async init (_pid: number, recv: string, send: string): Promise<void> {
-    const isNewQQ = this.napcore.basicInfo.requireMinNTQQBuild('40824');
+    this.available = false;
+    const isNewQQ = this.napcore.basicInfo.requireMinNTQQBuild('40768');
     if (!isNewQQ) {
       this.logStack.pushLogWarn('[PacketClient] 当前 QQ 版本低于 NativePacketClient 要求，跳过 Hook 初始化');
       return;
@@ -77,8 +78,9 @@ export class NativePacketClient {
         data: (ret as { rspbuffer: Buffer; }).rspbuffer,
       }));
 
+    let timeoutHandle: ReturnType<typeof setTimeout>;
     const timeoutPromise = new Promise<RecvPacketData>((_resolve, reject) => {
-      setTimeout(
+      timeoutHandle = setTimeout(
         () =>
           reject(
             new Error(
@@ -89,7 +91,11 @@ export class NativePacketClient {
       );
     });
 
-    return Promise.race([sendPromise, timeoutPromise]);
+    try {
+      return await Promise.race([sendPromise, timeoutPromise]);
+    } finally {
+      clearTimeout(timeoutHandle!);
+    }
   }
 
   async sendOidbPacket (pkt: OidbPacket, rsp = false, timeout = 5000): Promise<RecvPacketData> {

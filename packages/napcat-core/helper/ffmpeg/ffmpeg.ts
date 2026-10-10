@@ -1,21 +1,29 @@
 import { statSync, existsSync, writeFileSync } from 'fs';
 import path from 'path';
 import type { VideoInfo } from './video';
-import { fileTypeFromFile } from 'file-type';
-import { platform } from 'node:os';
 import { LogWrapper } from '@/napcat-core/helper/log';
 import { FFmpegAdapterFactory } from './ffmpeg-adapter-factory';
 import type { IFFmpegAdapter } from './ffmpeg-adapter-interface';
 import { FFmpegExecAdapter } from './ffmpeg-exec-adapter';
+import { FFmpegAddonAdapter } from './ffmpeg-addon-adapter';
 
-const getFFmpegPath = (tool: string, binaryPath?: string): string => {
-  if (process.platform === 'win32' && binaryPath) {
-    const exeName = `${tool}.exe`;
-    const localPath = path.join(binaryPath, 'ffmpeg', exeName);
-    const isLocalExeExists = existsSync(localPath);
-    return isLocalExeExists ? localPath : exeName;
+export const getFFmpegPath = (tool: 'ffmpeg' | 'ffprobe', binaryPath?: string): string => {
+  const configuredPath = process.env[tool === 'ffmpeg' ? 'FFMPEG_PATH' : 'FFPROBE_PATH'];
+  if (configuredPath) return configuredPath;
+  const executable = tool + (process.platform === 'win32' ? '.exe' : '');
+  if (binaryPath) {
+    const localPath = path.join(binaryPath, 'ffmpeg', executable);
+    if (existsSync(localPath)) return localPath;
   }
-  return tool;
+  if (process.platform === 'darwin') {
+    const directories = (process.env['PATH'] ?? '').split(':').filter(Boolean);
+    directories.push(process.arch === 'arm64' ? '/opt/homebrew/bin' : '/usr/local/bin');
+    for (const directory of directories) {
+      const candidate = path.join(directory, executable);
+      if (existsSync(candidate)) return candidate;
+    }
+  }
+  return executable;
 };
 
 export let FFMPEG_CMD = 'ffmpeg';
@@ -23,6 +31,7 @@ export let FFPROBE_CMD = 'ffprobe';
 export class FFmpegService {
   private static adapter: IFFmpegAdapter | null = null;
   private static initialized = false;
+  private static initializationError: unknown;
 
   /**
      * 初始化 FFmpeg 服务
@@ -38,20 +47,24 @@ export class FFmpegService {
     FFMPEG_CMD = getFFmpegPath('ffmpeg', binaryPath);
     FFPROBE_CMD = getFFmpegPath('ffprobe', binaryPath);
 
-    // 立即初始化适配器(会触发自动下载等逻辑)
-    this.adapter = await FFmpegAdapterFactory.getAdapter(
-      logger,
-      FFMPEG_CMD,
-      FFPROBE_CMD,
-      binaryPath
-    );
+    try {
+      this.adapter = await FFmpegAdapterFactory.getAdapter(
+        logger,
+        FFMPEG_CMD,
+        FFPROBE_CMD,
+        binaryPath
+      );
+    } catch (error) {
+      this.initializationError = error;
+      logger.logError('[FFmpeg] 媒体功能初始化失败:', error);
+    }
 
     this.initialized = true;
   }
 
   public static getAdapterName (): string {
     if (!this.adapter) {
-      throw new Error('FFmpeg service not initialized. Please call FFmpegService.init() first.');
+      throw this.initializationError ?? new Error('FFmpeg service not initialized. Please call FFmpegService.init() first.');
     }
     return this.adapter.name;
   }
@@ -61,7 +74,7 @@ export class FFmpegService {
      */
   private static async getAdapter (): Promise<IFFmpegAdapter> {
     if (!this.adapter) {
-      throw new Error('FFmpeg service not initialized. Please call FFmpegService.init() first.');
+      throw this.initializationError ?? new Error('FFmpeg service not initialized. Please call FFmpegService.init() first.');
     }
     return this.adapter;
   }
@@ -76,15 +89,14 @@ export class FFmpegService {
      * @deprecated 建议使用 init() 方法初始化
      */
   public static async setFfmpegPath (ffmpegPath: string, logger: LogWrapper): Promise<void> {
-    if (platform() === 'win32') {
-      FFMPEG_CMD = path.join(ffmpegPath, 'ffmpeg.exe');
-      FFPROBE_CMD = path.join(ffmpegPath, 'ffprobe.exe');
-      logger.log('[Check] ffmpeg:', FFMPEG_CMD);
-      logger.log('[Check] ffprobe:', FFPROBE_CMD);
-
-      // 更新适配器路径
-      await FFmpegAdapterFactory.updateFFmpegPath(logger, FFMPEG_CMD, FFPROBE_CMD);
-    }
+    const suffix = process.platform === 'win32' ? '.exe' : '';
+    const ffmpegCommand = path.join(ffmpegPath, 'ffmpeg' + suffix);
+    const ffprobeCommand = path.join(ffmpegPath, 'ffprobe' + suffix);
+    this.adapter = await FFmpegAdapterFactory.updateFFmpegPath(logger, ffmpegCommand, ffprobeCommand);
+    FFMPEG_CMD = ffmpegCommand;
+    FFPROBE_CMD = ffprobeCommand;
+    this.initializationError = undefined;
+    this.initialized = true;
   }
 
   /**
@@ -100,6 +112,11 @@ export class FFmpegService {
    * Packet/forward 路径继续使用当前适配器生成的 JPEG。
    */
   public static async extractLegacyVideoThumbnail (videoPath: string, thumbnailPath: string): Promise<void> {
+    const currentAdapter = await this.getAdapter();
+    if (currentAdapter instanceof FFmpegAddonAdapter) {
+      await currentAdapter.extractThumbnail(videoPath, thumbnailPath, 'png');
+      return;
+    }
     const adapter = new FFmpegExecAdapter(FFMPEG_CMD, FFPROBE_CMD);
     await adapter.extractThumbnail(videoPath, thumbnailPath);
   }
@@ -142,41 +159,18 @@ export class FFmpegService {
   public static async getVideoInfo (videoPath: string, thumbnailPath: string): Promise<VideoInfo> {
     const adapter = await this.getAdapter();
 
-    try {
-      // 获取文件大小
-      const fileSize = statSync(videoPath).size;
-
-      // 使用适配器获取视频信息
-      const videoInfo = await adapter.getVideoInfo(videoPath);
-
-      // 如果提供了缩略图路径且适配器返回了缩略图,保存到指定路径
-      if (thumbnailPath && videoInfo.thumbnail) {
-        writeFileSync(thumbnailPath, videoInfo.thumbnail);
-      }
-
-      const result: VideoInfo = {
-        width: videoInfo.width,
-        height: videoInfo.height,
-        time: videoInfo.duration,
-        format: videoInfo.format,
-        size: fileSize,
-        filePath: videoPath,
-      };
-
-      return result;
-    } catch (_error) {
-      // 降级处理:返回默认值
-      const fileType = await fileTypeFromFile(videoPath).catch(() => null);
-      const fileSize = statSync(videoPath).size;
-
-      return {
-        width: 100,
-        height: 100,
-        time: 60,
-        format: fileType?.ext ?? 'mp4',
-        size: fileSize,
-        filePath: videoPath,
-      };
+    const fileSize = statSync(videoPath).size;
+    const videoInfo = await adapter.getVideoInfo(videoPath);
+    if (thumbnailPath && videoInfo.thumbnail) {
+      writeFileSync(thumbnailPath, videoInfo.thumbnail);
     }
+    return {
+      width: videoInfo.width,
+      height: videoInfo.height,
+      time: videoInfo.duration,
+      format: videoInfo.format,
+      size: fileSize,
+      filePath: videoPath,
+    };
   }
 }
