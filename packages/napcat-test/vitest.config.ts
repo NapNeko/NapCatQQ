@@ -14,6 +14,8 @@ export default defineConfig({
       '@/napcat-common': resolve(__dirname, '../napcat-common'),
       '@/napcat-core': resolve(__dirname, '../napcat-core'),
       '@/napcat-onebot': resolve(__dirname, '../napcat-onebot'),
+      '@/napcat-shell': resolve(__dirname, '../napcat-shell'),
+      '@/napcat-webui-backend': resolve(__dirname, '../napcat-webui-backend'),
       'napcat-protobuf': resolve(__dirname, '../napcat-protobuf/NapProto.ts'),
     },
   },

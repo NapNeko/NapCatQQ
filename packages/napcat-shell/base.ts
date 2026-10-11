@@ -41,6 +41,7 @@ import { createOfflineRecovery } from '@/napcat-core/helper/offline-recovery';
 import { QQBasicInfoWrapper } from '@/napcat-core/helper/qq-basic-info';
 import { statusHelperSubscription } from '@/napcat-core/helper/status';
 import { applyPendingUpdates } from '@/napcat-webui-backend/src/api/UpdateNapCat';
+import { migrateLegacyGlobalPath } from './global-migrate';
 import { connectToNamedPipe } from './pipe';
 
 // NapCat Shell App ES 入口文件
@@ -64,7 +65,10 @@ function getDataPaths (wrapper: WrapperNodeApi): [string, string] {
     dataPath = path.resolve(os.homedir(), './.config/QQ');
     fs.mkdirSync(dataPath, { recursive: true });
   }
-  const dataPathGlobal = path.resolve(dataPath, './nt_qq/global');
+  // Linux: global 直接位于数据目录下; Windows: global 位于 nt_qq 子目录下
+  const dataPathGlobal = os.platform() === 'linux'
+    ? path.resolve(dataPath, './global')
+    : path.resolve(dataPath, './nt_qq/global');
   return [dataPath, dataPathGlobal];
 }
 
@@ -714,6 +718,7 @@ export async function NCoreInitShell () {
     }
   }
   const [dataPath, dataPathGlobal] = getDataPaths(wrapper);
+  migrateLegacyGlobalPath(dataPath, dataPathGlobal, logger);
   WebUiDataRuntime.setQQDataPath(dataPath);
   const systemPlatform = getPlatformType();
 

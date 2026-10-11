@@ -8,6 +8,8 @@ import { useEffect, useState, useCallback, useMemo } from 'react';
 import toast from 'react-hot-toast';
 import { MdContentCopy, MdDelete, MdRefresh, MdSave, MdRestorePage, MdBackup } from 'react-icons/md';
 import MD5 from 'crypto-js/md5';
+import Hex from 'crypto-js/enc-hex';
+import Utf8 from 'crypto-js/enc-utf8';
 
 import QQManager from '@/controllers/qq_manager';
 import useDialog from '@/hooks/use-dialog';
@@ -40,6 +42,16 @@ const GUIDManager: React.FC<GUIDManagerProps> = ({ showRestart = true, compact =
   const [machineId, setMachineId] = useState<string>('');
   const [linuxBackups, setLinuxBackups] = useState<string[]>([]);
 
+  // macOS 状态
+  const [macGuid, setMacGuid] = useState<string>('');
+  const [macSource, setMacSource] = useState<string>('');
+  const [macInfo, setMacInfo] = useState<{ machineId: string; sn: string; mac: string; platformUuid: string; }>({
+    machineId: '', sn: '', mac: '', platformUuid: '',
+  });
+  const [inputMachineId, setInputMachineId] = useState<string>('');
+  const [inputSn, setInputSn] = useState<string>('');
+  const [macBackups, setMacBackups] = useState<string[]>([]);
+
   // 通用状态
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -47,6 +59,7 @@ const GUIDManager: React.FC<GUIDManagerProps> = ({ showRestart = true, compact =
 
   const isValidGUID = (guid: string) => /^[0-9a-fA-F]{32}$/.test(guid);
   const isValidMAC = (mac: string) => /^[0-9a-fA-F]{2}(-[0-9a-fA-F]{2}){5}$/.test(mac.trim().toLowerCase());
+  const isValidMachineId = (id: string) => /^[0-9a-fA-F]{16}$/.test(id.trim());
 
   // 前端实时计算 Linux GUID = MD5(machine-id + MAC)
   const computedLinuxGUID = useMemo(() => {
@@ -61,6 +74,28 @@ const GUIDManager: React.FC<GUIDManagerProps> = ({ showRestart = true, compact =
     if (!isLinux || !currentMAC) return '';
     return MD5(machineId + currentMAC).toString();
   }, [isLinux, machineId, currentMAC]);
+
+  // macOS: GUID = MD5(machine_id[8 字节] || sn)
+  const macGuidOf = useCallback((machineIdHex: string, sn: string) => {
+    if (!isValidMachineId(machineIdHex)) return '';
+    const mid = Hex.parse(machineIdHex.trim().toLowerCase());
+    return MD5(mid.concat(Utf8.parse(sn))).toString();
+  }, []);
+
+  // macOS: SN 留空 = 沿用当前生效值 (与后端一致)
+  const effectiveMacSn = inputSn === '' ? macInfo.sn : inputSn;
+
+  // macOS: 实时预览 (基于输入的 machine_id / 有效 SN)
+  const computedMacGUID = useMemo(() => {
+    if (!isMac) return '';
+    if (!isValidMachineId(inputMachineId)) return '';
+    return macGuidOf(inputMachineId, effectiveMacSn);
+  }, [isMac, inputMachineId, effectiveMacSn, macGuidOf]);
+
+  // macOS: machine_id 或 SN 任一与当前值不同即视为可保存
+  const macDirty = isValidMachineId(inputMachineId) && (
+    inputMachineId.trim().toLowerCase() !== macInfo.machineId || effectiveMacSn !== macInfo.sn
+  );
 
   // 检测平台
   const fetchPlatform = useCallback(async () => {
@@ -131,6 +166,40 @@ const GUIDManager: React.FC<GUIDManagerProps> = ({ showRestart = true, compact =
     }
   }, []);
 
+  // macOS: 获取 GUID 信息 + 硬件信息
+  const fetchMacInfo = useCallback(async () => {
+    setLoading(true);
+    try {
+      const info = await QQManager.getMacGUIDInfo();
+      setMacGuid(info.guid);
+      setMacSource(info.source);
+      setMacInfo({
+        machineId: info.machineId,
+        sn: info.sn,
+        mac: info.mac,
+        platformUuid: info.platformUuid,
+      });
+      setInputMachineId(info.machineId);
+      setInputSn(info.sn);
+    } catch (error) {
+      const msg = (error as Error).message;
+      setMacGuid('');
+      toast.error(`获取 GUID 失败: ${msg}`);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // macOS: 获取备份
+  const fetchMacBackups = useCallback(async () => {
+    try {
+      const data = await QQManager.getMacInfoBackups();
+      setMacBackups(data);
+    } catch {
+      // ignore
+    }
+  }, []);
+
   useEffect(() => {
     fetchPlatform();
   }, [fetchPlatform]);
@@ -140,11 +209,14 @@ const GUIDManager: React.FC<GUIDManagerProps> = ({ showRestart = true, compact =
     if (isWindows) {
       fetchGUID();
       fetchBackups();
+    } else if (isMac) {
+      fetchMacInfo();
+      fetchMacBackups();
     } else {
       fetchLinuxInfo();
       fetchLinuxBackups();
     }
-  }, [platformDetected, isWindows, fetchGUID, fetchBackups, fetchLinuxInfo, fetchLinuxBackups]);
+  }, [platformDetected, isWindows, isMac, fetchGUID, fetchBackups, fetchLinuxInfo, fetchLinuxBackups, fetchMacInfo, fetchMacBackups]);
 
   // ========== Windows 操作 ==========
 
@@ -310,6 +382,86 @@ const GUIDManager: React.FC<GUIDManagerProps> = ({ showRestart = true, compact =
 
   // ========== 重启 ==========
 
+  // ========== macOS 操作 ==========
+
+  const handleMacSave = async () => {
+    const mid = inputMachineId.trim().toLowerCase();
+    if (!isValidMachineId(mid)) {
+      toast.error('machine_id 格式无效，需要 16 位十六进制字符');
+      return;
+    }
+    setSaving(true);
+    try {
+      await QQManager.setMacMachineId(mid, inputSn);
+      toast.success('machine_id 已设置，重启后生效');
+      await fetchMacInfo();
+      await fetchMacBackups();
+    } catch (error) {
+      const msg = (error as Error).message;
+      toast.error(`设置 machine_id 失败: ${msg}`);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleMacCopy = (text: string, label: string) => {
+    if (text) {
+      navigator.clipboard.writeText(text);
+      toast.success(`${label} 已复制到剪贴板`);
+    }
+  };
+
+  const handleMacDelete = () => {
+    dialog.confirm({
+      title: '确认删除',
+      content: '删除 machineid-info 后，QQ 将回退到基于网卡 MAC 的设备标识。确定要删除吗？',
+      confirmText: '删除',
+      cancelText: '取消',
+      onConfirm: async () => {
+        try {
+          await QQManager.resetMacDeviceID();
+          toast.success('已删除，重启后生效');
+          await fetchMacInfo();
+          await fetchMacBackups();
+        } catch (error) {
+          const msg = (error as Error).message;
+          toast.error(`删除失败: ${msg}`);
+        }
+      },
+    });
+  };
+
+  const handleMacBackup = async () => {
+    try {
+      await QQManager.createMacInfoBackup();
+      toast.success('备份已创建');
+      await fetchMacBackups();
+    } catch (error) {
+      const msg = (error as Error).message;
+      toast.error(`备份失败: ${msg}`);
+    }
+  };
+
+  const handleMacRestore = (backupName: string) => {
+    dialog.confirm({
+      title: '确认恢复',
+      content: `确定要从备份 "${backupName}" 恢复吗？当前的 machineid-info 将被覆盖。`,
+      confirmText: '恢复',
+      cancelText: '取消',
+      onConfirm: async () => {
+        try {
+          await QQManager.restoreMacInfoBackup(backupName);
+          toast.success('已恢复，重启后生效');
+          await fetchMacInfo();
+          await fetchMacBackups();
+        } catch (error) {
+          const msg = (error as Error).message;
+          toast.error(`恢复失败: ${msg}`);
+        }
+      },
+    });
+  };
+
   const handleRestart = () => {
     dialog.confirm({
       title: '确认重启',
@@ -339,18 +491,200 @@ const GUIDManager: React.FC<GUIDManagerProps> = ({ showRestart = true, compact =
     );
   }
 
-  // ========== macOS 不支持 ==========
+  // ========== macOS 渲染 ==========
   if (isMac) {
     return (
       <div className={`flex flex-col gap-${compact ? '3' : '4'}`}>
-        <div className='flex flex-col items-center justify-center py-8 gap-2'>
-          <Chip variant='flat' color='warning' className='text-xs'>
-            macOS 平台暂不支持 GUID 管理
-          </Chip>
+        {/* 当前设备 GUID */}
+        <div className='flex flex-col gap-2'>
+          <div className='text-sm font-medium text-default-700'>当前设备 GUID</div>
+          <div className='flex items-center gap-2'>
+            {macGuid
+              ? (
+                <Chip variant='flat' color='primary' className='font-mono text-xs max-w-full'>
+                  {macGuid}
+                </Chip>
+              )
+              : (
+                <Chip variant='flat' color='warning' className='text-xs'>
+                  未设置 / 不存在
+                </Chip>
+              )}
+            {macGuid && (
+              <Button
+                isIconOnly
+                size='sm'
+                variant='light'
+                onPress={() => handleMacCopy(macGuid, 'GUID')}
+                aria-label='复制GUID'
+              >
+                <MdContentCopy size={16} />
+              </Button>
+            )}
+            <Button
+              isIconOnly
+              size='sm'
+              variant='light'
+              onPress={fetchMacInfo}
+              aria-label='刷新'
+            >
+              <MdRefresh size={16} />
+            </Button>
+          </div>
           <div className='text-xs text-default-400'>
-            该功能仅适用于 Windows 和 Linux 平台
+            GUID = MD5(machine_id + SN)，machine_id 来自 TEA 加密的 machineid-info
+            {macSource === 'mac-fallback' && '（当前走网卡 MAC 回退）'}
           </div>
         </div>
+
+        <Divider />
+
+        {/* 硬件信息 */}
+        <div className='flex flex-col gap-1'>
+          <div className='text-sm font-medium text-default-700'>IOPlatformUUID（TEA 密钥来源）</div>
+          <Chip variant='flat' color='default' className='font-mono text-xs max-w-full'>
+            {macInfo.platformUuid || '未知'}
+          </Chip>
+          <div className='text-xs text-default-400'>不可修改，密钥为其前 16 字节</div>
+        </div>
+
+        <div className='flex flex-col gap-1'>
+          <div className='text-sm font-medium text-default-700'>序列号（SN）</div>
+          <Chip variant='flat' color='default' className='font-mono text-xs max-w-full'>
+            {macInfo.sn || '未知'}
+          </Chip>
+        </div>
+
+        <div className='flex flex-col gap-1'>
+          <div className='text-sm font-medium text-default-700'>主网卡 MAC</div>
+          <Chip variant='flat' color='secondary' className='font-mono text-xs max-w-full'>
+            {macInfo.mac || '未知'}
+          </Chip>
+        </div>
+
+        <Divider />
+
+        {/* 编辑 machine_id */}
+        <div className='flex flex-col gap-2'>
+          <div className='text-sm font-medium text-default-700'>设置 Machine ID</div>
+          <Input
+            size='sm'
+            variant='bordered'
+            placeholder='16 位十六进制 machine_id'
+            value={inputMachineId}
+            onValueChange={setInputMachineId}
+            isInvalid={inputMachineId.length > 0 && !isValidMachineId(inputMachineId)}
+            errorMessage={inputMachineId.length > 0 && !isValidMachineId(inputMachineId) ? '需要 16 位十六进制字符' : undefined}
+            classNames={{ input: 'font-mono text-sm' }}
+            maxLength={16}
+          />
+          <Input
+            size='sm'
+            variant='bordered'
+            placeholder='序列号 SN（留空使用当前值）'
+            value={inputSn}
+            onValueChange={setInputSn}
+            classNames={{ input: 'font-mono text-sm' }}
+          />
+
+          {/* 实时 GUID 预览 */}
+          {isValidMachineId(inputMachineId) && (
+            <div className='flex flex-col gap-1 p-2 rounded-lg bg-default-100'>
+              <div className='text-xs font-medium text-default-500'>预览 GUID</div>
+              <div className='font-mono text-xs text-primary break-all'>
+                {computedMacGUID}
+              </div>
+              {computedMacGUID !== macGuid && (
+                <div className='text-xs text-warning-500'>
+                  与当前 GUID 不同，保存后重启生效
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className='flex items-center gap-2'>
+            <Button
+              size='sm'
+              color='primary'
+              variant='flat'
+              isLoading={saving}
+              isDisabled={!macDirty}
+              onPress={handleMacSave}
+              startContent={<MdSave size={16} />}
+            >
+              保存 Machine ID
+            </Button>
+            <Button
+              size='sm'
+              color='danger'
+              variant='flat'
+              isDisabled={!macGuid}
+              onPress={handleMacDelete}
+              startContent={<MdDelete size={16} />}
+            >
+              删除
+            </Button>
+            <Button
+              size='sm'
+              color='secondary'
+              variant='flat'
+              onPress={handleMacBackup}
+              startContent={<MdBackup size={16} />}
+            >
+              手动备份
+            </Button>
+          </div>
+          <div className='text-xs text-default-400'>
+            修改 machine_id 后 GUID 将变化，需重启 NapCat 才能生效，操作前会自动备份
+          </div>
+        </div>
+
+        {/* 备份恢复 */}
+        {macBackups.length > 0 && (
+          <>
+            <Divider />
+            <div className='flex flex-col gap-2'>
+              <div className='text-sm font-medium text-default-700'>
+                备份列表
+                <span className='text-xs text-default-400 ml-2'>（点击恢复）</span>
+              </div>
+              <div className='max-h-[160px] overflow-y-auto rounded-lg border border-default-200'>
+                <Listbox
+                  aria-label='备份列表'
+                  selectionMode='none'
+                  onAction={(key) => handleMacRestore(key as string)}
+                >
+                  {macBackups.map((name) => (
+                    <ListboxItem
+                      key={name}
+                      startContent={<MdRestorePage size={16} className='text-default-400' />}
+                      className='font-mono text-xs'
+                    >
+                      {name}
+                    </ListboxItem>
+                  ))}
+                </Listbox>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* 重启 */}
+        {showRestart && (
+          <>
+            <Divider />
+            <Button
+              size='sm'
+              color='warning'
+              variant='flat'
+              isLoading={restarting}
+              onPress={handleRestart}
+              startContent={<MdRefresh size={16} />}
+            >
+              重启 NapCat
+            </Button>
+          </>
+        )}
       </div>
     );
   }

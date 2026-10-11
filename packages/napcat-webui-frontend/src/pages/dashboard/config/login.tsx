@@ -221,7 +221,7 @@ const LoginConfigCard = () => {
       <div className='flex-shrink-0 w-full mt-4'>
         <div className='mb-3 text-sm text-default-600'>设备 GUID 管理</div>
         <div className='text-xs text-default-400 mb-3'>
-          GUID 是设备登录唯一识别码，存储在 Registry20 文件中。修改后需重启生效。
+          GUID 是设备登录唯一识别码，Windows 存于 Registry20、Linux 存于 machine-info、macOS 存于 machineid-info。修改后需重启生效。
         </div>
         <GUIDManager showRestart={false} />
       </div>

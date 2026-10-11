@@ -31,6 +31,13 @@ import {
   QQCreateLinuxMachineInfoBackupHandler,
   QQRestoreLinuxMachineInfoBackupHandler,
   QQResetLinuxDeviceIDHandler,
+  QQGetMacGUIDInfoHandler,
+  QQGetMacHardwareInfoHandler,
+  QQSetMacMachineIdHandler,
+  QQGetMacInfoBackupsHandler,
+  QQCreateMacInfoBackupHandler,
+  QQRestoreMacInfoBackupHandler,
+  QQResetMacDeviceIDHandler,
 } from '@/napcat-webui-backend/src/api/QQLogin';
 
 const router: Router = Router();
@@ -98,5 +105,23 @@ router.post('/CreateLinuxMachineInfoBackup', QQCreateLinuxMachineInfoBackupHandl
 router.post('/RestoreLinuxMachineInfoBackup', QQRestoreLinuxMachineInfoBackupHandler);
 // router:重置Linux设备信息
 router.post('/ResetLinuxDeviceID', QQResetLinuxDeviceIDHandler);
+
+// ============================================================
+// macOS GUID 管理
+// ============================================================
+// router:获取macOS设备GUID信息
+router.post('/GetMacGUIDInfo', QQGetMacGUIDInfoHandler);
+// router:获取macOS硬件信息
+router.post('/GetMacHardwareInfo', QQGetMacHardwareInfoHandler);
+// router:设置macOS machine_id
+router.post('/SetMacMachineId', QQSetMacMachineIdHandler);
+// router:获取macOS machineid-info备份列表
+router.post('/GetMacInfoBackups', QQGetMacInfoBackupsHandler);
+// router:创建macOS machineid-info备份
+router.post('/CreateMacInfoBackup', QQCreateMacInfoBackupHandler);
+// router:恢复macOS machineid-info备份
+router.post('/RestoreMacInfoBackup', QQRestoreMacInfoBackupHandler);
+// router:重置macOS设备信息
+router.post('/ResetMacDeviceID', QQResetMacDeviceIDHandler);
 
 export { router as QQLoginRouter };
