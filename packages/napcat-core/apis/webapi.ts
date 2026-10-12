@@ -678,8 +678,9 @@ export class NTQQWebApi {
   async doAlbumMediaPlainCommentByNTQQ (
     qunId: string,
     albumId: string,
-    lloc: string,
-    content: string) {
+    lloc: string | undefined,
+    content: string,
+    batchId: string = '') {
     const random_seq = Math.floor(Math.random() * 9000) + 1000;
     const uin = this.core.selfInfo.uin || '10001';
     // 16位number数字
@@ -692,7 +693,7 @@ export class NTQQWebApi {
       },
       qunId,
       2,
-      createAlbumMediaFeed(uin, albumId, lloc),
+      createAlbumMediaFeed(uin, albumId, lloc, batchId),
       createAlbumCommentRequest(uin, content, client_key)
     );
   }

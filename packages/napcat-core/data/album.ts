@@ -65,14 +65,20 @@ export interface AlbumMediaFeed {
  * 创建相册媒体请求参数
  * @param uin 用户QQ号
  * @param albumId 相册ID
- * @param lloc
+ * @param lloc 图片ID；不传或为空时评论整个上传批次
+ * @param batchId 上传批次ID；lloc 为空时必填
  * @returns 媒体请求参数对象
  */
 export function createAlbumMediaFeed (
   uin: string,
   albumId: string,
-  lloc: string
+  lloc?: string,
+  batchId: string = ''
 ): AlbumMediaFeed {
+  if (!lloc && !batchId) {
+    throw new Error('lloc 或 batch_id 至少需要提供一个');
+  }
+
   return {
     cell_common: {
       time: '',
@@ -84,12 +90,8 @@ export function createAlbumMediaFeed (
     },
     cell_media: {
       album_id: albumId,
-      batch_id: '',
-      media_items: [{
-        image: {
-          lloc,
-        },
-      }],
+      batch_id: batchId,
+      media_items: lloc ? [{ image: { lloc } }] : [],
     },
   };
 }
@@ -113,6 +115,11 @@ export interface AlbumCommentReplyContent {
   content: AlbumCommentContent[];
   user: {
     uin: string;
+  };
+  like: {
+    id: string;
+    count: number;
+    status: number;
   };
 }
 export enum RichMsgType {
@@ -147,6 +154,12 @@ export function createAlbumCommentRequest (
     }],
     user: {
       uin,
+    },
+    // QQNT 会将 like 转换为对象，即使新评论没有点赞也不能省略。
+    like: {
+      id: '',
+      count: 0,
+      status: 0,
     },
   };
 }
