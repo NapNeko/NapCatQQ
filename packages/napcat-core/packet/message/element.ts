@@ -211,12 +211,14 @@ export class PacketMsgReplyElement extends IPacketMsgElement<SendReplyElement> {
 
 export class PacketMsgFaceElement extends IPacketMsgElement<SendFaceElement> {
   faceId: number;
+  faceText: string;
   isLargeFace: boolean;
   resultId?: string;
 
   constructor (element: SendFaceElement) {
     super(element);
     this.faceId = element.faceElement.faceIndex;
+    this.faceText = element.faceElement.faceText || '[表情]';
     this.resultId = element.faceElement.resultId;
     this.isLargeFace = element.faceElement.faceType === FaceType.AniSticke;
   }
@@ -236,6 +238,12 @@ export class PacketMsgFaceElement extends IPacketMsgElement<SendFaceElement> {
             randomType: 1,
           }),
           businessType: 1,
+        },
+      }, {
+        // QQ consumes the element after an animated face as compatibility text.
+        // Without it, the next user-supplied message segment is discarded.
+        text: {
+          str: this.faceText,
         },
       }];
     } else if (this.faceId < 260) {
