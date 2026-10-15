@@ -1,3 +1,4 @@
+import { selectProfileRegion } from '@/napcat-core/helper/profile-region';
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { OB11UserSex } from '@/napcat-onebot/index';
 import { OB11Construct } from '@/napcat-onebot/helper/data';
@@ -56,6 +57,7 @@ export default class GoCQHTTPGetStrangerInfo extends OneBotAction<PayloadType, R
       ...extendData.detail.simpleInfo.baseInfo,
       ...extendData.detail.simpleInfo.relationFlags ?? {},
       ...extendData.detail.simpleInfo.status ?? {},
+      ...selectProfileRegion(info, extendData.detail.commonExt),
       user_id: parseInt(extendData.detail.uin) ?? 0,
       uid: info.uid ?? uid,
       nickname: extendData.detail.simpleInfo.coreInfo.nick ?? '',
