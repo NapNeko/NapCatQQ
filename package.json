@@ -30,7 +30,7 @@
     "vitest": "^4.0.9"
   },
   "dependencies": {
-    "express": "^5.0.0",
+    "express": "^5.3.0",
     "ws": "^8.18.3"
   }
 }

@@ -18,7 +18,7 @@
     "dependencies": {
         "@sinclair/typebox": "^0.34.38",
         "cors": "^2.8.5",
-        "express": "^5.0.0",
+        "express": "^5.3.0",
         "fast-xml-parser": "^4.3.6",
         "file-type": "^21.0.0",
         "json5": "^2.2.3",
@@ -34,7 +34,7 @@
     },
     "devDependencies": {
         "@types/cors": "^2.8.17",
-        "@types/express": "^5.0.0",
+        "@types/express": "^5.0.6",
         "@types/node": "^22.0.1",
         "@types/on-finished": "^2.3.4",
         "@types/type-is": "^1.6.7"
