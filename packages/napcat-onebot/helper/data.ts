@@ -112,7 +112,7 @@ export class OB11Construct {
   static file (peerId: string, file: Exclude<GroupFileInfoUpdateParamType['item'][0]['fileInfo'], undefined>): OB11GroupFile {
     return {
       group_id: +peerId,
-      file_id: FileNapCatOneBotUUID.encodeModelId({ chatType: 2, peerUid: peerId }, file.fileModelId, file.fileId, file.fileId ?? ''),
+      file_id: FileNapCatOneBotUUID.encodeGroupFile({ chatType: 2, peerUid: peerId }, file),
       file_name: file.fileName,
       busid: file.busId,
       size: +file.fileSize,

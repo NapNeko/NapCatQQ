@@ -74,6 +74,7 @@ interface FileUUIDData {
   msgId?: string;
   elementId?: string;
   fileUUID?: string;
+  busId?: number;
 }
 
 class FileUUIDManager {
@@ -103,6 +104,10 @@ export class FileNapCatOneBotUUIDWrap {
 
   public encodeModelId (peer: Peer, modelId: string, fileId: string, fileUUID: string = '', endString: string = '', customUUID?: string): string {
     return this.manager.encode({ peer, modelId, fileId, fileUUID }, endString, customUUID);
+  }
+
+  public encodeGroupFile (peer: Peer, file: { fileModelId: string; fileId: string; busId: number; }): string {
+    return this.manager.encode({ peer, modelId: file.fileModelId, fileId: file.fileId, fileUUID: file.fileId, busId: file.busId });
   }
 
   public decodeModelId (uuid: string): FileUUIDData | undefined {

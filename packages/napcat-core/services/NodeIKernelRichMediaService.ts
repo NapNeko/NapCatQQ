@@ -1,5 +1,6 @@
 import { GetFileListParam, MessageElement, Peer } from '@/napcat-core/types';
 import { GeneralCallResult } from './common';
+import type { GroupFileInfoUpdateItem } from '../listeners/NodeIKernelMsgListener';
 
 export enum UrlFileDownloadType {
   KUNKNOWN,
@@ -192,7 +193,14 @@ export interface NodeIKernelRichMediaService {
     };
   }>;
 
-  getGroupFileInfo (arg1: unknown, arg2: unknown): unknown;
+  getGroupFileInfo (groupCode: string, fileId: string): Promise<GeneralCallResult & {
+    groupFileInfoResult: {
+      retCode: number;
+      retMsg: string;
+      clientWording: string;
+      fileInfo: NonNullable<GroupFileInfoUpdateItem['fileInfo']>;
+    };
+  }>;
 
   getGroupTransferList (arg1: string, arg2: unknown): unknown;
 
@@ -235,11 +243,16 @@ export interface NodeIKernelRichMediaService {
 
   searchGroupFileByWord (arg1: unknown[], arg2: unknown[], arg3: string, arg4: string, arg5: number): unknown;
 
-  deleteGroupFile (GroupCode: string, params: Array<number>, Files: Array<string>): Promise<GeneralCallResult & {
+  deleteGroupFile (groupCode: string, busIds: Array<number>, files: Array<string>): Promise<GeneralCallResult & {
+    // QQ's NodeIDeleteGroupFileCallback also uses this property name.
     transGroupFileResult: {
-      result: unknown;
-      successFileIdList: Array<unknown>;
-      failFileIdList: Array<unknown>;
+      result: {
+        retCode: number;
+        retMsg: string;
+        clientWording: string;
+      };
+      successFileIdList: Array<string>;
+      failFileIdList: Array<string>;
     };
   }>;
 

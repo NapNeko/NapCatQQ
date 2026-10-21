@@ -24,6 +24,7 @@ import {
   createGroupManagementRequests,
 } from '../data';
 import { NTEventWrapper } from '../helper/event';
+import { deleteGroupFiles } from '../helper/group-file';
 
 export class NTQQGroupApi {
   context: InstanceContext;
@@ -384,8 +385,8 @@ export class NTQQGroupApi {
     return this.context.session.getRichMediaService().createGroupFolder(groupCode, folderName);
   }
 
-  async delGroupFile (groupCode: string, files: Array<string>) {
-    return this.context.session.getRichMediaService().deleteGroupFile(groupCode, [102], files);
+  async delGroupFile (groupCode: string, files: Array<string>, busIds?: Array<number>) {
+    return deleteGroupFiles(this.context.session.getRichMediaService(), groupCode, files, busIds);
   }
 
   async delGroupFileFolder (groupCode: string, folderId: string) {

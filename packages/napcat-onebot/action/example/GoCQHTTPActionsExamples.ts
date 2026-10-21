@@ -24,7 +24,7 @@ export const GoCQHTTPActionsExamples = {
     response: { result: {}, groupItem: {} },
   },
   DeleteGroupFile: {
-    payload: { group_id: '123456', file_id: 'file_uuid_123' },
+    payload: { group_id: '123456', file_id: 'file_uuid_123', bus_id: 104 },
     response: {},
   },
   DeleteGroupFileFolder: {
