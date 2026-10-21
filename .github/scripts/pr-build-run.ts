@@ -103,7 +103,8 @@ function postBuild (target: BuildTarget): void {
 
   // Install production dependencies
   console.log('→ Installing production dependencies');
-  execSync('npm install --omit=dev', {
+  // --omit=dev still resolves dev peer dependencies; remove build tooling first.
+  execSync('npm pkg delete devDependencies && npm install --omit=dev', {
     cwd: destDir,
     stdio: 'inherit',
     shell: process.platform === 'win32' ? 'cmd.exe' : '/bin/bash',

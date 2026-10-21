@@ -53,6 +53,8 @@ jobs:
           pnpm --filter napcat-plugin-builtin run build || exit 1
           mv ${{ matrix.target.src_dir }} ${{ matrix.target.dist_dir }}
           cd ${{ matrix.target.dist_dir }}
+          # --omit=dev still resolves dev peer dependencies; remove build tooling first.
+          npm pkg delete devDependencies
           npm install --omit=dev
           rm ./package-lock.json || exit 0
       - name: Upload Artifact
