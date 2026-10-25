@@ -139,23 +139,32 @@ export interface QzonePublishResponse {
   code?: number;
   tid?: string;
   t1_tid?: string;
+  t1_time?: string | number;
+  now?: number;
   message?: string;
   msg?: string;
+}
+
+export function parseQzonePublishTime (value: unknown): number {
+  if (value === undefined || value === null) return 0;
+  const time = (typeof value === 'number' || (typeof value === 'string' && /^\d+$/.test(value))) ? Number(value) : NaN;
+  if (!Number.isSafeInteger(time) || time < 0) throw new Error('QQ空间发表时间无效，结果需查询确认，勿自动重试');
+  return time;
 }
 
 /**
  * 解析发表说说接口返回的 JSON, 提取 tid
  */
-export function parseQzonePublishResponse (json: QzonePublishResponse): { tid: string; } {
-  const subcode = json.subcode ?? json.code;
-  if (subcode !== undefined && subcode !== 0) {
-    throw new Error(json.message || json.msg || `QQ空间发说说失败, subcode=${subcode}`);
+export function parseQzonePublishResponse (json: QzonePublishResponse): { tid: string; time: number; } {
+  for (const code of [json.subcode, json.code]) {
+    if (code !== undefined && code !== 0) throw new Error('QQ空间发说说失败，服务端拒绝请求');
   }
   const tid = json.t1_tid || json.tid;
   if (!tid) {
     throw new Error('QQ空间发说说失败, 未返回tid');
   }
-  return { tid };
+  // SL uses zero when the server omits creation time; it is not the local clock.
+  return { tid, time: parseQzonePublishTime(json.t1_time ?? json.now) };
 }
 
 export interface QzoneDeleteParams {

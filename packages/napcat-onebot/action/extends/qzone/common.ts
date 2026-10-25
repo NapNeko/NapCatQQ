@@ -35,8 +35,8 @@ export const QzoneFeedReferenceSchema = Type.Object({
 });
 
 export const QzoneCommentSchema = Type.Object({
-  id: Type.Optional(Type.String()),
-  user: Type.Optional(QzoneUserSchema),
+  id: Type.Optional(Type.Union([Type.String(), Type.Integer({ minimum: 0, maximum: Number.MAX_SAFE_INTEGER })])),
+  user: Type.Optional(RawObject),
   content: Type.Optional(Type.Array(RawObject)),
 }, { additionalProperties: Type.Unknown(), description: '空间返回的完整评论或回复对象，保留未知字段' });
 
@@ -72,7 +72,11 @@ export const QzoneMsgListReturnSchema = Type.Object({
 
 export const QzoneDetailReturnSchema = Type.Composite([
   QzoneFeedItemSchema,
-  Type.Object({ comments: Type.Array(QzoneCommentSchema) }),
+  Type.Object({
+    comments: Type.Array(QzoneCommentSchema),
+    comment_has_more: Type.Optional(Type.Boolean()),
+    comment_next_cursor: Type.Optional(NullableString),
+  }),
 ]);
 
 export const QzoneFeedReferenceExample = {

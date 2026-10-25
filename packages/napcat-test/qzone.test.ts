@@ -86,8 +86,16 @@ describe('Qzone data helpers', () => {
     expect(result.tid).toBe('t1tid456');
   });
 
+  test('keeps server publish time and the SL unknown-time sentinel', () => {
+    expect(parseQzonePublishResponse({ code: 0, tid: 'post', t1_time: '1700000000', now: 1700000001 })).toEqual({ tid: 'post', time: 1700000000 });
+    expect(parseQzonePublishResponse({ code: 0, tid: 'post', now: 1700000001 })).toEqual({ tid: 'post', time: 1700000001 });
+    expect(parseQzonePublishResponse({ code: 0, tid: 'post' })).toEqual({ tid: 'post', time: 0 });
+    expect(() => parseQzonePublishResponse({ code: 0, tid: 'post', t1_time: 'bad' })).toThrow('勿自动重试');
+    expect(() => parseQzonePublishResponse({ code: -1, subcode: 0, tid: 'post' })).toThrow('服务端拒绝');
+  });
+
   test('parseQzonePublishResponse throws when subcode indicates failure', () => {
-    expect(() => parseQzonePublishResponse({ subcode: -200, message: '权限不足' })).toThrow('权限不足');
+    expect(() => parseQzonePublishResponse({ subcode: -200, message: 'private-response' })).toThrow('服务端拒绝请求');
   });
 
   test('parseQzonePublishResponse throws when tid missing', () => {

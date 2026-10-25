@@ -5,6 +5,7 @@ import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'n
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import * as fileUtils from '@/napcat-common/src/file';
 import { SendQzoneMsg } from '@/napcat-onebot/action/extends/SendQzoneMsg';
 import { DeleteQzoneMsg } from '@/napcat-onebot/action/extends/DeleteQzoneMsg';
 
@@ -15,6 +16,7 @@ function createCore () {
   tempDirs.push(directory);
   return {
     NapCatTempPath: directory,
+    selfInfo: { uin: '10001', uid: 'u_current' },
     apis: {
       QzoneApi: { publishMsg: vi.fn().mockResolvedValue({ tid: 'modern-tid' }) },
       WebApi: {
@@ -38,7 +40,7 @@ describe('Qzone existing action compatibility', () => {
     const action = new SendQzoneMsg(undefined as never, core as never);
 
     await expect(action._handle({ content: '朋友可见', ugc_right: '16', target_uins: ['10002'] }))
-      .resolves.toEqual({ tid: 'modern-tid' });
+      .resolves.toEqual({ tid: 'modern-tid', time: 0 });
     expect(core.apis.QzoneApi.publishMsg).toHaveBeenCalledExactlyOnceWith('朋友可见', 16, ['10002']);
     expect(core.apis.WebApi.publishQzoneMsg).not.toHaveBeenCalled();
   });
@@ -67,7 +69,7 @@ describe('Qzone existing action compatibility', () => {
     const action = new SendQzoneMsg(undefined as never, core as never);
 
     await expect(action._handle({ content: '排除指定好友', ugc_right: 128, target_uins: ['10002', 'invalid'], images }))
-      .rejects.toThrow('target_uins 必须为有效QQ号数组');
+      .rejects.toThrow('target_uins');
     expect(core.apis.QzoneApi.publishMsg).not.toHaveBeenCalled();
     expect(core.apis.WebApi.uploadImageToQzone).not.toHaveBeenCalled();
     expect(core.apis.WebApi.publishQzoneMsg).not.toHaveBeenCalled();
@@ -83,7 +85,7 @@ describe('Qzone existing action compatibility', () => {
       content: '带图说说',
       images: ['base64://aGVsbG8=', pathToFileURL(localImage).href],
       ugc_right: 64,
-    })).resolves.toEqual({ tid: 'legacy-tid' });
+    })).resolves.toEqual({ tid: 'legacy-tid', time: 0 });
 
     expect(core.apis.QzoneApi.publishMsg).not.toHaveBeenCalled();
     expect(core.apis.WebApi.uploadImageToQzone.mock.calls.map(args => args[0])).toEqual([
@@ -108,6 +110,52 @@ describe('Qzone existing action compatibility', () => {
     expect(readdirSync(core.NapCatTempPath)).toEqual([]);
   });
 
+  it('stops before upload and cleans decoded images if the account changes during image decoding', async () => {
+    for (const change of [{ uin: '10002' }, { uid: 'u_other' }]) {
+      const core = createCore();
+      const decode = fileUtils.uriToLocalFile;
+      const decoder = vi.spyOn(fileUtils, 'uriToLocalFile').mockImplementationOnce(async (...args) => {
+        const result = await decode(...args);
+        Object.assign(core.selfInfo, change);
+        return result;
+      });
+      try {
+        await expect(new SendQzoneMsg(undefined as never, core as never)._handle({
+          content: '带图', images: ['base64://aGVsbG8='],
+        })).rejects.toThrow('QQ账号已切换');
+
+        expect(core.apis.WebApi.uploadImageToQzone).not.toHaveBeenCalled();
+        expect(core.apis.WebApi.publishQzoneMsg).not.toHaveBeenCalled();
+        expect(core.apis.QzoneApi.publishMsg).not.toHaveBeenCalled();
+        expect(readdirSync(core.NapCatTempPath)).toEqual([]);
+      } finally {
+        decoder.mockRestore();
+      }
+    }
+  });
+
+  it('stops the upload chain without publishing to a changed account and preserves user images', async () => {
+    for (const change of [{ uin: '10002' }, { uid: 'u_other' }]) {
+      const core = createCore();
+      const localImage = join(core.NapCatTempPath, 'user-image.png');
+      writeFileSync(localImage, 'user image');
+      core.apis.WebApi.uploadImageToQzone.mockImplementationOnce(async () => {
+        Object.assign(core.selfInfo, change);
+        return 'legacy-richval';
+      });
+
+      await expect(new SendQzoneMsg(undefined as never, core as never)._handle({
+        content: '带图', images: ['base64://aGVsbG8=', pathToFileURL(localImage).href],
+      })).rejects.toThrow('QQ账号已切换');
+
+      expect(core.apis.WebApi.uploadImageToQzone).toHaveBeenCalledTimes(1);
+      expect(core.apis.WebApi.publishQzoneMsg).not.toHaveBeenCalled();
+      expect(core.apis.QzoneApi.publishMsg).not.toHaveBeenCalled();
+      expect(readdirSync(core.NapCatTempPath)).toEqual(['user-image.png']);
+      expect(readFileSync(localImage, 'utf8')).toBe('user image');
+    }
+  });
+
   it('validates existing selective visibility before uploading or publishing', async () => {
     const core = createCore();
     const action = new SendQzoneMsg(undefined as never, core as never);
@@ -122,7 +170,7 @@ describe('Qzone existing action compatibility', () => {
     const core = createCore();
     const action = new DeleteQzoneMsg(undefined as never, core as never);
 
-    await expect(action._handle({ tid: 'existing-tid' })).resolves.toBeUndefined();
+    await expect(action._handle({ tid: 'existing-tid' })).resolves.toBeNull();
     expect(core.apis.WebApi.deleteQzoneMsg).toHaveBeenCalledExactlyOnceWith('existing-tid');
   });
 });

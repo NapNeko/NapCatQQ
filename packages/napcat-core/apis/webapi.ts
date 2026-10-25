@@ -749,9 +749,16 @@ export class NTQQWebApi {
   }
 
   private async getQzoneAuth () {
+    const uin = this.core.selfInfo.uin;
+    const uid = this.core.selfInfo.uid;
+    if (!uin || !uid) throw new Error('QQ空间需要已登录的当前账号');
+    const assertAccount = () => {
+      if (this.core.selfInfo.uin !== uin || this.core.selfInfo.uid !== uid) throw new Error('QQ账号已切换，请重新确认QQ空间操作');
+    };
     const skey = await this.core.apis.UserApi.getSKey() || '';
+    assertAccount();
     const pskey = (await this.core.apis.UserApi.getPSkey(['qzone.qq.com'])).domainPskeyMap.get('qzone.qq.com') || '';
-    const uin = this.core.selfInfo.uin || '10001';
+    assertAccount();
     const g_tk = this.getBknFromSKey(skey);
     const cookie = `p_uin=o${uin}; p_skey=${pskey}; skey=${skey}; uin=o${uin}`;
     return { skey, pskey, uin, g_tk, cookie };

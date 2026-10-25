@@ -8,7 +8,7 @@ import { GetQzoneMsgDetail, GetQzoneMsgDetailPayloadSchema } from '@/napcat-oneb
 import { LikeQzone } from '@/napcat-onebot/action/extends/qzone/LikeQzone';
 import { UnlikeQzone } from '@/napcat-onebot/action/extends/qzone/UnlikeQzone';
 import { CommentQzone } from '@/napcat-onebot/action/extends/qzone/CommentQzone';
-import { QzoneFeedItemExample, QzoneFeedReferenceExample } from '@/napcat-onebot/action/extends/qzone/common';
+import { QzoneDetailReturnSchema, QzoneFeedItemExample, QzoneFeedReferenceExample, QzoneParentCommentSchema } from '@/napcat-onebot/action/extends/qzone/common';
 
 function createCore () {
   const QzoneApi = {
@@ -26,12 +26,12 @@ describe('QQ空间 OneBot actions', () => {
     const core = createCore();
     const action = new GetQzoneFeeds(undefined as never, core as never);
 
-    const first = await action._handle({});
+    const first = await action._handle({ format: 'native' });
     await action._handle({ cursor: 'next-page' });
 
     expect(core.apis.QzoneApi.getFriendFeeds.mock.calls).toEqual([[undefined], ['next-page']]);
-    expect(first.feeds[0]?.feed_ref).toEqual(QzoneFeedReferenceExample);
-    expect(first.feeds[0]?.feed).toEqual(QzoneFeedItemExample.feed);
+    expect(first).toHaveProperty('feeds.0.feed_ref', QzoneFeedReferenceExample);
+    expect(first).toHaveProperty('feeds.0.feed', QzoneFeedItemExample.feed);
     expect(first).not.toHaveProperty('total');
   });
 
@@ -39,9 +39,9 @@ describe('QQ空间 OneBot actions', () => {
     const core = createCore();
     const action = new GetQzoneMsgList(undefined as never, core as never);
 
-    await action._handle({});
-    await action._handle({ target_uin: 123456, cursor: 'next-page' });
-    await action._handle({ target_uin: '9007199254740993' });
+    await action._handle({ format: 'native' });
+    await action._handle({ format: 'native', target_uin: 123456, cursor: 'next-page' });
+    await action._handle({ format: 'native', target_uin: '9007199254740993' });
 
     expect(core.apis.QzoneApi.getMsgList.mock.calls).toEqual([
       [undefined, undefined],
@@ -113,6 +113,20 @@ describe('QQ空间 OneBot actions', () => {
     expect(parent).toEqual(expected);
   });
 
+  it('adds optional detail pagination without changing raw comment shape or write parent requirements', () => {
+    const detail = TypeCompiler.Compile(QzoneDetailReturnSchema);
+    const parent = TypeCompiler.Compile(QzoneParentCommentSchema);
+    expect(detail.Check({ ...QzoneFeedItemExample, comments: [] })).toBe(true);
+    expect(detail.Check({
+      ...QzoneFeedItemExample,
+      comments: [{ id: 0, user: { uid: 'u_commenter', portrait: { source: 'opaque' } }, replys: [{ id: 'reply' }], unknown_field: true }],
+      comment_has_more: true,
+      comment_next_cursor: 'opaque-cursor',
+    })).toBe(true);
+    expect(parent.Check({ id: 0, user: { uid: 'u_commenter' } })).toBe(false);
+    expect(parent.Check({ id: '0', user: { uin: '10002', uid: '' } })).toBe(true);
+  });
+
   it('publishes root comments and replies without synthesizing parent identities', async () => {
     const core = createCore();
     const action = new CommentQzone(undefined as never, core as never);
@@ -147,17 +161,17 @@ describe('QQ空间 OneBot actions', () => {
     expect(core.apis.QzoneApi.comment).not.toHaveBeenCalled();
   });
 
-  it('rejects invalid references, oversized cursors and unsupported legacy pagination', () => {
+  it('accepts both schema families while rejecting invalid references and scalar shapes', () => {
     const feeds = TypeCompiler.Compile(GetQzoneFeedsPayloadSchema);
     const list = TypeCompiler.Compile(GetQzoneMsgListPayloadSchema);
     const detail = TypeCompiler.Compile(GetQzoneMsgDetailPayloadSchema);
 
-    expect(feeds.Check({ cursor: 'a'.repeat(16385) })).toBe(false);
-    expect(feeds.Check({ page_num: 1, count: 10 })).toBe(false);
-    expect(list.Check({ pos: 0, num: 20 })).toBe(false);
+    expect(feeds.Check({ cursor: 'a'.repeat(65537) })).toBe(false);
+    expect(feeds.Check({ page_num: 1, count: 10 })).toBe(true);
+    expect(list.Check({ pos: 0, num: 20 })).toBe(true);
     expect(list.Check({ target_uin: Number.MAX_SAFE_INTEGER + 1 })).toBe(false);
     expect(list.Check({ target_uin: 'not-a-qq-number' })).toBe(false);
-    expect(detail.Check({ tid: 'shuoshuo-tid' })).toBe(false);
+    expect(detail.Check({ tid: 'shuoshuo-tid' })).toBe(true);
     expect(detail.Check({ feed_ref: { union_id: [] } })).toBe(false);
     expect(detail.Check({ feed_ref: { union_id: {} } })).toBe(false);
     expect(detail.Check({ feed_ref: { ...QzoneFeedReferenceExample, feed_action_domain_type: 0 } })).toBe(false);

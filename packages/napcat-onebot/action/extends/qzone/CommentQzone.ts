@@ -2,51 +2,89 @@ import { Static, Type } from '@sinclair/typebox';
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
 import { ActionName, BaseCheckResult } from '@/napcat-onebot/action/router';
 import type { QzoneComment } from '@/napcat-core/data/qzone-rpc';
-import { QzoneCommentSchema, QzoneFeedReferenceExample, QzoneFeedReferenceSchema, QzoneParentCommentSchema, QzoneUserSchema } from './common';
+import type { SlQzoneCommentOptions, SlQzoneCommentResult } from '@/napcat-core/data/qzone-snowluma';
+import { uriToLocalFile } from 'napcat-common/src/file';
+import { readFileSync } from 'node:fs';
+import { unlink } from 'node:fs/promises';
+import { QzoneCommentSchema, QzoneFeedReferenceSchema, QzoneParentCommentSchema, QzoneUserSchema } from './common';
+import { normalizeQzoneCommentPayload, SlQzoneCommentReturnSchema, SlQzoneIdentitySchema, SlQzoneImagesSchema, SlQzoneTextSchema, SlQzoneUinSchema } from './common-snowluma';
 
 export const CommentQzonePayloadSchema = Type.Object({
-  feed_ref: QzoneFeedReferenceSchema,
-  content: Type.String({ minLength: 1, maxLength: 2000, description: '评论或回复正文' }),
+  feed_ref: Type.Optional(QzoneFeedReferenceSchema),
+  tid: Type.Optional(SlQzoneIdentitySchema),
+  target_uin: Type.Optional(SlQzoneUinSchema),
+  content: SlQzoneTextSchema,
   comment: Type.Optional(QzoneParentCommentSchema),
   reply_user: Type.Optional(QzoneUserSchema),
-}, { additionalProperties: false });
+  comment_id: Type.Optional(SlQzoneIdentitySchema),
+  comment_uin: Type.Optional(SlQzoneUinSchema),
+  reply_uin: Type.Optional(SlQzoneUinSchema),
+  reply_name: Type.Optional(SlQzoneTextSchema),
+  images: SlQzoneImagesSchema,
+}, { additionalProperties: Type.Unknown() });
 export type CommentQzonePayload = Static<typeof CommentQzonePayloadSchema>;
 
-const ReturnSchema = Type.Object({
+const NativeReturnSchema = Type.Object({
   comment_id: Type.String({ description: '新评论或回复 ID' }),
   comment: QzoneCommentSchema,
 });
 
-export class CommentQzone extends OneBotAction<CommentQzonePayload, { comment_id: string; comment: QzoneComment; }> {
+type ReturnType = { comment_id: string; comment: QzoneComment; } | SlQzoneCommentResult;
+
+export class CommentQzone extends OneBotAction<CommentQzonePayload, ReturnType> {
   override actionName = ActionName.CommentQzone;
   override actionSummary = '评论QQ空间说说';
-  override actionDescription = '不传 comment 时发表评论；传入详情返回的完整父评论时回复该评论，reply_user 可指定回复目标。正文为纯文本，评论作者固定为当前账号。';
+  override actionDescription = '传 tid 使用 SnowLuma 参数，一级评论支持 images；回复须成对提供 comment_id/comment_uin，指定接收者时还需 reply_uin/reply_name，楼中楼仅文字。传 feed_ref 则保留原 comment/reply_user 方式及原始结果；两种参数不能混用。';
   override actionTags = ['扩展接口'];
-  override payloadExample = { feed_ref: QzoneFeedReferenceExample, content: '很有意思' };
-  override returnExample = {
-    comment_id: 'comment-id',
-    comment: { id: 'comment-id', user: { uin: '10001' }, content: [{ type: 0, content: '很有意思' }] },
-  };
+  override payloadExample = { tid: 'sample-post', target_uin: '10002', content: '很有意思' };
+  override returnExample = { comment_id: 'sample-comment' };
 
   override payloadSchema = CommentQzonePayloadSchema;
-  override returnSchema = ReturnSchema;
+  override returnSchema = Type.Union([SlQzoneCommentReturnSchema, NativeReturnSchema]);
 
   protected override async check (payload: CommentQzonePayload): Promise<BaseCheckResult> {
-    const result = await super.check(payload);
-    if (!result.valid) return result;
-    if (!payload.content.trim()) return { valid: false, message: '评论内容不能为空' };
-    if (payload.reply_user && !payload.comment) return { valid: false, message: 'reply_user 必须与完整父评论 comment 一起提供' };
-    return { valid: true };
+    try { normalizeQzoneCommentPayload(payload); } catch (error) { return { valid: false, message: (error as Error).message }; }
+    return await super.check(payload);
   }
 
-  async _handle (payload: CommentQzonePayload): Promise<{ comment_id: string; comment: QzoneComment; }> {
-    if (!payload.content.trim()) throw new Error('评论内容不能为空');
-    if (payload.reply_user && !payload.comment) throw new Error('reply_user 必须与完整父评论 comment 一起提供');
-    return await this.core.apis.QzoneApi.comment(
-      payload.feed_ref,
-      payload.content,
-      payload.comment as QzoneComment | undefined,
-      payload.reply_user
-    );
+  async _handle (payload: CommentQzonePayload): Promise<ReturnType> {
+    const normalized = normalizeQzoneCommentPayload(payload);
+    if (normalized.format === 'native') {
+      return await this.core.apis.QzoneApi.comment(normalized.reference, normalized.content, normalized.comment, normalized.replyUser);
+    }
+    const originalAccount = normalized.images?.length
+      ? { uin: this.core.selfInfo?.uin, uid: this.core.selfInfo?.uid }
+      : undefined;
+    if (originalAccount && (!originalAccount.uin || !originalAccount.uid)) throw new Error('QQ空间图片评论需要已登录的当前账号');
+    const assertAccount = () => {
+      if (originalAccount && (this.core.selfInfo?.uin !== originalAccount.uin || this.core.selfInfo?.uid !== originalAccount.uid)) {
+        throw new Error('QQ账号已切换，图片评论已停止，请重新确认后操作');
+      }
+    };
+    const cleanupPaths: string[] = [];
+    const urls: string[] = [];
+    try {
+      for (const [index, source] of (normalized.images ?? []).entries()) {
+        const image = await uriToLocalFile(this.core.NapCatTempPath, source);
+        if (!image.success) throw new Error(`第${index + 1}张图片处理失败，${image.errMsg}`);
+        if (!image.isLocal) cleanupPaths.push(image.path);
+        assertAccount();
+        const upload = await this.core.apis.QzoneApi.uploadCommentImage(readFileSync(image.path).toString('base64'));
+        assertAccount();
+        let url: URL;
+        try { url = new URL(upload.url); } catch { throw new Error(`第${index + 1}张图片上传未返回有效地址`); }
+        if (!['https:', 'http:'].includes(url.protocol) || url.username || url.password || upload.url.length > 8192 || upload.url.trim() !== upload.url || /[\t\r\n]/.test(upload.url)) {
+          throw new Error(`第${index + 1}张图片上传未返回有效地址`);
+        }
+        urls.push(upload.url);
+      }
+      const options: SlQzoneCommentOptions | undefined = urls.length
+        ? { ...normalized.options, imageUrls: urls }
+        : normalized.options;
+      assertAccount();
+      return await this.core.apis.QzoneApi.commentSnowluma(normalized.tid, normalized.content, normalized.targetUin, options);
+    } finally {
+      for (const path of cleanupPaths) await unlink(path).catch(() => { });
+    }
   }
 }

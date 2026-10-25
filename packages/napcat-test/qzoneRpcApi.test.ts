@@ -190,7 +190,7 @@ describe('Qzone modern HTTP2RPC API', () => {
   it('publishes with session author and mapped privacy, and accepts only a returned server tid', async () => {
     const { api } = createApi();
     fetchMock.mockResolvedValueOnce(response({ feed }));
-    await expect(api.publishMsg('正文', 16, ['20001'])).resolves.toEqual({ tid: 'mood-tid' });
+    await expect(api.publishMsg('正文', 16, ['20001'])).resolves.toEqual({ tid: 'mood-tid', time: 0 });
     const request = JSON.parse(fetchMock.mock.calls[0]![1]?.body as string);
     expect(request).toMatchObject({
       from: 3,
@@ -203,6 +203,22 @@ describe('Qzone modern HTTP2RPC API', () => {
     fetchMock.mockResolvedValueOnce(response({ feed: { cell_common: { client_key: 'local-key-only' } } }));
     await expect(api.publishMsg('第二条')).rejects.toThrow('结果未知');
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('returns publish time only from the server feed without substituting the current clock', async () => {
+    const { api } = createApi();
+    fetchMock.mockResolvedValueOnce(response({ feed: { ...feed, cell_common: { ...feed.cell_common, time: '1700000123' } } }));
+    await expect(api.publishMsg('带服务端时间')).resolves.toEqual({ tid: 'mood-tid', time: 1700000123 });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not turn a malformed supplied publish time into a missing-time sentinel', async () => {
+    const { api } = createApi();
+    for (const time of [-1, 'bad', Number.MAX_SAFE_INTEGER + 1]) {
+      fetchMock.mockResolvedValueOnce(response({ feed: { ...feed, cell_common: { ...feed.cell_common, time } } }));
+      await expect(api.publishMsg('仅发表一次')).rejects.toThrow('勿自动重试');
+    }
+    expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 
   it('uses distinct official like/unlike routes and requires the business result', async () => {

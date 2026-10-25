@@ -41,8 +41,8 @@ export interface QzoneRichMsg {
 }
 
 export interface QzoneComment {
-  id?: string;
-  user?: QzoneUser;
+  id?: string | number;
+  user?: Partial<QzoneUser>;
   content?: QzoneRichMsg[];
   replys?: QzoneComment[];
   [key: string]: unknown;
@@ -106,6 +106,8 @@ export interface QzoneMsgPage {
 
 export interface QzoneDetail extends QzoneFeedItem {
   comments: QzoneComment[];
+  comment_has_more?: boolean;
+  comment_next_cursor?: string | null;
 }
 
 function record (value: unknown): Record<string, unknown> | undefined {
@@ -152,7 +154,7 @@ export function getQzoneTid (feed: QzoneFeed): string | null {
   return identity(union['ugc_id']);
 }
 
-function normalizedContent (value: unknown): string | null {
+export function normalizeQzoneRichContent (value: unknown): string | null {
   if (!Array.isArray(value)) return null;
   const parts: string[] = [];
   for (const item of value) {
@@ -190,7 +192,7 @@ function imageUrl (value: unknown): string | null {
   }
 }
 
-function normalizedImages (value: unknown): string[] | null {
+export function normalizeQzoneMediaImages (value: unknown): string[] | null {
   if (!Array.isArray(value)) return null;
   const images: string[] = [];
   for (const item of value) {
@@ -285,11 +287,11 @@ export function normalizeQzoneFeed (feed: QzoneFeed): QzoneFeedItem {
   return {
     tid: getQzoneTid(feed),
     user_id: numericIdentifier(user?.['uin']),
-    content: normalizedContent(record(feed.cell_summary)?.['summary']),
+    content: normalizeQzoneRichContent(record(feed.cell_summary)?.['summary']),
     time: nonnegativeInteger(common?.['time']),
     comment_num: nonnegativeInteger(record(feed.cell_comment)?.['num']),
     like_num: nonnegativeInteger(record(feed.cell_like)?.['num']),
-    images: normalizedImages(record(feed.cell_media)?.['media_items']),
+    images: normalizeQzoneMediaImages(record(feed.cell_media)?.['media_items']),
     feed_ref: reference,
     feed,
   };
