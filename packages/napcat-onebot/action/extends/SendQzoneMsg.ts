@@ -26,7 +26,7 @@ type ReturnType = Static<typeof ReturnSchema>;
 export class SendQzoneMsg extends OneBotAction<PayloadType, ReturnType> {
   override actionName = ActionName.SendQzoneMsg;
   override actionSummary = '发表QQ空间说说';
-  override actionDescription = '在QQ空间(Qzone)发表说说, 支持纯文字或带(多)图, 可设置查看权限';
+  override actionDescription = '在QQ空间(Qzone)发表说说, 支持纯文字或带(多)图, 可设置查看权限。纯文字使用QQ内置空间接口, 图片保留原有上传和发表方式';
   override actionTags = ['扩展接口'];
   override payloadExample = ExtendsActionsExamples.SendQzoneMsg.payload;
   override returnExample = ExtendsActionsExamples.SendQzoneMsg.response;
@@ -39,9 +39,18 @@ export class SendQzoneMsg extends OneBotAction<PayloadType, ReturnType> {
     if (!ValidUgcRights.includes(ugcRight as typeof ValidUgcRights[number])) {
       throw new Error(`ugc_right 参数不合法, 允许的值为: ${ValidUgcRights.join(', ')}`);
     }
-    const targetUins = payload.target_uins?.map((uin) => +uin).filter((uin) => !Number.isNaN(uin));
+    const targetUins = payload.target_uins?.map((uin) => {
+      if ((typeof uin === 'number' && !Number.isSafeInteger(uin)) || !/^[1-9]\d{0,19}$/.test(String(uin))) {
+        throw new Error('target_uins 必须为有效QQ号数组');
+      }
+      return String(uin);
+    });
     if ((ugcRight === 16 || ugcRight === 128) && (!targetUins || targetUins.length === 0)) {
       throw new Error('ugc_right 为 16 或 128 时, target_uins 不能为空');
+    }
+
+    if (!payload.images?.length) {
+      return this.core.apis.QzoneApi.publishMsg(payload.content, ugcRight, targetUins);
     }
 
     const richvals: string[] = [];

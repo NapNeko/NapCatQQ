@@ -222,6 +222,12 @@ export const ActionName = {
   GetGroupSignedList: 'get_group_signed_list',
 
   // QQ 空间扩展
+  GetQzoneFeeds: 'get_qzone_feeds',
+  GetQzoneMsgList: 'get_qzone_msg_list',
+  GetQzoneMsgDetail: 'get_qzone_msg_detail',
+  LikeQzone: 'like_qzone',
+  UnlikeQzone: 'unlike_qzone',
+  CommentQzone: 'comment_qzone',
   SendQzoneMsg: 'send_qzone_msg',
   DeleteQzoneMsg: 'delete_qzone_msg',
 } as const;

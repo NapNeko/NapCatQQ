@@ -165,6 +165,12 @@ import { FetchPttText } from '@/napcat-onebot/action/msg/FetchPttText';
 import { GetGroupSignedList } from './extends/GetGroupSignedList';
 import { SendQzoneMsg } from './extends/SendQzoneMsg';
 import { DeleteQzoneMsg } from './extends/DeleteQzoneMsg';
+import { GetQzoneFeeds } from './extends/qzone/GetQzoneFeeds';
+import { GetQzoneMsgList } from './extends/qzone/GetQzoneMsgList';
+import { GetQzoneMsgDetail } from './extends/qzone/GetQzoneMsgDetail';
+import { LikeQzone } from './extends/qzone/LikeQzone';
+import { UnlikeQzone } from './extends/qzone/UnlikeQzone';
+import { CommentQzone } from './extends/qzone/CommentQzone';
 import SetGroupMemberInvitePolicy from './group/SetGroupMemberInvitePolicy';
 import SetGroupMemberPermissions from './group/SetGroupMemberPermissions';
 import SetGroupNewMemberHistoryVisibility from './group/SetGroupNewMemberHistoryVisibility';
@@ -229,6 +235,12 @@ export function getAllHandlers (obContext: NapCatOneBot11Adapter, core: NapCatCo
     new GetGroupSignedList(obContext, core),
     new SendQzoneMsg(obContext, core),
     new DeleteQzoneMsg(obContext, core),
+    new GetQzoneFeeds(obContext, core),
+    new GetQzoneMsgList(obContext, core),
+    new GetQzoneMsgDetail(obContext, core),
+    new LikeQzone(obContext, core),
+    new UnlikeQzone(obContext, core),
+    new CommentQzone(obContext, core),
     new SetGroupMemberInvitePolicy(obContext, core),
     new SetGroupMemberPermissions(obContext, core),
     new SetGroupNewMemberHistoryVisibility(obContext, core),
