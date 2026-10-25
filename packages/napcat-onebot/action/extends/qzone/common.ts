@@ -16,6 +16,13 @@ export const QzoneUserSchema = Type.Object({
   nick: Type.Optional(Type.String({ maxLength: 256, description: '昵称' })),
 }, { additionalProperties: Type.Unknown() });
 
+const QzoneParentUserSchema = Type.Object({
+  ...QzoneUserSchema.properties,
+  uid: Type.Optional(Type.Union([Type.String({ maxLength: 256 }), Type.Null()], {
+    description: '原始父评论作者的 UID；允许上游返回 null 并原样保留',
+  })),
+}, { additionalProperties: Type.Unknown() });
+
 export const QzoneUnionIdSchema = Type.Object({
   uf_key: Type.Optional(Type.String({ maxLength: 8192 })),
   ugc_id: Type.Optional(Type.String({ maxLength: 8192 })),
@@ -42,7 +49,7 @@ export const QzoneCommentSchema = Type.Object({
 
 export const QzoneParentCommentSchema = Type.Object({
   id: Type.String({ minLength: 1, maxLength: 8192, description: '父评论 ID' }),
-  user: QzoneUserSchema,
+  user: QzoneParentUserSchema,
 }, { additionalProperties: Type.Unknown(), description: '从详情 comments 中取得的完整父评论对象' });
 
 export const QzoneFeedItemSchema = Type.Object({

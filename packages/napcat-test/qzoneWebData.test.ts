@@ -115,6 +115,10 @@ function detail (overrides: Record<string, unknown> = {}): Record<string, unknow
   return { code: 0, subcode: 0, tid: 'T1', uin: '10001', content: ' original\ntext ', ...overrides };
 }
 
+function observedEmptyForwardFields (): Record<string, unknown> {
+  return { rt_tid: '', rt_uin: 0, rt_con: { conlist: null, content: '' }, rt_source: 0 };
+}
+
 describe('Qzone permission update preflight', () => {
   test('validates rights and all target IDs without lossy conversion or silent omission', () => {
     expect(normalizeQzoneRight(16, ['10002', '10002', '9007199254740993']))
@@ -152,6 +156,67 @@ describe('Qzone permission update preflight', () => {
     });
     expect(new URLSearchParams(buildQzoneRightBody(detail(), '10001', 'T1', 64, ['10002'])).has('allow_uins')).toBe(false);
     expect(new URLSearchParams(buildQzoneRightBody(detail({ richtype: '', subrichtype: '' }), '10001', 'T1', 4)).get('richtype')).toBe('');
+  });
+
+  test('accepts the observed plain-text forward placeholder and retains subtype 2', () => {
+    const value = detail({ ...observedEmptyForwardFields(), t1_subtype: 2 });
+    const body = new URLSearchParams(buildQzoneRightBody(value, '10001', 'T1', 4));
+    expect(Object.fromEntries(body)).toMatchObject({ con: ' original\ntext ', richtype: '', richval: '', subrichtype: '2' });
+    expect(value['rt_con']).toEqual({ conlist: null, content: '' });
+  });
+
+  test('accepts the same observed placeholder on complete image posts without dropping image data', () => {
+    const value = detail({
+      ...observedEmptyForwardFields(),
+      t1_subtype: 1,
+      pic: [{ pic_id: ',SYNTHETIC-ALBUM,SYNTHETIC-LOCATION', pictype: 3, height: 96, width: 128, smallurl: 'https://photo.example/a?bo=metadata' }],
+    });
+    const body = new URLSearchParams(buildQzoneRightBody(value, '10001', 'T1', 64));
+    expect(Object.fromEntries(body)).toMatchObject({
+      con: ' original\ntext ',
+      richtype: '1',
+      subrichtype: '1',
+      richval: ',SYNTHETIC-ALBUM,SYNTHETIC-LOCATION,SYNTHETIC-LOCATION,3,96,128,,0,0',
+      pic_bo: 'metadata\tmetadata',
+    });
+  });
+
+  test.each([
+    { rt_con: { conlist: null, content: ' ' } },
+    { rt_con: { conlist: null, content: 'forwarded text' } },
+    { rt_con: { conlist: [], content: '' } },
+    { rt_con: { conlist: [{}], content: '' } },
+    { rt_con: { content: '' } },
+    { rt_con: { conlist: null } },
+    { rt_con: { conlist: null, content: '', unknown: 0 } },
+    { rt_con: [{ conlist: null, content: '' }] },
+    { rt_con: 'nonempty' },
+    { rt_tid: 'forwarded' },
+    { rt_uin: 10002 },
+    { rt_source: 1 },
+    { rt_tid: undefined },
+    { rt_uin: '0' },
+    { rt_source: undefined },
+    { video: { vid: 'video-id' } },
+    { music: { url: 'https://music.example/song' } },
+    { forward: { tid: 'forwarded' } },
+    { origin: { tid: 'original' } },
+  ])('does not generalize the observed empty forward object to other content (%j)', (overrides) => {
+    const value = detail({ ...observedEmptyForwardFields(), t1_subtype: 1, ...overrides });
+    expect(() => buildQzoneRightBody(value, '10001', 'T1', 4)).toThrow('媒体或转发内容');
+  });
+
+  test.each([
+    { pic: [{ pic_id: ',ALBUM,LOCATION', pictype: 3, height: 96, width: 128 }] },
+    { richtype: 1 },
+    { richtype: 2 },
+    { richtype: '' },
+    { subrichtype: 2 },
+    { t1_subtype: 9 },
+    { rt_con: undefined },
+  ])('restricts subtype 2 to the observed ordinary text layout (%j)', (overrides) => {
+    const value = detail({ ...observedEmptyForwardFields(), t1_subtype: 2, ...overrides });
+    expect(() => buildQzoneRightBody(value, '10001', 'T1', 4)).toThrow();
   });
 
   test('preserves all conlist segments including whitespace instead of using a truncated summary', () => {

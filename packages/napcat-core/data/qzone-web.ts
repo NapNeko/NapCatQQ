@@ -105,11 +105,36 @@ function rejectDuplicateSuccessFields (text: string): void {
   }
 }
 
+// FormSender's response is a data callback inside one fixed, passive HTML shell.
+// Consume its observed domain setup as text; never run the returned JavaScript.
+const FORM_SENDER_HTML = /^(?:<!doctype\s+html>\s*)?<html>\s*<head>\s*<meta\s+http-equiv="content-type"\s+content="text\/html;\s*charset=utf-8"\s*\/?>\s*<\/head>\s*<body>\s*<script\s+type="text\/javascript">\s*([\s\S]*?)\s*<\/script>\s*<\/body>\s*<\/html>$/i;
+const DOMAIN_SETUP = 'document\\s*\\.\\s*domain\\s*=\\s*"h5\\.qzone\\.qq\\.com"\\s*;\\s*';
+const CALLBACK_SETUP = 'cb\\s*=\\s*frameElement\\s*\\.\\s*callback\\s*;\\s*';
+const DOMAIN_TRY_SETUP = new RegExp(
+  '^var\\s+cb\\s*;\\s*try\\s*\\{\\s*' + DOMAIN_SETUP + CALLBACK_SETUP +
+  '\\}\\s*catch\\s*\\(\\s*e\\s*\\)\\s*\\{\\s*try\\s*\\{\\s*' + DOMAIN_SETUP + CALLBACK_SETUP +
+  '\\}\\s*catch\\s*\\(\\s*e\\s*\\)\\s*\\{\\s*' + DOMAIN_SETUP + CALLBACK_SETUP + '\\}\\s*\\}\\s*'
+);
+const DOMAIN_ONLY_SETUP = new RegExp('^' + DOMAIN_SETUP);
+
+function unwrapFormSenderHtml (text: string): string | undefined {
+  const html = FORM_SENDER_HTML.exec(text);
+  if (!html) return undefined;
+  const script = html[1]!.trim();
+  const setup = DOMAIN_TRY_SETUP.exec(script) ?? DOMAIN_ONLY_SETUP.exec(script);
+  if (!setup) throw new Error('QQ空间响应脚本包裹格式异常');
+  const callback = script.slice(setup[0].length).trim();
+  if (!/^frameElement\.callback\s*\(/.test(callback)) throw new Error('QQ空间响应脚本包裹格式异常');
+  return callback;
+}
+
 /** Parse data only: no script evaluation and no first-brace/last-brace extraction. */
 export function parseQzoneWebResponse (text: string, requireCode = false): Record<string, unknown> {
   if (typeof text !== 'string' || text.length > 8 * 1024 * 1024) throw new Error('QQ空间响应格式异常');
   let payload = text.trim();
-  // A sole observed script wrapper is supported; HTML documents and login pages are not.
+  const formSender = unwrapFormSenderHtml(payload);
+  if (formSender !== undefined) payload = formSender;
+  // Preserve the original single-script and bare callback envelopes as well.
   const script = /^<script>\s*([\s\S]*?)\s*<\/script>$/i.exec(payload);
   if (script) {
     payload = script[1]!.trim();
@@ -207,6 +232,15 @@ function hasMediaValue (value: unknown): boolean {
   return record ? Object.keys(record).length > 0 : true;
 }
 
+function hasObservedEmptyForwardContent (detail: Record<string, unknown>): boolean {
+  if (detail['rt_tid'] !== '' || detail['rt_uin'] !== 0 || detail['rt_source'] !== 0) return false;
+  const content = object(detail['rt_con']);
+  if (!content) return false;
+  const keys = Object.keys(content);
+  return keys.length === 2 && keys.includes('conlist') && keys.includes('content') &&
+    content['conlist'] === null && content['content'] === '';
+}
+
 function assertSupportedMedia (detail: Record<string, unknown>): void {
   for (const field of [
     'video', 'videos', 'video_info', 'video_url', 'videoid', 'video_id', 'vid',
@@ -214,6 +248,8 @@ function assertSupportedMedia (detail: Record<string, unknown>): void {
     'rt_tid', 'rt_uin', 'rt_con', 'rt_source', 'forward', 'forward_info', 'forward_tid',
     'origin', 'origin_tid', 'origin_feed', 'cell_origin',
   ]) {
+    // The legacy detail CGI supplies this exact empty object for ordinary text and image posts.
+    if (field === 'rt_con' && hasObservedEmptyForwardContent(detail)) continue;
     if (hasMediaValue(detail[field])) throw new Error('该说说包含暂不支持完整重建的媒体或转发内容');
   }
   for (const field of ['appid', 'app_id']) {
@@ -306,7 +342,10 @@ export function buildQzoneRightBody (
   const originalRichValue = wireText(source['richval'], '');
   if (richValues.length === 0 && originalRichValue !== '') throw new Error('QQ空间说说包含无法完整重建的媒体数据');
   const subtype = wireInteger(firstPresent(source['t1_subtype'], source['subrichtype']), richValues.length ? '1' : '', 0, true);
-  if (!['', '0', '1'].includes(subtype)) throw new Error('该说说的媒体子类型暂不支持完整重建');
+  // Subtype 2 was observed on plain text, without either rich-type field or pictures.
+  const observedPlainTextSubtype = subtype === '2' && hasObservedEmptyForwardContent(source) &&
+    pics.length === 0 && source['richtype'] === undefined && source['subrichtype'] === undefined;
+  if (!['', '0', '1'].includes(subtype) && !observedPlainTextSubtype) throw new Error('该说说的媒体子类型暂不支持完整重建');
   const sign = wireInteger(source['to_sign'], '0');
   if (sign !== '0' && sign !== '1') throw new Error('QQ空间说说同步标记无效');
   const rightId = wireText(source['ugcright_id'], tid);

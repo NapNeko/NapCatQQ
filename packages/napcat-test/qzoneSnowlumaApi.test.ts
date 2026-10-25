@@ -112,6 +112,16 @@ describe('SnowLuma Qzone compatibility transport', () => {
     }
   });
 
+  it('accepts the observed FormSender upload envelope with ret acknowledgement and rejects conflicting codes', async () => {
+    const { api } = createApi();
+    const html = (body: Record<string, unknown>) => '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/></head><body><script type="text/javascript">document.domain="h5.qzone.qq.com";frameElement.callback(' + JSON.stringify(body) + ');</script></body></html>';
+    fetchMock.mockResolvedValueOnce(new Response(html({ ret: 0, data: { url: 'https://photo.example/test.png' } })));
+    await expect(api.uploadCommentImage('aGVsbG8=')).resolves.toEqual({ url: 'https://photo.example/test.png' });
+    fetchMock.mockResolvedValueOnce(new Response(html({ ret: 0, code: -1, data: { url: 'https://photo.example/test.png' } })));
+    await expect(api.uploadCommentImage('aGVsbG8=')).rejects.toThrow('勿自动重试');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   it('posts image comments with URLs and preserves the real parent for replies', async () => {
     const { api } = createApi();
     fetchMock.mockResolvedValueOnce(response({ code: 0, commentid: 0 }));

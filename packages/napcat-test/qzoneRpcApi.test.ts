@@ -296,6 +296,18 @@ describe('Qzone modern HTTP2RPC API', () => {
     expect(JSON.parse(fetchMock.mock.calls[0]![1]?.body as string).comment.id).toBe(id);
   });
 
+  it('preserves a real parent null UID while omitting it only from the normalized reply target', async () => {
+    const { api } = createApi();
+    const parent = { id: '0', user: { uin: '20001', uid: null, nick: '作者', extra: 'keep' }, content: [{ type: 0, content: '原评论' }], unknown: { keep: true } };
+    const saved = structuredClone(parent);
+    fetchMock.mockResolvedValueOnce(response({ reply: { id: 'new-reply' } }));
+    await expect(api.comment(reference, '回复', parent)).resolves.toMatchObject({ comment_id: 'new-reply' });
+    const request = JSON.parse(fetchMock.mock.calls[0]![1]?.body as string);
+    expect(request.comment).toEqual(saved);
+    expect(request.reply.target_user).toEqual({ uin: '20001', nick: '作者', extra: 'keep' });
+    expect(parent).toEqual(saved);
+  });
+
   it('rejects HTTP errors, redirects, malformed JSON and outer RPC errors without returning server secrets', async () => {
     const { api } = createApi();
     fetchMock.mockResolvedValueOnce(new Response('private response', { status: 302, headers: { Location: 'https://other.example' } }));

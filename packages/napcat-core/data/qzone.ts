@@ -140,6 +140,7 @@ export interface QzonePublishResponse {
   tid?: string;
   t1_tid?: string;
   t1_time?: string | number;
+  t1_ntime?: string | number;
   now?: number;
   message?: string;
   msg?: string;
@@ -163,8 +164,11 @@ export function parseQzonePublishResponse (json: QzonePublishResponse): { tid: s
   if (!tid) {
     throw new Error('QQ空间发说说失败, 未返回tid');
   }
-  // SL uses zero when the server omits creation time; it is not the local clock.
-  return { tid, time: parseQzonePublishTime(json.t1_time ?? json.now) };
+  // t1_ntime is Unix seconds; current CGI t1_time is a display label such as "22:08".
+  const displayTime = typeof json.t1_time === 'string' && /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(json.t1_time);
+  const time = json.t1_ntime ?? (displayTime ? json.now : json.t1_time ?? json.now);
+  // SL uses zero when no machine-readable creation time is supplied, never the local clock.
+  return { tid, time: parseQzonePublishTime(time) };
 }
 
 export interface QzoneDeleteParams {

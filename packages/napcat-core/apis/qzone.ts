@@ -135,11 +135,14 @@ function validIdentity (value: unknown, maxLength = 4096): value is string {
 
 function validateUser (value: unknown): QzoneUser {
   if (!isRecord(value) || !validUin(value['uin']) ||
-    (value['uid'] !== undefined && value['uid'] !== '' && !validIdentity(value['uid'])) ||
+    (value['uid'] !== undefined && value['uid'] !== null && value['uid'] !== '' && !validIdentity(value['uid'])) ||
     (value['nick'] !== undefined && (typeof value['nick'] !== 'string' || value['nick'].length > 4096))) {
     throw new Error('QQ空间用户信息无效');
   }
-  return value as QzoneUser;
+  // A raw parent may carry uid:null; keep the parent intact and omit only this target's absent UID.
+  const user = { ...value };
+  if (user['uid'] === null) delete user['uid'];
+  return user as unknown as QzoneUser;
 }
 
 function validateComment (value: unknown): QzoneComment {
@@ -525,7 +528,13 @@ export class NTQQQzoneApi {
       body: buildQzoneUploadImageBody({ uin: user.uin, skey: auth.skey, pskey: auth.pskey, g_tk: String(gtk), base64 }),
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     }), true);
-    const response = parseQzoneWebResponse(text, true);
+    let response: Record<string, unknown>;
+    try {
+      // The upload CGI acknowledges with ret:0 rather than code:0.
+      response = parseQzoneWebResponse(text);
+    } catch (error) {
+      throw new Error(`${(error as Error).message}；图片上传结果未确认，请先查询状态，勿自动重试`);
+    }
     const data = response['data'];
     if (!isRecord(data) || typeof data['url'] !== 'string' || data['url'].trim() !== data['url'] ||
       [...data['url']].some(char => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127)) {

@@ -40,9 +40,16 @@ export interface QzoneRichMsg {
   [key: string]: unknown;
 }
 
+export interface QzoneRawCommentUser {
+  uin?: string;
+  uid?: string | null;
+  nick?: string;
+  [key: string]: unknown;
+}
+
 export interface QzoneComment {
   id?: string | number;
-  user?: Partial<QzoneUser>;
+  user?: QzoneRawCommentUser;
   content?: QzoneRichMsg[];
   replys?: QzoneComment[];
   [key: string]: unknown;

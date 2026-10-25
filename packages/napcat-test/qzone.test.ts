@@ -90,6 +90,9 @@ describe('Qzone data helpers', () => {
     expect(parseQzonePublishResponse({ code: 0, tid: 'post', t1_time: '1700000000', now: 1700000001 })).toEqual({ tid: 'post', time: 1700000000 });
     expect(parseQzonePublishResponse({ code: 0, tid: 'post', now: 1700000001 })).toEqual({ tid: 'post', time: 1700000001 });
     expect(parseQzonePublishResponse({ code: 0, tid: 'post' })).toEqual({ tid: 'post', time: 0 });
+    expect(parseQzonePublishResponse({ code: 0, tid: 'post', t1_time: '22:08', t1_ntime: 1700000002 })).toEqual({ tid: 'post', time: 1700000002 });
+    expect(parseQzonePublishResponse({ code: 0, tid: 'post', t1_time: '22:08', now: 1700000003 })).toEqual({ tid: 'post', time: 1700000003 });
+    expect(parseQzonePublishResponse({ code: 0, tid: 'post', t1_time: '22:08' })).toEqual({ tid: 'post', time: 0 });
     expect(() => parseQzonePublishResponse({ code: 0, tid: 'post', t1_time: 'bad' })).toThrow('勿自动重试');
     expect(() => parseQzonePublishResponse({ code: -1, subcode: 0, tid: 'post' })).toThrow('服务端拒绝');
   });
