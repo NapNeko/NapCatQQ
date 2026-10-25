@@ -51,20 +51,27 @@ function assertSuccess (response: Record<string, unknown>, requireCode: boolean)
   if (!acknowledged || (requireCode && response['code'] !== 0)) throw new Error('QQ空间响应缺少明确成功状态');
 }
 
-/** Only quote the documented name:"Ack" object key, outside JSON strings. */
-function normalizeAckFragment (text: string): string {
+/** Quote only observed bare name keys with string values, never string contents. */
+function normalizeNameStringKeys (text: string): string {
   let result = '';
   let quoted = false;
   let escaped = false;
+  const containers: Array<{ object: boolean; key: boolean; }> = [];
   for (let index = 0; index < text.length; index++) {
     const character = text[index]!;
-    if (!quoted && character === '{') {
-      const fragment = /^\{\s*name\s*:\s*"Ack"(?=\s*[,}])/.exec(text.slice(index));
-      if (fragment) {
-        result += '{"name":"Ack"';
-        index += fragment[0].length - 1;
+    if (!quoted) {
+      const container = containers[containers.length - 1];
+      if (container?.object && container.key && character === 'n' && /^name(?=\s*:\s*")/.test(text.slice(index))) {
+        result += '"name"';
+        index += 'name'.length - 1;
+        container.key = false;
         continue;
       }
+      if (character === '{') containers.push({ object: true, key: true });
+      else if (character === '[') containers.push({ object: false, key: false });
+      else if (character === '}' || character === ']') containers.pop();
+      else if (character === ',' && container?.object) container.key = true;
+      else if (!/\s/.test(character) && container?.object) container.key = false;
     }
     result += character;
     if (quoted) {
@@ -147,7 +154,7 @@ export function parseQzoneWebResponse (text: string, requireCode = false): Recor
   }
   let parsed: unknown;
   try {
-    payload = normalizeAckFragment(payload);
+    payload = normalizeNameStringKeys(payload);
     rejectDuplicateSuccessFields(payload);
     parsed = JSON.parse(payload);
   } catch {

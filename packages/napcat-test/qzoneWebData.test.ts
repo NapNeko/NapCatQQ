@@ -21,16 +21,18 @@ describe('Qzone management response parsing', () => {
     expect(parseQzoneWebResponse(text, true)).toEqual({ code: 0, subcode: 0, data: { field: 'raw' } });
   });
 
-  test('repairs the documented Ack data fragment without treating Ack alone as success', () => {
+  test('repairs observed name string fragments without treating a name alone as success', () => {
     expect(parseQzoneWebResponse('frameElement.callback({"code":0,"subcode":0,"data":{name:"Ack"}});'))
       .toEqual({ code: 0, subcode: 0, data: { name: 'Ack' } });
     expect(() => parseQzoneWebResponse('frameElement.callback({name:"Ack"});')).toThrow('成功状态');
-    expect(() => parseQzoneWebResponse('callback({"code":0,"data":{name:"Other"}});')).toThrow();
+    expect(parseQzoneWebResponse('callback({"code":0,"data":{name:"Other"}});'))
+      .toEqual({ code: 0, data: { name: 'Other' } });
     expect(parseQzoneWebResponse('frameElement.callback({name:"Ack","code":0,"subcode":0});'))
       .toEqual({ name: 'Ack', code: 0, subcode: 0 });
     expect(parseQzoneWebResponse('frameElement.callback({"code":0,"data":{name:"Ack","extra":true}});'))
       .toEqual({ code: 0, data: { name: 'Ack', extra: true } });
-    expect(() => parseQzoneWebResponse('frameElement.callback({name:"Other","code":0});')).toThrow();
+    expect(parseQzoneWebResponse('frameElement.callback({name:"Other","code":0});'))
+      .toEqual({ name: 'Other', code: 0 });
   });
 
   test.each([

@@ -50,6 +50,41 @@ describe('QQ空间 inert FormSender envelopes', () => {
       .toEqual({ ret: 0, data: { name: 'Ack' } });
   });
 
+  test.each(['Example Space', '', '合成空间名称', 'quote " and slash \\', 'line one\nline two', '}; callback({"code":-1});'])('accepts the observed bare name string key without changing its value (%j)', (name) => {
+    const payload = `{"code":0,"subcode":0,"message":"","default":0,"data":{name:${JSON.stringify(name)}}}`;
+    const body = html(`${TRY_SETUP}frameElement.callback(${payload});`);
+
+    expect(parseQzoneWebResponse(body, true)).toEqual({ code: 0, subcode: 0, message: '', default: 0, data: { name } });
+  });
+
+  test('normalizes only object keys and preserves name-looking text inside JSON strings', () => {
+    const content = '{name:"Example"}, name:"Ack", escaped quote \\"';
+    const payload = `{"code":0,"data":{"content":${JSON.stringify(content)},name:"Example","nested":[{name:"Nested"}]}}`;
+
+    expect(parseQzoneWebResponse(html(`${DOMAIN}frameElement.callback(${payload});`)))
+      .toEqual({ code: 0, data: { content, name: 'Example', nested: [{ name: 'Nested' }] } });
+  });
+
+  test.each([
+    '{"code":0,"data":{name:1}}',
+    '{"code":0,"data":{name:null}}',
+    '{"code":0,"data":{name:false}}',
+    '{"code":0,"data":{name:["Example"]}}',
+    '{"code":0,"data":{name:{"value":"Example"}}}',
+    '{"code":0,"data":{name:someName}}',
+    '{"code":0,"data":{name:"Example"+"suffix"}}',
+    '{"code":0,"data":{name:("Example")}}',
+    '{"code":0,"data":{name:\'Example\'}}',
+    '{"code":0,"data":{other:"Example"}}',
+    '{"code":0,"data":{namex:"Example"}}',
+    '{"code":0,"data":[name:"Example"]}',
+    '{"code":0,"data":{name:"Example",other:"value"}}',
+    '{"code":-1,"\\u0063ode":0,"data":{name:"Example"}}',
+    '{"code":0,"subcode":-1,"data":{name:"Example"}}',
+  ])('does not extend bare-name compatibility to other syntax or failed statuses (%s)', (payload) => {
+    expect(() => parseQzoneWebResponse(html(`${TRY_SETUP}frameElement.callback(${payload});`))).toThrow();
+  });
+
   test.each([
     html(`${TRY_SETUP}${callback({ code: 0 })}`).replace('<body>', '<body onload="alert(1)">'),
     html(`${TRY_SETUP}${callback({ code: 0 })}`).replace('<head>', '<head><script>alert(1)</script>'),
