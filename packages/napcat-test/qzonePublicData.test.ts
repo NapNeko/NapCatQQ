@@ -188,6 +188,16 @@ describe('QQ public Qzone request business data', () => {
 });
 
 describe('QQ public Qzone JSON and identity boundaries', () => {
+  test.each([null, [{ key: 'synthetic-extension', future: null }]])('preserves nullable protobuf defaults in full feed identity (%j)', (extIds) => {
+    const union = { uf_key: 'synthetic-public', ugc_id: 'synthetic-ugc', feed_id: 'synthetic-feed', serialized_data: null, ext_ids: extIds };
+    const source = feed();
+    (source['cell_common'] as QzonePublicObject)['union_id'] = union;
+    expect(buildQzonePublicRequest('detail', { feed: source })).toHaveProperty('union_id', union);
+    expect(buildQzonePublicRequest('feeds', { refreshId: 'synthetic-refresh', cursor: 'next', lastUnionId: union }))
+      .toHaveProperty('last_client_feed_union_id', union);
+    expect(union.serialized_data).toBeNull();
+  });
+
   test.each([null, true, -1, Number.MAX_SAFE_INTEGER + 1, '', 'bad\nidentity'])('rejects invalid parent identities without changing their types (%j)', (id) => {
     expect(() => buildQzonePublicRequest('deleteComment', { feed: feed(), comment: { id } })).toThrow();
   });
@@ -238,6 +248,11 @@ describe('QQ public Qzone response acknowledgements', () => {
     try { parseQzonePublicResponse({ retcode: -1, data: {}, message: 'synthetic-private' }, 'feeds'); } catch (error) {
       expect((error as Error).message).not.toContain('synthetic-private');
     }
+  });
+
+  test('exposes a numeric upstream rejection code while keeping its private text out of errors', () => {
+    expect(() => parseQzonePublicResponse({ retcode: 10120, message: 'synthetic-private', data: null }, 'addReply'))
+      .toThrow('QQ空间公开接口拒绝请求 (retcode=10120)');
   });
 
   test.each([

@@ -145,12 +145,12 @@ function unionId (value: unknown): QzonePublicObject {
   const union = jsonObject(value, 'QQ空间完整动态标识');
   let identified = false;
   for (const key of ['uf_key', 'ugc_id', 'feed_id', 'serialized_data']) {
-    if (union[key] === undefined) continue;
+    if (union[key] === undefined || union[key] === null) continue;
     const field = identity(union[key], 'QQ空间动态身份字段', true);
     if (field.trim()) identified = true;
   }
   if (!identified) throw new Error('QQ空间动态缺少完整有效身份');
-  if (union['ext_ids'] !== undefined && (!Array.isArray(union['ext_ids']) || union['ext_ids'].some(item => !object(item)))) {
+  if (union['ext_ids'] !== undefined && union['ext_ids'] !== null && (!Array.isArray(union['ext_ids']) || union['ext_ids'].some(item => !object(item)))) {
     throw new Error('QQ空间动态扩展身份无效');
   }
   return union;
@@ -257,6 +257,9 @@ export function buildQzonePublicRequest (operation: QzonePublicOperation, option
 /** Return the business data, preserving unknown fields while checking the observed acknowledgements. */
 export function parseQzonePublicResponse (value: unknown, operation: QzonePublicOperation): QzonePublicObject {
   assertOperation(operation);
+  if (object(value) && typeof value['retcode'] === 'number' && Number.isSafeInteger(value['retcode']) && value['retcode'] !== 0) {
+    throw new Error(`QQ空间公开接口拒绝请求 (retcode=${value['retcode']})`);
+  }
   if (!object(value) || value['retcode'] !== 0 || !object(value['data'])) throw new Error('QQ空间公开接口未返回明确成功响应');
   const data = snapshot(value['data'], 'QQ空间公开接口响应', MAX_RESPONSE_BYTES);
   if (operation === 'follow' || operation === 'unfollow') {
