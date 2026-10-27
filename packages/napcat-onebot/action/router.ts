@@ -224,4 +224,18 @@ export const ActionName = {
   // QQ 空间扩展
   SendQzoneMsg: 'send_qzone_msg',
   DeleteQzoneMsg: 'delete_qzone_msg',
+  GetQzonePublicCapabilities: 'get_qzone_public_capabilities',
+  GetQzonePublicFeeds: 'get_qzone_public_feeds',
+  GetQzonePublicFeedDetail: 'get_qzone_public_feed_detail',
+  GetQzonePublicComments: 'get_qzone_public_comments',
+  GetQzonePublicReplies: 'get_qzone_public_replies',
+  SetQzonePublicUpvote: 'set_qzone_public_upvote',
+  SetQzonePublicLike: 'set_qzone_public_like',
+  SetQzonePublicFollow: 'set_qzone_public_follow',
+  SetQzonePublicCommentLike: 'set_qzone_public_comment_like',
+  CommentQzonePublicFeed: 'comment_qzone_public_feed',
+  ReplyQzonePublicFeed: 'reply_qzone_public_feed',
+  DeleteQzonePublicComment: 'delete_qzone_public_comment',
+  DeleteQzonePublicReply: 'delete_qzone_public_reply',
+  ForwardQzonePublicFeed: 'forward_qzone_public_feed',
 } as const;
