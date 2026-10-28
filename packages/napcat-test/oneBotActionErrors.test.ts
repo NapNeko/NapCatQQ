@@ -3,6 +3,7 @@ import '../napcat-onebot/action/stream/StreamBasic';
 import { describe, expect, test, vi } from 'vitest';
 import { OneBotAction } from '../napcat-onebot/action/OneBotAction';
 import type { NetworkAdapterConfig } from '../napcat-onebot/config/config';
+import { LogWrapper } from '../napcat-core/helper/log';
 
 class RejectingAction extends OneBotAction<unknown, string> {
   rejection: unknown;
@@ -35,7 +36,7 @@ describe.each(['http', 'websocket'] as const)('%s action errors', (transport) =>
     { label: 'circular object', rejection: circular },
     { label: 'throwing message getter', rejection: throwingMessage },
   ])('returns a failure response for $label', async ({ rejection, message }) => {
-    const logError = vi.fn();
+    const logError = vi.fn((...args: unknown[]) => LogWrapper.prototype.formatMsg(args));
     const action = new RejectingAction({} as never, { context: { logger: { logError } } } as never);
     action.rejection = rejection;
     const config = {} as NetworkAdapterConfig;
@@ -57,7 +58,10 @@ describe.each(['http', 'websocket'] as const)('%s action errors', (transport) =>
     });
     expect(logError).toHaveBeenCalledTimes(1);
     expect(logError.mock.calls[0]?.[0]).toBe('发生错误');
-    expect(logError.mock.calls[0]?.[1]).toBe(rejection);
+    expect(logError.mock.results[0]?.value).toContain('发生错误');
+    if (rejection instanceof Error) {
+      expect(logError.mock.calls[0]?.[1]).toBe(rejection);
+    }
 
     // The same action can still serve a subsequent successful request.
     vi.spyOn(action, '_handle').mockResolvedValueOnce('ok');

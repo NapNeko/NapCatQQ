@@ -112,8 +112,9 @@ export abstract class OneBotAction<PayloadType, ReturnDataType> {
       const resData = await this._handle(payload, adaptername, config, req);
       return OB11Response.ok(resData, echo, this.useStream);
     } catch (e: unknown) {
-      this.core.context.logger.logError('发生错误', e);
-      return OB11Response.error(getErrorMessage(e, '未知错误，可能操作超时'), 200, echo, this.useStream);
+      const message = getErrorMessage(e, '未知错误，可能操作超时');
+      this.core.context.logger.logError('发生错误', e instanceof Error ? e : message);
+      return OB11Response.error(message, 200, echo, this.useStream);
     }
   }
 
@@ -126,8 +127,9 @@ export abstract class OneBotAction<PayloadType, ReturnDataType> {
       const resData = await this._handle(payload, adaptername, config, req);
       return OB11Response.ok(resData, echo, this.useStream);
     } catch (e: unknown) {
-      this.core.context.logger.logError('发生错误', e);
-      return OB11Response.error(getErrorMessage(e, 'Error'), 1200, echo, this.useStream);
+      const message = getErrorMessage(e, 'Error');
+      this.core.context.logger.logError('发生错误', e instanceof Error ? e : message);
+      return OB11Response.error(message, 1200, echo, this.useStream);
     }
   }
 
