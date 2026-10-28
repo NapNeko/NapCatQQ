@@ -177,6 +177,22 @@ import { GetQzoneProfile } from './extends/qzone/GetQzoneProfile';
 import { SetQzoneProfile } from './extends/qzone/SetQzoneProfile';
 import { SetQzoneMsgRight } from './extends/qzone/SetQzoneMsgRight';
 import { SetQzoneBan } from './extends/qzone/SetQzoneBan';
+import {
+  GetQzonePublicCapabilities,
+  GetQzonePublicFeeds,
+  GetQzonePublicFeedDetail,
+  GetQzonePublicComments,
+  GetQzonePublicReplies,
+  SetQzonePublicUpvote,
+  SetQzonePublicLike,
+  SetQzonePublicFollow,
+  SetQzonePublicCommentLike,
+  CommentQzonePublicFeed,
+  ReplyQzonePublicFeed,
+  DeleteQzonePublicComment,
+  DeleteQzonePublicReply,
+  ForwardQzonePublicFeed,
+} from './extends/qzone-public';
 import SetGroupMemberInvitePolicy from './group/SetGroupMemberInvitePolicy';
 import SetGroupMemberPermissions from './group/SetGroupMemberPermissions';
 import SetGroupNewMemberHistoryVisibility from './group/SetGroupNewMemberHistoryVisibility';
@@ -253,6 +269,20 @@ export function getAllHandlers (obContext: NapCatOneBot11Adapter, core: NapCatCo
     new SetQzoneProfile(obContext, core),
     new SetQzoneMsgRight(obContext, core),
     new SetQzoneBan(obContext, core),
+    new GetQzonePublicCapabilities(obContext, core),
+    new GetQzonePublicFeeds(obContext, core),
+    new GetQzonePublicFeedDetail(obContext, core),
+    new GetQzonePublicComments(obContext, core),
+    new GetQzonePublicReplies(obContext, core),
+    new SetQzonePublicUpvote(obContext, core),
+    new SetQzonePublicLike(obContext, core),
+    new SetQzonePublicFollow(obContext, core),
+    new SetQzonePublicCommentLike(obContext, core),
+    new CommentQzonePublicFeed(obContext, core),
+    new ReplyQzonePublicFeed(obContext, core),
+    new DeleteQzonePublicComment(obContext, core),
+    new DeleteQzonePublicReply(obContext, core),
+    new ForwardQzonePublicFeed(obContext, core),
     new SetGroupMemberInvitePolicy(obContext, core),
     new SetGroupMemberPermissions(obContext, core),
     new SetGroupNewMemberHistoryVisibility(obContext, core),

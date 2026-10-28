@@ -13,6 +13,8 @@ import { URL } from 'url';
 import { ActionName } from '@/napcat-onebot/action/router';
 import { OB11HeartbeatEvent } from '@/napcat-onebot/event/meta/OB11HeartbeatEvent';
 import { OB11LifeCycleEvent, LifeCycleSubType } from '@/napcat-onebot/event/meta/OB11LifeCycleEvent';
+import { QzonePublicAction } from '@/napcat-onebot/action/extends/qzone-public/common';
+import { decodeQzonePublicHttpParameters } from '@/napcat-onebot/action/extends/qzone-public/http-params';
 
 export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig> {
   private app: Express | undefined;
@@ -261,10 +263,15 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
       return res.json(hello);
     }
     const actionName = req.path.split('/')[1];
+    const action = this.actions.get(actionName as any);
+    if (action instanceof QzonePublicAction) {
+      const query = decodeQzonePublicHttpParameters(req.query);
+      const body = req.is('application/x-www-form-urlencoded') ? decodeQzonePublicHttpParameters(req.body) : req.body;
+      payload = req.method === 'GET' ? query : { ...body, ...query };
+    }
     const payload_echo = payload['echo'];
     const real_echo = payload_echo ?? Math.random().toString(36).substring(2, 15);
 
-    const action = this.actions.get(actionName as any);
     if (action) {
       const useStream = action.useStream;
       try {
