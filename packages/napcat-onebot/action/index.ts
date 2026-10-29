@@ -165,6 +165,18 @@ import { FetchPttText } from '@/napcat-onebot/action/msg/FetchPttText';
 import { GetGroupSignedList } from './extends/GetGroupSignedList';
 import { SendQzoneMsg } from './extends/SendQzoneMsg';
 import { DeleteQzoneMsg } from './extends/DeleteQzoneMsg';
+import { GetQzoneFeeds } from './extends/qzone/GetQzoneFeeds';
+import { GetQzoneMsgList } from './extends/qzone/GetQzoneMsgList';
+import { GetQzoneMsgDetail } from './extends/qzone/GetQzoneMsgDetail';
+import { GetQzoneCommentList } from './extends/qzone/GetQzoneCommentList';
+import { GetQzoneCommentReplies } from './extends/qzone/GetQzoneCommentReplies';
+import { LikeQzone } from './extends/qzone/LikeQzone';
+import { UnlikeQzone } from './extends/qzone/UnlikeQzone';
+import { CommentQzone } from './extends/qzone/CommentQzone';
+import { GetQzoneProfile } from './extends/qzone/GetQzoneProfile';
+import { SetQzoneProfile } from './extends/qzone/SetQzoneProfile';
+import { SetQzoneMsgRight } from './extends/qzone/SetQzoneMsgRight';
+import { SetQzoneBan } from './extends/qzone/SetQzoneBan';
 import {
   GetQzonePublicCapabilities,
   GetQzonePublicFeeds,
@@ -245,6 +257,18 @@ export function getAllHandlers (obContext: NapCatOneBot11Adapter, core: NapCatCo
     new GetGroupSignedList(obContext, core),
     new SendQzoneMsg(obContext, core),
     new DeleteQzoneMsg(obContext, core),
+    new GetQzoneFeeds(obContext, core),
+    new GetQzoneMsgList(obContext, core),
+    new GetQzoneMsgDetail(obContext, core),
+    new GetQzoneCommentList(obContext, core),
+    new GetQzoneCommentReplies(obContext, core),
+    new LikeQzone(obContext, core),
+    new UnlikeQzone(obContext, core),
+    new CommentQzone(obContext, core),
+    new GetQzoneProfile(obContext, core),
+    new SetQzoneProfile(obContext, core),
+    new SetQzoneMsgRight(obContext, core),
+    new SetQzoneBan(obContext, core),
     new GetQzonePublicCapabilities(obContext, core),
     new GetQzonePublicFeeds(obContext, core),
     new GetQzonePublicFeedDetail(obContext, core),

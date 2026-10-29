@@ -10,4 +10,5 @@ export * from './file';
 export * from './online';
 export * from './flash';
 export * from './database';
+export * from './qzone';
 export * from './qzone-public';

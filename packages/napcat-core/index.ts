@@ -9,6 +9,7 @@ import {
   NTQQFlashApi,
   NTQQOnlineApi,
   NTQQDatabaseApi,
+  NTQQQzoneApi,
   NTQQQzonePublicApi,
 } from '@/napcat-core/apis';
 import { NTQQCollectionApi } from '@/napcat-core/apis/collection';
@@ -172,6 +173,7 @@ export class NapCatCore {
       FlashApi: new NTQQFlashApi(this.context, this),
       OnlineApi: new NTQQOnlineApi(this.context, this),
       DatabaseApi: new NTQQDatabaseApi(this.context, this),
+      QzoneApi: new NTQQQzoneApi(this.context, this),
       QzonePublicApi: new NTQQQzonePublicApi(this.context, this),
     };
     container.bind(NapCatCore).toConstantValue(this);
@@ -384,5 +386,6 @@ export interface StableNTApiWrapper {
   FlashApi: NTQQFlashApi,
   OnlineApi: NTQQOnlineApi,
   DatabaseApi: NTQQDatabaseApi,
+  QzoneApi: NTQQQzoneApi,
   QzonePublicApi: NTQQQzonePublicApi,
 }

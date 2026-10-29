@@ -749,9 +749,16 @@ export class NTQQWebApi {
   }
 
   private async getQzoneAuth () {
+    const uin = this.core.selfInfo.uin;
+    const uid = this.core.selfInfo.uid;
+    if (!uin || !uid) throw new Error('QQ空间需要已登录的当前账号');
+    const assertAccount = () => {
+      if (this.core.selfInfo.uin !== uin || this.core.selfInfo.uid !== uid) throw new Error('QQ账号已切换，请重新确认QQ空间操作');
+    };
     const skey = await this.core.apis.UserApi.getSKey() || '';
+    assertAccount();
     const pskey = (await this.core.apis.UserApi.getPSkey(['qzone.qq.com'])).domainPskeyMap.get('qzone.qq.com') || '';
-    const uin = this.core.selfInfo.uin || '10001';
+    assertAccount();
     const g_tk = this.getBknFromSKey(skey);
     const cookie = `p_uin=o${uin}; p_skey=${pskey}; skey=${skey}; uin=o${uin}`;
     return { skey, pskey, uin, g_tk, cookie };
@@ -786,7 +793,7 @@ export class NTQQWebApi {
    * @param ugcRight 查看权限 1所有人可见 4好友可见 16部分好友可见 64仅自己可见 128部分好友不可见
    * @param targetUins 权限作用QQ号数组, ugcRight为16/128时使用
    */
-  async publishQzoneMsg (content: string, richvals: string[], ugcRight: number, targetUins?: number[]) {
+  async publishQzoneMsg (content: string, richvals: string[], ugcRight: number, targetUins?: Array<string | number>) {
     const { uin, g_tk, cookie } = await this.getQzoneAuth();
     const richval = richvals.length > 0 ? richvals.join('\t') : undefined;
     const allowUins = targetUins && targetUins.length > 0 ? targetUins.join('|') : undefined;

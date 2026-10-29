@@ -222,6 +222,18 @@ export const ActionName = {
   GetGroupSignedList: 'get_group_signed_list',
 
   // QQ 空间扩展
+  GetQzoneFeeds: 'get_qzone_feeds',
+  GetQzoneMsgList: 'get_qzone_msg_list',
+  GetQzoneMsgDetail: 'get_qzone_msg_detail',
+  GetQzoneCommentList: 'get_qzone_comment_list',
+  GetQzoneCommentReplies: 'get_qzone_comment_replies',
+  LikeQzone: 'like_qzone',
+  UnlikeQzone: 'unlike_qzone',
+  CommentQzone: 'comment_qzone',
+  GetQzoneProfile: 'get_qzone_profile',
+  SetQzoneProfile: 'set_qzone_profile',
+  SetQzoneMsgRight: 'set_qzone_msg_right',
+  SetQzoneBan: 'set_qzone_ban',
   SendQzoneMsg: 'send_qzone_msg',
   DeleteQzoneMsg: 'delete_qzone_msg',
   GetQzonePublicCapabilities: 'get_qzone_public_capabilities',

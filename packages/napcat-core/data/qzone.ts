@@ -139,23 +139,36 @@ export interface QzonePublishResponse {
   code?: number;
   tid?: string;
   t1_tid?: string;
+  t1_time?: string | number;
+  t1_ntime?: string | number;
+  now?: number;
   message?: string;
   msg?: string;
+}
+
+export function parseQzonePublishTime (value: unknown): number {
+  if (value === undefined || value === null) return 0;
+  const time = (typeof value === 'number' || (typeof value === 'string' && /^\d+$/.test(value))) ? Number(value) : NaN;
+  if (!Number.isSafeInteger(time) || time < 0) throw new Error('QQ空间发表时间无效，结果需查询确认，勿自动重试');
+  return time;
 }
 
 /**
  * 解析发表说说接口返回的 JSON, 提取 tid
  */
-export function parseQzonePublishResponse (json: QzonePublishResponse): { tid: string; } {
-  const subcode = json.subcode ?? json.code;
-  if (subcode !== undefined && subcode !== 0) {
-    throw new Error(json.message || json.msg || `QQ空间发说说失败, subcode=${subcode}`);
+export function parseQzonePublishResponse (json: QzonePublishResponse): { tid: string; time: number; } {
+  for (const code of [json.subcode, json.code]) {
+    if (code !== undefined && code !== 0) throw new Error('QQ空间发说说失败，服务端拒绝请求');
   }
   const tid = json.t1_tid || json.tid;
   if (!tid) {
     throw new Error('QQ空间发说说失败, 未返回tid');
   }
-  return { tid };
+  // t1_ntime is Unix seconds; current CGI t1_time is a display label such as "22:08".
+  const displayTime = typeof json.t1_time === 'string' && /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(json.t1_time);
+  const time = json.t1_ntime ?? (displayTime ? json.now : json.t1_time ?? json.now);
+  // SL uses zero when no machine-readable creation time is supplied, never the local clock.
+  return { tid, time: parseQzonePublishTime(time) };
 }
 
 export interface QzoneDeleteParams {
