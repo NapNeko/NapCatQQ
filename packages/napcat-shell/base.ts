@@ -42,6 +42,7 @@ import { QQBasicInfoWrapper } from '@/napcat-core/helper/qq-basic-info';
 import { statusHelperSubscription } from '@/napcat-core/helper/status';
 import { applyPendingUpdates } from '@/napcat-webui-backend/src/api/UpdateNapCat';
 import { migrateLegacyGlobalPath } from './global-migrate';
+import { getDataPaths } from './data-path';
 import { connectToNamedPipe } from './pipe';
 
 // NapCat Shell App ES 入口文件
@@ -52,24 +53,6 @@ async function handleUncaughtExceptions (logger: LogWrapper) {
   process.on('unhandledRejection', (reason) => {
     logger.logError('[NapCat] [Error] unhandledRejection:', reason);
   });
-}
-
-function getDataPaths (wrapper: WrapperNodeApi): [string, string] {
-  if (os.platform() === 'darwin') {
-    const userPath = os.homedir();
-    const appDataPath = path.resolve(userPath, './Library/Application Support/QQ');
-    return [appDataPath, path.join(appDataPath, 'global')];
-  }
-  let dataPath = wrapper.NodeQQNTWrapperUtil.getNTUserDataInfoConfig();
-  if (!dataPath) {
-    dataPath = path.resolve(os.homedir(), './.config/QQ');
-    fs.mkdirSync(dataPath, { recursive: true });
-  }
-  // Linux: global 直接位于数据目录下; Windows: global 位于 nt_qq 子目录下
-  const dataPathGlobal = os.platform() === 'linux'
-    ? path.resolve(dataPath, './global')
-    : path.resolve(dataPath, './nt_qq/global');
-  return [dataPath, dataPathGlobal];
 }
 
 function getPlatformType (): PlatformType {

@@ -23,7 +23,7 @@ import {
 } from '@/napcat-core/wrapper';
 import { LogLevel, LogWrapper } from '@/napcat-core/helper/log';
 import { QQBasicInfoWrapper } from '@/napcat-core/helper/qq-basic-info';
-import { NapCatPathWrapper } from 'napcat-common/src/path';
+import { getQQDataDirOverride, NapCatPathWrapper } from 'napcat-common/src/path';
 import path from 'node:path';
 import fs from 'node:fs';
 import { hostname, systemName, systemVersion } from 'napcat-common/src/system';
@@ -240,6 +240,8 @@ export class NapCatCore {
   }
 
   get dataPath (): string {
+    const override = getQQDataDirOverride();
+    if (override) return override;
     let result = this.context.wrapper.NodeQQNTWrapperUtil.getNTUserDataInfoConfig();
     if (!result) {
       result = path.resolve(os.homedir(), './.config/QQ');

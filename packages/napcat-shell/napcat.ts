@@ -12,7 +12,6 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const pathWrapper = new NapCatPathWrapper();
 const envPath = path.join(__dirname, 'config', '.env');
 if (fs.existsSync(envPath)) {
   try {
@@ -32,6 +31,7 @@ if (fs.existsSync(envPath)) {
     console.log('[NapCat] Failed to load .env file:', e);
   }
 }
+const pathWrapper = new NapCatPathWrapper();
 
 // 环境变量配置
 const ENV = {

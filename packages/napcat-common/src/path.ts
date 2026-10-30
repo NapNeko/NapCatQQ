@@ -3,6 +3,11 @@ import { fileURLToPath } from 'url';
 import fs from 'fs';
 import os from 'os';
 
+export function getQQDataDirOverride (): string | undefined {
+  const dataDir = process.env['NAPCAT_QQ_DATA_DIR'];
+  return dataDir ? path.resolve(dataDir) : undefined;
+}
+
 export class NapCatPathWrapper {
   binaryPath: string;
   logsPath: string;
@@ -14,9 +19,12 @@ export class NapCatPathWrapper {
   constructor (mainPath: string = dirname(fileURLToPath(import.meta.url))) {
     this.binaryPath = mainPath;
     let writePath: string;
+    const qqDataDir = getQQDataDirOverride();
 
     if (process.env['NAPCAT_WORKDIR']) {
       writePath = process.env['NAPCAT_WORKDIR'];
+    } else if (qqDataDir) {
+      writePath = path.join(qqDataDir, 'NapCat');
     } else if (os.platform() === 'darwin') {
       writePath = path.join(os.homedir(), 'Library', 'Application Support', 'QQ', 'NapCat');
     } else {
