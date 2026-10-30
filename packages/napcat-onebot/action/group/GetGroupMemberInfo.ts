@@ -38,28 +38,31 @@ class GetGroupMemberInfo extends OneBotAction<PayloadType, ReturnType> {
     return uid;
   }
 
-  private async getGroupMemberInfo (payload: PayloadType, uid: string, isNocache: boolean) {
-    const groupMemberCache = this.core.apis.GroupApi.groupMemberCache.get(payload.group_id.toString());
-    const groupMember = groupMemberCache?.get(uid);
+  private async getGroupMemberInfo (payload: PayloadType, isNocache: boolean) {
+    const groupId = payload.group_id.toString();
+    // 全局 UIN -> UID 转换可能与目标群的成员记录不一致，优先按 QQ 号在本群查询。
+    // getGroupMember 会在缓存未命中时刷新一次，避免冷缓存被误判为成员不存在。
+    const groupMember = await this.core.apis.GroupApi.getGroupMember(groupId, payload.user_id);
+    const uid = groupMember?.uid || await this.getUid(payload.user_id);
 
     const [member, info] = await Promise.all([
-      this.core.apis.GroupApi.getGroupMemberEx(payload.group_id.toString(), uid, isNocache),
-      this.core.apis.UserApi.getUserDetailInfo(uid, isNocache),
+      this.core.apis.GroupApi.getGroupMemberEx(groupId, uid, isNocache),
+      this.core.apis.UserApi.getUserDetailInfo(uid, isNocache).catch((error) => {
+        this.core.context.logger.logDebug(`获取群成员补充资料失败, 群号: ${groupId}, QQ号: ${payload.user_id}, 错误: ${error}`);
+        return undefined;
+      }),
     ]);
 
-    if (!member || !groupMember) throw new Error(`群(${payload.group_id})成员${payload.user_id}不存在`);
+    const baseMember = member ?? groupMember;
+    if (!baseMember) throw new Error(`群(${payload.group_id})成员${payload.user_id}不存在`);
 
-    return info ? { ...groupMember, ...member, ...info } : member;
+    // 个人资料只补充信息，不能覆盖已确认的群成员身份。
+    return { ...groupMember, ...baseMember, ...info, uid: baseMember.uid, uin: baseMember.uin };
   }
 
   async _handle (payload: PayloadType) {
     const isNocache = this.parseBoolean(payload.no_cache ?? true);
-    const uid = await this.getUid(payload.user_id);
-    const member = await this.getGroupMemberInfo(payload, uid, isNocache);
-
-    if (!member) {
-      this.core.context.logger.logDebug('获取群成员详细信息失败, 只能返回基础信息');
-    }
+    const member = await this.getGroupMemberInfo(payload, isNocache);
 
     return OB11Construct.groupMember(payload.group_id.toString(), member);
   }

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { MessageType, PartialMessage, RepeatType, ScalarType } from '@protobuf-ts/runtime';
+import { BinaryReader, MessageType, PartialMessage, RepeatType, ScalarType } from '@protobuf-ts/runtime';
 import { PartialFieldInfo } from '@protobuf-ts/runtime/build/types/reflection-info';
 
 export type LowerCamelCase<S extends string> = CamelCaseHelper<S, false, true>;
@@ -179,7 +179,11 @@ class NapProtoRealMsg<T extends ProtoMessageType> {
   }
 
   decode (data: Uint8Array): NapProtoDecodeStructType<T> {
-    return this._proto_msg.fromBinary(data) as NapProtoDecodeStructType<T>;
+    return this._proto_msg.fromBinary(data, {
+      // QQ may send truncated UTF-8 in names. Replace invalid characters without
+      // dropping the whole packet; retain BinaryReader's bounds checks and BOM handling.
+      readerFactory: bytes => new BinaryReader(bytes, new TextDecoder('utf-8', { fatal: false, ignoreBOM: true })),
+    }) as NapProtoDecodeStructType<T>;
   }
 }
 

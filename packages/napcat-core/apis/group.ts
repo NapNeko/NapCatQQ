@@ -341,7 +341,7 @@ export class NTQQGroupApi {
         return undefined;
       }
       if (isNumeric(memberUinOrUidStr)) {
-        return Array.from(members.values()).find(member => member.uin === memberUinOrUidStr);
+        return Array.from(members.values()).find(member => member.uin?.toString() === memberUinOrUidStr);
       } else {
         return members.get(memberUinOrUidStr);
       }
@@ -360,7 +360,7 @@ export class NTQQGroupApi {
   getUidFromMemberCache (uin: string) {
     for (const members of this.groupMemberCache.values()) {
       for (const [uid, member] of members) {
-        if (member.uin === uin) {
+        if (member.uin?.toString() === uin) {
           return uid;
         }
       }
