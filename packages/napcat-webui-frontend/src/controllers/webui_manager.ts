@@ -185,11 +185,6 @@ export default class WebUIManager {
     return data.data;
   }
 
-  public static async getAllUsers (): Promise<any> {
-    const { data } = await serverRequest.get<ServerResponse<any>>('/QQLogin/GetAllUsers');
-    return data.data;
-  }
-
   public static async getLogList () {
     const { data } =
       await serverRequest.get<ServerResponse<string[]>>('/Log/GetLogList');

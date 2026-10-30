@@ -17,7 +17,6 @@ import { title } from '@/components/primitives';
 import PasswordLogin from '@/components/password_login';
 import QrCodeLogin from '@/components/qr_code_login';
 import QuickLogin from '@/components/quick_login';
-import type { QQItem } from '@/components/quick_login';
 import { ThemeSwitch } from '@/components/theme-switch';
 import type { CaptchaCallbackData } from '@/components/tencent_captcha';
 
@@ -60,7 +59,7 @@ export default function QQLoginPage () {
   const isRefreshingQRCodeRef = useRef(false);
   const [loginError, setLoginError] = useState<string>('');
   const lastErrorRef = useRef<string>('');
-  const [qqList, setQQList] = useState<(QQItem | LoginListItem)[]>([]);
+  const [qqList, setQQList] = useState<LoginListItem[]>([]);
   const [refresh, setRefresh] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>('shortcut');
   const firstLoad = useRef<boolean>(true);
@@ -213,10 +212,6 @@ export default function QQLoginPage () {
         setIsRecoveringLoginService(true);
       }
 
-      if (firstLoad.current) {
-        setIsLoading(false);
-        firstLoad.current = false;
-      }
       if (data.isLogin) {
         toast.success('QQ登录成功');
         navigate('/', { replace: true });
@@ -259,6 +254,11 @@ export default function QQLoginPage () {
       if (!isRecoveringLoginService) {
         toast.error(`获取二维码失败: ${msg}`);
       }
+    } finally {
+      if (firstLoad.current) {
+        setIsLoading(false);
+        firstLoad.current = false;
+      }
     }
   };
 
@@ -267,20 +267,9 @@ export default function QQLoginPage () {
     try {
       const data = await QQManager.getQQQuickLoginListNew();
       setQQList(data);
-    } catch (_error) {
-      try {
-        const data = await QQManager.getQQQuickLoginList();
-
-        const qqList = data.map((item) => ({
-          uin: item,
-        }));
-
-        setQQList(qqList);
-      } catch (_error) {
-        const msg = (_error as Error).message;
-
-        toast.error(`获取QQ列表失败: ${msg}`);
-      }
+    } catch (error) {
+      const msg = (error as Error).message;
+      toast.error(`获取QQ列表失败: ${msg}`);
     } finally {
       setRefresh(false);
     }
@@ -347,10 +336,13 @@ export default function QQLoginPage () {
     }, pollInterval);
 
     onUpdateQrCode();
-    onUpdateQQList();
 
     return () => clearInterval(timer);
   }, [isRefreshingQRCode, loginPhase, isRecoveringLoginService]);
+
+  useEffect(() => {
+    onUpdateQQList();
+  }, []);
 
   useEffect(() => {
     if (!isRecoveringLoginService) return;

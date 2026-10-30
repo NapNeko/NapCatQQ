@@ -61,14 +61,6 @@ export default class QQManager {
     return data.data.data.qrcode;
   }
 
-  public static async getQQQuickLoginList () {
-    const data = await serverRequest.post<ServerResponse<string[]>>(
-      '/QQLogin/GetQuickLoginList'
-    );
-
-    return data.data.data;
-  }
-
   public static async getQQQuickLoginListNew () {
     const data = await serverRequest.post<ServerResponse<LoginListItem[]>>(
       '/QQLogin/GetQuickLoginListNew'
