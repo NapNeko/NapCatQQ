@@ -44,6 +44,7 @@ export function createAlbumListRequest (
 export interface AlbumMediaFeed {
   cell_common: {
     time: string;
+    feed_id?: string;
   };
   cell_user_info: {
     user: {

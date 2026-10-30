@@ -681,11 +681,41 @@ export class NTQQWebApi {
     lloc: string | undefined,
     content: string,
     batchId: string = '') {
+    if (!lloc && !batchId) {
+      throw new Error('lloc 或 batch_id 至少需要提供一个');
+    }
     const random_seq = Math.floor(Math.random() * 9000) + 1000;
     const uin = this.core.selfInfo.uin || '10001';
+    const albumService = this.context.session.getAlbumService();
+    let feed;
+    if (lloc) {
+      feed = createAlbumMediaFeed(uin, albumId, lloc, batchId);
+    } else {
+      // Batch comments need the server's feed identity and uploader, not an
+      // empty media cell with the commenter substituted for the feed owner.
+      const { response } = await albumService.getQunFeedDetail({
+        seq: random_seq,
+        request_time_line: { request_invoke_time: '0' },
+        ext_info: { map_info: [], map_bytes_info: [], map_user_account: [] },
+        qun_id: qunId,
+        feed_id: '',
+        comment_count: 20,
+        attach_info: '',
+        album_id: albumId,
+        batch_id: batchId,
+        lloc: '',
+      });
+      if (response?.result !== 0) {
+        throw new Error(`获取群相册批次动态失败, ${response?.result ?? 'unknown'}:${response?.errMs || '未知错误'}`);
+      }
+      feed = response.feed?.feed;
+      if (!feed?.cell_common?.feed_id || !feed.cell_user_info?.user || !feed.cell_media) {
+        throw new Error('获取群相册批次动态失败: 未返回有效动态');
+      }
+    }
     // 16位number数字
     const client_key = Date.now() * 1000;
-    return await this.context.session.getAlbumService().doQunComment(
+    const result = await albumService.doQunComment(
       random_seq, {
         map_info: [],
         map_bytes_info: [],
@@ -693,9 +723,16 @@ export class NTQQWebApi {
       },
       qunId,
       2,
-      createAlbumMediaFeed(uin, albumId, lloc, batchId),
+      feed,
       createAlbumCommentRequest(uin, content, client_key)
     );
+    if (result?.result !== 0) {
+      throw new Error(`群相册评论失败, ${result?.result ?? 'unknown'}:${result?.errMs || '未知错误'}`);
+    }
+    if (!result.comment?.id) {
+      throw new Error('群相册评论失败: 未返回有效评论');
+    }
+    return result;
   }
 
   async deleteAlbumMediaByNTQQ (

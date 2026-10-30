@@ -56,7 +56,28 @@ export interface NodeIKernelAlbumService {
 
   getQunFeeds (arg: unknown): unknown;// needs 1 arguments
 
-  getQunFeedDetail (arg: unknown): unknown;// needs 1 arguments
+  getQunFeedDetail (params: {
+    seq: number;
+    request_time_line: { request_invoke_time: string; };
+    ext_info: {
+      map_info: unknown[];
+      map_bytes_info: unknown[];
+      map_user_account: unknown[];
+    };
+    qun_id: string;
+    feed_id: string;
+    comment_count: number;
+    attach_info: string;
+    album_id: string;
+    batch_id: string;
+    lloc: string;
+  }): Promise<{
+    response: {
+      result: number;
+      errMs?: string;
+      feed?: { feed?: AlbumMediaFeed; };
+    };
+  }>;
 
   getQunNoticeList (arg1: number, arg2: unknown, arg3: string, arg4: string): unknown;// needs 4 arguments
 
@@ -77,7 +98,11 @@ export interface NodeIKernelAlbumService {
     commentType: number,
     feed: AlbumMediaFeed,
     content: AlbumCommentReplyContent,
-  ): Promise<unknown>;// needs 6 arguments
+  ): Promise<{
+    result: number;
+    errMs?: string;
+    comment?: { id: string; };
+  }>;// needs 6 arguments
 
   doQunReply (arg1: number, arg2: unknown, arg3: string, arg4: number, arg5: unknown, arg6: unknown, arg7: unknown): unknown;// needs 7 arguments
 
