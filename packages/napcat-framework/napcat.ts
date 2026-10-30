@@ -23,7 +23,7 @@ export async function getWebUiUrl () {
 }
 
 export async function NCoreInitFramework (
-  session: NodeIQQNTWrapperSession,
+  session: NodeIQQNTWrapperSession | Promise<NodeIQQNTWrapperSession>,
   loginService: NodeIKernelLoginService,
   registerInitCallback: (callback: () => void) => void
 ) {
@@ -176,7 +176,10 @@ export async function NCoreInitFramework (
   // 过早进入会导致addKernelMsgListener等Listener添加失败
   // await sleep(2500);
   // 初始化 NapCatFramework
-  const loaderObject = new NapCatFramework(wrapper, session, logger, selfInfo, basicInfoWrapper, pathWrapper, nativePacketHandler, napi2nativeLoader);
+  // 新版 wrapper 的会话由 QQ 在启动过程中创建，dlopen 时可能尚不存在。
+  const wrapperSession = await session;
+  if (!wrapperSession) throw new Error('QQ 未提供有效的 Framework Session');
+  const loaderObject = new NapCatFramework(wrapper, wrapperSession, logger, selfInfo, basicInfoWrapper, pathWrapper, nativePacketHandler, napi2nativeLoader);
   // 将捕获的 passphrase 设置到 core 上，供 DatabaseApi 使用
   if (dbPassphrase) {
     loaderObject.core.dbPassphrase = dbPassphrase;
