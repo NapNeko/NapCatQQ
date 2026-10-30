@@ -365,15 +365,17 @@ export class NapCatOneBot11Adapter {
     msgListener.onAddSendMsg = async (msg) => {
       try {
         if (msg.sendStatus === SendStatusType.KSEND_STATUS_SENDING) {
-          const [updatemsgs] = await this.core.eventWrapper.registerListen('NodeIKernelMsgListener/onMsgInfoListUpdate', (msgList: RawMessage[]) => {
-            const report = msgList.find((e) =>
-              e.senderUin === this.core.selfInfo.uin && e.sendStatus !== SendStatusType.KSEND_STATUS_SENDING && e.msgId === msg.msgId
-            );
-            return !!report;
-          }, 1, 10 * 60 * 1000);
+          const isCompletedSend = (e: RawMessage) =>
+            e.senderUin === this.core.selfInfo.uin && e.msgId === msg.msgId &&
+            (e.sendStatus === SendStatusType.KSEND_STATUS_SUCCESS || e.sendStatus === SendStatusType.KSEND_STATUS_FAILED);
+          const [updatemsgs] = await this.core.eventWrapper.registerListen(
+            'NodeIKernelMsgListener/onMsgInfoListUpdate',
+            (msgList: RawMessage[]) => msgList.some(isCompletedSend),
+            1,
+            10 * 60 * 1000
+          );
           // 10分钟 超时
-          const updatemsg = updatemsgs.find((e) => e.msgId === msg.msgId);
-          // updatemsg?.sendStatus == SendStatusType.KSEND_STATUS_SUCCESS_NOSEQ NOSEQ一般是服务器未下发SEQ 这意味着这条消息不应该推送network
+          const updatemsg = updatemsgs.find(isCompletedSend);
           if (updatemsg?.sendStatus === SendStatusType.KSEND_STATUS_SUCCESS) {
             updatemsg.id = MessageUnique.createUniqueMsgId(
               {
