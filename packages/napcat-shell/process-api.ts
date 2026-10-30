@@ -116,7 +116,19 @@ class NodeProcessManager implements IProcessManager {
   }
 
   createWorker (modulePath: string, args: string[], options: ProcessOptions): IWorkerProcess {
-    const child = this.forkFn(modulePath, args, options as any);
+    let execArgv = options.execArgv;
+    if (execArgv === undefined && process.versions['electron']) {
+      // macOS QQ 的 Electron fork 会自动设置 ELECTRON_RUN_AS_NODE 并使用 QQ Helper，
+      // 即使父进程没有该变量，子进程也只接受 Node 参数。
+      const runsAsNode = process.platform === 'darwin' || options.env['ELECTRON_RUN_AS_NODE'] !== undefined;
+      execArgv = runsAsNode
+        ? process.execArgv.filter(arg => arg !== '--no-sandbox')
+        : ['--no-sandbox'];
+    }
+    const child = this.forkFn(modulePath, args, {
+      ...options,
+      ...(execArgv !== undefined ? { execArgv } : {}),
+    } as any);
 
     return {
       get pid () { return child.pid; },
@@ -169,7 +181,10 @@ export async function createProcessManager (): Promise<{
   manager: IProcessManager;
   isElectron: boolean;
 }> {
-  const isElectron = process.env['NAPCAT_FORCE_NODE_PROCESS'] !== '1' && typeof process.versions['electron'] !== 'undefined';
+  // Electron 的 Node 模式仍保留 versions.electron，但没有 utilityProcess API。
+  const isElectron = process.env['NAPCAT_FORCE_NODE_PROCESS'] !== '1' &&
+    process.env['ELECTRON_RUN_AS_NODE'] === undefined &&
+    typeof process.versions['electron'] !== 'undefined';
 
   if (isElectron) {
     // @ts-ignore - electron 运行时存在但类型声明可能缺失
