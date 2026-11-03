@@ -133,13 +133,7 @@ async function tryDownload (options: string | HttpDownloadOptions, useReferer: b
     }
   }
 
-  const fetchRes = await fetch(url, { headers, redirect: 'follow' }).catch((err) => {
-    if (err.cause) {
-      throw err.cause;
-    }
-    throw err;
-  });
-  return fetchRes;
+  return fetch(url, { headers, redirect: 'follow' });
 }
 
 /**
