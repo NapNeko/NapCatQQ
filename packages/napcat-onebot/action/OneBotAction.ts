@@ -16,22 +16,6 @@ export const ActionExamples = {
   },
 };
 
-function getErrorMessage (error: unknown, fallback: string): string {
-  try {
-    if (typeof error === 'string') return error || fallback;
-    if (typeof error === 'object' && error !== null) {
-      const errorLike = error as { message?: unknown; stack?: unknown; };
-      const message = errorLike.message;
-      if (typeof message === 'string' && message) return message;
-      const stack = errorLike.stack;
-      if (typeof stack === 'string' && stack) return stack;
-    }
-  } catch {
-    // Error-like objects can have getters that throw while being inspected.
-  }
-  return fallback;
-}
-
 export class OB11Response {
   private static createResponse<T> (data: T, status: string, retcode: number, message: string = '', echo: unknown = null, useStream: boolean = false): OB11Return<T> {
     return {
@@ -112,9 +96,8 @@ export abstract class OneBotAction<PayloadType, ReturnDataType> {
       const resData = await this._handle(payload, adaptername, config, req);
       return OB11Response.ok(resData, echo, this.useStream);
     } catch (e: unknown) {
-      const message = getErrorMessage(e, '未知错误，可能操作超时');
-      this.core.context.logger.logError('发生错误', e instanceof Error ? e : message);
-      return OB11Response.error(message, 200, echo, this.useStream);
+      this.core.context.logger.logError('发生错误', e);
+      return OB11Response.error((e as Error).message.toString() || (e as Error)?.stack?.toString() || '未知错误，可能操作超时', 200, echo, this.useStream);
     }
   }
 
@@ -127,9 +110,8 @@ export abstract class OneBotAction<PayloadType, ReturnDataType> {
       const resData = await this._handle(payload, adaptername, config, req);
       return OB11Response.ok(resData, echo, this.useStream);
     } catch (e: unknown) {
-      const message = getErrorMessage(e, 'Error');
-      this.core.context.logger.logError('发生错误', e instanceof Error ? e : message);
-      return OB11Response.error(message, 1200, echo, this.useStream);
+      this.core.context.logger.logError('发生错误', e);
+      return OB11Response.error(((e as Error).message.toString() || (e as Error).stack?.toString()) ?? 'Error', 1200, echo, this.useStream);
     }
   }
 
