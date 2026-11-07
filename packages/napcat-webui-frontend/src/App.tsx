@@ -48,19 +48,24 @@ function App () {
 function AuthChecker ({ children }: { children: React.ReactNode; }) {
   const { isAuth } = useAuth();
   const navigate = useNavigate();
+  const search = new URLSearchParams(window.location.search);
+  const token = search.get('token');
 
   useEffect(() => {
-    if (!isAuth) {
-      const search = new URLSearchParams(window.location.search);
-      const token = search.get('token');
+    if (token || !isAuth) {
+
       let url = '/web_login';
 
       if (token) {
-        url += `?token=${token}`;
+        url += `?token=${encodeURIComponent(token)}`;
       }
       navigate(url, { replace: true });
     }
   }, [isAuth, navigate]);
+
+  // URL 带 token 且还没到登录页时，先不渲染业务页面，
+  // 避免业务页面用旧凭证发请求、触发清凭证/刷新而打断自动登录
+  if (token && !window.location.pathname.endsWith('/web_login')) return null;
 
   return <>{children}</>;
 }
