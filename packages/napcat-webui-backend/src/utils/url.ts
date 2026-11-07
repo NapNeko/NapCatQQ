@@ -92,8 +92,8 @@ export const createUrl = (
     }
   }
 
-  /** 进行url解码 对特殊字符进行处理 */
-  return decodeURIComponent(url.toString());
+  // URLSearchParams 已完成必要的百分号编码，不能再整体解码，否则 & # + 等字符会破坏 URL 结构
+  return url.toString();
 };
 
 /**
