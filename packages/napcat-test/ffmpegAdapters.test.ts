@@ -145,7 +145,7 @@ describe('FFmpeg adapter selection', () => {
   });
 
   it('does not warn when the command line ffmpeg supports ntsilk', async () => {
-    (logger.logError as { mockClear: () => void }).mockClear();
+    vi.mocked(logger.logError).mockClear();
     mocks.exists.mockReturnValue(false);
     mocks.execute.mockImplementation(async (_command: string, args?: string[]) => {
       if (args?.includes('-formats')) {
