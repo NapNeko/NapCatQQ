@@ -128,6 +128,41 @@ describe('FFmpeg adapter selection', () => {
     await expect(FFmpegAdapterFactory.updateFFmpegPath(logger, '/bad/ffmpeg', '/bad/ffprobe')).rejects.toThrow('/bad/ffprobe');
     expect(FFmpegAdapterFactory.getCurrentAdapter()).toBe(adapter);
   });
+
+  it('logs the probed addon path when the packaged addon file is missing', async () => {
+    mocks.exists.mockReturnValue(false);
+    const adapter = await FFmpegAdapterFactory.getAdapter(logger, 'ffmpeg', 'ffprobe', '/app');
+    expect(adapter.name).toBe('FFmpegExec');
+    expect(mocks.dlopen).not.toHaveBeenCalled();
+    expect(logger.log).toHaveBeenCalledWith(expect.stringContaining(path.join('/app', 'native/ffmpeg')));
+  });
+
+  it('warns when the selected command line ffmpeg lacks ntsilk support', async () => {
+    mocks.exists.mockReturnValue(false);
+    const adapter = await FFmpegAdapterFactory.getAdapter(logger, 'ffmpeg', 'ffprobe', '/app');
+    expect(adapter.name).toBe('FFmpegExec');
+    expect(logger.logError).toHaveBeenCalledWith(expect.stringContaining('ntsilk_s16le'));
+  });
+
+  it('does not warn when the command line ffmpeg supports ntsilk', async () => {
+    (logger.logError as { mockClear: () => void }).mockClear();
+    mocks.exists.mockReturnValue(false);
+    mocks.execute.mockImplementation(async (_command: string, args?: string[]) => {
+      if (args?.includes('-formats')) {
+        return { stdout: 'File formats:\n DE ntsilk_s16le      NapCat NT silk (le) s16\n', stderr: '' };
+      }
+      return { stdout: '', stderr: '' };
+    });
+    const adapter = await FFmpegAdapterFactory.getAdapter(logger, 'ffmpeg', 'ffprobe', '/app');
+    expect(adapter.name).toBe('FFmpegExec');
+    expect(logger.logError).not.toHaveBeenCalledWith(expect.stringContaining('ntsilk_s16le'));
+  });
+
+  it('warns when a replacement ffmpeg path lacks ntsilk support', async () => {
+    await FFmpegAdapterFactory.getAdapter(logger);
+    await FFmpegAdapterFactory.updateFFmpegPath(logger, '/plain/ffmpeg', '/plain/ffprobe');
+    expect(logger.logError).toHaveBeenCalledWith(expect.stringContaining('ntsilk_s16le'));
+  });
 });
 
 describe('FFmpeg media operations', () => {

@@ -33,8 +33,8 @@ export class FFmpegExecAdapter implements IFFmpegAdapter {
   ) { }
 
   /**
-     * 检查 FFmpeg 和 FFprobe 是否可用
-     */
+   * 检查 FFmpeg 和 FFprobe 是否可用
+   */
   async isAvailable (): Promise<boolean> {
     // 首先检查当前路径
     try {
@@ -43,6 +43,21 @@ export class FFmpegExecAdapter implements IFFmpegAdapter {
         execFileAsync(this.ffprobePath, ['-version'], { timeout: 10000, windowsHide: true }),
       ]);
       return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * 检查 FFmpeg 是否支持指定的输出格式(如 ntsilk_s16le)
+   * 官方发行版之外的 ffmpeg 构建通常不含 NapCat 所需的 ntsilk 编码,
+   * 提前探测可以在启动阶段给出可定位的警告,而不是在语音转码时才报
+   * "Requested output format 'ntsilk_s16le' is not a suitable output format"
+   */
+  async supportsOutputFormat (format: string): Promise<boolean> {
+    try {
+      const { stdout } = await execFileAsync(this.ffmpegPath, ['-hide_banner', '-formats'], { timeout: 10000, windowsHide: true });
+      return stdout.toLowerCase().includes(format.toLowerCase());
     } catch {
       return false;
     }

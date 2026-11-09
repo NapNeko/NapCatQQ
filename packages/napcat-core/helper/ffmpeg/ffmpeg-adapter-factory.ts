@@ -60,16 +60,26 @@ export class FFmpegAdapterFactory {
     binaryPath?: string
   ): Promise<IFFmpegAdapter> {
     const useCommandLine = Boolean(process.env['FFMPEG_PATH'] || process.env['FFPROBE_PATH']);
-    if (binaryPath && !useCommandLine && existsSync(getAddonPath(binaryPath))) {
-      const addonAdapter = new FFmpegAddonAdapter(binaryPath);
+    if (binaryPath && !useCommandLine) {
+      const addonPath = getAddonPath(binaryPath);
+      if (!existsSync(addonPath)) {
+        logger.log(
+          '[FFmpeg] Native Addon 未找到, 将改用命令行 ffmpeg。' +
+          `detail: 找不到文件 ${addonPath} ; ` +
+          'cause: 当前发行包未内置原生组件, 或安装目录布局与预期不符(常见于内置更新器原地升级后) ; ' +
+          'next: 将检查命令行 ffmpeg, 若其不支持 ntsilk_s16le 语音消息将无法发送'
+        );
+      } else {
+        const addonAdapter = new FFmpegAddonAdapter(binaryPath);
 
-      logger.log('[FFmpeg] 检查 Native Addon 可用性...');
-      if (await addonAdapter.isAvailable()) {
-        logger.log('[FFmpeg] ✓ 使用 Native Addon 适配器');
-        return addonAdapter;
+        logger.log('[FFmpeg] 检查 Native Addon 可用性...');
+        if (await addonAdapter.isAvailable()) {
+          logger.log('[FFmpeg] ✓ 使用 Native Addon 适配器');
+          return addonAdapter;
+        }
+
+        throw new Error('FFmpeg Native Addon 加载失败: ' + addonPath);
       }
-
-      throw new Error('FFmpeg Native Addon 加载失败: ' + getAddonPath(binaryPath));
     }
 
     const execAdapter = new FFmpegExecAdapter(ffmpegPath, ffprobePath);
@@ -77,10 +87,22 @@ export class FFmpegAdapterFactory {
     logger.log(`[FFmpeg] 检查命令行工具可用性: ${ffmpegPath}`);
     if (await execAdapter.isAvailable()) {
       logger.log('[FFmpeg] 使用命令行工具适配器 ✓');
+      if (!await execAdapter.supportsOutputFormat('ntsilk_s16le')) {
+        logger.logError(
+          '[FFmpeg] 警告: 当前 ffmpeg 不支持语音转码所需格式, 发送语音(record)消息将会失败。' +
+          `detail: ${ffmpegPath} 的输出格式列表中不含 ntsilk_s16le (官方发行版之外的 ffmpeg 构建通常如此) ; ` +
+          'impact: 文本/图片/视频等消息不受影响, 仅语音转码失败 ; ' +
+          'action: 1.使用 NapCat 官方发行包自带的 Native Addon, 或 2.换用支持 ntsilk_s16le 的 ffmpeg 并通过 FFMPEG_PATH/FFPROBE_PATH 环境变量指定'
+        );
+      }
       return execAdapter;
     }
 
-    throw new Error('FFmpeg 命令行工具不可用，请检查 ffmpeg 和 ffprobe 路径: ' + ffmpegPath + ', ' + ffprobePath);
+    throw new Error(
+      'FFmpeg 命令行工具不可用: ffmpeg=' + ffmpegPath + ', ffprobe=' + ffprobePath + ' ; ' +
+      'detail: 路径不存在或无法执行, 请检查安装与路径配置 ; ' +
+      'action: 安装 ffmpeg/ffprobe, 或通过 FFMPEG_PATH/FFPROBE_PATH 环境变量指定正确路径'
+    );
   }
 
   /**
@@ -105,6 +127,13 @@ export class FFmpegAdapterFactory {
     const adapter = new FFmpegExecAdapter(ffmpegPath, ffprobePath);
     if (!await adapter.isAvailable()) {
       throw new Error('FFmpeg 路径不可用: ' + ffmpegPath + ', ' + ffprobePath);
+    }
+    if (!await adapter.supportsOutputFormat('ntsilk_s16le')) {
+      logger.logError(
+        '[FFmpeg] 警告: 新指定的 ffmpeg 不支持语音转码所需格式, 发送语音(record)消息将会失败。' +
+        `detail: ${ffmpegPath} 的输出格式列表中不含 ntsilk_s16le ; ` +
+        'action: 换用支持 ntsilk_s16le 的 ffmpeg, 或使用 NapCat 官方发行包自带的 Native Addon'
+      );
     }
     this.instance = adapter;
     logger.log('[FFmpeg] 已更新命令行工具路径:', ffmpegPath, ffprobePath);
